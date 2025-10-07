@@ -7,7 +7,6 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: traefik
     traefik.ingress.kubernetes.io/router.entrypoints: web
-    traefik.ingress.kubernetes.io/router.middlewares: sabnzbd-https-redirect@kubernetescrd
 spec:
   rules:
     - host: usenet.sargeant.co
@@ -40,7 +39,7 @@ spec:
         - usenet.sargeant.co
       secretName: sabnzbd-tls
   rules:
-    - host: sabnzbd.sargeant.co
+    - host: usenet.sargeant.co
       http:
         paths:
           - path: /
