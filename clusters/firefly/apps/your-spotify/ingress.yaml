@@ -1,0 +1,52 @@
+# HTTP ingress with redirect to HTTPS
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: your-spotify-ingress-http
+  namespace: your-spotify
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: your-spotify-https-redirect@kubernetescrd
+spec:
+  rules:
+    - host: your-spotify.sargeant.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: your-spotify
+                port:
+                  number: 80
+---
+# HTTPS ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: your-spotify-ingress-https
+  namespace: your-spotify
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/service.serversscheme: http
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/redirect-to-https: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-dns
+spec:
+  tls:
+    - hosts:
+        - your-spotify.sargeant.co
+      secretName: your-spotify-tls
+  rules:
+    - host: your-spotify.sargeant.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: your-spotify
+                port:
+                  number: 80

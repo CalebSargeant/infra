@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: your-spotify
+  namespace: your-spotify
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: your-spotify
+  template:
+    metadata:
+      labels:
+        app: your-spotify
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: your-spotify
+          image: linuxserver/your_spotify:latest
+          ports:
+            - containerPort: 80
+            - containerPort: 443
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Europe/Amsterdam"
+          volumeMounts:
+            - mountPath: /config
+              name: your-spotify-config
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+              ephemeral-storage: "1Gi"
+            limits:
+              memory: "512Mi"
+              cpu: "200m"
+              ephemeral-storage: "2Gi"
+      volumes:
+        - name: your-spotify-config
+          persistentVolumeClaim:
+            claimName: your-spotify-config
