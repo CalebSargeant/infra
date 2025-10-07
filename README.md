@@ -105,7 +105,7 @@ ls /mnt/raid/
 ### Detailed Documentation
 
 For complete setup instructions, troubleshooting, and configuration options, see:
-[📖 NFS Server Documentation](clusters/firefly/apps/nfs-server/README.md)
+[📖 NFS Server Documentation](docs/README.md)
 
 ## 🔄 Auto-Update System
 
