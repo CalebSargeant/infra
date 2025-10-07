@@ -39,7 +39,7 @@ spec:
         - usenet.sargeant.co
       secretName: sabnzbd-tls
   rules:
-    - host: sabnzbd.sargeant.co
+    - host: usenet.sargeant.co
       http:
         paths:
           - path: /
