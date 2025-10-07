@@ -16,7 +16,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: sabnzbd
-          image: linuxserver/sabnzbd:latest
+          image: linuxserver/sabnzbd:4.5.3-ls232
           ports:
             - containerPort: 8080
           env:
