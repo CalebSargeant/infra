@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nfs-server
+  namespace: storage
+spec:
+  selector:
+    matchLabels:
+      app: nfs-server
+  template:
+    metadata:
+      labels:
+        app: nfs-server
+    spec:
+      containers:
+        - name: nfs-server
+          image: itsthenetwork/nfs-server-alpine:latest
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 2049   # NFS
+              name: nfs
+            - containerPort: 20048  # mountd
+              name: mountd
+            - containerPort: 111    # portmapper
+              name: portmap
+          env:
+            - name: SHARED_DIRECTORY
+              value: "/data"
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /data
+              name: nfs-data
+      volumes:
+        - name: nfs-data
+          hostPath:
+            path: /mnt/raid
+            type: Directory
