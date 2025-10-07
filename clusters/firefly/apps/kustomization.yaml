@@ -18,6 +18,7 @@ resources:
   - blackbox-exporter
   - n8n
   - nextcloud
+  - nfs-server
   - postgres
   - timemachine
   - homarr
