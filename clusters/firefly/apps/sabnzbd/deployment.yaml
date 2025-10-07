@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sabnzbd
+  namespace: sabnzbd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sabnzbd
+  template:
+    metadata:
+      labels:
+        app: sabnzbd
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: sabnzbd
+          image: linuxserver/sabnzbd:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Europe/Amsterdam"
+          volumeMounts:
+            - mountPath: /config
+              name: sabnzbd-config
+            - mountPath: /downloads
+              name: sabnzbd-downloads
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+              ephemeral-storage: "1Gi"
+            limits:
+              memory: "512Mi"
+              cpu: "200m"
+              ephemeral-storage: "2Gi"
+      volumes:
+        - name: sabnzbd-config
+          persistentVolumeClaim:
+            claimName: sabnzbd-config
+        - name: sabnzbd-downloads
+          persistentVolumeClaim:
+            claimName: sabnzbd-downloads
