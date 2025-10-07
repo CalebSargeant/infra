@@ -57,6 +57,56 @@ The above will install k3s, deploy a GitHub Private Runner, and install the nece
 ### Deploy
 Now you can deploy your Helm charts using Terragrunt.
 
+## 📁 NFS Server Setup
+
+The firefly host runs an NFS server to share `/mnt/raid` storage with Linux clients (like VMs and other systems). This provides shared storage for media files and application data.
+
+### Server Setup (on firefly host)
+
+```bash
+# SSH to firefly host
+ssh firefly
+
+# Install NFS server
+sudo apt update && sudo apt install -y nfs-kernel-server
+
+# Configure exports
+sudo tee /etc/exports << 'EOF'
+/mnt/raid *(rw,sync,no_subtree_check,no_root_squash,fsid=0)
+/mnt/raid/movies *(rw,sync,no_subtree_check,no_root_squash)
+/mnt/raid/series *(rw,sync,no_subtree_check,no_root_squash)
+/mnt/raid/downloads *(rw,sync,no_subtree_check,no_root_squash)
+/mnt/raid/config *(rw,sync,no_subtree_check,no_root_squash)
+EOF
+
+# Start services
+sudo systemctl enable nfs-kernel-server
+sudo systemctl restart nfs-kernel-server
+sudo exportfs -ra
+```
+
+### Client Setup (on Linux systems)
+
+```bash
+# Install NFS client
+sudo apt install -y nfs-common
+
+# Create mount points
+sudo mkdir -p /mnt/raid/{movies,series,downloads,config}
+
+# Test mount (replace with firefly IP)
+sudo mount -t nfs4 FIREFLY_IP:/ /mnt/raid
+ls /mnt/raid/
+
+# For permanent mounts, add to /etc/fstab:
+# FIREFLY_IP:/movies /mnt/raid/movies nfs4 defaults,_netdev 0 0
+```
+
+### Detailed Documentation
+
+For complete setup instructions, troubleshooting, and configuration options, see:
+[📖 NFS Server Documentation](clusters/firefly/apps/nfs-server/README.md)
+
 ## 🔄 Auto-Update System
 
 This repository includes a centralized auto-update system that automatically updates servers and sends intelligent Slack notifications via GitHub Actions.
