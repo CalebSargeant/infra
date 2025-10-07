@@ -3,14 +3,14 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: sabnzbd-ingress-http
-  namespace: sabnzbd
+  namespace: media
   annotations:
     kubernetes.io/ingress.class: traefik
     traefik.ingress.kubernetes.io/router.entrypoints: web
     traefik.ingress.kubernetes.io/router.middlewares: sabnzbd-https-redirect@kubernetescrd
 spec:
   rules:
-    - host: sabnzbd.sargeant.co
+    - host: usenet.sargeant.co
       http:
         paths:
           - path: /
@@ -26,7 +26,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: sabnzbd-ingress-https
-  namespace: sabnzbd
+  namespace: media
   annotations:
     kubernetes.io/ingress.class: traefik
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
@@ -37,7 +37,7 @@ metadata:
 spec:
   tls:
     - hosts:
-        - sabnzbd.sargeant.co
+        - usenet.sargeant.co
       secretName: sabnzbd-tls
   rules:
     - host: sabnzbd.sargeant.co
