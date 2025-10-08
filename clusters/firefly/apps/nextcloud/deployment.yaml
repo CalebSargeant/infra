@@ -18,11 +18,11 @@ spec:
           image: linuxserver/nextcloud:arm64v8-30.0.6
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "75m"
+              memory: "256Mi"
+              cpu: "250m"
             limits:
-              memory: "512Mi"
-              cpu: "300m"
+              memory: "1Gi"
+              cpu: "1000m"
           ports:
             - containerPort: 80
           env:
