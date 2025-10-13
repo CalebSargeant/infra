@@ -13,6 +13,8 @@ spec:
       labels:
         app: plex
     spec:
+      nodeSelector:
+        type: pi
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet # Adjust DNS policy when using host networking
       containers:
