@@ -3,9 +3,5 @@ kind: Kustomization
 metadata:
   name: core
 resources:
+  - namespace.yaml
   - cert-manager
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: core
