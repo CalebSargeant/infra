@@ -1,9 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 metadata:
-  name: media
+  name: backup
 resources:
-  - ../../../../_base/media/radarr
+  - ../../../../_base/backup/timemachine
 components:
-  - ../../../../_components/resource-profiles/c.micro
+  - ../../../../_components/resource-profiles/t.small
   - ../../../../_components/node-selectors/mini

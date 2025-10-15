@@ -5,39 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 resources:
-  - ../../../_base/automation
-components:
-  - ../../../_components/resource-profiles/t.small
-  - ../../../_components/resource-profiles/m.medium
-  - ../../../_components/resource-profiles/m.large
-  - ../../../_components/node-selectors/pi
-patches:
-  # Node selector for all apps
-  - patch: |
-      - op: add
-        path: /metadata/labels/node-selector
-        value: pi
-    target:
-      labelSelector: "app.kubernetes.io/name in (homebridge, n8n, homeassistant)"
-
-  # Resource profiles for specific apps
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: t.small
-    target:
-      labelSelector: "app.kubernetes.io/name=homebridge"
-
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: m.medium
-    target:
-      labelSelector: "app.kubernetes.io/name=n8n"
-
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: m.large
-    target:
-      labelSelector: "app.kubernetes.io/name=homeassistant"
+  - ../../../_base/automation/namespace.yaml
+  - homeassistant
+  - homebridge
+  - n8n
