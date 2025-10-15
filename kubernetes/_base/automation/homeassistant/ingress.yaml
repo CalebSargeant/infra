@@ -3,7 +3,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: homeassistant-ingress-http
-  namespace: homeassistant
+  namespace: automation
   annotations:
     kubernetes.io/ingress.class: traefik
     traefik.ingress.kubernetes.io/router.entrypoints: web
@@ -26,7 +26,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: homeassistant-ingress-https
-  namespace: homeassistant
+  namespace: automation
   annotations:
     kubernetes.io/ingress.class: traefik
     traefik.ingress.kubernetes.io/router.entrypoints: websecure

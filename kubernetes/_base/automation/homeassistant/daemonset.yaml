@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: homeassistant
-  namespace: homeassistant
+  namespace: automation
 spec:
   selector:
     matchLabels:
