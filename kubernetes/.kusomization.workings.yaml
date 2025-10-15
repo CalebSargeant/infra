@@ -1,0 +1,57 @@
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: mini
+resources:
+  # Backups
+  - ../../../_base/backup/timemachine
+  - ../../../_base/backup/velero
+  # Media
+  - ../../../_base/media/bazarr
+  - ../../../_base/media/nzbhydra2
+  - ../../../_base/media/plex
+  - ../../../_base/media/qbittorrent
+  - ../../../_base/media/radarr
+  - ../../../_base/media/sabnzbd
+  - ../../../_base/media/sonarr
+  - ../../../_base/media/readarr
+  -
+  # Observability
+  - ../../../_base/observability/alloy
+  - ../../../_base/observability/faro
+  # Miscellaneous
+  - ../../../_base/miscellaneous/nextcloud
+  - ../../../_base/miscellaneous/kured
+  - ../../../_base/miscellaneous/github-runner
+#patches:
+#  - path: admin-backend/deployment.yaml
+#  - path: admin-frontend/configmap.yaml
+
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: oci
+resources:
+  # Core (web & proxy)
+  - ../../../_base/core/nginx-ingress
+  - ../../../_base/core/rancher
+  # Media (web & proxy)
+  - ../../../_base/media/overseerr
+  - ../../../_base/media/flaresolverr
+  - ../../../_base/media/jackett
+  - ../../../_base/media/prowlarr
+  # Observability
+  - ../../../_base/observability/grafana
+  - ../../../_base/observability/alloy
+
+  # Miscellaneous
+  - ../../../_base/miscellaneous/homarr
+  - ../../../_base/miscellaneous/your-spotify
+  - ../../../_base/miscellaneous/kured
+  - ../../../_base/miscellaneous/cloudflared
+  - ../../../_base/miscellaneous/adguard-home
+#patches:
+#  - path: admin-backend/deployment.yaml
+#  - path: admin-frontend/configmap.yaml

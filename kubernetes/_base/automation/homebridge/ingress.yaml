@@ -1,0 +1,37 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homebridge-ingress
+  namespace: homebridge
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/service.serversscheme: http
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-dns
+spec:
+    tls:
+      - hosts:
+          - homebridge.sargeant.co
+        secretName: homebridge-tls
+    rules:
+      - host: homebridge.sargeant.co
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: homebridge
+                  port:
+                    number: 8581
+      - host: homebridge.sargeant.local
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: homebridge
+                  port:
+                    number: 8581

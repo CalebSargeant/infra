@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: backup
+resources:
+  - ../../../_base/backup
+components:
+  - ../../../_components/resource-profiles
+  - ../../../_components/node-selectors
+patches:
+  - patch: |
+      - op: add
+        path: /metadata/labels/node-selector
+        value: mini
+    target:
+      labelSelector: "app.kubernetes.io/name=timemachine"
+
+  # Resource profiles for specific apps
+  - patch: |
+      - op: add
+        path: /metadata/labels/resource-profile
+        value: t.small
+    target:
+      labelSelector: "app.kubernetes.io/name=timemachine"
