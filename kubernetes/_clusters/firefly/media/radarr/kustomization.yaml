@@ -3,7 +3,7 @@ kind: Kustomization
 metadata:
   name: media
 resources:
-  - ../../../../_base/media/bazarr
+  - ../../../../_base/media/radarr
 components:
   - ../../../../_components/resource-profiles/c.pico
   - ../../../../_components/node-selectors/pi
