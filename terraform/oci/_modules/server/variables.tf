@@ -70,13 +70,7 @@ variable "servers" {
     subnet_cidr     = string
     edge_instance_key = string  # Key to lookup the edge instance from edge module outputs
   }))
-  default = {
-    "server1" = { 
-      fault_domain = 0
-      subnet_cidr = "172.17.1.0/24"
-      edge_instance_key = "fd1"
-    }
-  }
+  default = {}
 }
 
 variable "edge_instances" {
