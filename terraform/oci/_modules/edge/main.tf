@@ -6,10 +6,13 @@ data "oci_identity_availability_domains" "ads" {
 }
 
 resource "oci_core_instance" "this" {
+  for_each = var.fault_domains
+  
   availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
   compartment_id      = var.compartment_ocid
-  display_name        = "${var.environment}-mikrotik-chr"
+  display_name        = "${var.environment}-mikrotik-chr-${each.key}"
   shape               = var.shape
+  fault_domain        = "FAULT-DOMAIN-${each.value.fault_domain + 1}"
 
   create_vnic_details {
     subnet_id              = var.subnet_id

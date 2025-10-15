@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: observability
+resources:
+  - ../../../_base/observability/alloy
+  - ../../../_base/observability/mimir
+  - ../../../_base/observability/loki
+  - ../../../_base/observability/tempo
+  - ../../../_base/observability/pyroscope
+  - ../../../_base/observability/alertmanager
+  - ../../../_base/observability/mikrotik-exporter
+  - ../../../_base/observability/cloudflare-exporter
+  - ../../../_base/observability/blackbox-exporter
+  - ../../../_base/observability/postgres-exporter
+  - ../../../_base/observability/raspberrypi_exporter
+  - ../../../_base/observability/smartctl_exporter
+  - ../../../_base/observability/nvme_exporter
+  - ../../../_base/observability/etcd_exporter
+  - ../../../_base/observability/nfs_exporter
+  - ../../../_base/observability/restic_exporter
+  - ../../../_base/observability/meross-exporter
+  - ../../../_base/observability/scraparr
+  - ../../../_base/observability/homebridge-exporter
+  - ../../../_base/observability/home-assistant-exporter
+  - ../../../_base/observability/nginx-exporter
+  - ../../../_base/observability/plex_exporter
+  - ../../../_base/observability/nextcloud-exporter
+  - ../../../_base/observability/pmacct-netflow

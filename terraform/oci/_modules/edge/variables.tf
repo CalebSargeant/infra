@@ -45,3 +45,13 @@ variable "network_security_group_id" {
   description = "ID of the Network Security Group"
   type        = string
 }
+
+variable "fault_domains" {
+  description = "Map of fault domains to create instances in"
+  type        = map(object({
+    fault_domain = number
+  }))
+  default = {
+    "fd1" = { fault_domain = 0 }
+  }
+}
