@@ -1,10 +1,9 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: plex
   namespace: media
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: plex
@@ -13,13 +12,11 @@ spec:
       labels:
         app: plex
     spec:
-      nodeSelector:
-        type: pi
       hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet # Adjust DNS policy when using host networking
+      dnsPolicy: ClusterFirstWithHostNet # Required when host networking is used
       containers:
         - name: plex
-          image: linuxserver/plex:1.42.1
+          image: linuxserver/plex:1.42.2
           resources:
             requests:
               memory: "320Mi"
@@ -39,13 +36,13 @@ spec:
 #            - containerPort: 32469 # DLNA server
           env:
             - name: PUID
-              value: "1000" # Update with your user ID
+              value: "1000"
             - name: PGID
-              value: "1000" # Update with your group ID
+              value: "1000"
             - name: TZ
-              value: "Europe/Amsterdam" # Set your timezone
+              value: "Europe/Amsterdam"
             - name: VERSION
-              value: docker # Optional: stick to the Docker version
+              value: docker
             - name: PLEX_CLAIM
               value: "claim-NLroaq6PN_ax3fp6JqzK" # Optional, get a claim token from https://www.plex.tv/claim
           volumeMounts:
