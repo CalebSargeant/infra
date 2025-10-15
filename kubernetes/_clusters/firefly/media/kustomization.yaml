@@ -50,3 +50,25 @@ patches:
         value: c.large
     target:
       labelSelector: "app.kubernetes.io/name=plex"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: media
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/sops: enabled
+spec:
+  interval: 1m
+  path: ./kubernetes/_clusters/firefly/media
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 2m
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-keys
+  dependsOn:
+    - name: database
