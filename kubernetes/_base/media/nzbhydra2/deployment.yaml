@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nzbhydra2
+  namespace: media
+  labels:
+    app: nzbhydra2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nzbhydra2
+  template:
+    metadata:
+      labels:
+        app: nzbhydra2
+    spec:
+      containers:
+      - name: nzbhydra2
+        image: linuxserver/nzbhydra2:latest
+        ports:
+        - containerPort: 5076
+          name: http
+        env:
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
+        - name: TZ
+          value: "Europe/London"
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+            ephemeral-storage: 2Gi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+            ephemeral-storage: 1Gi
+      volumes:
+      - name: config
+        hostPath:
+          path: /mnt/nvme/nzbhydra2-config
+          type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nzbhydra2
+  namespace: media
+  labels:
+    app: nzbhydra2
+spec:
+  selector:
+    app: nzbhydra2
+  ports:
+  - name: http
+    port: 5076
+    targetPort: 5076
+  type: ClusterIP

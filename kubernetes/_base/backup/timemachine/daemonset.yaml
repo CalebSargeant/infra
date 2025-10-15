@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: timemachine
+  namespace: media
+spec:
+  selector:
+    matchLabels:
+      app: timemachine
+  template:
+    metadata:
+      labels:
+        app: timemachine
+    spec:
+      hostNetwork: true # Needed to expose port 445 directly to LAN
+      containers:
+        - name: timemachine
+          image: mbentley/timemachine
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "25m"
+            limits:
+              memory: "256Mi"
+              cpu: "100m"
+          env:
+            - name: CUSTOM_SMB_CONF
+              value: "false"
+            - name: CUSTOM_USER
+              value: "false"
+            - name: DEBUG_LEVEL
+              value: "1"
+            - name: MIMIC_MODEL
+              value: "TimeCapsule8,119"
+            - name: EXTERNAL_CONF
+              value: "/users"
+            - name: HIDE_SHARES
+              value: "no"
+            - name: TM_USERNAME
+              value: "timemachine"
+            - name: TM_GROUPNAME
+              value: "timemachine"
+            - name: TM_UID
+              value: "1000" # Replace with real UID
+            - name: TM_GID
+              value: "1000" # Replace with real GID
+            - name: PASSWORD
+              value: "timemachine"
+            - name: SET_PERMISSIONS
+              value: "false"
+            - name: SHARE_NAME
+              value: "TimeMachine"
+            - name: SMB_INHERIT_PERMISSIONS
+              value: "no"
+            - name: SMB_NFS_ACES
+              value: "yes"
+            - name: SMB_METADATA
+              value: "stream"
+            - name: SMB_PORT
+              value: "445"
+            - name: SMB_VFS_OBJECTS
+              value: "acl_xattr fruit streams_xattr"
+            - name: VOLUME_SIZE_LIMIT
+              value: "0"
+            - name: WORKGROUP
+              value: "WORKGROUP"
+          volumeMounts:
+            - mountPath: /opt
+              name: share
+            - mountPath: /users
+              name: users
+#            - mountPath: /var/lib/samba
+#              name: var-lib-samba
+#            - mountPath: /var/cache/samba
+#              name: var-cache-samba
+#            - mountPath: /run/samba
+#              name: run-samba
+      volumes:
+        - name: share
+          persistentVolumeClaim:
+            claimName: timemachine-share
+        - name: users
+          persistentVolumeClaim:
+            claimName: timemachine-users
+#        - name: var-lib-samba
+#          persistentVolumeClaim:
+#            claimName: timemachine-var-lib-samba
+#        - name: var-cache-samba
+#          persistentVolumeClaim:
+#            claimName: timemachine-var-cache-samba
+#        - name: run-samba
+#          persistentVolumeClaim:
+#            claimName: timemachine-run-samba
