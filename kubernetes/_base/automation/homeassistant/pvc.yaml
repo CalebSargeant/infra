@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: homeassistant
-  namespace: homeassistant
+  namespace: automation
 spec:
   accessModes:
     - ReadWriteOnce
