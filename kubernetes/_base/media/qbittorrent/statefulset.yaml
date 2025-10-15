@@ -1,9 +1,10 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: qbittorrent
   namespace: media
 spec:
+  serviceName: qbittorrent
   replicas: 1
   selector:
     matchLabels:
@@ -26,28 +27,36 @@ spec:
               memory: "512Mi"
               cpu: "300m"
           ports:
-            - containerPort: 8080 # Web UI
-            - containerPort: 55555 # BitTorrent (TCP/UDP)
+            - containerPort: 8080   # Web UI
+            - containerPort: 55555  # BitTorrent (TCP/UDP)
           env:
             - name: PUID
-              value: "1000" # Replace with your user ID
+              value: "1000"
             - name: PGID
-              value: "1000" # Replace with your group ID
+              value: "1000"
             - name: TZ
-              value: "Europe/Amsterdam" # Replace with your timezone
+              value: "Europe/Amsterdam"
             - name: WEBUI_PORT
-              value: "8080" # Set qBittorrent Web UI port
+              value: "8080"
             - name: TORRENTING_PORT
               value: "55555"
           volumeMounts:
-            - mountPath: /config
-              name: qbittorrent
-            - mountPath: /downloads
-              name: downloads
-      volumes:
-        - name: qbittorrent
-          persistentVolumeClaim:
-            claimName: qbittorrent
-        - name: downloads
-          persistentVolumeClaim:
-            claimName: downloads
+            - name: config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+  volumeClaimTemplates:
+    - metadata:
+        name: config
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi
+    - metadata:
+        name: downloads
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 100Gi
