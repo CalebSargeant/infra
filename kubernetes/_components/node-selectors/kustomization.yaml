@@ -5,31 +5,35 @@ patches:
   # Raspberry Pi nodes
   - patch: |
       - op: add
-        path: /spec/template/spec/nodeSelector/type
-        value: pi
+        path: /spec/template/spec/nodeSelector
+        value:
+          type: pi
     target:
       labelSelector: "node-selector=pi"
 
   # Mini PC nodes (the node is a VM on a NUC-style mini PC)
   - patch: |
       - op: add
-        path: /spec/template/spec/nodeSelector/type
-        value: mini
+        path: /spec/template/spec/nodeSelector
+        value:
+          type: mini
     target:
       labelSelector: "node-selector=mini"
 
   # All available nodes (every node)
   - patch: |
       - op: add
-        path: /spec/template/spec/nodeSelector/type
-        value: all
+        path: /spec/template/spec/nodeSelector
+        value:
+          type: all
     target:
       labelSelector: "node-selector=all"
 
   # GPU nodes (for future use)
   - patch: |
       - op: add
-        path: /spec/template/spec/nodeSelector/type
-        value: gpu
+        path: /spec/template/spec/nodeSelector
+        value:
+          type: gpu
     target:
       labelSelector: "node-selector=gpu"
