@@ -2,6 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 metadata:
   name: backup
+  labels:
+    app.kubernetes.io/sops: enabled
 resources:
   - ../../../_base/backup
 components:
@@ -22,3 +24,25 @@ patches:
         value: t.small
     target:
       labelSelector: "app.kubernetes.io/name=timemachine"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: backup
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/sops: enabled
+spec:
+  interval: 1m
+  path: ./kubernetes/_clusters/firefly/backup
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 2m
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-keys
+  dependsOn:
+    - name: core

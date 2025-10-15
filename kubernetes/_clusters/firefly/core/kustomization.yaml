@@ -5,7 +5,6 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 resources:
-  - flux-system
   - ../../../_base/core
 components:
   - ../../../_components/resource-profiles
@@ -17,7 +16,7 @@ patches:
         path: /metadata/labels/node-selector
         value: pi
     target:
-      labelSelector: "app.kubernetes.io/name=cert-manager, app.kubernetes.io/instance=flux-system"
+      labelSelector: "app.kubernetes.io/name=cert-manager"
 
 ### CERT MANAGER
   # Resource profiles for specific apps
@@ -27,47 +26,25 @@ patches:
         value: t.small
     target:
       labelSelector: "app.kubernetes.io/name=cert-manager"
-
-### FLUX SYSTEM
-  # Flux System - Helm Controller
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: p.pico
-    target:
-      labelSelector: "app=helm-controller"
-  # Flux System - Image Automation Controller
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: p.pico
-    target:
-      labelSelector: "app=image-automation-controller"
-  # Flux System - Image Reflector Controller
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: p.pico
-    target:
-      labelSelector: "app=image-reflector-controller"
-  # Flux System - Kustomize Controller
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: p.pico
-    target:
-      labelSelector: "app=kustomize-controller"
-  # Flux System - Notification Controller
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: p.pico
-    target:
-      labelSelector: "app=notification-controller"
-  # Flux System - Source Controller
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: t.nano
-    target:
-      labelSelector: "app=source-controller"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: core
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/sops: enabled
+spec:
+  interval: 1m
+  path: ./kubernetes/_clusters/firefly/core
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 2m
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-keys
+  dependsOn:
+    - name: flux-system
