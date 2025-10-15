@@ -17,6 +17,7 @@ patches:
         value: pi
     target:
       labelSelector: "app=postgres"
+      kind: StatefulSet
 
   # Resource profiles for specific apps
   - patch: |
@@ -25,3 +26,4 @@ patches:
         value: t.small
     target:
       labelSelector: "app=postgres"
+      kind: StatefulSet
