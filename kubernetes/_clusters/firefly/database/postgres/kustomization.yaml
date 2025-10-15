@@ -7,5 +7,5 @@ metadata:
 resources:
   - ../../../../_base/database/postgres
 components:
-  - ../../../../_components/resource-profiles/t.small
+  - ../../../../_components/resource-profiles/m.small
   - ../../../../_components/node-selectors/pi

@@ -6,4 +6,4 @@ resources:
   - ../../../../_base/media/jackett
 components:
   - ../../../../_components/resource-profiles/c.pico
-  - ../../../../_components/node-selectors/pi
+  - ../../../../_components/node-selectors/mini

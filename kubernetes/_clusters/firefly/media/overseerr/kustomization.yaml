@@ -5,5 +5,5 @@ metadata:
 resources:
   - ../../../../_base/media/overseerr
 components:
-  - ../../../../_components/resource-profiles/c.pico
+  - ../../../../_components/resource-profiles/c.nano
   - ../../../../_components/node-selectors/mini

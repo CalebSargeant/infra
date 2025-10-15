@@ -5,5 +5,5 @@ metadata:
 resources:
   - ../../../../_base/media/qbittorrent
 components:
-  - ../../../../_components/resource-profiles/c.pico
-  - ../../../../_components/node-selectors/pi
+  - ../../../../_components/resource-profiles/c.micro
+  - ../../../../_components/node-selectors/mini

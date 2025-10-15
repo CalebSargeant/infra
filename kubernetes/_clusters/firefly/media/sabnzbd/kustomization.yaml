@@ -5,5 +5,5 @@ metadata:
 resources:
   - ../../../../_base/media/sabnzbd
 components:
-  - ../../../../_components/resource-profiles/c.pico
+  - ../../../../_components/resource-profiles/c.micro
   - ../../../../_components/node-selectors/mini
