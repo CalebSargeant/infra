@@ -70,22 +70,5 @@ variable "servers" {
     subnet_cidr     = string
     edge_instance_key = string  # Key to lookup the edge instance from edge module outputs
   }))
-  default = {
-    "server1" = { 
-      fault_domain = 0
-      subnet_cidr = "172.17.1.0/24"
-      edge_instance_key = "fd1"
-    }
-  }
-}
-
-variable "edge_instances" {
-  description = "Map of edge instances from edge module"
-  type = map(object({
-    instance_id   = string
-    private_ip    = string
-    public_ip     = string
-    instance_state = string
-  }))
   default = {}
 }
