@@ -5,14 +5,14 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 resources:
-  - bazarr.yaml
-  - flaresolverr.yaml
-  - jackett.yaml
-  - nzbhydra2.yaml
-  - overseerr.yaml
-  - plex.yaml
-  - prowlarr.yaml
-  - qbittorrent.yaml
-  - radarr.yaml
-  - sabnzbd.yaml
-  - sonarr.yaml
+  - bazarr
+  - flaresolverr
+  - jackett
+  - nzbhydra2
+  - overseerr
+  - plex
+  - prowlarr
+  - qbittorrent
+  - radarr
+  - sabnzbd
+  - sonarr

@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: media
+resources:
+  - ../../../../_base/media/nzbhydra2
+components:
+  - ../../../../_components/resource-profiles/c.pico
+  - ../../../../_components/node-selectors/mini

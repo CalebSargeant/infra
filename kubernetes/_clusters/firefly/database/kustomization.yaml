@@ -5,4 +5,4 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 resources:
-  - postgres.yaml
+  - postgres
