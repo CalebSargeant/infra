@@ -11,19 +11,21 @@ components:
   - ../../../_components/node-selectors
 patches:
   # Node selector for all apps
-  - patch: |
+  - patch: |-
       - op: add
         path: /metadata/labels/node-selector
         value: pi
     target:
       labelSelector: "app=postgres"
+      name: postgres
       kind: StatefulSet
 
   # Resource profiles for specific apps
-  - patch: |
+  - patch: |-
       - op: add
         path: /metadata/labels/resource-profile
         value: t.small
     target:
       labelSelector: "app=postgres"
+      name: postgres
       kind: StatefulSet
