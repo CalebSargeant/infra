@@ -7,8 +7,8 @@ metadata:
 resources:
   - ../../../_base/core
 components:
-  - ../../../_components/resource-profiles
-  - ../../../_components/node-selectors
+  - ../../../_components/resource-profiles/t.small
+  - ../../../_components/node-selectors/pi
 patches:
   # Node selector for all apps
   - patch: |

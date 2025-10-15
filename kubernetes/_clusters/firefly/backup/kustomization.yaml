@@ -7,8 +7,8 @@ metadata:
 resources:
   - ../../../_base/backup
 components:
-  - ../../../_components/resource-profiles
-  - ../../../_components/node-selectors
+  - ../../../_components/resource-profiles/t.small
+  - ../../../_components/node-selectors/mini
 patches:
   - patch: |
       - op: add
