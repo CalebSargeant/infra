@@ -5,8 +5,9 @@ resources:
   - gotk-sync.yaml
   - kustomizations.yaml
 components:
-  - ../../../_components/resource-profiles
-  - ../../../_components/node-selectors
+  - ../../../_components/resource-profiles/p.pico
+  - ../../../_components/resource-profiles/t.nano
+  - ../../../_components/node-selectors/pi
 patches:
   # Node selector for all apps
   - patch: |

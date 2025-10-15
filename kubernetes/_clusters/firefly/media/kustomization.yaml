@@ -1,74 +1,14 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-metadata:
-  name: media
-  labels:
-    app.kubernetes.io/sops: enabled
 resources:
-  - ../../../_base/media
-components:
-  - ../../../_components/resource-profiles
-  - ../../../_components/node-selectors
-patches:
-  # Node selector for all apps
-  - patch: |
-      - op: add
-        path: /metadata/labels/node-selector
-        value: mini
-    target:
-      labelSelector: "app.kubernetes.io/name in (bazarr, flaresolverr, jackett, nzbhydra2, overseerr, plex, prowlarr, qbittorrent, radarr, sabnzbd, sonarr)"
-
-  # Resource profiles for specific apps
-  # Resource profiles for lightweight indexers/searchers
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: t.small
-    target:
-      labelSelector: "app.kubernetes.io/name in (bazarr, flaresolverr, jackett, nzbhydra2, prowlarr)"
-
-  # Resource profiles for moderate apps
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: m.small
-    target:
-      labelSelector: "app.kubernetes.io/name in (overseerr, radarr, sonarr)"
-
-  # Resource profiles for download clients and heavy processing
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: m.medium
-    target:
-      labelSelector: "app.kubernetes.io/name in (qbittorrent, sabnzbd)"
-
-  # Resource profile for Plex (high memory/CPU for transcoding)
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: c.large
-    target:
-      labelSelector: "app.kubernetes.io/name=plex"
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: media
-  namespace: flux-system
-  labels:
-    app.kubernetes.io/sops: enabled
-spec:
-  interval: 1m
-  path: ./kubernetes/_clusters/firefly/media
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  timeout: 2m
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-keys
-  dependsOn:
-    - name: database
+  - bazarr.yaml
+  - flaresolverr.yaml
+  - jackett.yaml
+  - nzbhydra2.yaml
+  - overseerr.yaml
+  - plex.yaml
+  - prowlarr.yaml
+  - qbittorrent.yaml
+  - radarr.yaml
+  - sabnzbd.yaml
+  - sonarr.yaml
