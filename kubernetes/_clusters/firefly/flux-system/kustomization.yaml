@@ -1,0 +1,60 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - gotk-components.yaml
+  - gotk-sync.yaml
+components:
+  - ../../../_components/resource-profiles
+  - ../../../_components/node-selectors
+patches:
+  # Node selector for all apps
+  - patch: |
+      - op: add
+        path: /metadata/labels/node-selector
+        value: pi
+    target:
+      labelSelector: "app.kubernetes.io/instance=flux-system"
+
+### FLUX SYSTEM
+  # Flux System - Helm Controller
+  - patch: |
+      - op: add
+        path: /metadata/labels/resource-profile
+        value: p.pico
+    target:
+      labelSelector: "app=helm-controller"
+  # Flux System - Image Automation Controller
+  - patch: |
+      - op: add
+        path: /metadata/labels/resource-profile
+        value: p.pico
+    target:
+      labelSelector: "app=image-automation-controller"
+  # Flux System - Image Reflector Controller
+  - patch: |
+      - op: add
+        path: /metadata/labels/resource-profile
+        value: p.pico
+    target:
+      labelSelector: "app=image-reflector-controller"
+  # Flux System - Kustomize Controller
+  - patch: |
+      - op: add
+        path: /metadata/labels/resource-profile
+        value: p.pico
+    target:
+      labelSelector: "app=kustomize-controller"
+  # Flux System - Notification Controller
+  - patch: |
+      - op: add
+        path: /metadata/labels/resource-profile
+        value: p.pico
+    target:
+      labelSelector: "app=notification-controller"
+  # Flux System - Source Controller
+  - patch: |
+      - op: add
+        path: /metadata/labels/resource-profile
+        value: t.nano
+    target:
+      labelSelector: "app=source-controller"

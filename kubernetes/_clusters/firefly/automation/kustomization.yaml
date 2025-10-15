@@ -2,6 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 metadata:
   name: automation
+  labels:
+    app.kubernetes.io/sops: enabled
 resources:
   - ../../../_base/automation
 components:
@@ -37,3 +39,25 @@ patches:
         value: m.large
     target:
       labelSelector: "app.kubernetes.io/name=homeassistant"
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: automation
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/sops: enabled
+spec:
+  interval: 1m
+  path: ./kubernetes/_clusters/firefly/automation
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 2m
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-keys
+  dependsOn:
+    - name: database
