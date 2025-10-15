@@ -120,7 +120,7 @@ patches:
   - patch: |
       - op: add
         path: /spec/template/spec/containers/0/resources
-        value: { requests: { cpu: 200m, memory: 512Mi }, limits: { cpu: 750m, memory: 1536Mi } }
+        value: { requests: { cpu: 200m, memory: 512Mi }, limits: { cpu: 750m, memory: 1.5Gi } }
     target:
       labelSelector: "resource-profile=c.micro"
   - patch: |
