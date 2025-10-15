@@ -3,6 +3,7 @@ kind: Kustomization
 metadata:
   name: media
 resources:
+  - namespace.yaml
   - bazarr
   - flaresolverr
   - jackett
@@ -15,8 +16,3 @@ resources:
 #  - todo: readarr
   - sabnzbd
   - sonarr
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: media
