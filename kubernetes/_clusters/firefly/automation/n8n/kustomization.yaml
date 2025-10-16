@@ -3,7 +3,7 @@ kind: Kustomization
 metadata:
   name: automation
 resources:
-  - ../../../../_base/automation/homeassistant
+  - ../../../../_base/automation/n8n
 components:
   - ../../../../_components/resource-profiles/c.small
   - ../../../../_components/node-selectors/pi
