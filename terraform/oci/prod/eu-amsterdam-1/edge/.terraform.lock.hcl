@@ -1,26 +1,24 @@
-# This file is maintained automatically by "terraform init".
+# This file is maintained automatically by "tofu init".
 # Manual edits may be lost in future updates.
 
-provider "registry.terraform.io/hashicorp/google" {
+provider "registry.opentofu.org/hashicorp/google" {
   version = "6.30.0"
   hashes = [
-    "h1:yb0p5GeexuGrL1vTkLDo59h1nCW57kseVMmLnvIQZFc=",
-    "zh:1142610145b7b7a723f2523074c32ce3ff64120125d99ebee244f6e23b252253",
-    "zh:5662acc5a76f7cc7adb479fc575b179c5db360fb822c1b38b9c1aa45e8e49014",
-    "zh:599f3dc02834eb7cf859a61d5b9f404163462f5914a8415482e6f45eaa5ffede",
-    "zh:88286a03238eb36ecec1cd19bc9126fd75f1fe5a151ebf75f23d550d50957b18",
-    "zh:9a89658e92865b5034ebc70ebd5cf1bacf0fda6b488e13a881d5eed533c26db2",
-    "zh:a2af3e4f558f89dc0ae147426126002f0b403e8bd361c10a3cd907d8361a7e08",
-    "zh:b519e298fd76d3e3dfb425333ab6da09880b7b3f718049292c3a843c754c7e76",
-    "zh:d498a531a21e755359ce1f29938ec955f477cdfa132569ce19388b15b946f550",
-    "zh:ded198b0085e15fb687152d9aecd6c1d42d17d7ef05fa05567d92622cf8e7d92",
-    "zh:e08e7f4f6d651ead65a5628caba9e2bfa781a5b2a2e086e03147033387440be9",
-    "zh:ef773c504729526c0bea48b624ff221d693cfbd33ce61575856d6d77620287d4",
-    "zh:f569b65999264a9416862bca5cd2a6177d94ccb0424f3a4ef424428912b9cb3c",
+    "h1:XlvS3Fl+NGDC8lFVu/+2XP+XNV/k5V0AlV2WPE9GxNU=",
+    "zh:0c79f7803f98651a5e22ba68f49623e6efddd603a6b7110d9d7b4955155a8eaf",
+    "zh:0fa4896cf880392b3b422b3151d237858aefc7f887710e955489691267c4c055",
+    "zh:1de84a8c628ec78b33058deb033d3ae77a4f5f67dfe3182f946a5c1bfeabd63d",
+    "zh:464fab03cdcfd9670810399f7307f6067281b3b5bf03e0a54a688fbc575adc66",
+    "zh:79425da1372e470b91c12ba326a530cf9d84221649ab8fb0ddeaddaf3208d6f6",
+    "zh:a26af9b468cdb9b3361bc2f575b185dde27deef8a2993c7667b645c21b77cc27",
+    "zh:c207fc074e9ed9c15e35efa0ecd3229d73e97685b386e8391b846bc0e59c85b2",
+    "zh:c3306fb116bcb47b0bbb659c84144a4a06fe5478c4d3cdf620d5dd027d603b89",
+    "zh:d63ada43c39cbd121ec97de121264fb422f964ac828c5c58b7581b8e7d4ea11b",
+    "zh:ecd61ad75f39be3fdc873a5b47ce65176ab046a5e08cf9cf7e0ed6d508f065f5",
   ]
 }
 
-provider "registry.terraform.io/oracle/oci" {
+provider "registry.opentofu.org/oracle/oci" {
   version     = "6.35.0"
   constraints = "6.35.0"
   hashes = [

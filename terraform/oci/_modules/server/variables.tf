@@ -58,24 +58,17 @@ variable "memory_in_gbs" {
   default     = 24  # Free tier allows up to 24 GB RAM
 }
 
-variable "edge_private_ip" {
-  description = "Private IP of the edge CHR instance to route traffic through"
-  type        = string
-  default     = ""  # If empty, traffic will go through the internet gateway
-}
-
-variable "edge_instance_id" {
-  description = "Instance ID of the edge CHR instance to route traffic through"
-  type        = string
-  default     = ""  # Required if edge_private_ip is provided
-}
-
 variable "vcn_id" {
   description = "ID of the VCN"
   type        = string
 }
 
-variable "subnet_cidr" {
-  description = "CIDR of the subnet"
-  type        = string
+variable "servers" {
+  description = "Map of servers to create"
+  type        = map(object({
+    fault_domain    = number
+    subnet_cidr     = string
+    edge_instance_key = string  # Key to lookup the edge instance from edge module outputs
+  }))
+  default = {}
 }

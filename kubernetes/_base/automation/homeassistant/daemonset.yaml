@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: homeassistant
+  namespace: automation
+spec:
+  selector:
+    matchLabels:
+      app: homeassistant
+  template:
+    metadata:
+      labels:
+        app: homeassistant
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet # Adjust DNS policy when using host networking
+      containers:
+        - name: homeassistant
+          image: ghcr.io/home-assistant/home-assistant:stable
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "75m"
+            limits:
+              memory: "512Mi"
+              cpu: "300m"
+          ports:
+            - containerPort: 8123 # Home Assistant web UI
+          env:
+            - name: TZ
+              value: "Europe/Amsterdam" # Adjust timezone
+          volumeMounts:
+            - mountPath: /config
+              name: homeassistant-config
+            - mountPath: /config/configuration.yaml
+              name: homeassistant-main-config
+              subPath: configuration.yaml
+      volumes:
+        - name: homeassistant-config
+          persistentVolumeClaim:
+            claimName: homeassistant
+        - name: homeassistant-main-config
+          configMap:
+            name: homeassistant-config
+# todo: move from sqlite to postgres

@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homebridge-values
+data:
+  values.yaml: |
+    #
+    # IMPORTANT NOTE
+    #
+    # This chart inherits from our common library chart. You can check the default values/options here:
+    # https://github.com/k8s-at-home/library-charts/tree/main/charts/stable/common/values.yaml
+    #
+
+    controller:
+      type: daemonset
+
+    image:
+      repository: ghcr.io/homebridge/homebridge
+      tag: beta-2025-10-03
+
+    env:
+      TZ: Europe/Amsterdam
+
+    hostNetwork: true
+    dnsPolicy: ClusterFirstWithHostNet
+
+    ingress:
+      main:
+        enabled: true
+
+    persistence:
+      config:
+        storageClass: homebridge
+        size: 5Gi
+        hostPath: /mnt/nvme/homebridge-config
+        reclaimPolicy: Retain

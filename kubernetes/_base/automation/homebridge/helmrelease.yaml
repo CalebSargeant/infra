@@ -1,0 +1,19 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: homebridge
+  namespace: automation
+spec:
+  interval: 1m
+  chart:
+    spec:
+      chart: homebridge
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home
+        namespace: flux-system
+      interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: homebridge-values
+      valuesKey: values.yaml

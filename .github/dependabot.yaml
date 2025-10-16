@@ -32,7 +32,7 @@ updates:
 
   # Docker images in Kubernetes manifests
   - package-ecosystem: "docker"
-    directory: "/clusters/firefly/apps"
+    directory: "/kubernetes/_clusters/firefly"
     schedule:
       interval: "weekly"
       day: "wednesday"

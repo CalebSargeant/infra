@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: plex
+  namespace: media
+spec:
+  selector:
+    matchLabels:
+      app: plex
+  template:
+    metadata:
+      labels:
+        app: plex
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet # Required when host networking is used
+      containers:
+        - name: plex
+          image: linuxserver/plex:1.42.2
+          resources:
+            requests:
+              memory: "320Mi"
+              cpu: "150m"
+            limits:
+              memory: "1280Mi"
+              cpu: "600m"
+          ports:
+            - containerPort: 32400 # Plex web interface
+#            - containerPort: 1900  # Plex DLNA server
+#            - containerPort: 5353  # Bonjour/Avahi
+#            - containerPort: 8324  # Plex Roku Companion
+            - containerPort: 32410 # GDM network discovery
+            - containerPort: 32412 # GDM network discovery
+            - containerPort: 32413 # GDM network discovery
+            - containerPort: 32414 # GDM network discovery
+#            - containerPort: 32469 # DLNA server
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Europe/Amsterdam"
+            - name: VERSION
+              value: docker
+            - name: PLEX_CLAIM
+              value: "claim-NLroaq6PN_ax3fp6JqzK" # Optional, get a claim token from https://www.plex.tv/claim
+          volumeMounts:
+            - mountPath: /config
+              name: plex
+            - mountPath: /movies
+              name: movies
+            - mountPath: /series
+              name: series
+      volumes:
+        - name: plex
+          persistentVolumeClaim:
+            claimName: plex
+        - name: movies
+          persistentVolumeClaim:
+            claimName: movies
+        - name: series
+          persistentVolumeClaim:
+            claimName: series
