@@ -1,0 +1,61 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: HelmRelease
+    patch: |-
+      apiVersion: helm.toolkit.fluxcd.io/v2beta2
+      kind: HelmRelease
+      metadata:
+        name: not-important
+      spec:
+        values:
+          ingress:
+            main:
+              ingressClassName: traefik
+              annotations:
+                kubernetes.io/ingress.class: traefik
+                traefik.ingress.kubernetes.io/router.entrypoints: websecure
+                traefik.ingress.kubernetes.io/service.serversscheme: http
+                traefik.ingress.kubernetes.io/router.tls: "true"
+                cert-manager.io/cluster-issuer: letsencrypt-dns
+              hosts:
+                - host: PLACEHOLDER.sargeant.co
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                - host: PLACEHOLDER.sargeant.local
+                  paths:
+                    - path: /
+                      pathType: Prefix
+              tls:
+                - secretName: PLACEHOLDER-tls
+                  hosts:
+                    - PLACEHOLDER.sargeant.co
+
+replacements:
+  - source:
+      kind: HelmRelease
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.ingress.main.hosts.0.host
+          - spec.values.ingress.main.hosts.1.host
+          - spec.values.ingress.main.tls.0.hosts.0
+        options:
+          delimiter: '.'
+          index: 0
+  - source:
+      kind: HelmRelease
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.ingress.main.tls.0.secretName
+        options:
+          delimiter: '-'
+          index: 0

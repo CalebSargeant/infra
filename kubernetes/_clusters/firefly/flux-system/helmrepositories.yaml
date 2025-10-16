@@ -1,0 +1,17 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: calebsargeant
+  namespace: flux-system
+spec:
+  interval: 10m
+  url: https://calebsargeant.github.io/helm-charts
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: k8s-at-home
+  namespace: flux-system
+spec:
+  interval: 10m
+  url: https://k8s-at-home.com/charts/
