@@ -28,3 +28,13 @@ patches:
         path: /spec/template/spec/nodeSelector
         value:
           type: pi
+
+  # HelmReleases
+  - target:
+      kind: HelmRelease
+    patch: |
+      - op: add
+        path: /spec/values
+        value:
+          nodeSelector:
+            type: pi
