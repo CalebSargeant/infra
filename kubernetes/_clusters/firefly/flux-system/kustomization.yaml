@@ -4,6 +4,7 @@ resources:
   - gotk-components.yaml
   - gotk-sync.yaml
   - kustomizations.yaml
+  - helmrepositories.yaml
 components:
   - ../../../_components/resource-profiles/t.nano
   - ../../../_components/node-selectors/pi

@@ -7,3 +7,10 @@ resources:
 components:
   - ../../../../_components/resource-profiles/c.pico
   - ../../../../_components/node-selectors/pi
+  - ../../../../_components/ingress-standards/sargeant.co
+configMapGenerator:
+  - name: homebridge-values
+    files:
+      - values.yaml
+    options:
+      disableNameSuffixHash: true

@@ -1,0 +1,9 @@
+image:
+  tag: beta-2025-10-03
+
+persistence:
+  config:
+    storageClass: homebridge
+    size: 5Gi
+    hostPath: /mnt/nvme/homebridge-config
+    reclaimPolicy: Retain
