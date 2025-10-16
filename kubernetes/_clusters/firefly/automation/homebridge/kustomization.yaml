@@ -4,24 +4,8 @@ metadata:
   name: automation
 resources:
   - ../../../../_base/automation/homebridge
+  - configmap.yaml
 components:
   - ../../../../_components/resource-profiles/c.pico
   - ../../../../_components/node-selectors/pi
   - ../../../../_components/ingress-standards/sargeant.co
-configMapGenerator:
-  - name: homebridge-values
-    files:
-      - values.yaml
-    options:
-      disableNameSuffixHash: true
-patches:
-  - target:
-      kind: HelmRelease
-      name: homebridge
-    patch: |-
-      - op: add
-        path: /spec/valuesFrom
-        value:
-          - kind: ConfigMap
-            name: homebridge-values
-            valuesKey: values.yaml
