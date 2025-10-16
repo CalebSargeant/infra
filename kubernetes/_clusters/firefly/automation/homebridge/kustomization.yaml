@@ -14,8 +14,6 @@ configMapGenerator:
       - values.yaml
     options:
       disableNameSuffixHash: true
-      behavior: replace
-
 patches:
   - target:
       kind: HelmRelease
