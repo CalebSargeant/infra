@@ -34,7 +34,7 @@ patches:
       kind: HelmRelease
     patch: |
       - op: add
-        path: /spec/values
+        path: /spec/values/nodeSelector
         value:
-          nodeSelector:
-            type: pi
+          type: pi
+
