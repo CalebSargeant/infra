@@ -11,3 +11,6 @@ patches:
   - path: patches.yaml
     target:
       kind: DaemonSet
+  - path: helmrelease-patches.yaml
+    target:
+      kind: HelmRelease
