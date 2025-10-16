@@ -37,3 +37,4 @@ patches:
         path: /spec/values/nodeSelector
         value:
           type: pi
+
