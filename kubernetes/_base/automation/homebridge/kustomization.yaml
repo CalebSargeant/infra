@@ -6,3 +6,5 @@ configMapGenerator:
   - name: homebridge-values
     files:
       - values.yaml
+    options:
+      disableNameSuffixHash: true
