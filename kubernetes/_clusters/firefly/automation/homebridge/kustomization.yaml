@@ -14,3 +14,15 @@ configMapGenerator:
       - values.yaml
     options:
       disableNameSuffixHash: true
+
+patches:
+  - target:
+      kind: HelmRelease
+      name: homebridge
+    patch: |-
+      - op: add
+        path: /spec/valuesFrom
+        value:
+          - kind: ConfigMap
+            name: homebridge-values
+            valuesKey: values.yaml
