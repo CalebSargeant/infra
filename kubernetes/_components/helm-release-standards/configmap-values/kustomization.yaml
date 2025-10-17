@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: HelmRelease
+    patch: |-
+      apiVersion: helm.toolkit.fluxcd.io/v2beta2
+      kind: HelmRelease
+      metadata:
+        name: not-important
+      spec:
+        valuesFrom:
+          - kind: ConfigMap
+            name: PLACEHOLDER-values
+            valuesKey: values.yaml
+
+replacements:
+  - source:
+      kind: HelmRelease
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.valuesFrom.0.name
+        options:
+          delimiter: '-'
+          index: 0

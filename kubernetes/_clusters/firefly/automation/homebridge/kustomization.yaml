@@ -1,7 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-metadata:
-  name: automation
+namespace: automation
 resources:
   - ../../../../_base/_helm-releases/bjw-s-app-template.yaml
   - configmap.yaml
@@ -9,6 +8,7 @@ components:
   - ../../../../_components/resource-profiles/c.pico
   - ../../../../_components/node-selectors/pi
   - ../../../../_components/ingress-standards/sargeant.co
+  - ../../../../_components/helm-release-standards/configmap-values
 patches:
   - target:
       kind: HelmRelease
@@ -16,12 +16,3 @@ patches:
       - op: replace
         path: /metadata/name
         value: homebridge
-      - op: replace
-        path: /metadata/namespace
-        value: automation
-      - op: add
-        path: /spec/valuesFrom
-        value:
-          - kind: ConfigMap
-            name: homebridge-values
-            valuesKey: values.yaml
