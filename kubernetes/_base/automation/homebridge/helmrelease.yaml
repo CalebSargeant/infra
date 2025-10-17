@@ -7,7 +7,7 @@ spec:
   interval: 1m
   chart:
     spec:
-      chart: oci://ghcr.io/bjw-s/helm/app-template
+      chart: app-template
       version: "4.4.0"
       sourceRef:
         kind: HelmRepository

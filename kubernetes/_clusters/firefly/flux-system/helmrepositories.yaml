@@ -14,5 +14,4 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
-  type: oci
-  url: oci://ghcr.io/bjw-s/helm
+  url: https://bjw-s-labs.github.io/helm-charts
