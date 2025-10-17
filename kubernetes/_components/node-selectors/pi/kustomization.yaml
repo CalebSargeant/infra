@@ -29,11 +29,12 @@ patches:
         value:
           type: pi
 
-  # HelmReleases
+  # HelmReleases (app-template v4+)
   - target:
       kind: HelmRelease
     patch: |
       - op: add
-        path: /spec/values/nodeSelector
+        path: /spec/values/defaultPodOptions
         value:
-          type: pi
+          nodeSelector:
+            type: pi
