@@ -1,8 +1,8 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: homebridge
-  namespace: automation
+  name: app-template
+  namespace: default
 spec:
   interval: 1m
   chart:
@@ -21,7 +21,3 @@ spec:
           main: {}
     defaultPodOptions:
       nodeSelector: {}
-  valuesFrom:
-    - kind: ConfigMap
-      name: homebridge-values
-      valuesKey: values.yaml
