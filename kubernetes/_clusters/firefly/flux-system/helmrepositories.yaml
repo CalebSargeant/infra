@@ -5,13 +5,14 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
-  url: https://calebsargeant.github.io/helm-charts
+  url: https://charts.calebsargeant.com
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
-  name: k8s-at-home
+  name: bjw-s
   namespace: flux-system
 spec:
   interval: 10m
-  url: https://k8s-at-home.com/charts/
+  type: oci
+  url: oci://ghcr.io/bjw-s/helm
