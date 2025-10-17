@@ -7,10 +7,10 @@ spec:
   interval: 1m
   chart:
     spec:
-      chart: homebridge
+      chart: app-template
       sourceRef:
         kind: HelmRepository
-        name: k8s-at-home
+        name: bjw-s
         namespace: flux-system
       interval: 1m
   valuesFrom:
