@@ -5,33 +5,35 @@ metadata:
   namespace: automation
 data:
   values.yaml: |
-    #
-    # IMPORTANT NOTE
-    #
-    # This chart inherits from our common library chart. You can check the default values/options here:
-    # https://github.com/k8s-at-home/library-charts/tree/main/charts/stable/common/values.yaml
-    #
+    # Updated for app-template v3.7.3 schema
 
-    controller:
-      type: daemonset
-
-    image:
-      repository: ghcr.io/homebridge/homebridge
-      tag: beta-2025-10-03
-
-    env:
-      TZ: Europe/Amsterdam
-
-    hostNetwork: true
-    dnsPolicy: ClusterFirstWithHostNet
-
-    ingress:
+    controllers:
       main:
-        enabled: true
+        type: daemonset
+        containers:
+          main:
+            image:
+              repository: ghcr.io/homebridge/homebridge
+              tag: beta-2025-10-03
+            env:
+              TZ: Europe/Amsterdam
+
+    defaultPodOptions:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+
+    service:
+      main:
+        controller: main
+        ports:
+          http:
+            port: 8581
+            protocol: HTTP
 
     persistence:
       config:
-        storageClass: homebridge
-        size: 5Gi
+        type: hostPath
         hostPath: /mnt/nvme/homebridge-config
-        reclaimPolicy: Retain
+        accessMode: ReadWriteOnce
+        globalMounts:
+          - path: /homebridge
