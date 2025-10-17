@@ -34,7 +34,5 @@ patches:
       kind: HelmRelease
     patch: |
       - op: add
-        path: /spec/values/defaultPodOptions/nodeSelector
-        value:
-          nodeSelector:
-            type: pi
+        path: /spec/values/defaultPodOptions/nodeSelector/type
+        value: pi
