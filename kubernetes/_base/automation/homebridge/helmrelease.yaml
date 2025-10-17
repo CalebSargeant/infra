@@ -19,7 +19,8 @@ spec:
       main:
         containers:
           main: {}
-    defaultPodOptions: {}
+    defaultPodOptions:
+      nodeSelector: {}
   valuesFrom:
     - kind: ConfigMap
       name: homebridge-values
