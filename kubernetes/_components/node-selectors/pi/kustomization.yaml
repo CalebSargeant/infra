@@ -36,4 +36,5 @@ patches:
       - op: add
         path: /spec/values/defaultPodOptions/nodeSelector
         value:
-          type: pi
+          nodeSelector:
+            type: pi
