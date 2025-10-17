@@ -32,8 +32,8 @@ data:
 
     persistence:
       config:
+        enabled: true
         type: hostPath
         hostPath: /mnt/nvme/homebridge-config
-        accessMode: ReadWriteOnce
         globalMounts:
           - path: /homebridge
