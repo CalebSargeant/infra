@@ -9,6 +9,7 @@ components:
   - ../../../../_components/node-selectors/pi
   - ../../../../_components/ingress-standards/sargeant.co
   - ../../../../_components/helm-release-standards/configmap-values
+
 patches:
   - target:
       kind: HelmRelease
