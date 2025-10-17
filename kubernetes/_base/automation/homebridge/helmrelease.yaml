@@ -14,6 +14,12 @@ spec:
         name: bjw-s
         namespace: flux-system
       interval: 1m
+  values:
+    controllers:
+      main:
+        containers:
+          main: {}
+    defaultPodOptions: {}
   valuesFrom:
     - kind: ConfigMap
       name: homebridge-values
