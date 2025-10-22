@@ -1,62 +1,38 @@
 version: 2
 updates:
-  # GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-    open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-      - "github-actions"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-
-  # Terraform
-  - package-ecosystem: "terraform"
-    directory: "/terraform"
+      interval: daily
+  - package-ecosystem: docker
+    directory: /dockerfiles/n8n
     schedule:
-      interval: "weekly"
-      day: "tuesday"
-      time: "09:00"
-    open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-      - "terraform"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-
-  # Docker images in Kubernetes manifests
-  - package-ecosystem: "docker"
-    directory: "/kubernetes/_clusters/firefly"
+      interval: daily
+  - package-ecosystem: docker
+    directory: /dockerfiles/openfortivpn
     schedule:
-      interval: "weekly"
-      day: "wednesday"
-      time: "09:00"
-    open-pull-requests-limit: 15
-    labels:
-      - "dependencies"
-      - "docker"
-      - "kubernetes"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-
-  # Ansible Galaxy collections/roles if any
-  - package-ecosystem: "pip"
-    directory: "/ansible"
+      interval: daily
+  - package-ecosystem: terraform
+    directory: /terraform/gcp/prod/europe-west4/project
     schedule:
-      interval: "weekly"
-      day: "thursday"
-      time: "09:00"
-    open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-      - "ansible"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
+      interval: daily
+  - package-ecosystem: terraform
+    directory: /terraform/modules/gcp/project
+    schedule:
+      interval: daily
+  - package-ecosystem: terraform
+    directory: /terraform/oci/_modules/edge
+    schedule:
+      interval: daily
+  - package-ecosystem: terraform
+    directory: /terraform/oci/_modules/network
+    schedule:
+      interval: daily
+  - package-ecosystem: terraform
+    directory: /terraform/oci/_modules/policy
+    schedule:
+      interval: daily
+  - package-ecosystem: terraform
+    directory: /terraform/oci/_modules/server
+    schedule:
+      interval: daily
