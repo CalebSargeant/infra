@@ -116,7 +116,7 @@ spec:
             - name: TZ
               value: "Europe/Amsterdam" # Adjust timezone
             - name: PATH
-              value: "/opt/nodejs/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" # Use upgraded Node.js first
+              value: "/opt/nodejs/bin:$PATH" # Prepend upgraded Node.js to existing system paths
           volumeMounts:
             - mountPath: /homebridge
               name: homebridge
