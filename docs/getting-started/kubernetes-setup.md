@@ -19,7 +19,7 @@ This guide walks you through setting up a single-node Kubernetes cluster on a Ra
 ### Bootstrap
 
 Run the following command to bootstrap your pi (You need to be inside `./ansible`):
-```yaml
+```bash
 ansible-playbook -i hosts pi-k3s-bootstrap.yml
 ```
 
