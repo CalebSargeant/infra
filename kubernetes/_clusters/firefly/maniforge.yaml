@@ -1,0 +1,292 @@
+apiVersion: maniforge.calebsargeant.com/v1alpha1
+kind: ClusterManifest
+metadata:
+  name: firefly
+  description: Firefly cluster configuration consolidating all kustomizations
+spec:
+  cluster:
+    name: firefly
+    nodes:
+    - name: pi
+      type: raspberry-pi-5
+      specs:
+        cpu: 4
+        memory: 8Gi
+      labels:
+        type: pi
+    - name: mini
+      type: x86-vm
+      specs:
+        cpu: 8
+        memory: 16Gi
+      labels:
+        type: mini
+  applications:
+    automation:
+      namespace: automation
+      apps:
+      - name: homeassistant
+        basePath: ../../../_base/automation/homeassistant
+        resourceProfile: c.small
+        nodeSelector: pi
+      - name: homebridge
+        basePath: ../../../_base/automation/homebridge
+        resourceProfile: c.pico
+        nodeSelector: pi
+      - name: n8n
+        basePath: ../../../_base/automation/n8n
+        resourceProfile: c.small
+        nodeSelector: pi
+    backup:
+      namespace: backup
+      apps:
+      - name: timemachine
+        basePath: ../../../_base/backup/timemachine
+        resourceProfile: t.small
+        nodeSelector: mini
+    core:
+      namespace: core
+      apps:
+      - name: cert-manager
+        basePath: ../../../_base/core/cert-manager
+        resourceProfile: t.nano
+        nodeSelector: pi
+    database:
+      namespace: database
+      apps:
+      - name: postgres
+        basePath: ../../../_base/database/postgres
+        resourceProfile: m.small
+        nodeSelector: pi
+    media:
+      namespace: media
+      apps:
+      - name: bazarr
+        basePath: ../../../_base/media/bazarr
+        resourceProfile: c.pico
+        nodeSelector: mini
+      - name: flaresolverr
+        basePath: ../../../_base/media/flaresolverr
+        resourceProfile: c.micro
+        nodeSelector: mini
+      - name: jackett
+        basePath: ../../../_base/media/jackett
+        resourceProfile: c.pico
+        nodeSelector: mini
+      - name: nzbhydra2
+        basePath: ../../../_base/media/nzbhydra2
+        resourceProfile: c.micro
+        nodeSelector: mini
+      - name: overseerr
+        basePath: ../../../_base/media/overseerr
+        resourceProfile: c.nano
+        nodeSelector: mini
+      - name: plex
+        basePath: ../../../_base/media/plex
+        resourceProfile: t.medium
+        nodeSelector: pi
+      - name: prowlarr
+        basePath: ../../../_base/media/prowlarr
+        resourceProfile: c.pico
+        nodeSelector: mini
+      - name: qbittorrent
+        basePath: ../../../_base/media/qbittorrent
+        resourceProfile: c.micro
+        nodeSelector: mini
+      - name: radarr
+        basePath: ../../../_base/media/radarr
+        resourceProfile: c.micro
+        nodeSelector: mini
+      - name: sabnzbd
+        basePath: ../../../_base/media/sabnzbd
+        resourceProfile: c.micro
+        nodeSelector: mini
+      - name: sonarr
+        basePath: ../../../_base/media/sonarr
+        resourceProfile: c.micro
+        nodeSelector: mini
+    miscellaneous:
+      namespace: miscellaneous
+      apps:
+      - name: kured
+        basePath: ../../../_base/miscellaneous/kured
+        resourceProfile: t.small
+        nodeSelector: pi
+      - name: cloudflared
+        basePath: ../../../_base/miscellaneous/cloudflared
+        resourceProfile: t.small
+        nodeSelector: pi
+      - name: adguard-home
+        basePath: ../../../_base/miscellaneous/adguard-home
+        resourceProfile: t.small
+        nodeSelector: pi
+    observability:
+      namespace: observability
+      apps:
+      - name: alloy
+        basePath: ../../../_base/observability/alloy
+        resourceProfile: m.medium
+        nodeSelector: mini
+      - name: mimir
+        basePath: ../../../_base/observability/mimir
+        resourceProfile: m.large
+        nodeSelector: mini
+      - name: loki
+        basePath: ../../../_base/observability/loki
+        resourceProfile: m.large
+        nodeSelector: mini
+      - name: tempo
+        basePath: ../../../_base/observability/tempo
+        resourceProfile: m.large
+        nodeSelector: mini
+      - name: pyroscope
+        basePath: ../../../_base/observability/pyroscope
+        resourceProfile: m.large
+        nodeSelector: mini
+      - name: alertmanager
+        basePath: ../../../_base/observability/alertmanager
+        resourceProfile: m.medium
+        nodeSelector: mini
+      - name: mikrotik-exporter
+        basePath: ../../../_base/observability/mikrotik-exporter
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: cloudflare-exporter
+        basePath: ../../../_base/observability/cloudflare-exporter
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: blackbox-exporter
+        basePath: ../../../_base/observability/blackbox-exporter
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: postgres-exporter
+        basePath: ../../../_base/observability/postgres-exporter
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: raspberrypi-exporter
+        basePath: ../../../_base/observability/raspberrypi_exporter
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: smartctl-exporter
+        basePath: ../../../_base/observability/smartctl_exporter
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: nvme-exporter
+        basePath: ../../../_base/observability/nvme_exporter
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: etcd-exporter
+        basePath: ../../../_base/observability/etcd_exporter
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: nfs-exporter
+        basePath: ../../../_base/observability/nfs_exporter
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: restic-exporter
+        basePath: ../../../_base/observability/restic_exporter
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: meross-exporter
+        basePath: ../../../_base/observability/meross-exporter
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: scraparr
+        basePath: ../../../_base/observability/scraparr
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: homebridge-exporter
+        basePath: ../../../_base/observability/homebridge-exporter
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: home-assistant-exporter
+        basePath: ../../../_base/observability/home-assistant-exporter
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: nginx-exporter
+        basePath: ../../../_base/observability/nginx-exporter
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: plex-exporter
+        basePath: ../../../_base/observability/plex_exporter
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: nextcloud-exporter
+        basePath: ../../../_base/observability/nextcloud-exporter
+        resourceProfile: t.small
+        nodeSelector: mini
+      - name: pmacct-netflow
+        basePath: ../../../_base/observability/pmacct-netflow
+        resourceProfile: t.small
+        nodeSelector: mini
+  resourceProfiles:
+    c.pico:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 250m
+        memory: 512Mi
+    c.nano:
+      requests:
+        cpu: 150m
+        memory: 384Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+    c.micro:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 750m
+        memory: 1536Mi
+    c.small:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: '1'
+        memory: 2Gi
+    t.nano:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    t.small:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: '1'
+        memory: 1Gi
+    t.medium:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+      limits:
+        cpu: '2'
+        memory: 2Gi
+    m.small:
+      requests:
+        cpu: 250m
+        memory: 1Gi
+      limits:
+        cpu: '1'
+        memory: 4Gi
+    m.medium:
+      requests:
+        cpu: 500m
+        memory: 2Gi
+      limits:
+        cpu: '2'
+        memory: 8Gi
+    m.large:
+      requests:
+        cpu: '1'
+        memory: 4Gi
+      limits:
+        cpu: '4'
+        memory: 16Gi
