@@ -39,7 +39,7 @@ terragrunt run-all apply
 
 ## 📚 Documentation
 
-▶ **Full documentation:** https://CalebSargeant.github.io/infra/
+▶ **Full documentation:** https://calebsargeant.github.io/infra/
 
 The complete documentation includes:
 
