@@ -1,0 +1,5 @@
+mkdocs>=1.6
+mkdocs-material
+mkdocs-redirects
+mkdocs-git-revision-date-localized-plugin
+pymdown-extensions
