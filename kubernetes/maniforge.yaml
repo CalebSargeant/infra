@@ -1,0 +1,23 @@
+platform:
+  source: built-in
+  version: v1.0.0
+cluster:
+  name: firefly
+  domain: sargeant.co
+  defaults:
+    profile: c.small
+    nodeSelector: pi
+output:
+  directory: apps
+apps:
+  nginx-example:
+    image: nginx:latest
+    type: deployment
+    network: clusterip
+    profile: c.small
+nodes:
+  pi:
+    count: 2
+    cpu: 4
+    mem: 8Gi
+    disk: 100Gi
