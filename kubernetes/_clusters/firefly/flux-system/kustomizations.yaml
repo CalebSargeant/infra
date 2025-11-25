@@ -118,7 +118,7 @@ metadata:
     app.kubernetes.io/sops: enabled
 spec:
   interval: 1m
-  path: ./kubernetes/_clusters/firefly/misc
+  path: ./kubernetes/_clusters/firefly/miscellaneous
   prune: true
   sourceRef:
     kind: GitRepository
