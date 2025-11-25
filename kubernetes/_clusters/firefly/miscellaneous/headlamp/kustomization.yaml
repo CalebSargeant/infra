@@ -5,6 +5,7 @@ resources:
   - ../../../../_base/_helm-releases/headlamp.yaml
   - configmap.yaml
   - secret.enc.yaml
+  - aws-credentials-secret.enc.yaml
   - serviceaccount.yaml
 #components:
 #  - ../../../../_components/node-selectors/pi
