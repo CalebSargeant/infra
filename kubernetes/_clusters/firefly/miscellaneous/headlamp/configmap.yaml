@@ -26,18 +26,16 @@ data:
         cpu: 200m
         memory: 128Mi
     
-    # Configure KUBECONFIG environment variable to include mounted kubeconfigs
-    env:
-      - name: KUBECONFIG
-        value: /etc/kubernetes/admin.conf:/kubeconfigs/external
-    
     # Mount external cluster kubeconfig from secret
     volumeMounts:
       - name: external-kubeconfig
-        mountPath: /kubeconfigs
+        mountPath: /home/headlamp/.config/Headlamp/kubeconfigs
         readOnly: true
     
     volumes:
       - name: external-kubeconfig
         secret:
           secretName: headlamp-staging-kubeconfig
+          items:
+            - key: kubeconfig
+              path: config
