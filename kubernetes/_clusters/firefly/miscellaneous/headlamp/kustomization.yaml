@@ -4,11 +4,11 @@ namespace: misc
 resources:
   - ../../../../_base/_helm-releases/headlamp.yaml
   - configmap.yaml
-#components:
-#  - ../../../../_components/resource-profiles/c.pico
-#  - ../../../../_components/node-selectors/pi
-#  - ../../../../_components/ingress-standards/sargeant.co
-#  - ../../../../_components/helm-release-standards/configmap-values
+components:
+  - ../../../../_components/resource-profiles/c.pico
+  - ../../../../_components/node-selectors/pi
+  - ../../../../_components/ingress-standards/sargeant.co
+  - ../../../../_components/helm-release-standards/configmap-values
 
 patches:
   - target:
