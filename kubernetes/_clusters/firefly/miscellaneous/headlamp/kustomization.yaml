@@ -4,6 +4,8 @@ namespace: misc
 resources:
   - ../../../../_base/_helm-releases/headlamp.yaml
   - configmap.yaml
+#  - secret.yaml
+  - serviceaccount.yaml
 components:
   - ../../../../_components/resource-profiles/c.pico
   - ../../../../_components/node-selectors/pi
