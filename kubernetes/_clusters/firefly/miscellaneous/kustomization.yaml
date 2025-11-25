@@ -5,9 +5,10 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 resources:
-  - ../../../_base/miscellaneous/kured
-  - ../../../_base/miscellaneous/cloudflared
-  - ../../../_base/miscellaneous/adguard-home
+#  - ../../../_base/miscellaneous/kured
+  - ../../../_base/miscellaneous/rancher
+#  - ../../../_base/miscellaneous/cloudflared
+#  - ../../../_base/miscellaneous/adguard-home
 components:
   - ../../../_components/resource-profiles/t.small
   - ../../../_components/node-selectors/pi
@@ -18,7 +19,7 @@ patches:
         path: /metadata/labels/node-selector
         value: pi
     target:
-      labelSelector: "app.kubernetes.io/name in (kured, cloudflared, adguard-home)"
+      labelSelector: "app.kubernetes.io/name in (rancher)"
 
   # Resource profiles for specific apps
   - patch: |
@@ -26,4 +27,4 @@ patches:
         path: /metadata/labels/resource-profile
         value: t.small
     target:
-      labelSelector: "app.kubernetes.io/name in (kured, cloudflared, adguard-home)"
+      labelSelector: "app.kubernetes.io/name in (rancher)"
