@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: headlamp-values
+  namespace: kube-system
+data:
+  values.yaml: |
+    ingress:
+      enabled: true
+      hosts:
+        - host: headlamp.sargeant.co
+          paths:
+            - path: /
+              type: ImplementationSpecific
+    
+    # Run on Pi nodes
+    nodeSelector:
+      type: pi
+    
+    # Minimal resources
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi

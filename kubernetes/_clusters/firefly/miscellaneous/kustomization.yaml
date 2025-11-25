@@ -7,3 +7,4 @@ metadata:
 resources:
   - ../../../_base/miscellaneous/namespace.yaml
   - rancher
+  - headlamp

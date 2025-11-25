@@ -24,3 +24,12 @@ metadata:
 spec:
   interval: 1m
   url: https://releases.rancher.com/server-charts/latest
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: headlamp
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://kubernetes-sigs.github.io/headlamp/
