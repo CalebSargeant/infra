@@ -7,3 +7,11 @@ data:
   values.yaml: |
     hostname: rancher.sargeant.co
     replicas: 1
+    bootstrapPassword: "admin"
+    # Node selector for main Rancher pods
+    extraNodeSelectorTerms:
+      - matchExpressions:
+          - key: type
+            operator: In
+            values:
+              - pi
