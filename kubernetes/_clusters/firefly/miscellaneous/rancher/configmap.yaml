@@ -8,12 +8,17 @@ data:
     hostname: rancher.sargeant.co
     replicas: 1
     bootstrapPassword: "admin"
+    
     # Node selector for main Rancher pods
     nodeSelector:
       type: pi
-    extraNodeSelectorTerms:
-      - matchExpressions:
-          - key: type
-            operator: In
-            values:
-              - pi
+    
+    # Fleet pods
+    fleet:
+      nodeSelector:
+        type: pi
+    
+    # Webhook pods  
+    webhook:
+      nodeSelector:
+        type: pi
