@@ -16,4 +16,4 @@ data:
           - key: type
             operator: In
             values:
-              type: pi
+              - pi
