@@ -5,5 +5,5 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 resources:
-  - ../../../_base/automation/namespace.yaml
+  - ../../../_base/miscellaneous/namespace.yaml
   - rancher
