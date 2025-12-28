@@ -10,16 +10,3 @@ spec:
     requests:
       storage: 1Gi
   storageClassName: sabnzbd-config
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: downloads
-  namespace: media
-spec:
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 100Gi
-  storageClassName: downloads
