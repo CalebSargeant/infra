@@ -16,14 +16,14 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: sabnzbd-downloads
+  name: downloads
   namespace: media
 spec:
   capacity:
-    storage: 50Gi
+    storage: 100Gi
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: sabnzbd-downloads
+  storageClassName: downloads
   hostPath:
-    path: /mnt/nvme/sabnzbd-downloads
+    path: /mnt/nvme/downloads

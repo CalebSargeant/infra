@@ -30,7 +30,7 @@ spec:
             - mountPath: /config
               name: sabnzbd-config
             - mountPath: /downloads
-              name: sabnzbd-downloads
+              name: downloads
           resources:
             requests:
               memory: "128Mi"
@@ -44,6 +44,6 @@ spec:
         - name: sabnzbd-config
           persistentVolumeClaim:
             claimName: sabnzbd-config
-        - name: sabnzbd-downloads
+        - name: downloads
           persistentVolumeClaim:
-            claimName: sabnzbd-downloads
+            claimName: downloads

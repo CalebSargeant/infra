@@ -14,12 +14,12 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: sabnzbd-downloads
+  name: downloads
   namespace: media
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
-      storage: 50Gi
-  storageClassName: sabnzbd-downloads
+      storage: 100Gi
+  storageClassName: downloads
