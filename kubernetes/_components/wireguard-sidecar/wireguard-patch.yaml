@@ -23,8 +23,11 @@ spec:
             privileged: true
           volumeMounts:
             - name: wireguard-config
-              mountPath: /config
+              mountPath: /config/wg_confs/wg0.conf
+              subPath: wg0.conf
               readOnly: true
+            - name: wireguard-tmp
+              mountPath: /config
             - name: lib-modules
               mountPath: /lib/modules
               readOnly: true
@@ -39,6 +42,8 @@ spec:
         - name: wireguard-config
           secret:
             secretName: wireguard-config
+        - name: wireguard-tmp
+          emptyDir: {}
         - name: lib-modules
           hostPath:
             path: /lib/modules
