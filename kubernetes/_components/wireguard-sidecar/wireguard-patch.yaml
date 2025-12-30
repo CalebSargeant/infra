@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: not-important
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: route-setup
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - |
+              # Add routes for RFC1918 addresses via default gateway
+              ip route add 10.0.0.0/8 via $(ip route | grep default | awk '{print $3}')
+              ip route add 172.16.0.0/12 via $(ip route | grep default | awk '{print $3}')
+              ip route add 192.168.0.0/16 via $(ip route | grep default | awk '{print $3}')
+              # Make WireGuard the default route (non-RFC1918 traffic)
+              ip route del default
+              ip route add default dev wg0
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+      containers:
+        - name: wireguard
+          image: linuxserver/wireguard:latest
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Europe/Amsterdam"
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_MODULE
+            privileged: true
+          volumeMounts:
+            - name: wireguard-config
+              mountPath: /config
+              readOnly: true
+            - name: lib-modules
+              mountPath: /lib/modules
+              readOnly: true
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+      volumes:
+        - name: wireguard-config
+          secret:
+            secretName: wireguard-config
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+            type: Directory

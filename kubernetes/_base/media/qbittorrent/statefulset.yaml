@@ -14,8 +14,7 @@ spec:
       labels:
         app: qbittorrent
     spec:
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
+      automountServiceAccountToken: false
       containers:
         - name: qbittorrent
           image: linuxserver/qbittorrent:5.1.2
