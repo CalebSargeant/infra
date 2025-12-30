@@ -4,6 +4,15 @@ kind: Kustomization
 components:
   - ../../../_components/wireguard-sidecar
 
+patches:
+  - target:
+      kind: Deployment
+      name: jackett
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/volumes/0/secret/secretName
+        value: jackett-wireguard
+
 resources:
   - deployment.yaml
   - service.yaml
