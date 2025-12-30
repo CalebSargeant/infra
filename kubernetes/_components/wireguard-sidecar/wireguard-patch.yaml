@@ -15,6 +15,14 @@ spec:
               value: "1000"
             - name: TZ
               value: "Europe/Amsterdam"
+            - name: POST_UP
+              value: |
+                iptables -I OUTPUT ! -o wg0 -m mark ! --mark $(wg show wg0 fwmark) -m addrtype ! --dst-type LOCAL -j REJECT;
+                ip6tables -I OUTPUT ! -o wg0 -m mark ! --mark $(wg show wg0 fwmark) -m addrtype ! --dst-type LOCAL -j REJECT
+            - name: PRE_DOWN
+              value: |
+                iptables -D OUTPUT ! -o wg0 -m mark ! --mark $(wg show wg0 fwmark) -m addrtype ! --dst-type LOCAL -j REJECT;
+                ip6tables -D OUTPUT ! -o wg0 -m mark ! --mark $(wg show wg0 fwmark) -m addrtype ! --dst-type LOCAL -j REJECT
           securityContext:
             capabilities:
               add:
