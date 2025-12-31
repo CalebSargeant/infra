@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: nextcloud
-          image: linuxserver/nextcloud:latest
+          image: linuxserver/nextcloud:31
           resources:
             requests:
               memory: "256Mi"
