@@ -13,6 +13,7 @@ spec:
         app: timemachine
     spec:
       hostNetwork: true # Needed to expose port 445 directly to LAN
+      hostname: firefly
       containers:
         - name: timemachine
           image: mbentley/timemachine
