@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
         - name: prowlarr
-          image: lscr.io/linuxserver/prowlarr:latest
+          image: linuxserver/prowlarr:latest
+          imagePullPolicy: IfNotPresent
           resources:
             requests:
               memory: "64Mi"
