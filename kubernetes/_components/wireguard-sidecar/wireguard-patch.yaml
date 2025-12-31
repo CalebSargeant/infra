@@ -8,6 +8,7 @@ spec:
       containers:
         - name: wireguard
           image: linuxserver/wireguard:latest
+          imagePullPolicy: IfNotPresent
           env:
             - name: PUID
               value: "1000"

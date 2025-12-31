@@ -33,13 +33,13 @@ spec:
               name: downloads
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "50m"
+              memory: "512Mi"
+              cpu: "100m"
               ephemeral-storage: "1Gi"
             limits:
-              memory: "512Mi"
-              cpu: "200m"
-              ephemeral-storage: "2Gi"
+              memory: "1Gi"
+              cpu: "500m"
+              ephemeral-storage: "4Gi"
       volumes:
         - name: sabnzbd-config
           persistentVolumeClaim:

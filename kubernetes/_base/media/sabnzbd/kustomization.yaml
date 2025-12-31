@@ -11,7 +11,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/volumes/0/secret/secretName
-        value: sabnzbd-wireguard
+        value: sabnzbd-privado
 
 resources:
   - deployment.yaml
