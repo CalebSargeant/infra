@@ -8,3 +8,4 @@ resources:
   - ../../../_base/miscellaneous/namespace.yaml
   - rancher
   - headlamp
+  - ../../../_base/miscellaneous/nextcloud
