@@ -24,6 +24,8 @@ spec:
               memory: "256Mi"
               cpu: "100m"
           env:
+            - name: AVAHI_NAME
+              value: "firefly"
             - name: CUSTOM_SMB_CONF
               value: "false"
             - name: CUSTOM_USER
