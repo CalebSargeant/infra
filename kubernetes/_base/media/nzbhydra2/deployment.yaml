@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: nzbhydra2
-        image: linuxserver/nzbhydra2:latest
+        image: lscr.io/linuxserver/nzbhydra2:latest
         ports:
         - containerPort: 5076
           name: http
