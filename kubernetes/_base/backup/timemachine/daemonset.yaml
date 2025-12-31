@@ -17,6 +17,16 @@ spec:
       containers:
         - name: timemachine
           image: mbentley/timemachine
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    sleep 5
+                    sed -i 's/<name replace-wildcards="yes">%h<\/name>/<name replace-wildcards="yes">firefly<\/name>/' /etc/avahi/services/smbd.service
+                    pkill -HUP avahi-daemon
           resources:
             requests:
               memory: "64Mi"
