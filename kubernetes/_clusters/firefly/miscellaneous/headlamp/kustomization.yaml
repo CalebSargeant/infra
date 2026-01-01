@@ -4,6 +4,7 @@ namespace: misc
 resources:
   - configmap.yaml
   - serviceaccount.yaml
+  - ../../../../_base/_helm-releases/kubernetes-dashboard.yaml
 #components:
 #  - ../../../../_components/node-selectors/pi
 #  - ../../../../_components/ingress-standards/sargeant.co
@@ -15,4 +16,4 @@ patches:
     patch: |-
       - op: replace
         path: /metadata/name
-        value: headlamp
+        value: k8sboard
