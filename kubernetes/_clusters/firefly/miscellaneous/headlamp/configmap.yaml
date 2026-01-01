@@ -17,6 +17,7 @@ data:
       - "-enable-dynamic-clusters=false"
       - "-in-cluster"
       - "-oidc-skip-login"
+      - "-kubeconfig="
     
     # Use our custom ServiceAccount with cluster-admin permissions
     serviceAccount:
