@@ -1,46 +1,38 @@
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: headlamp-values
+  name: kubernetes-dashboard-values
   namespace: misc
 data:
   values.yaml: |
-    # Configuration
-    config:
-      baseURL: ""
-      inCluster: true
-      enableServiceAccountAuth: true
+    app:
+      scheduling:
+        nodeSelector:
+          type: pi
+      ingress:
+        enabled: true
+        ingressClassName: nginx
+        hosts:
+          - dashboard.sargeant.co
+        tls:
+          enabled: true
+          secretName: dashboard-tls
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-dns
 
-    # Command line arguments
-    args:
-      - "-html-static-dir=/headlamp/frontend"
-      - "-plugins-dir=/headlamp/plugins"
-      - "-enable-dynamic-clusters=false"
-    
-    # Use our custom ServiceAccount with cluster-admin permissions
+    # Skip login - use ServiceAccount automatically
+    extras:
+      - name: kubernetes-dashboard-skip-login
+        args:
+          - --enable-skip-login
+          - --enable-insecure-login
+
+    # Use our existing ServiceAccount
     serviceAccount:
       create: false
-      name: headlamp-admin
-    
-    ingress:
-      enabled: true
-      annotations:
-        # TLS certificate
-        cert-manager.io/cluster-issuer: letsencrypt-dns
-      hosts:
-        - host: headlamp.sargeant.co
-          paths:
-            - path: /
-              type: ImplementationSpecific
-      tls:
-        - secretName: headlamp-tls
-          hosts:
-            - headlamp.sargeant.co
-    
-    # Run on Pi nodes
-    nodeSelector:
-      type: pi
-    
+      name: dashboard-admin
+
     # Minimal resources
     resources:
       requests:
@@ -49,17 +41,3 @@ data:
       limits:
         cpu: 200m
         memory: 128Mi
-    
-    # Mount AWS credentials for EKS access
-    volumeMounts:
-      - name: aws-credentials
-        mountPath: /home/headlamp/.aws
-        readOnly: true
-    
-    volumes:
-      - name: aws-credentials
-        secret:
-          secretName: headlamp-aws-credentials
-          items:
-            - key: credentials
-              path: credentials
