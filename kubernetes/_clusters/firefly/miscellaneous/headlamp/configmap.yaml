@@ -8,16 +8,14 @@ data:
     # Configuration
     config:
       baseURL: ""
-      inCluster: false
-    
-    # Command line arguments to disable OIDC
+      inCluster: true
+      enableServiceAccountAuth: true
+
+    # Command line arguments
     args:
       - "-html-static-dir=/headlamp/frontend"
       - "-plugins-dir=/headlamp/plugins"
       - "-enable-dynamic-clusters=false"
-      - "-in-cluster"
-      - "-oidc-skip-login"
-      - "-kubeconfig="
     
     # Use our custom ServiceAccount with cluster-admin permissions
     serviceAccount:
