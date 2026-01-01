@@ -5,16 +5,16 @@ metadata:
   namespace: misc
 data:
   values.yaml: |
-    # Use in-cluster auth for firefly (local cluster)
+    # Configuration
     config:
-      pluginsDir: ""
       baseURL: ""
-      inCluster: true
+      inCluster: false
     
-    # Disable OIDC to prevent ID token prompts
-    env:
-      - name: HEADLAMP_CONFIG_NO_OIDC
-        value: "true"
+    # Command line arguments to disable OIDC
+    args:
+      - "-html-static-dir=/headlamp/frontend"
+      - "-plugins-dir=/headlamp/plugins"
+      - "-enable-dynamic-clusters=false"
     
     # Use our custom ServiceAccount with cluster-admin permissions
     serviceAccount:
