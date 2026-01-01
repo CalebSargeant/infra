@@ -5,17 +5,15 @@ metadata:
   namespace: misc
 data:
   values.yaml: |
-    # Configuration
+    # Configuration - keep in-cluster for firefly, add external via KUBECONFIG
     config:
       baseURL: ""
-      # Disable in-cluster mode to use external kubeconfigs
-      inCluster: false
+      inCluster: true
       
-    # Command line arguments to disable OIDC
-    args:
-      - "-html-static-dir=/headlamp/frontend"
-      - "-plugins-dir=/headlamp/plugins"
-      - "-enable-dynamic-clusters=false"
+    # Point to kubeconfig file for additional clusters
+    env:
+      - name: KUBECONFIG
+        value: "/home/headlamp/.config/Headlamp/kubeconfigs/p1-staging-eks"
     
     ingress:
       enabled: true
