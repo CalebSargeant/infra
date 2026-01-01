@@ -1,4 +1,3 @@
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,38 +5,63 @@ metadata:
   namespace: misc
 data:
   values.yaml: |
+    # Disable extras/serviceMonitor
+    extras:
+      serviceMonitor:
+        enabled: false
+
+    # Kong ingress settings
+    kong:
+      proxy:
+        http:
+          enabled: true
+
+    # App settings with skip-login
     app:
-      scheduling:
-        nodeSelector:
-          type: pi
       ingress:
         enabled: true
         ingressClassName: nginx
         hosts:
-          - k8sboard.sargeant.co
+          - dashboard.sargeant.co
         tls:
           enabled: true
           secretName: dashboard-tls
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt-dns
 
-    # Skip login - use ServiceAccount automatically
-    extras:
-      - name: kubernetes-dashboard-skip-login
-        args:
-          - --enable-skip-login
-          - --enable-insecure-login
+      settings:
+        global:
+          clusterName: firefly
+          itemsPerPage: 50
 
-    # Use our existing ServiceAccount
-    serviceAccount:
-      create: false
-      name: dashboard-admin
+      scheduling:
+        nodeSelector:
+          type: pi
+
+    # Auth settings - use ServiceAccount
+    auth:
+      extraArgs:
+        - --enable-skip-login
+        - --enable-insecure-login
+      serviceAccount:
+        create: false
+        name: dashboard-admin
 
     # Minimal resources
-    resources:
-      requests:
-        cpu: 50m
-        memory: 64Mi
-      limits:
-        cpu: 200m
-        memory: 128Mi
+    api:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
+
+    web:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
