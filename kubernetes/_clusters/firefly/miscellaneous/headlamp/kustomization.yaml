@@ -6,7 +6,7 @@ resources:
   - serviceaccount.yaml
   - ../../../../_base/_helm-releases/headlamp.yaml
   - ingress.yaml
-  - middleware.yaml
+  - middleware.enc.yaml
   - headlamp-kubeconfigs.enc.yaml
 #components:
 #  - ../../../../_components/node-selectors/pi
