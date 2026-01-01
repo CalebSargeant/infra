@@ -10,13 +10,15 @@ data:
       serviceMonitor:
         enabled: false
 
-    # Kong ingress settings
+    # Kong proxy settings
     kong:
       proxy:
         http:
           enabled: true
+        tls:
+          enabled: false
 
-    # App settings with skip-login
+    # App settings
     app:
       ingress:
         enabled: true
@@ -28,6 +30,9 @@ data:
           secretName: dashboard-tls
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt-dns
+        issuer:
+          name: disabled
+          scope: disabled
 
       settings:
         global:
