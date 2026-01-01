@@ -1,0 +1,33 @@
+# Template for adding a new cluster to Headlamp
+# 1. Copy this file to clusters/<cluster-name>.yaml
+# 2. Fill in the values
+# 3. Encrypt: sops --encrypt --encrypted-regex '^(data|stringData)$' clusters/<cluster-name>.yaml > clusters/<cluster-name>.enc.yaml
+# 4. Add to kustomization.yaml resources
+# 5. Delete the unencrypted file
+# 6. Commit and push (Flux will auto-apply)
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: headlamp-cluster-<cluster-name>
+  namespace: misc
+type: Opaque
+stringData:
+  <cluster-name>: |
+    apiVersion: v1
+    kind: Config
+    clusters:
+    - name: <cluster-name>
+      cluster:
+        server: https://your-cluster-api:6443
+        certificate-authority-data: BASE64_CA_CERT
+    contexts:
+    - name: <cluster-name>
+      context:
+        cluster: <cluster-name>
+        user: headlamp-admin
+    current-context: <cluster-name>
+    users:
+    - name: headlamp-admin
+      user:
+        token: "SERVICE_ACCOUNT_TOKEN"

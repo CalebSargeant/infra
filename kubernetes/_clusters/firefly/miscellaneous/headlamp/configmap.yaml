@@ -26,9 +26,9 @@ data:
         cpu: 200m
         memory: 128Mi
     
-    # Mount external cluster kubeconfig and AWS credentials
+    # Mount kubeconfig directory (one file per cluster) and AWS credentials
     volumeMounts:
-      - name: external-kubeconfig
+      - name: external-kubeconfigs
         mountPath: /home/headlamp/.config/Headlamp/kubeconfigs
         readOnly: true
       - name: aws-credentials
@@ -36,12 +36,9 @@ data:
         readOnly: true
     
     volumes:
-      - name: external-kubeconfig
+      - name: external-kubeconfigs
         secret:
-          secretName: headlamp-staging-kubeconfig
-          items:
-            - key: kubeconfig
-              path: config
+          secretName: headlamp-kubeconfigs
       - name: aws-credentials
         secret:
           secretName: headlamp-aws-credentials

@@ -1,0 +1,11 @@
+# Temporary kubeconfig files (contain sensitive tokens)
+*.yaml
+!kustomization.yaml
+!configmap.yaml
+!serviceaccount.yaml
+!serviceaccount-token.yaml
+!clusters/_template.yaml
+!.sops.yaml
+
+# Keep encrypted files
+!*.enc.yaml
