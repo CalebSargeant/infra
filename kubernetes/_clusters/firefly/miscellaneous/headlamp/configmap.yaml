@@ -5,16 +5,17 @@ metadata:
   namespace: misc
 data:
   values.yaml: |
-    # Disable token-based authentication
+    # Configuration
     config:
-      pluginsDir: ""
-      # Use kubeconfigs from mounted directory
       baseURL: ""
+      # Disable in-cluster mode to use external kubeconfigs
+      inCluster: false
       
-    # Disable OIDC to prevent ID token prompts
-    env:
-      - name: HEADLAMP_CONFIG_NO_OIDC
-        value: "true"
+    # Command line arguments to disable OIDC
+    args:
+      - "-html-static-dir=/headlamp/frontend"
+      - "-plugins-dir=/headlamp/plugins"
+      - "-enable-dynamic-clusters=false"
     
     ingress:
       enabled: true
