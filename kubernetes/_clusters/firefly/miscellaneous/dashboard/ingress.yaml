@@ -5,6 +5,7 @@ metadata:
   namespace: misc
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-dns
+    traefik.ingress.kubernetes.io/router.middlewares: misc-dashboard-inject-token@kubernetescrd
 spec:
   ingressClassName: traefik
   tls:

@@ -1,0 +1,24 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+    name: dashboard-inject-token
+    namespace: misc
+spec:
+    headers:
+        customRequestHeaders:
+            Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IkMzZUZ5WGFVQ0VBQlVUa2Q3bVRLajhKYzAzREhZbHpxR0draV9feHFYdWcifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJtaXNjIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRhc2hib2FyZC1hZG1pbi10b2tlbiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJkYXNoYm9hcmQtYWRtaW4iLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI5M2NkODlkOC00Y2Y5LTQ2YjMtOWI4NC1lZjdjZTNiYWUyNzEiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6bWlzYzpkYXNoYm9hcmQtYWRtaW4ifQ.K_BABfO78UNNz1FLfLUFIf7d6pSb3Jkj6i40evttXRrkorOPsKHiQMcKnaYXhPEBU83JhCZq4eeyGNCzCgfC3Tv-Tlcg5B3P0QITuHMkxhugsgRdibKQJ5lGJ9f1-J3FJeW6azUt94BfH3x6_wWxw_Y1XmM1ACW5VFs-1Ug71XUCpBIyRM7Utj2iZkN4XssrEjs1Em1XWtQUM6EwQD2rUUUpaJXO80MezcJrBCToqn-bJN6vL-TXeF7cK4vQ55AosiwqXrpXGdoV7lRLxfcoAVcNqFI04GiUbOjtkRwtnAC7Esou99rc5IDBlHaNvjcBxWvVyA_1sJHmVPrviqgONA
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBJOHlvSCswWTRzaWx4ZmNE
+            WlBNNUcxc0RTeThHbDNEY0doQ1o1cWpud2dRCnhwQUV5ZmdiaTZmbFU2U2hHTkx4
+            OWhocktCdWlPNmYxRHJWdnM3SUI3MmcKLS0tIFpaeDJuT0pUZzZhK3U5ZHU5Z1ZS
+            dTErSVFJc0xhOVA2MnNueVBqelV1WjAKb7On6Mpd2eKTVebOCNPnYkQnybaIdCFp
+            8PxT++zZAJZZ3GAB3bcDe0Tdq2DTxAOA21bZLgUc4quRDs8xszbhMQ==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-01-01T22:28:34Z"
+    mac: ENC[AES256_GCM,data:pnmNmxH4NQlFOlF6P78CXphEIlkcbXv3kuq0FiM7v2q2jR86ET1EIdaURc58mNGjoboDoPA26dB4Ymfq3b5FPLu0fpP1zcD02uRE1ojSODQBQz5eRbANxNxtlcrdOt41+89cMu6W/bnzSWdzuyQTXiSB6stQW1C2pzwj6ToZdVQ=,iv:rk5+REaXznUzwXmNxH08W45FaqEa4G7A16fZ9ONLanE=,tag:QU/7Y6VWatfU+B/vZlr1sg==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0
