@@ -6,7 +6,6 @@
 !serviceaccount-token.yaml
 !clusters/_template.yaml
 !.sops.yaml
-!middleware.yaml
 !ingress.yaml
 
 # Keep encrypted files
