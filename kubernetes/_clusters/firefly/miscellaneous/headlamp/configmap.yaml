@@ -12,7 +12,7 @@ data:
     args:
       - "-html-static-dir=/headlamp/frontend"
       - "-plugins-dir=/headlamp/plugins"
-      - "-enable-dynamic-clusters=false"
+      - "-enable-dynamic-clusters=true"
 
     serviceAccount:
       create: false
