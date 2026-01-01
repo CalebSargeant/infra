@@ -8,11 +8,7 @@ data:
     config:
       baseURL: ""
       inCluster: true
-
-    args:
-      - "-html-static-dir=/headlamp/frontend"
-      - "-plugins-dir=/headlamp/plugins"
-      - "-enable-dynamic-clusters=true"
+      enableDynamicClusters: true
 
     serviceAccount:
       create: false
