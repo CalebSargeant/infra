@@ -5,6 +5,17 @@ metadata:
   namespace: misc
 data:
   values.yaml: |
+    # Disable token-based authentication
+    config:
+      pluginsDir: ""
+      # Use kubeconfigs from mounted directory
+      baseURL: ""
+      
+    # Disable OIDC to prevent ID token prompts
+    env:
+      - name: HEADLAMP_CONFIG_NO_OIDC
+        value: "true"
+    
     ingress:
       enabled: true
       hosts:
