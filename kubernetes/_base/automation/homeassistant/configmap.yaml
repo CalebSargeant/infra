@@ -25,3 +25,7 @@ data:
     automation: !include automations.yaml
     script: !include scripts.yaml
     scene: !include scenes.yaml
+
+    # Database configuration - PostgreSQL
+    recorder:
+      db_url: postgresql://admin:s78x7jKMiWWNpdd@postgres.database.svc.cluster.local:5432/homeassistant
