@@ -5,25 +5,16 @@ metadata:
   namespace: misc
 data:
   values.yaml: |
-    # Configuration - keep in-cluster for firefly, add external via KUBECONFIG
+    # Use in-cluster auth for firefly (local cluster)
     config:
       baseURL: ""
       inCluster: true
-      
-    # Point to kubeconfig file for additional clusters
-    env:
-      - name: KUBECONFIG
-        value: "/home/headlamp/.config/Headlamp/kubeconfigs/p1-staging-eks"
     
     ingress:
       enabled: true
       annotations:
         # TLS certificate
         cert-manager.io/cluster-issuer: letsencrypt-dns
-        # Basic auth for access control
-        nginx.ingress.kubernetes.io/auth-type: basic
-        nginx.ingress.kubernetes.io/auth-secret: headlamp-basic-auth
-        nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - Headlamp'
       hosts:
         - host: headlamp.sargeant.co
           paths:
@@ -47,19 +38,13 @@ data:
         cpu: 200m
         memory: 128Mi
     
-    # Mount kubeconfig directory (one file per cluster) and AWS credentials
+    # Mount AWS credentials for EKS access
     volumeMounts:
-      - name: external-kubeconfigs
-        mountPath: /home/headlamp/.config/Headlamp/kubeconfigs
-        readOnly: true
       - name: aws-credentials
         mountPath: /home/headlamp/.aws
         readOnly: true
     
     volumes:
-      - name: external-kubeconfigs
-        secret:
-          secretName: headlamp-kubeconfigs
       - name: aws-credentials
         secret:
           secretName: headlamp-aws-credentials
