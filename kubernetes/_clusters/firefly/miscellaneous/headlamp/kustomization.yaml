@@ -19,4 +19,4 @@ patches:
     patch: |-
       - op: replace
         path: /metadata/name
-        value: k8sboard
+        value: headlamp
