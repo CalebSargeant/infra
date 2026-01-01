@@ -7,8 +7,14 @@ data:
   values.yaml: |
     # Use in-cluster auth for firefly (local cluster)
     config:
+      pluginsDir: ""
       baseURL: ""
       inCluster: true
+    
+    # Disable OIDC to prevent ID token prompts
+    env:
+      - name: HEADLAMP_CONFIG_NO_OIDC
+        value: "true"
     
     # Use our custom ServiceAccount with cluster-admin permissions
     serviceAccount:
