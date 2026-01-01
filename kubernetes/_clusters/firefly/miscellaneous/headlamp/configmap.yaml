@@ -10,6 +10,11 @@ data:
       baseURL: ""
       inCluster: true
     
+    # Use our custom ServiceAccount with cluster-admin permissions
+    serviceAccount:
+      create: false
+      name: headlamp-admin
+    
     ingress:
       enabled: true
       annotations:
