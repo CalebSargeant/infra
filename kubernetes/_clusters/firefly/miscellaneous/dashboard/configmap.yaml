@@ -10,7 +10,7 @@ data:
       serviceMonitor:
         enabled: false
 
-    # Kong proxy settings
+    # Kong proxy settings - use HTTP
     kong:
       proxy:
         http:
@@ -18,21 +18,10 @@ data:
         tls:
           enabled: false
 
-    # App settings
+    # Disable the chart's ingress - we'll create our own
     app:
       ingress:
-        enabled: true
-        ingressClassName: traefik
-        hosts:
-          - dashboard.sargeant.co
-        tls:
-          enabled: true
-          secretName: dashboard-tls
-        annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-dns
-        issuer:
-          name: disabled
-          scope: disabled
+        enabled: false
 
       settings:
         global:

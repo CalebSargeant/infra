@@ -5,6 +5,7 @@ resources:
   - configmap.yaml
   - serviceaccount.yaml
   - ../../../../_base/_helm-releases/kubernetes-dashboard.yaml
+  - ingress.yaml
 #components:
 #  - ../../../../_components/node-selectors/pi
 #  - ../../../../_components/ingress-standards/sargeant.co
