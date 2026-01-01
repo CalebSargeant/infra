@@ -20,7 +20,7 @@ data:
     app:
       ingress:
         enabled: true
-        ingressClassName: nginx
+    #    ingressClassName: nginx
         hosts:
           - dashboard.sargeant.co
         tls:
