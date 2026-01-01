@@ -19,6 +19,8 @@ data:
     ingress:
       enabled: true
       annotations:
+        # TLS certificate
+        cert-manager.io/cluster-issuer: letsencrypt-dns
         # Basic auth for access control
         nginx.ingress.kubernetes.io/auth-type: basic
         nginx.ingress.kubernetes.io/auth-secret: headlamp-basic-auth
@@ -28,6 +30,10 @@ data:
           paths:
             - path: /
               type: ImplementationSpecific
+      tls:
+        - secretName: headlamp-tls
+          hosts:
+            - headlamp.sargeant.co
     
     # Run on Pi nodes
     nodeSelector:
