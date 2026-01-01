@@ -21,6 +21,46 @@ Scalable Kubernetes dashboard for managing unlimited clusters without manual tok
 - Kubeconfig Directory: `/home/headlamp/.config/Headlamp/kubeconfigs/`
 - Secret: `headlamp-kubeconfigs.enc.yaml` (SOPS encrypted)
 
+**Authentication:**
+- Basic auth at ingress level (username/password)
+- No OIDC/ID token prompts - uses kubeconfig files directly
+- Clusters authenticated via service account tokens in kubeconfigs
+
+## Initial Setup
+
+### 1. Create Basic Auth Credentials
+
+Run the helper script:
+
+```bash
+./create-basic-auth.sh
+```
+
+This creates `basic-auth.enc.yaml` with your username/password.
+
+Add it to kustomization.yaml:
+
+```yaml
+resources:
+  # ...
+  - basic-auth.enc.yaml
+```
+
+Commit and push:
+
+```bash
+git add basic-auth.enc.yaml kustomization.yaml
+git commit -m "Add Headlamp basic auth"
+git push
+```
+
+### 2. Apply Configuration
+
+Flux will automatically apply the changes. You'll now:
+- See a login prompt at https://headlamp.sargeant.co (username/password)
+- No ID token prompts when accessing clusters
+- All clusters available immediately after login
+
 ## How to Add a New Cluster
 
 ### Step 1: Create Service Account on Target Cluster

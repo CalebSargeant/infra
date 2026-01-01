@@ -10,6 +10,7 @@ resources:
   - serviceaccount-token.yaml
   # Aggregated kubeconfigs (encrypted). Add new cluster keys to this secret only.
   - headlamp-kubeconfigs.enc.yaml
+  - basic-auth.enc.yaml
 #components:
 #  - ../../../../_components/node-selectors/pi
 #  - ../../../../_components/ingress-standards/sargeant.co

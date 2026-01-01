@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: headlamp-basic-auth
+    namespace: misc
+type: Opaque
+stringData:
+    auth: ENC[AES256_GCM,data:dKV7ql6JE9drgYTqv+sXKxihXAd/p9wa1pFcq4TJRQMHPENlBCJL1Zm6Xrg=,iv:M5NxCMBWcw/G1WvllQpevJ3srESCo/5seH7Cc9r9i4E=,tag:V3Y39IDzAqNDd6uoJ9WqDw==,type:str]
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBDWWdSbzBnbFo2bmdmVlEz
+            cFlwYmVYb25iWHF1YWJtN2ZOTUdnT1ArZG1FCnNZZVBsZU13M2hRWDIxQzMxc0do
+            S3JZdlk4UDM0M3MzbVp4VFhFOUJCTFkKLS0tIFJTQzJLWEx6bm1NczN0RU5yYStO
+            NWdYaElXREZ3Ly80aHY4NmtDc1pCWXMKtrnnqvUVJezQughUkFn7ySjMrOdlGWgS
+            vwAzDs7q8/c3SgrSpN3DnhBTQ8GzCoIteVRxS82SPvG+WDaHZunIEw==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-01-01T18:27:18Z"
+    mac: ENC[AES256_GCM,data:EED+7n2hSBVjNW2/RCEme9Hc395dOFye2qo6wyu4UCHMmHNui5JdTZnFMH4lejFqCy00qDUyYpMRcXe007IH8isROOV3eO/Wo/Wd7XPsFaMXRlEmaa9oQmjrecE5s5ux5kmOwVurTnZCQ7O+eJ0CSfKMVtBK3EY+I3H8dZvGjFM=,iv:uqnPKLHfenQ2WQcdDl6KZ9h/LWzYIjGKphGdt0IfSXc=,tag:rPPF7m7MJH88RbS7JDDJmg==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0
