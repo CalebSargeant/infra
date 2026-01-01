@@ -7,5 +7,5 @@ metadata:
 resources:
   - ../../../_base/miscellaneous/namespace.yaml
   - rancher
-  - dashboard
+  - headlamp
   - ../../../_base/miscellaneous/nextcloud

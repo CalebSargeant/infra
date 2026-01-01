@@ -1,25 +1,26 @@
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: kubernetes-dashboard
+  name: headlamp
   namespace: misc
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-dns
-    traefik.ingress.kubernetes.io/router.middlewares: misc-dashboard-inject-token@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: misc-headlamp-inject-token@kubernetescrd
 spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - dashboard.sargeant.co
-      secretName: dashboard-tls
+        - headlamp.sargeant.co
+      secretName: headlamp-tls
   rules:
-    - host: dashboard.sargeant.co
+    - host: headlamp.sargeant.co
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: k8sboard-kong-proxy
+                name: headlamp
                 port:
                   number: 80
