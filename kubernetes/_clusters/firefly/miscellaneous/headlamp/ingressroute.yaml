@@ -9,6 +9,7 @@ spec:
   routes:
     - match: Host(`headlamp.sargeant.co`) && PathPrefix(`/c/main`)
       kind: Rule
+      priority: 100
       services:
         - name: headlamp
           port: 80
@@ -17,6 +18,7 @@ spec:
           namespace: misc
     - match: Host(`headlamp.sargeant.co`) && PathPrefix(`/c/p1-staging-eks`)
       kind: Rule
+      priority: 100
       services:
         - name: headlamp
           port: 80
@@ -25,6 +27,7 @@ spec:
           namespace: misc
     - match: Host(`headlamp.sargeant.co`)
       kind: Rule
+      priority: 10
       services:
         - name: headlamp
           port: 80
