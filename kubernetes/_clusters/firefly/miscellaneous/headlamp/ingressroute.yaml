@@ -14,6 +14,7 @@ spec:
           port: 80
       middlewares:
         - name: headlamp-inject-token
+          namespace: misc
     - match: Host(`headlamp.sargeant.co`) && PathPrefix(`/c/p1-staging-eks`)
       kind: Rule
       services:
@@ -21,6 +22,7 @@ spec:
           port: 80
       middlewares:
         - name: headlamp-inject-token-staging
+          namespace: misc
     - match: Host(`headlamp.sargeant.co`)
       kind: Rule
       services:
