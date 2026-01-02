@@ -1,0 +1,30 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: headlamp
+  namespace: misc
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`headlamp.sargeant.co`) && PathPrefix(`/c/main`)
+      kind: Rule
+      services:
+        - name: headlamp
+          port: 80
+      middlewares:
+        - name: headlamp-inject-token
+    - match: Host(`headlamp.sargeant.co`) && PathPrefix(`/c/p1-staging-eks`)
+      kind: Rule
+      services:
+        - name: headlamp
+          port: 80
+      middlewares:
+        - name: headlamp-inject-token-staging
+    - match: Host(`headlamp.sargeant.co`)
+      kind: Rule
+      services:
+        - name: headlamp
+          port: 80
+  tls:
+    secretName: headlamp-tls
