@@ -28,5 +28,8 @@ spec:
       services:
         - name: headlamp
           port: 80
+      middlewares:
+        - name: headlamp-inject-token
+          namespace: misc
   tls:
     secretName: headlamp-tls
