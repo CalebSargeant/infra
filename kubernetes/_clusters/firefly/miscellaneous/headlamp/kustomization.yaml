@@ -9,6 +9,8 @@ resources:
   - middleware.enc.yaml
   - middleware-staging.enc.yaml
   - headlamp-kubeconfigs.enc.yaml
+  - oauth2-proxy.yaml
+  - oauth2-proxy-secret.enc.yaml
 #components:
 #  - ../../../../_components/node-selectors/pi
 #  - ../../../../_components/ingress-standards/sargeant.co
