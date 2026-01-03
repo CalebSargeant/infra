@@ -20,6 +20,8 @@ spec:
         - name: headlamp
           port: 80
       middlewares:
+        - name: oauth2-errors
+          namespace: misc
         - name: oauth2-auth
           namespace: misc
         - name: headlamp-inject-token
@@ -31,6 +33,8 @@ spec:
         - name: headlamp
           port: 80
       middlewares:
+        - name: oauth2-errors
+          namespace: misc
         - name: oauth2-auth
           namespace: misc
         - name: headlamp-inject-token-staging
@@ -42,6 +46,8 @@ spec:
         - name: headlamp
           port: 80
       middlewares:
+        - name: oauth2-errors
+          namespace: misc
         - name: oauth2-auth
           namespace: misc
         - name: headlamp-inject-token
