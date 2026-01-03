@@ -4,7 +4,10 @@ metadata:
   name: oauth2-errors
   namespace: misc
 spec:
-  redirectRegex:
-    regex: ".*"
-    replacement: "/oauth2/start?rd=${1}"
-    permanent: false
+  errors:
+    status:
+      - "401"
+    query: "/"
+    service:
+      name: auth-redirect
+      port: 80
