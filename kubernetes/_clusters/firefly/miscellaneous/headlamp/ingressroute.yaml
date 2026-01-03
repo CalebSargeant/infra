@@ -26,7 +26,7 @@ spec:
           namespace: misc
         - name: headlamp-inject-token
           namespace: misc
-    - match: Host(\`headlamp.sargeant.co\`) && (PathPrefix(\`/c/p1-prod-eks`) || PathPrefix(\`/clusters/p1-prod-eks`))
+    - match: Host(`headlamp.sargeant.co`) && (PathPrefix(`/c/p1-prod-eks`) || PathPrefix(`/clusters/p1-prod-eks`))
       kind: Rule
       priority: 100
       services:
