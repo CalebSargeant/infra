@@ -52,6 +52,19 @@ spec:
           namespace: misc
         - name: headlamp-inject-token-p1-staging-eks
           namespace: misc
+    - match: Host(`headlamp.sargeant.co`) && (PathPrefix(`/c/pr-nonprod-aks`) || PathPrefix(`/clusters/pr-nonprod-aks`))
+      kind: Rule
+      priority: 100
+      services:
+        - name: headlamp
+          port: 80
+      middlewares:
+        - name: oauth2-errors
+          namespace: misc
+        - name: oauth2-auth
+          namespace: misc
+        - name: headlamp-inject-token-pr-nonprod-aks
+          namespace: misc
     - match: Host(`headlamp.sargeant.co`)
       kind: Rule
       priority: 10

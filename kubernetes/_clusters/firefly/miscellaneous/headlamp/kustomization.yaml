@@ -9,6 +9,7 @@ resources:
   - middleware.enc.yaml
   - middleware-p1-prod-eks.enc.yaml
   - middleware-p1-staging-eks.enc.yaml
+  - middleware-pr-nonprod-aks.enc.yaml
   - middleware-oauth2.yaml
   - middleware-errors.yaml
   - headlamp-kubeconfigs.enc.yaml
