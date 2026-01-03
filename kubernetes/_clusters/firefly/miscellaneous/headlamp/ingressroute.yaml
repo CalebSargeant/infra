@@ -7,31 +7,43 @@ spec:
   entryPoints:
     - websecure
   routes:
+    - match: Host(`headlamp.sargeant.co`) && PathPrefix(`/oauth2`)
+      kind: Rule
+      priority: 200
+      services:
+        - name: oauth2-proxy
+          port: 4180
     - match: Host(`headlamp.sargeant.co`) && PathPrefix(`/c/main`)
       kind: Rule
       priority: 100
       services:
-        - name: oauth2-proxy
-          port: 4180
+        - name: headlamp
+          port: 80
       middlewares:
+        - name: oauth2-auth
+          namespace: misc
         - name: headlamp-inject-token
           namespace: misc
     - match: Host(`headlamp.sargeant.co`) && (PathPrefix(`/c/p1-staging-eks`) || PathPrefix(`/clusters/p1-staging-eks`))
       kind: Rule
       priority: 100
       services:
-        - name: oauth2-proxy
-          port: 4180
+        - name: headlamp
+          port: 80
       middlewares:
+        - name: oauth2-auth
+          namespace: misc
         - name: headlamp-inject-token-staging
           namespace: misc
     - match: Host(`headlamp.sargeant.co`)
       kind: Rule
       priority: 10
       services:
-        - name: oauth2-proxy
-          port: 4180
+        - name: headlamp
+          port: 80
       middlewares:
+        - name: oauth2-auth
+          namespace: misc
         - name: headlamp-inject-token
           namespace: misc
   tls:

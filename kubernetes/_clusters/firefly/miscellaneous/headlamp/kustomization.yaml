@@ -8,6 +8,7 @@ resources:
   - ingressroute.yaml
   - middleware.enc.yaml
   - middleware-staging.enc.yaml
+  - middleware-oauth2.yaml
   - headlamp-kubeconfigs.enc.yaml
   - oauth2-proxy.yaml
   - oauth2-proxy-secret.enc.yaml
