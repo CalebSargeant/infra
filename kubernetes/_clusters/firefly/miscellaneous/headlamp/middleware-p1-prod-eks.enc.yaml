@@ -1,0 +1,24 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+    name: headlamp-inject-token-p1-prod-eks
+    namespace: misc
+spec:
+    headers:
+        customRequestHeaders:
+            Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InM1UVM3STRRS2JualozTXhGTHdSd2NUenBwbnpGaDZWREhVZVFXVGdVTW8ifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJoZWFkbGFtcCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJoZWFkbGFtcC1hZG1pbi10b2tlbiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJoZWFkbGFtcC1hZG1pbiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjA1NTNlMDRiLWI1NTAtNDRlYS1hZDliLTEwOWVkNjliNzA2YiIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpoZWFkbGFtcDpoZWFkbGFtcC1hZG1pbiJ9.HsLDXOZ5lbuPIGjXODeqKHIQ5Nt9dqL1gGlxhksHwkeq4zEM0B5BHOFWhMxBiKTajJZFITdEuCU4pt4svA8sb3eNRgt0Tumgqo_4VIuUFVGzNQ8IPoMtvB1OEa4qkM0NF80L9AFXa5D5DtBe3AtnAuEwSJgkzgT5YYUVY6W-xNwVkp6XQfGhfJ0GXxoCdulat8UrNwPqAveE-Wa0VEjav6v1xLqmjoUqHDJKOKXvS4BS4s64dhhngtH-aY4eEhPpfGhr1t0_4oBIwG9tjRuUXoV4vGjvBBQe17VVaj-eih3J6GyhJTwnfVVjkt1ScVUoqFWnVvDwZaykJHeOZ8-S2Q
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBUTjBJeTBsQlJ5YUFDenhW
+            QUYvNjI3eWRxYk1wZWdJMWNtWjU4ZWlyeDFzCmdDSEdmM3JhZi9RTnBZbGozSzRT
+            QjUxTTNHMzcxWXo5RGoxaS9IRXZGdkEKLS0tIEZoMnkvMkx1UFJZQVMzVnpibUZn
+            NGhXU2wxbWRUN2FUbDZYdVhCRnNxUXcK2CbqnzbUxC/x1NIfbY2KIT44nbeuLpxv
+            4I7RD7m0AbKAJ5ZD3KpHBcyHxDxLGBLtb+f4Nvte2jTPFz75eopyaQ==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-01-03T18:11:11Z"
+    mac: ENC[AES256_GCM,data:zH9cVxCSBL9poJSS16C6Mx2S8r2MX6x93nyQUYl+q96cJCP81JJL7ynqp1x/iXa5PUxX9IOwpFlMQMtkrF/iVMzwkq4BodK65/vKF80sUi6gsl3zdg8MaN/O8ACAl1X+ZvSFpkA7CoFw4U4uN338BQOC3X5FkPGvWywCPbUOI2E=,iv:Gv5RCagmwnXi7niKFuUuqHaDAvr2668u3mb/FuUp1W0=,tag:Sr1F2yW4IyiP7Syi9TjYig==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0

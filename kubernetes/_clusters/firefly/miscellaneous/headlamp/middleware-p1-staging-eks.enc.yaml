@@ -1,7 +1,7 @@
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-    name: headlamp-inject-token-staging
+    name: headlamp-inject-token-p1-staging-eks
     namespace: misc
 spec:
     headers:
@@ -18,7 +18,7 @@ sops:
             TXZ1WVc2WEF0RG03TzV0R1pPQmFya0EKC7tpfhDe5pu0V9VprYgVs27CX+u7qA5P
             xZTEg/TF5HtzEonr67CgzNpyp08exMWSDiXmorHXgS4XXRJeJ3n5CQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-01-02T18:39:59Z"
-    mac: ENC[AES256_GCM,data:D+2ifrZYbOTNiUjsKCTs4xPTFtAs/vOV6EXhDr8p5FU05bM1zOWqxPnzQJrFmMQAMf9DR/B2nzjS53k0qfA3mpDE+Run7lv4A4VjBeuQtzhfcUeeRNVz7VQUa6f8IVlUkq8Nfkg0gnPjzxHsmIOClk1I+mrK6WolKw1KI7KFmWk=,iv:NsPrK/l3Kx4emNj8XJ+CDWgVBwZFvAoOKIbvH689lYA=,tag:sNS8JjV0WMV74kQ/uYCxxw==,type:str]
+    lastmodified: "2026-01-03T18:55:27Z"
+    mac: ENC[AES256_GCM,data:qdObnhoL2wDjBwjYrxWF/oT0eeSSUiVngHwiBbyNMPB4UpQNdU/kwPMkguzU6st4j/twIKxni8MBFMsnqo+D1w5BrpQKKZ/qHCwavJ95JGPRwu1jeEAFcB0ksLtRHRUk6SJSfDY1cTne2DA4URkYkWyJabkrGENA1Iu3LZQ3/7Y=,iv:VthlYpULsaESLR7zMUXmxtDru1N402U4GRSI0N5SufA=,tag:35hNo3phwL3zuP7yvSu7Tw==,type:str]
     encrypted_regex: ^(data|stringData)$
     version: 3.11.0

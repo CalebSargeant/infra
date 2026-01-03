@@ -63,7 +63,44 @@ kubectl get secret headlamp-admin-token -n headlamp -o jsonpath='{.data.token}' 
 
 Copy the token output.
 
-### 4. Create a middleware for the cluster
+### 4. Add cluster to kubeconfig secret
+
+Edit the encrypted kubeconfig secret:
+
+```bash
+sops headlamp-kubeconfigs.enc.yaml
+```
+
+Add the new cluster to the `config` key (this is a multi-cluster kubeconfig):
+
+```yaml
+stringData:
+  config: |
+    apiVersion: v1
+    kind: Config
+    clusters:
+    - name: <cluster-name>
+      cluster:
+        server: https://<cluster-api-server>
+        certificate-authority-data: <CA_CERT>
+    # ... existing clusters ...
+    contexts:
+    - name: <cluster-name>
+      context:
+        cluster: <cluster-name>
+        user: headlamp-admin
+    # ... existing contexts ...
+    current-context: main
+    users:
+    - name: headlamp-admin
+      user:
+        token: "<TOKEN_FROM_STEP_3>"
+    # ... existing users (can reuse headlamp-admin) ...
+```
+
+**Note:** You can reuse the same `headlamp-admin` user entry if the user section just has the token. The middleware will inject the correct token based on the path.
+
+### 5. Create a middleware for the cluster
 
 Create `middleware-<cluster-name>.enc.yaml`:
 
@@ -85,7 +122,7 @@ Encrypt it:
 sops --encrypt middleware-<cluster-name>.enc.yaml > middleware-<cluster-name>.enc.yaml.tmp && mv middleware-<cluster-name>.enc.yaml.tmp middleware-<cluster-name>.enc.yaml
 ```
 
-### 5. Update IngressRoute
+### 6. Update IngressRoute
 
 Add a route for the new cluster in `ingressroute.yaml`:
 
@@ -97,13 +134,17 @@ Add a route for the new cluster in `ingressroute.yaml`:
     - name: headlamp
       port: 80
   middlewares:
+    - name: oauth2-errors
+      namespace: misc
+    - name: oauth2-auth
+      namespace: misc
     - name: headlamp-inject-token-<cluster-name>
       namespace: misc
 ```
 
 Place it **before** the catch-all route.
 
-### 6. Update kustomization.yaml
+### 7. Update kustomization.yaml
 
 Add the new middleware:
 
@@ -113,7 +154,7 @@ resources:
   - middleware-<cluster-name>.enc.yaml
 ```
 
-### 7. Commit and push
+### 8. Commit and push
 
 ```bash
 git add middleware-<cluster-name>.enc.yaml ingressroute.yaml kustomization.yaml
@@ -121,7 +162,7 @@ git commit -m "Add <cluster-name> to Headlamp"
 git push
 ```
 
-### 8. Access the cluster
+### 9. Access the cluster
 
 Navigate to `https://headlamp.sargeant.co/c/<cluster-name>`
 
