@@ -17,3 +17,6 @@ patches:
       - op: replace
         path: /metadata/name
         value: homebridge
+      - op: replace
+        path: /spec/valuesFrom/0/name
+        value: homebridge-values
