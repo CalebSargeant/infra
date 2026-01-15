@@ -5,6 +5,8 @@ resources:
   - gotk-sync.yaml
   - kustomizations.yaml
   - helmrepositories.yaml
+  - buxfer-sync.yaml
+  - deskbird-booking.yaml
 components:
   - ../../../_components/resource-profiles/t.nano
   - ../../../_components/node-selectors/pi
