@@ -18,6 +18,8 @@ spec:
           args:
             - tunnel
             - --no-autoupdate
+            - --protocol
+            - quic
             - run
             - --token
             - $(TUNNEL_TOKEN)
