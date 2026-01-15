@@ -4,6 +4,4 @@ metadata:
   name: cloudflared
 resources:
   - ../../../../_base/core/cloudflared
-components:
-  - ../../../../_components/resource-profiles/t.nano
-  - ../../../../_components/node-selectors/all
+
