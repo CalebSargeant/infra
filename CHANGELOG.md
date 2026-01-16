@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v1.1.15 (2026-01-16)
+
+### Bug Fixes
+
+- Add SOPS decryption to buxfer-sync Kustomization
+  ([`a16710b`](https://github.com/CalebSargeant/infra/commit/a16710b70ab188c8da3857657d76dfec50c04bbf))
+
+- Add SOPS decryption to deskbird-booking Kustomization
+  ([`41f0969`](https://github.com/CalebSargeant/infra/commit/41f09690944adfb657295b909d4dcb6cc1ca2f11))
+
+
 ## v1.1.14 (2026-01-16)
 
 
