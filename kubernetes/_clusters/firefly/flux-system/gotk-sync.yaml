@@ -20,7 +20,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1m0s
-  path: ./kubernetes/_clusters/firefly
+  path: ./kubernetes/_clusters/firefly/flux-system
   prune: true
   sourceRef:
     kind: GitRepository
