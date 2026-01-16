@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.1.1 (2026-01-16)
+
+### Bug Fixes
+
+- Update GitRepository URLs for `buxfer-sync` and `deskbird-booking` in Firefly cluster
+  ([`7631042`](https://github.com/CalebSargeant/infra/commit/7631042863aadc97ae4d7ab9c9374f5ef7fd486c))
+
+### Refactoring
+
+- Replace GitRepository configs for `buxfer-sync` and `deskbird-booking` with shared `gitrepos.yaml`
+  ([`c38dab1`](https://github.com/CalebSargeant/infra/commit/c38dab147f09e10a0dec5540c647284d0ad590e7))
+
+
 ## v1.1.0 (2026-01-16)
 
 ### Features
