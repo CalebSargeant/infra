@@ -7,11 +7,9 @@ resources:
   - kustomizations.yaml
   - helmrepositories.yaml
   - ghcr-pull-secret.yaml
+  - github-app-secret.yaml
   - buxfer-sync.yaml
   - deskbird-booking.yaml
-  - deskbird-booking-secret.yaml
-  - deskbird-booking.yaml
-  - github-app-secret.yaml
 components:
   - ../../../_components/resource-profiles/t.nano
   - ../../../_components/node-selectors/pi
