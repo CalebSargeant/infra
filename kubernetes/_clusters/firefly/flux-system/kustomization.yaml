@@ -6,11 +6,8 @@ resources:
   - gitrepos.yaml
   - kustomizations.yaml
   - helmrepositories.yaml
-  - buxfer-sync-secret.yaml
   - buxfer-sync.yaml
-  - deskbird-booking-secret.yaml
   - deskbird-booking.yaml
-  - github-app-secret.yaml
 components:
   - ../../../_components/resource-profiles/t.nano
   - ../../../_components/node-selectors/pi
