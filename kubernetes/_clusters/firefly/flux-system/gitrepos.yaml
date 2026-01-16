@@ -6,11 +6,12 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1m
+  provider: github
   ref:
     branch: main
   secretRef:
-    name: buxfer-sync-deploy-key
-  url: ssh://git@github.com/CalebSargeant/buxfer-sync
+    name: buxfer-sync-github-app
+  url: https://github.com/CalebSargeant/buxfer-sync
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
@@ -19,8 +20,9 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1m
+  provider: github
   ref:
     branch: main
   secretRef:
-    name: deskbird-booking-deploy-key
-  url: ssh://git@github.com/CalebSargeant/deskbird-booking
+    name: buxfer-sync-github-app
+  url: https://github.com/CalebSargeant/deskbird-booking

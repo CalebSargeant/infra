@@ -48,11 +48,6 @@ spec:
         [ci skip]
     push:
       branch: main
-      options:
-        provider: github
-        githubAppAuth:
-          secretRef:
-            name: buxfer-sync-github-app
   update:
     path: "./k8s/overlays/prod"
     strategy: Setters
