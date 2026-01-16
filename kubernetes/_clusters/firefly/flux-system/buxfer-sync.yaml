@@ -45,7 +45,7 @@ spec:
         email: actions@users.noreply.github.com
         name: Flux Bot
       messageTemplate: |-
-        chore: update buxfer-sync image to {{ range .Updated.Images }}{{ println . }}{{ end }}
+        chore: update buxfer-sync image to {{ range .Changed.Images }}{{ println . }}{{ end }}
         
         [ci skip]
     push:
