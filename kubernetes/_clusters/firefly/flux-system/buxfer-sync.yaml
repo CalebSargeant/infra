@@ -1,16 +1,4 @@
 ---
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
-metadata:
-  name: buxfer-sync
-  namespace: flux-system
-spec:
-  interval: 1m
-  provider: github
-  ref:
-    branch: main
-  url: https://github.com/CalebSargeant/buxfer-sync
----
 apiVersion: image.toolkit.fluxcd.io/v1beta2
 kind: ImageRepository
 metadata:

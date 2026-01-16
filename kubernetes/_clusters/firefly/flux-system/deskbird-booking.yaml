@@ -1,16 +1,4 @@
 ---
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
-metadata:
-  name: deskbird-booking
-  namespace: flux-system
-spec:
-  interval: 1m
-  provider: github
-  ref:
-    branch: main
-  url: https://github.com/CalebSargeant/deskbird-booking
----
 apiVersion: image.toolkit.fluxcd.io/v1beta2
 kind: ImageRepository
 metadata:
