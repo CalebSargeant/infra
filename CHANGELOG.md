@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.1.0 (2026-01-16)
+
+### Features
+
+- Update Flux configuration to v2.7.3 in Firefly cluster
+  ([`a37c5c7`](https://github.com/CalebSargeant/infra/commit/a37c5c790f779824236c01894b16776f2e08c65e))
+
+### Refactoring
+
+- Consolidate `buxfer-sync` and `deskbird-booking` Kustomization configs in `kustomizations.yaml`
+  ([`386c388`](https://github.com/CalebSargeant/infra/commit/386c3882fc2cc7d39d20dcc0a525da5f3dacd63d))
+
+
 ## v1.0.4 (2026-01-15)
 
 
