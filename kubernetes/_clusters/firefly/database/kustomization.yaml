@@ -7,3 +7,4 @@ metadata:
 resources:
   - ../../../_base/database/namespace.yaml
   - postgres
+  - mariadb
