@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mariadb
-  namespace: wordpress
+  namespace: database
 spec:
   serviceName: mariadb
   replicas: 1
@@ -31,27 +31,27 @@ spec:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: wordpress-db
-                  key: db-root-password
+                  name: mariadb
+                  key: mariadb-root-password
             - name: MYSQL_DATABASE
               value: "wordpress"
             - name: MYSQL_USER
               valueFrom:
                 secretKeyRef:
-                  name: wordpress-db
-                  key: db-user
+                  name: mariadb
+                  key: wordpress-user
             - name: MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: wordpress-db
-                  key: db-password
+                  name: mariadb
+                  key: wordpress-password
           volumeMounts:
-            - name: wordpress-db
+            - name: mariadb-data
               mountPath: /var/lib/mysql
               # subPath prevents MariaDB from using the volume root,
               # avoiding issues with lost+found and other metadata
               subPath: mysql
       volumes:
-        - name: wordpress-db
+        - name: mariadb-data
           persistentVolumeClaim:
-            claimName: wordpress-db
+            claimName: mariadb
