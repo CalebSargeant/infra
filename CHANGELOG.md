@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.16 (2026-01-18)
+
+### Bug Fixes
+
+- Move MariaDB resources to dedicated database namespace
+  ([`1c063fe`](https://github.com/CalebSargeant/infra/commit/1c063fe41a7bcda66ea84d8db49a3f00381072ed))
+
+
 ## v1.1.15 (2026-01-16)
 
 ### Bug Fixes
