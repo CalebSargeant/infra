@@ -44,6 +44,8 @@ spec:
           volumeMounts:
             - name: wordpress-db
               mountPath: /var/lib/mysql
+              # subPath prevents MariaDB from using the volume root,
+              # avoiding issues with lost+found and other metadata
               subPath: mysql
         - name: wordpress
           image: wordpress:6.7-apache
