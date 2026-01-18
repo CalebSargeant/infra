@@ -1,0 +1,31 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: radarr-config
+  namespace: media
+data:
+  config.xml: |
+    <Config>
+      <BindAddress>*</BindAddress>
+      <Port>7878</Port>
+      <SslPort>9898</SslPort>
+      <EnableSsl>False</EnableSsl>
+      <LaunchBrowser>True</LaunchBrowser>
+      <ApiKey>8e8775a13599406ab89a68df1a5f102e</ApiKey>
+      <AuthenticationMethod>Forms</AuthenticationMethod>
+      <AuthenticationRequired>DisabledForLocalAddresses</AuthenticationRequired>
+      <Branch>master</Branch>
+      <LogLevel>debug</LogLevel>
+      <SslCertPath></SslCertPath>
+      <SslCertPassword></SslCertPassword>
+      <UrlBase></UrlBase>
+      <InstanceName>Radarr</InstanceName>
+      <UpdateMechanism>Docker</UpdateMechanism>
+      <PostgresUser>admin</PostgresUser>
+      <PostgresPassword>s78x7jKMiWWNpdd</PostgresPassword>
+      <PostgresPort>5432</PostgresPort>
+      <PostgresHost>postgres.database.svc.cluster.local</PostgresHost>
+      <PostgresMainDb>radarr-main</PostgresMainDb>
+      <PostgresLogDb>radarr-log</PostgresLogDb>
+    </Config>

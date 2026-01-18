@@ -14,9 +14,11 @@ spec:
     - name: bittorrent-tcp
       protocol: TCP
       port: 55555
-      targetPort: 55555 # BitTorrent TCP
+      targetPort: 55555
+      nodePort: 30555 # BitTorrent TCP - accessible on all nodes
     - name: bittorrent-udp
       protocol: UDP
       port: 55555
-      targetPort: 55555 # BitTorrent UDP
-  type: ClusterIP
+      targetPort: 55555
+      nodePort: 30555 # BitTorrent UDP - accessible on all nodes
+  type: NodePort

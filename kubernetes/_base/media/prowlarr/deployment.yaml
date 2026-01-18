@@ -16,6 +16,7 @@ spec:
       containers:
         - name: prowlarr
           image: linuxserver/prowlarr:latest
+          imagePullPolicy: IfNotPresent
           resources:
             requests:
               memory: "64Mi"
@@ -35,7 +36,13 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: prowlarr
+            - mountPath: /config/config.xml
+              name: prowlarr-config
+              subPath: config.xml
       volumes:
         - name: prowlarr
           persistentVolumeClaim:
             claimName: prowlarr
+        - name: prowlarr-config
+          configMap:
+            name: prowlarr-config
