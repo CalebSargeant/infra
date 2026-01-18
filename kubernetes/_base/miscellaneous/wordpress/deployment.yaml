@@ -28,7 +28,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: wordpress-db
-                  key: db-password
+                  key: db-root-password
             - name: MYSQL_DATABASE
               value: "wordpress"
             - name: MYSQL_USER
@@ -83,4 +83,3 @@ spec:
         - name: wordpress-db
           persistentVolumeClaim:
             claimName: wordpress-db
-      restartPolicy: Always
