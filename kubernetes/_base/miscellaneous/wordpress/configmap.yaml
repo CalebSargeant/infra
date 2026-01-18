@@ -17,10 +17,9 @@ data:
     WordPress with Elementor for Static Site Generation
     ====================================================
 
-    This WordPress deployment includes MariaDB as a database sidecar.
-    Note: While a PostgreSQL instance exists in the cluster, WordPress
-    requires MySQL/MariaDB for full compatibility with Elementor and
-    other plugins.
+    This WordPress deployment uses a MariaDB StatefulSet for the database.
+    The MariaDB instance runs as a separate StatefulSet with stable network
+    identity and persistent storage.
 
     Initial Setup:
     1. Access WordPress at: https://wordpress.sargeant.co

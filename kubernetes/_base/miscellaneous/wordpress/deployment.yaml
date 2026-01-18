@@ -14,39 +14,6 @@ spec:
         app: wordpress
     spec:
       containers:
-        - name: mariadb
-          image: mariadb:11.2
-          resources:
-            requests:
-              memory: "128Mi"
-              cpu: "100m"
-            limits:
-              memory: "512Mi"
-              cpu: "500m"
-          env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: wordpress-db
-                  key: db-root-password
-            - name: MYSQL_DATABASE
-              value: "wordpress"
-            - name: MYSQL_USER
-              valueFrom:
-                secretKeyRef:
-                  name: wordpress-db
-                  key: db-user
-            - name: MYSQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: wordpress-db
-                  key: db-password
-          volumeMounts:
-            - name: wordpress-db
-              mountPath: /var/lib/mysql
-              # subPath prevents MariaDB from using the volume root,
-              # avoiding issues with lost+found and other metadata
-              subPath: mysql
         - name: wordpress
           image: wordpress:6.7-apache
           resources:
@@ -60,7 +27,7 @@ spec:
             - containerPort: 80
           env:
             - name: WORDPRESS_DB_HOST
-              value: "127.0.0.1:3306"
+              value: "mariadb.wordpress.svc.cluster.local:3306"
             - name: WORDPRESS_DB_USER
               valueFrom:
                 secretKeyRef:
@@ -82,6 +49,3 @@ spec:
         - name: wordpress-data
           persistentVolumeClaim:
             claimName: wordpress-data
-        - name: wordpress-db
-          persistentVolumeClaim:
-            claimName: wordpress-db

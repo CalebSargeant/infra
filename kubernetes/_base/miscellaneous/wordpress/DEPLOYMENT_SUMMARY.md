@@ -13,8 +13,10 @@ A complete WordPress deployment for the Firefly cluster with the following featu
 ### Components Created
 
 #### Kubernetes Manifests (`kubernetes/_base/miscellaneous/wordpress/`)
-- `deployment.yaml` - WordPress + MariaDB sidecar containers
-- `service.yaml` - ClusterIP service on port 8080
+- `deployment.yaml` - WordPress container
+- `statefulset.yaml` - MariaDB StatefulSet
+- `service.yaml` - ClusterIP service for WordPress
+- `mariadb-service.yaml` - Headless service for MariaDB
 - `ingress.yaml` - HTTPS access via wordpress.sargeant.co
 - `pv.yaml` - 10Gi for WordPress files, 5Gi for database
 - `pvc.yaml` - Persistent volume claims
@@ -32,13 +34,13 @@ A complete WordPress deployment for the Firefly cluster with the following featu
 
 ### Database Decision
 
-**Current Implementation:** MariaDB 11.2 as sidecar container
+**Current Implementation:** MariaDB 11.2 as StatefulSet
 
 **Rationale:**
 - WordPress and Elementor are designed for MySQL/MariaDB
 - Better plugin compatibility
 - More reliable for static site export
-- Self-contained deployment
+- StatefulSet provides stable network identity and persistent storage
 
 **PostgreSQL Alternative:** 
 A Dockerfile and documentation are provided for using the existing PostgreSQL StatefulSet if needed.
@@ -96,7 +98,7 @@ Make sure these directories exist on the host or adjust the hostPath in `pv.yaml
 - Requests: 250m CPU, 256Mi RAM
 - Limits: 1000m CPU, 1Gi RAM
 
-### MariaDB Container
+### MariaDB StatefulSet
 - Requests: 100m CPU, 128Mi RAM
 - Limits: 500m CPU, 512Mi RAM
 

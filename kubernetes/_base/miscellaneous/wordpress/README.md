@@ -6,25 +6,27 @@ This directory contains Kubernetes manifests for deploying WordPress with Elemen
 
 WordPress is configured with:
 - **WordPress 6.7** (Apache variant)
-- **MariaDB 11.2** database (sidecar container)
+- **MariaDB 11.2** database (StatefulSet)
 - **Elementor** support for visual page building
 - **Static site export** capability
 
-## Database Decision
+## Database Architecture
 
-While the cluster has a PostgreSQL StatefulSet, this deployment uses MariaDB because:
+This deployment uses a MariaDB StatefulSet for the database because:
 
 1. **WordPress Compatibility**: WordPress is designed for MySQL/MariaDB
 2. **Plugin Support**: Elementor and other plugins expect MySQL
-3. **Reliability**: Using PG4WP plugin for PostgreSQL adds complexity and potential compatibility issues
-4. **Best Practices**: MariaDB sidecar keeps the deployment self-contained
+3. **Reliability**: MariaDB provides stable database support
+4. **StatefulSet Benefits**: Ensures stable network identity and persistent storage
 
-The MariaDB instance runs as a sidecar container in the WordPress pod, with its data persisted to a PVC.
+The MariaDB instance runs as a separate StatefulSet with its own service and persistent volume.
 
 ## Components
 
-- `deployment.yaml` - WordPress + MariaDB containers
-- `service.yaml` - ClusterIP service for internal access
+- `deployment.yaml` - WordPress container
+- `statefulset.yaml` - MariaDB StatefulSet
+- `service.yaml` - ClusterIP service for WordPress
+- `mariadb-service.yaml` - Headless service for MariaDB StatefulSet
 - `ingress.yaml` - External HTTPS access via Traefik
 - `pv.yaml` - Persistent volumes for WordPress files and database
 - `pvc.yaml` - Persistent volume claims
@@ -63,7 +65,7 @@ spec:
     - host: your-domain.com
 ```
 
-To change resource limits, edit `deployment.yaml` resources sections.
+To change resource limits, edit `deployment.yaml` and `statefulset.yaml` resources sections.
 
 ## Security
 
