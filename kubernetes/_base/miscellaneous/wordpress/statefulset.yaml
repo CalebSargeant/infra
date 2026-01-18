@@ -46,12 +46,12 @@ spec:
                   name: wordpress-db
                   key: db-password
           volumeMounts:
-            - name: mariadb-data
+            - name: wordpress-db
               mountPath: /var/lib/mysql
               # subPath prevents MariaDB from using the volume root,
               # avoiding issues with lost+found and other metadata
               subPath: mysql
       volumes:
-        - name: mariadb-data
+        - name: wordpress-db
           persistentVolumeClaim:
             claimName: wordpress-db
