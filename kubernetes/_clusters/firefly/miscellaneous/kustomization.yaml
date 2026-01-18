@@ -9,3 +9,4 @@ resources:
   - rancher
   - headlamp
   - ../../../_base/miscellaneous/nextcloud
+  - ../../../_base/miscellaneous/wordpress

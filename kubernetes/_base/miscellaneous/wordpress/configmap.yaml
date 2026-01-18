@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wordpress-config
+  namespace: wordpress
+data:
+  # PHP configuration
+  php.ini: |
+    upload_max_filesize = 64M
+    post_max_size = 64M
+    memory_limit = 256M
+    max_execution_time = 300
+    max_input_vars = 3000
+
+  # WordPress setup and usage guide
+  README.txt: |
+    WordPress with Elementor for Static Site Generation
+    ====================================================
+
+    This WordPress deployment includes MariaDB as a database sidecar.
+    Note: While a PostgreSQL instance exists in the cluster, WordPress
+    requires MySQL/MariaDB for full compatibility with Elementor and
+    other plugins.
+
+    Initial Setup:
+    1. Access WordPress at: https://wordpress.sargeant.co
+    2. Complete the WordPress installation wizard
+    3. Set up admin credentials
+
+    Installing Elementor:
+    1. Log into WordPress admin dashboard
+    2. Navigate to Plugins -> Add New
+    3. Search for "Elementor"
+    4. Install and activate "Elementor" (free version)
+    5. (Optional) Install "Elementor Pro" if you have a license
+
+    Creating Multiple Websites:
+    - Use WordPress Multisite feature, OR
+    - Create multiple pages/posts with different designs
+    - Use Elementor templates for consistency
+
+    Exporting Static Sites:
+    1. Install "Simply Static" plugin:
+       - Go to Plugins -> Add New
+       - Search for "Simply Static"
+       - Install and activate
+    2. Configure Simply Static:
+       - Go to Simply Static -> Settings
+       - Choose "Local Directory" or "ZIP Archive" as delivery method
+       - Set destination directory
+    3. Generate static site:
+       - Go to Simply Static -> Generate
+       - Download the generated static HTML/CSS/JS files
+    4. Host separately on any static hosting service
+
+    Alternative Static Export Plugins:
+    - WP2Static (more advanced features)
+    - Static HTML Output Plugin
+    - WP Static HTML Output
+
+    Tips:
+    - Design your site completely before exporting
+    - Test the exported static site locally first
+    - Re-export whenever you make changes
+    - Keep the WordPress instance running for future updates
