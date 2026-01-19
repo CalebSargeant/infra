@@ -1,0 +1,141 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: slack-bot-token
+    namespace: flux-system
+stringData:
+    token: ENC[AES256_GCM,data:h5v0YATKwEU=,iv:SZfiN8UxopJ3g/ul8fYrFkZYt4HGaayG1TNz8DljMBE=,tag:9KRX16kC3/KsIINupZW6Og==,type:str]
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBGNzdiWk95NnlzMFBLRGlx
+            bm1SOVZqOHh0Wnh1NE5FVEpEZTFWSmpTMkJvCjdhTnhSai9GMi9WZTdtVDFoOGZS
+            UVBtZEgvYmRzclhNM1JTanU5Y21HUUUKLS0tIHNveFZPaklkYXdUOFBnN0tTc1Qv
+            SisvbUZSaWllMTZkaExoekE2eW0xS3MKeDTYgzktQFXNBNbtkyLs4LZrPUNMIS55
+            ciCHhsfwvBZcORd8R+BL/QdDWBsTXQWEJuRbiImDQ2m4mhFFVj3Q4Q==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-01-19T18:59:58Z"
+    mac: ENC[AES256_GCM,data:6MqU63oo6ZDWJJhPsd1tFzDDiGubdtBc91/2l0LT6Ic0WoUwnyoTWoMEVB+pK0XtMJyWfzd5ZUzBr7P2eQlYf2JAinFtZVbuPFnvhW6huEIF8MWKIkcIqt+WMWUoJWzHd2Z20u4HvXHhL0us2pXJtq00TRBdwewpAH8WZ7YVe/Q=,iv:+H0c3qUK2FsNfIY5tcbQ1NW1BzSY1vZdHFXcFKEV/ZU=,tag:0rv0Ujp4CLMPGqb/nAGPgQ==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+    name: slack-success
+    namespace: flux-system
+spec:
+    type: slackbot
+    channel: engineering-info
+    secretRef:
+        name: slack-bot-token
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBGNzdiWk95NnlzMFBLRGlx
+            bm1SOVZqOHh0Wnh1NE5FVEpEZTFWSmpTMkJvCjdhTnhSai9GMi9WZTdtVDFoOGZS
+            UVBtZEgvYmRzclhNM1JTanU5Y21HUUUKLS0tIHNveFZPaklkYXdUOFBnN0tTc1Qv
+            SisvbUZSaWllMTZkaExoekE2eW0xS3MKeDTYgzktQFXNBNbtkyLs4LZrPUNMIS55
+            ciCHhsfwvBZcORd8R+BL/QdDWBsTXQWEJuRbiImDQ2m4mhFFVj3Q4Q==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-01-19T18:59:58Z"
+    mac: ENC[AES256_GCM,data:6MqU63oo6ZDWJJhPsd1tFzDDiGubdtBc91/2l0LT6Ic0WoUwnyoTWoMEVB+pK0XtMJyWfzd5ZUzBr7P2eQlYf2JAinFtZVbuPFnvhW6huEIF8MWKIkcIqt+WMWUoJWzHd2Z20u4HvXHhL0us2pXJtq00TRBdwewpAH8WZ7YVe/Q=,iv:+H0c3qUK2FsNfIY5tcbQ1NW1BzSY1vZdHFXcFKEV/ZU=,tag:0rv0Ujp4CLMPGqb/nAGPgQ==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+    name: slack-errors
+    namespace: flux-system
+spec:
+    type: slackbot
+    channel: engineering-alerts
+    secretRef:
+        name: slack-bot-token
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBGNzdiWk95NnlzMFBLRGlx
+            bm1SOVZqOHh0Wnh1NE5FVEpEZTFWSmpTMkJvCjdhTnhSai9GMi9WZTdtVDFoOGZS
+            UVBtZEgvYmRzclhNM1JTanU5Y21HUUUKLS0tIHNveFZPaklkYXdUOFBnN0tTc1Qv
+            SisvbUZSaWllMTZkaExoekE2eW0xS3MKeDTYgzktQFXNBNbtkyLs4LZrPUNMIS55
+            ciCHhsfwvBZcORd8R+BL/QdDWBsTXQWEJuRbiImDQ2m4mhFFVj3Q4Q==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-01-19T18:59:58Z"
+    mac: ENC[AES256_GCM,data:6MqU63oo6ZDWJJhPsd1tFzDDiGubdtBc91/2l0LT6Ic0WoUwnyoTWoMEVB+pK0XtMJyWfzd5ZUzBr7P2eQlYf2JAinFtZVbuPFnvhW6huEIF8MWKIkcIqt+WMWUoJWzHd2Z20u4HvXHhL0us2pXJtq00TRBdwewpAH8WZ7YVe/Q=,iv:+H0c3qUK2FsNfIY5tcbQ1NW1BzSY1vZdHFXcFKEV/ZU=,tag:0rv0Ujp4CLMPGqb/nAGPgQ==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+    name: success-notifications
+    namespace: flux-system
+spec:
+    providerRef:
+        name: slack-success
+    eventSeverity: info
+    eventSources:
+        - kind: Kustomization
+          name: '*'
+        - kind: HelmRelease
+          name: '*'
+    inclusionList:
+        - ^Reconciliation finished.*
+        - ^Health check passed.*
+        - ^Helm install succeeded.*
+        - ^Helm upgrade succeeded.*
+    suspend: false
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBGNzdiWk95NnlzMFBLRGlx
+            bm1SOVZqOHh0Wnh1NE5FVEpEZTFWSmpTMkJvCjdhTnhSai9GMi9WZTdtVDFoOGZS
+            UVBtZEgvYmRzclhNM1JTanU5Y21HUUUKLS0tIHNveFZPaklkYXdUOFBnN0tTc1Qv
+            SisvbUZSaWllMTZkaExoekE2eW0xS3MKeDTYgzktQFXNBNbtkyLs4LZrPUNMIS55
+            ciCHhsfwvBZcORd8R+BL/QdDWBsTXQWEJuRbiImDQ2m4mhFFVj3Q4Q==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-01-19T18:59:58Z"
+    mac: ENC[AES256_GCM,data:6MqU63oo6ZDWJJhPsd1tFzDDiGubdtBc91/2l0LT6Ic0WoUwnyoTWoMEVB+pK0XtMJyWfzd5ZUzBr7P2eQlYf2JAinFtZVbuPFnvhW6huEIF8MWKIkcIqt+WMWUoJWzHd2Z20u4HvXHhL0us2pXJtq00TRBdwewpAH8WZ7YVe/Q=,iv:+H0c3qUK2FsNfIY5tcbQ1NW1BzSY1vZdHFXcFKEV/ZU=,tag:0rv0Ujp4CLMPGqb/nAGPgQ==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+    name: error-notifications
+    namespace: flux-system
+spec:
+    providerRef:
+        name: slack-errors
+    eventSeverity: error
+    eventSources:
+        - kind: Kustomization
+          name: '*'
+        - kind: HelmRelease
+          name: '*'
+    suspend: false
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBGNzdiWk95NnlzMFBLRGlx
+            bm1SOVZqOHh0Wnh1NE5FVEpEZTFWSmpTMkJvCjdhTnhSai9GMi9WZTdtVDFoOGZS
+            UVBtZEgvYmRzclhNM1JTanU5Y21HUUUKLS0tIHNveFZPaklkYXdUOFBnN0tTc1Qv
+            SisvbUZSaWllMTZkaExoekE2eW0xS3MKeDTYgzktQFXNBNbtkyLs4LZrPUNMIS55
+            ciCHhsfwvBZcORd8R+BL/QdDWBsTXQWEJuRbiImDQ2m4mhFFVj3Q4Q==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-01-19T18:59:58Z"
+    mac: ENC[AES256_GCM,data:6MqU63oo6ZDWJJhPsd1tFzDDiGubdtBc91/2l0LT6Ic0WoUwnyoTWoMEVB+pK0XtMJyWfzd5ZUzBr7P2eQlYf2JAinFtZVbuPFnvhW6huEIF8MWKIkcIqt+WMWUoJWzHd2Z20u4HvXHhL0us2pXJtq00TRBdwewpAH8WZ7YVe/Q=,iv:+H0c3qUK2FsNfIY5tcbQ1NW1BzSY1vZdHFXcFKEV/ZU=,tag:0rv0Ujp4CLMPGqb/nAGPgQ==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0
