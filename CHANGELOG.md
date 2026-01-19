@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.20 (2026-01-19)
+
+### Bug Fixes
+
+- Add Slack notifications to Firefly cluster
+  ([`966df5e`](https://github.com/CalebSargeant/infra/commit/966df5e48ee17e70e8734263705bf5f197349dfc))
+
+
 ## v1.1.19 (2026-01-18)
 
 
