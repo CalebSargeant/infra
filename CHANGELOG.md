@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.9.0 (2026-01-20)
+
+### Features
+
+- Update encrypted email data and last modified timestamp in configuration
+  ([`eddd0fa`](https://github.com/CalebSargeant/infra/commit/eddd0fafaf8b9870b9a493491b60ddb34c417f9c))
+
+
 ## v1.8.0 (2026-01-20)
 
 
