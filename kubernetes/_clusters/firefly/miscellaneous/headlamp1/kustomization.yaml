@@ -6,17 +6,12 @@ resources:
   - serviceaccount.yaml
   - ../../../../_base/_helm-releases/headlamp.yaml
   - ingressroute.yaml
-  - middleware.enc.yaml
   - middleware-p1-prod-eks.enc.yaml
   - middleware-p1-staging-eks.enc.yaml
-  - middleware-pr-nonprod-aks.enc.yaml
-  - middleware-oauth2.yaml
-  - middleware-errors.yaml
   - headlamp-kubeconfigs.enc.yaml
   - oauth2-proxy.yaml
   - oauth2-proxy-secret.enc.yaml
   - oauth2-proxy-emails.enc.yaml
-  - auth-redirect.yaml
 #components:
 #  - ../../../../_components/node-selectors/pi
 #  - ../../../../_components/ingress-standards/sargeant.co
@@ -28,4 +23,4 @@ patches:
     patch: |-
       - op: replace
         path: /metadata/name
-        value: headlamp
+        value: headlamp1

@@ -25,7 +25,7 @@ spec:
         - --whitelist-domain=.sargeant.co
         - --reverse-proxy=false
         - --skip-provider-button=true
-        - --redirect-url=https://headlamp.sargeant.co/oauth2/callback
+        - --redirect-url=https://headlamp1.sargeant.co/oauth2/callback
         env:
         - name: OAUTH2_PROXY_CLIENT_ID
           valueFrom:

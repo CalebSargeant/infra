@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: headlamp1-values
+  namespace: misc
+data:
+  values.yaml: |
+    config:
+      baseURL: ""
+      inCluster: true
+      enableDynamicClusters: true
+
+    serviceAccount:
+      create: false
+      name: headlamp1-admin
+
+    ingress:
+      enabled: false
+
+    nodeSelector:
+      type: pi
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+
+    volumeMounts:
+      - name: kubeconfigs
+        mountPath: /home/headlamp/.config/Headlamp/kubeconfigs
+        readOnly: true
+
+    volumes:
+      - name: kubeconfigs
+        secret:
+          secretName: headlamp1-kubeconfigs

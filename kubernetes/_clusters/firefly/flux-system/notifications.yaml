@@ -80,6 +80,7 @@ metadata:
     name: success-notifications
     namespace: flux-system
 spec:
+    summary: "🚀 Firefly Cluster Deployment"
     providerRef:
         name: slack-success
     eventSeverity: info
@@ -90,7 +91,6 @@ spec:
           name: '*'
     inclusionList:
         - ^Reconciliation finished.*
-        - ^Health check passed.*
         - ^Helm install succeeded.*
         - ^Helm upgrade succeeded.*
     suspend: false
@@ -140,3 +140,37 @@ sops:
     mac: ENC[AES256_GCM,data:p9LcNpXV3hiKP8ktzwkzlV7uTPM5xsf4faGXpHgLWv9/3PSH92KHFLPwPwk3mws0YhYbD/h22Ivo+5N0QzJZ5a1CareVPArVtsoenJJ/F4eq7SO+T9KiwnQhUO7BY1O75RZ6NEI2OPZkanMMY2VVk6tI0IKYk57xs989+8ESHTE=,iv:8vg5YV74r8V6gkAuWw3uQOfEWM1kt/3/s0T4QsvAf6U=,tag:YUlSfHKvtFLME7bKtp3qQA==,type:str]
     encrypted_regex: ^(data|stringData)$
     version: 3.11.0
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+    name: github-webhook
+    namespace: flux-system
+spec:
+    type: githubdispatch
+    address: https://github.com/CalebSargeant/infra
+    secretRef:
+        name: github-webhook-token
+---
+apiVersion: v1
+kind: Secret
+metadata:
+    name: github-webhook-token
+    namespace: flux-system
+stringData:
+    token: ghp_YOUR_GITHUB_TOKEN_HERE  # needs repo scope
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+    name: github-deployment-notifications
+    namespace: flux-system
+spec:
+    providerRef:
+        name: github-webhook
+    eventSeverity: info
+    eventSources:
+        - kind: Kustomization
+          name: '*'
+    inclusionList:
+        - ^Reconciliation finished.*
