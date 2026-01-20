@@ -7,6 +7,5 @@ metadata:
 resources:
   - ../../../_base/miscellaneous/namespace.yaml
   - headlamp
-  - headlamp1
   - ../../../_base/miscellaneous/nextcloud
   - ../../../_base/miscellaneous/wordpress
