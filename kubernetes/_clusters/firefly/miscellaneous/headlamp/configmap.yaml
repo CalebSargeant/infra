@@ -8,7 +8,7 @@ data:
     config:
       baseURL: ""
       inCluster: true
-      enableDynamicClusters: true
+      enableDynamicClusters: false
 
     serviceAccount:
       create: false
