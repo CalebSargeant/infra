@@ -5,19 +5,19 @@ metadata:
     namespace: misc
 type: Opaque
 stringData:
-    emails.txt: ENC[AES256_GCM,data:/hSrTHdUjdaMpymYjbvGRjhvndevvwM70Fkvb3wOuBAJPIu6RMJZFpghTT8kFziEc09nzgebWWduFuDdqF53rvlG24d+dfQjuwIUuqpnBS3gzKcqDQ==,iv:Gi4F4xkTRzUwFvGH2ValCgcwD5IDV1hvWOIwC4WlHCI=,tag:NxNL3nx/pCMw4XmcFZ+Nmw==,type:str]
+    emails.txt: ENC[AES256_GCM,data:VSA9FvnYoQkQyIVxqO8gKfwCGJjr,iv:LhW3w1sILv/Rw7nwMFl6hLu7h2uRFIbcjdBIcvPUg68=,tag:87xY8FxINHZPSekup+AwfQ==,type:str]
 sops:
     age:
         - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
           enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAwQm9GWXdYUjNQN2ovWEJV
-            YlNwSXJ1bFJ3QkxXT2FoenNHQzcvOHJ0SUE4CkpDb0g3SHk4VWlDNHZ6SWNuWDly
-            SUY3RERqdEViRHgxMVh2akM1dWxJcGsKLS0tIHE0dDJPL2cxVXBDTnVseVZqRXNY
-            T2d3MDBZdTl1dFlvQlVueE5WekJhNGcKKQsZ205eDYOD/0JG6F8YmvkMnMoum0ii
-            AMCl6Ljzm5mRRQQE2tTH1P7F1wsOeArvb4um5FzfZBkx205+enOVKA==
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBVY0ppakxxdXFWWEhsbmRp
+            d1JsdW9GNHE2UVNLYTViTVZvM3lvdURHS0F3Ck9xNkFVbTZ0cnh1T0UxRVNPeExK
+            QllwQ0tEdWNQTHVqdG9vR0M2T1V3Z1EKLS0tIExWQkw5d1p2M0RTWDhGTHNHV3Rt
+            L01nWGdvTVhkSUcwWEhPNGZXOEpLTEEKl4CLLN6RE448G7sY4PMnRChCNbnj432x
+            O1Ey/NnZuLRbn2F0ReU/mu0GMu8M7Dep2wdqWLgsx+K7b6ozBR7txg==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-01-20T20:03:01Z"
-    mac: ENC[AES256_GCM,data:DoHR7a/FMALHzwVNerDmPsh3MOjkN21S3HJkfViIL1A0z2Xz8l1qUhyOkbReOtbJVHjn0rQ3GCqqUp7RKYR8hO00XpjrB3NMaLFyRyfyaCgB8naWpKCvZ5tAvrEPJca7VNdTtJ9Z2sMjBUo8VCxQp+se17/napNcZve4D2VokEA=,iv:wSBuKd0MhuAdE1l04SmupR2EiF61ZiCO7xxgiQbD8Kk=,tag:jcK3QayW6y5sa9aPVrJcJA==,type:str]
+    lastmodified: "2026-01-20T20:43:35Z"
+    mac: ENC[AES256_GCM,data:Gpg3zV7Rf9IKblQ91dYgpVVDIfJclj//4YFar6usKPyJhKIzGsWWWC3JQwvjBSsnRMjFjUUO5hWhVxtqt0A5nx5PboCxPFWPY62dlNyGtAc5mlxP4uQWofDDV//myZQSY81LHjUqFd9oiBLqmj2GOSatR0voiUJAeQEN0mRTwHo=,iv:dQjpf/Zb/pBI1y962zkm/xWQKyWRV2KofdxCWR+F380=,tag:41PL3R6MQ4MonqT1DueYQQ==,type:str]
     encrypted_regex: ^(data|stringData)$
     version: 3.11.0

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: oauth2-proxy-p1-emails
+    namespace: misc
+type: Opaque
+stringData:
+    emails.txt: ENC[AES256_GCM,data:WwrEiEKOI7Qw1+8PCQzWy35vFgY7YcDR9oVjp1pbj29iidoerd/cyTtNdAWg78aaeCHMKOJLlkxrqv43J4VxRA==,iv:Om1iQ402F+tn4Llex0WDGcN7NiMesh1PaLZz2y15d88=,tag:+Hyi4VlLau1AgdGk6j5uIg==,type:str]
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBJTUpwbzg0QVBtMjNjK0xa
+            OEovVVM0dDdNejhzSkY3Qm14WXh6azUzU3hNCmRnek9JVHFIYjZ5ZUh3cHk2bnpU
+            ZEpDWGpmZDM0SWFuWjNqSXVMdG14dDgKLS0tIGhBZU1icFhUSnFMTitkcGpabTB2
+            YnZITncwOVR5K2xQcjI1cFRqcWxCQ00KgvM4mbVOcMGNezDuc+sz0b5ayoJK/ZVG
+            0CV/nfW6Mi9Yu4JSes/A7xyzH3ej53DnNj3D9Sy+HBLFkiCNz1Avgw==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-01-20T20:43:46Z"
+    mac: ENC[AES256_GCM,data:jThs6JZ6wXaZam49fYyYl7SB0lXIwXk03iDVt8fzwEqYQXyJZ1cq9v6rRkP3xNAR12ZHUTnQmnLuLG3FFocfo69EOHwnogXzIJrewQJJzhIADF3ZNuO1qBKT5n1uKctrftJtL/4r0PNUF5M9V2VObeQGmpw6TZ0ZDT/FvtEApjA=,iv:lrCeMF3FmaazfGUPoM8rJ+NceQpfyMt+Gcf/CSuBXoU=,tag:rIFBi4uJxxbuaO2Mdysmug==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0
