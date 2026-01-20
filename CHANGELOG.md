@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.7.0 (2026-01-20)
+
+### Features
+
+- Add OAuth2 middleware for error handling and authentication
+  ([`3d4b778`](https://github.com/CalebSargeant/infra/commit/3d4b77894a4962e45c5db484d9683bedcebc7e54))
+
+
 ## v1.6.0 (2026-01-20)
 
 
