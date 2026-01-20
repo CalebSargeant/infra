@@ -78,5 +78,16 @@ spec:
           namespace: misc
         - name: headlamp-inject-token
           namespace: misc
+    - match: Host(`headlamp.sargeant.co`)
+      kind: Rule
+      priority: 5
+      services:
+        - name: headlamp
+          port: 80
+      middlewares:
+        - name: oauth2-errors
+          namespace: misc
+        - name: oauth2-auth
+          namespace: misc
   tls:
     secretName: headlamp-tls
