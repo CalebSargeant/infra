@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.10.0 (2026-01-20)
+
+### Features
+
+- Add init container for Headlamp plugins and configure volume mounts
+  ([`8b80db9`](https://github.com/CalebSargeant/infra/commit/8b80db91ebc0961b8e0ebd02923f2761ec09f481))
+
+
 ## v1.9.0 (2026-01-20)
 
 ### Features
