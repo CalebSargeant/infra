@@ -6,6 +6,8 @@ resources:
   - serviceaccount.yaml
   - ../../../../_base/_helm-releases/headlamp.yaml
   - ingressroute.yaml
+  - middleware-oauth2.yaml
+  - middleware-errors.yaml
   - middleware-p1-prod-eks.enc.yaml
   - middleware-p1-staging-eks.enc.yaml
   - headlamp-kubeconfigs.enc.yaml
