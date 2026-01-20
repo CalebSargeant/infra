@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: headlamp1-oauth2-proxy-emails
+    namespace: misc
+type: Opaque
+stringData:
+    emails.txt: ENC[AES256_GCM,data:JTkDBOaxeAZ/SRYMVv306ymbt9Qw0lHhJf3/F6RMW1UKAPiUhJAqbgsBoprr4EMdVI8HW4zgm6IaYrFZBNru3Ve7,iv:zquigfgvpt9YwKzhlarE2O54AivlKiQ19JWMNYmERWo=,tag:/J5SmiIV8vNADgTdnKeGew==,type:str]
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBiYW1kR3o3ZkU2eDk4MnFn
+            eEhybnBBTXhycWkybm0zSzg0RXBSWWNYVm53Cm1IeG1IeXJlckhEdlhXSURhTXYv
+            bUp1VlIwNG5FbXFDVTZLYzZmYm1oOWsKLS0tIFR1NUh3M2ZzMjJIQnBUYVp2Y3l3
+            M2V5K3hUMUs5ME51OE9VeW12WFFtV2cKmnc5KPniOb40Gpf+8K60R9HRLZg0FWs4
+            6JEdFpCXg9T91mojLASE/EwisGvUMyizD2qEnZWJXp3PaBw0CCQ/rQ==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-01-20T17:47:31Z"
+    mac: ENC[AES256_GCM,data:Ev+iHtOcOb5vtBtxJvCFMHpTJ8vxJGP0Lax1q9HaYLsaNrOdCdqRRp6quXpUvfcKoPJsiy/r5/SzuD/RByPlHefc+Imk3RWIpgrcGOAfyhZBPHyhL4U8/VepHBOYgyxgw+gc1cly+I/D6O4h94rq2CALzrnyjERixP5FCvRYxsE=,iv:aH+cV6ma47Qegx5YmfiT8CqAL1R2UNWL5bg8yrw2LV8=,tag:cDbDweSMB2e69LaeIJO3FQ==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0

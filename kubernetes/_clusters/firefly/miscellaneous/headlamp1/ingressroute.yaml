@@ -11,7 +11,7 @@ spec:
       kind: Rule
       priority: 200
       services:
-        - name: oauth2-proxy
+        - name: headlamp1-oauth2-proxy
           port: 4180
     - match: Host(`headlamp1.sargeant.co`) && (PathPrefix(`/c/p1-prod-eks`) || PathPrefix(`/clusters/p1-prod-eks`))
       kind: Rule

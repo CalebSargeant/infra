@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: oauth2-proxy
+  name: headlamp1-oauth2-proxy
   namespace: misc
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: oauth2-proxy
+      app: headlamp1-oauth2-proxy
   template:
     metadata:
       labels:
-        app: oauth2-proxy
+        app: headlamp1-oauth2-proxy
     spec:
       containers:
       - name: oauth2-proxy
@@ -30,17 +30,17 @@ spec:
         - name: OAUTH2_PROXY_CLIENT_ID
           valueFrom:
             secretKeyRef:
-              name: oauth2-proxy
+              name: headlamp1-oauth2-proxy
               key: client-id
         - name: OAUTH2_PROXY_CLIENT_SECRET
           valueFrom:
             secretKeyRef:
-              name: oauth2-proxy
+              name: headlamp1-oauth2-proxy
               key: client-secret
         - name: OAUTH2_PROXY_COOKIE_SECRET
           valueFrom:
             secretKeyRef:
-              name: oauth2-proxy
+              name: headlamp1-oauth2-proxy
               key: cookie-secret
         ports:
         - containerPort: 4180
@@ -59,16 +59,16 @@ spec:
       volumes:
       - name: emails
         secret:
-          secretName: oauth2-proxy-emails
+          secretName: headlamp1-oauth2-proxy-emails
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: oauth2-proxy
+  name: headlamp1-oauth2-proxy
   namespace: misc
 spec:
   selector:
-    app: oauth2-proxy
+    app: headlamp1-oauth2-proxy
   ports:
   - port: 4180
     targetPort: 4180
