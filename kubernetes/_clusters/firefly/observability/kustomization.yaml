@@ -10,6 +10,7 @@ components:
   - ../../../_components/resource-profiles/m.large
   - ../../../_components/node-selectors/mini
 resources:
+  - ../../../_base/observability/namespace.yaml
   # Core observability stack
   - ../../../_base/observability/kube-prometheus-stack
   - ../../../_base/observability/thanos-query
