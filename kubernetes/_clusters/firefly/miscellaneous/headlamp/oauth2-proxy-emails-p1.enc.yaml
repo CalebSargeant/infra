@@ -5,7 +5,7 @@ metadata:
     namespace: misc
 type: Opaque
 stringData:
-    emails.txt: ENC[AES256_GCM,data:MRWyvKC9y/3WqrUoKUeZTqMutpC7oSvSY2o2btj/49y/Fyj2VROUuZ/5XDBXD4XaYm01fs+qPfmz6fwsjTentDU=,iv:SvEiWBKKhiO790gVq5llZygiVzjbbtpqmbOjZGmwCgo=,tag:++ohBVdPhE7fGLifeStCpw==,type:str]
+    emails.txt: ENC[AES256_GCM,data:Fzj5wlQvKmMpj+li0DXjvz3CgVwrVwu3EpvcY5hSwIP6Aj34TT8EbHA8q2emJEo+4gCUlbBbVuqoAxLxDq+Rnjdlw1Iyncg6DN/cCu+4OxyFyppFdu3ORa2A2w==,iv:/NZU5mgOKGl+Hu0Ov2L/2PXQwh9bIyWQPtMAfq5SVxs=,tag:tSo3gOfBOzYZ8mOu5wCJdw==,type:str]
 sops:
     age:
         - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
@@ -17,7 +17,7 @@ sops:
             YnZITncwOVR5K2xQcjI1cFRqcWxCQ00KgvM4mbVOcMGNezDuc+sz0b5ayoJK/ZVG
             0CV/nfW6Mi9Yu4JSes/A7xyzH3ej53DnNj3D9Sy+HBLFkiCNz1Avgw==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-01-20T21:08:55Z"
-    mac: ENC[AES256_GCM,data:klJRu7pFM2pq4AsGeiXgqjd+x2If3zEJqXGmQxu/NIY73CawEfUhbmXhpBUImFDxtFImBYsJ0XtSok39pSnZUs4QpBnWhA6GPbWamab/IOrhxg13+XzZP5Rv1Jwqsozghk9BfcTfQYYsSvimDo7qC0l41we7smqaWrIHV4d8iOo=,iv:0SX5Q39Mi/XQMOIrjjdHFFh0WZiazEhWnwdKPYfevKI=,tag:d5FuTS4iWGIsuIYjsCGycQ==,type:str]
+    lastmodified: "2026-01-21T14:15:10Z"
+    mac: ENC[AES256_GCM,data:Vr5h5es6YCXjbyAoqDkM+thcQ7BI1Dcg0HnhTnbWrpqQKmjWlkFqis7qgMK9H7eqHxgg0Qd1Uuwc2jhoEo95IAALrP+AZI/ZPDKgVHrcS7KeRhTwRA3BqbQmJR06NBjQBvkBzNkJ1asOL+nxnErf9TI28K2zDmIpkiJa6uJqtjE=,iv:EmFwosOccCjdHzIb0RTf1c989yzguZ9QnSZ+XcrF0M0=,tag:D6je79H3ha+OiNaLvNLc/Q==,type:str]
     encrypted_regex: ^(data|stringData)$
     version: 3.11.0
