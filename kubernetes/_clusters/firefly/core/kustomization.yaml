@@ -6,6 +6,7 @@ metadata:
     app.kubernetes.io/sops: enabled
 resources:
   - ../../../_base/core/namespace.yaml
+  - ../../../_base/core/minio
   - cert-manager
   - cloudflared
 patches:

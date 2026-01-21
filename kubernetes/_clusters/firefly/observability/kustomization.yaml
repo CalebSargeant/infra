@@ -10,30 +10,32 @@ components:
   - ../../../_components/resource-profiles/m.large
   - ../../../_components/node-selectors/mini
 resources:
-  - ../../../_base/observability/alloy
-  - ../../../_base/observability/mimir
+  # Core observability stack
+  - ../../../_base/observability/kube-prometheus-stack
+  - ../../../_base/observability/thanos-query
+  - ../../../_base/observability/thanos-store
+  - ../../../_base/observability/thanos-compactor
   - ../../../_base/observability/loki
-  - ../../../_base/observability/tempo
-  - ../../../_base/observability/pyroscope
-  - ../../../_base/observability/alertmanager
-  - ../../../_base/observability/mikrotik-exporter
-  - ../../../_base/observability/cloudflare-exporter
+  - ../../../_base/observability/fluent-bit
+  # Exporters
   - ../../../_base/observability/blackbox-exporter
-  - ../../../_base/observability/postgres-exporter
-  - ../../../_base/observability/raspberrypi_exporter
-  - ../../../_base/observability/smartctl_exporter
-  - ../../../_base/observability/nvme_exporter
-  - ../../../_base/observability/etcd_exporter
-  - ../../../_base/observability/nfs_exporter
-  - ../../../_base/observability/restic_exporter
-  - ../../../_base/observability/meross-exporter
-  - ../../../_base/observability/scraparr
-  - ../../../_base/observability/homebridge-exporter
-  - ../../../_base/observability/home-assistant-exporter
-  - ../../../_base/observability/nginx-exporter
-  - ../../../_base/observability/plex_exporter
-  - ../../../_base/observability/nextcloud-exporter
-  - ../../../_base/observability/pmacct-netflow
+#  - ../../../_base/observability/mikrotik-exporter
+#  - ../../../_base/observability/cloudflare-exporter
+#  - ../../../_base/observability/postgres-exporter
+#  - ../../../_base/observability/raspberrypi_exporter
+#  - ../../../_base/observability/smartctl_exporter
+#  - ../../../_base/observability/nvme_exporter
+#  - ../../../_base/observability/etcd_exporter
+#  - ../../../_base/observability/nfs_exporter
+#  - ../../../_base/observability/restic_exporter
+#  - ../../../_base/observability/meross-exporter
+#  - ../../../_base/observability/scraparr
+#  - ../../../_base/observability/homebridge-exporter
+#  - ../../../_base/observability/home-assistant-exporter
+#  - ../../../_base/observability/nginx-exporter
+#  - ../../../_base/observability/plex_exporter
+#  - ../../../_base/observability/nextcloud-exporter
+#  - ../../../_base/observability/pmacct-netflow
 patches:
   # Node selector for all observability apps
   - patch: |
@@ -41,7 +43,7 @@ patches:
         path: /metadata/labels/node-selector
         value: mini
     target:
-      labelSelector: "app.kubernetes.io/name in (alloy, mimir, loki, tempo, pyroscope, alertmanager, mikrotik-exporter, cloudflare-exporter, blackbox-exporter, postgres-exporter, raspberrypi-exporter, smartctl-exporter, nvme-exporter, etcd-exporter, nfs-exporter, restic-exporter, meross-exporter, scraparr, homebridge-exporter, home-assistant-exporter, nginx-exporter, plex-exporter, nextcloud-exporter, pmacct-netflow)"
+      labelSelector: "app.kubernetes.io/name in (kube-prometheus-stack, thanos-query, thanos-store, thanos-compactor, loki, fluent-bit, mikrotik-exporter, cloudflare-exporter, blackbox-exporter, postgres-exporter, raspberrypi-exporter, smartctl-exporter, nvme-exporter, etcd-exporter, nfs-exporter, restic-exporter, meross-exporter, scraparr, homebridge-exporter, home-assistant-exporter, nginx-exporter, plex-exporter, nextcloud-exporter, pmacct-netflow)"
 
   # Resource profiles - Small exporters
   - patch: |
@@ -57,7 +59,7 @@ patches:
         path: /metadata/labels/resource-profile
         value: m.medium
     target:
-      labelSelector: "app.kubernetes.io/name in (alloy, alertmanager)"
+      labelSelector: "app.kubernetes.io/name in (thanos-query)"
 
   # Resource profiles - Large apps (storage/processing)
   - patch: |
@@ -65,4 +67,4 @@ patches:
         path: /metadata/labels/resource-profile
         value: m.large
     target:
-      labelSelector: "app.kubernetes.io/name in (mimir, loki, tempo, pyroscope)"
+      labelSelector: "app.kubernetes.io/name in (kube-prometheus-stack, thanos-store, thanos-compactor, loki)"
