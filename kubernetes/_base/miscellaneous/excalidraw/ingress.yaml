@@ -1,0 +1,81 @@
+# HTTP ingress with redirect to HTTPS
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: excalidraw-ingress-http
+  namespace: misc
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: misc-https-redirect@kubernetescrd
+spec:
+  rules:
+    - host: excalidraw.sargeant.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: excalidraw
+                port:
+                  number: 80
+---
+# HTTPS ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: excalidraw-ingress-https
+  namespace: misc
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/service.serversscheme: http
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/redirect-to-https: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-dns
+spec:
+  tls:
+    - hosts:
+        - excalidraw.sargeant.co
+      secretName: excalidraw-tls
+  rules:
+    - host: excalidraw.sargeant.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: excalidraw
+                port:
+                  number: 80
+---
+# Backend API ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: excalidraw-backend-ingress
+  namespace: misc
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/service.serversscheme: http
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-dns
+spec:
+  tls:
+    - hosts:
+        - excalidraw.sargeant.co
+      secretName: excalidraw-tls
+  rules:
+    - host: excalidraw.sargeant.co
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: excalidraw-backend
+                port:
+                  number: 3000

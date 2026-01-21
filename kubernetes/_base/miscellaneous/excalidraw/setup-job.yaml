@@ -1,0 +1,57 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: excalidraw-db-setup
+  namespace: misc
+  labels:
+    app.kubernetes.io/name: excalidraw-db-setup
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: psql
+          image: postgres:15
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/sh
+              set -e
+              echo "Waiting for PostgreSQL to be ready..."
+              until pg_isready -h postgres.database.svc.cluster.local -p 5432 -U postgres; do
+                echo "Waiting for PostgreSQL..."
+                sleep 2
+              done
+              
+              echo "Creating excalidraw database and user..."
+              PGPASSWORD=$POSTGRES_PASSWORD psql -h postgres.database.svc.cluster.local -U postgres <<EOF
+              -- Create user if not exists
+              DO \$\$
+              BEGIN
+                IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'excalidraw') THEN
+                  CREATE USER excalidraw WITH PASSWORD '$EXCALIDRAW_PASSWORD';
+                END IF;
+              END
+              \$\$;
+              
+              -- Create database if not exists
+              SELECT 'CREATE DATABASE excalidraw OWNER excalidraw'
+              WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'excalidraw')\gexec
+              
+              -- Grant privileges
+              GRANT ALL PRIVILEGES ON DATABASE excalidraw TO excalidraw;
+              EOF
+              
+              echo "Excalidraw database setup complete!"
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: postgres-password
+            - name: EXCALIDRAW_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: excalidraw
+                  key: DB_PASSWORD

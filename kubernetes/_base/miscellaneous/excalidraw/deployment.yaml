@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: excalidraw
+  namespace: misc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: excalidraw
+  template:
+    metadata:
+      labels:
+        app: excalidraw
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        # Excalidraw frontend
+        - name: excalidraw
+          image: excalidraw/excalidraw:latest
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            - name: TZ
+              value: "Europe/Amsterdam"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+              ephemeral-storage: "500Mi"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+              ephemeral-storage: "1Gi"
+        # Storage backend - using official excalidraw-storage-backend
+        - name: excalidraw-backend
+          image: kiliandeca/excalidraw-storage-backend:latest
+          ports:
+            - containerPort: 8080
+              name: backend
+          env:
+            - name: TZ
+              value: "Europe/Amsterdam"
+            - name: PORT
+              value: "8080"
+            - name: STORAGE_URI
+              valueFrom:
+                secretKeyRef:
+                  name: excalidraw
+                  key: STORAGE_URI
+            - name: LOG_LEVEL
+              value: "warn"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
