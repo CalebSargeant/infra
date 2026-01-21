@@ -1,0 +1,49 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: vpa
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: vpa
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: vpa
+      version: "4.6.0"
+      sourceRef:
+        kind: HelmRepository
+        name: fairwinds-stable
+        namespace: flux-system
+      interval: 1h
+  install:
+    createNamespace: true
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+  values:
+    # VPA Recommender - generates recommendations
+    recommender:
+      enabled: true
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 512Mi
+    
+    # VPA Updater - applies recommendations automatically (disabled by default)
+    updater:
+      enabled: false  # Set to true if you want automatic pod restarts with new recommendations
+    
+    # VPA Admission Controller - applies recommendations on pod creation
+    admissionController:
+      enabled: true
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 512Mi
