@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.10.1 (2026-01-21)
+
+### Bug Fixes
+
+- Update encrypted email data and last modified timestamp in oauth2-proxy-emails-p1.enc.yaml
+  ([`5375451`](https://github.com/CalebSargeant/infra/commit/53754515c625290fe1814f43970b9dd3d16c051b))
+
+
 ## v1.10.0 (2026-01-20)
 
 ### Features
