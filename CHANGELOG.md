@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.15.0 (2026-01-21)
+
+### Features
+
+- Add Kubernetes manifests for Excalidraw deployment with backend and ingress
+  ([`758aa8b`](https://github.com/CalebSargeant/infra/commit/758aa8bd0e7889e75aa44c34bdef530eee6be042))
+
+
 ## v1.14.0 (2026-01-21)
 
 
