@@ -196,3 +196,25 @@ spec:
     provider: sops
     secretRef:
       name: sops-keys
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: fortivpn-gateway
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/sops: enabled
+spec:
+  interval: 1m
+  path: ./k8s/overlays/prod
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: fortivpn-gateway
+    namespace: flux-system
+  timeout: 5m
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-keys
