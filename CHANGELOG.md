@@ -2,6 +2,22 @@
 
 <!-- version list -->
 
+## v1.18.0 (2026-02-08)
+
+### Bug Fixes
+
+- Conditionally assign BGP IPs and update OCI-supported IP ranges
+  ([`b5d4611`](https://github.com/CalebSargeant/infra/commit/b5d4611db5e0e6a92a7ec2b56ade33ac3b10b30a))
+
+- Remove postgres reference from database kustomization
+  ([`eaa2d2b`](https://github.com/CalebSargeant/infra/commit/eaa2d2bc5c094b9402a3ab2b2349ec882e6402a3))
+
+### Features
+
+- **loki**: Re-enable retention and set compactor.delete_request_store=s3 (MinIO)
+  ([`a7bb5dd`](https://github.com/CalebSargeant/infra/commit/a7bb5dd18096025ace81fed87af1b0b04de27459))
+
+
 ## v1.17.2 (2026-02-08)
 
 ### Bug Fixes
