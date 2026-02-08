@@ -77,9 +77,10 @@ resource "oci_core_ipsec_connection_tunnel_management" "tunnel1" {
   dynamic "bgp_session_info" {
     for_each = each.value.routing_type == "BGP" ? [1] : []
     content {
-      customer_bgp_asn      = each.value.bgp_asn
-      customer_interface_ip = each.value.bgp_customer_ip_tunnel1
-      oracle_interface_ip   = each.value.bgp_oracle_ip_tunnel1
+      customer_bgp_asn = each.value.bgp_asn
+      # Only set IPs if provided, otherwise let OCI auto-assign
+      customer_interface_ip = each.value.bgp_customer_ip_tunnel1 != null ? each.value.bgp_customer_ip_tunnel1 : null
+      oracle_interface_ip   = each.value.bgp_oracle_ip_tunnel1 != null ? each.value.bgp_oracle_ip_tunnel1 : null
     }
   }
 
@@ -109,9 +110,10 @@ resource "oci_core_ipsec_connection_tunnel_management" "tunnel2" {
   dynamic "bgp_session_info" {
     for_each = each.value.routing_type == "BGP" ? [1] : []
     content {
-      customer_bgp_asn      = each.value.bgp_asn
-      customer_interface_ip = each.value.bgp_customer_ip_tunnel2
-      oracle_interface_ip   = each.value.bgp_oracle_ip_tunnel2
+      customer_bgp_asn = each.value.bgp_asn
+      # Only set IPs if provided, otherwise let OCI auto-assign
+      customer_interface_ip = each.value.bgp_customer_ip_tunnel2 != null ? each.value.bgp_customer_ip_tunnel2 : null
+      oracle_interface_ip   = each.value.bgp_oracle_ip_tunnel2 != null ? each.value.bgp_oracle_ip_tunnel2 : null
     }
   }
 

@@ -43,12 +43,12 @@ inputs = {
       static_routes       = ["192.168.19.0/24"]
       routing_type        = "BGP"
       ike_version         = "V2"
-      # BGP configuration
+      # BGP configuration - using OCI-supported ranges (169.254.21.0/24 or 169.254.22.0/24)
       bgp_asn                  = 65001  # Customer ASN (same as AWS)
-      bgp_customer_ip_tunnel1  = "169.254.10.2/30"
-      bgp_oracle_ip_tunnel1    = "169.254.10.1/30"
-      bgp_customer_ip_tunnel2  = "169.254.10.6/30"
-      bgp_oracle_ip_tunnel2    = "169.254.10.5/30"
+      bgp_customer_ip_tunnel1  = "169.254.21.2/30"   # Customer (MikroTik) side
+      bgp_oracle_ip_tunnel1    = "169.254.21.1/30"   # Oracle side
+      bgp_customer_ip_tunnel2  = "169.254.21.6/30"   # Customer (MikroTik) side
+      bgp_oracle_ip_tunnel2    = "169.254.21.5/30"   # Oracle side
       # PSKs will be auto-generated and stored in OCI Vault
       shared_secret_tunnel1 = null
       shared_secret_tunnel2 = null
