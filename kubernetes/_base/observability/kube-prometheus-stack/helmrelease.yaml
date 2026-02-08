@@ -30,6 +30,10 @@ spec:
     # Prometheus configuration
     prometheus:
       prometheusSpec:
+        # Node selector to run on VM nodes only
+        nodeSelector:
+          node-role.kubernetes.io/mini: "true"
+        
         # External labels for Thanos
         externalLabels:
           cluster: firefly
@@ -84,6 +88,10 @@ spec:
     grafana:
       enabled: true
       adminPassword: admin-change-me
+      
+      # Node selector to run on VM nodes only
+      nodeSelector:
+        node-role.kubernetes.io/mini: "true"
       
       # Persistence
       persistence:
@@ -146,6 +154,10 @@ spec:
     alertmanager:
       enabled: true
       alertmanagerSpec:
+        # Node selector to run on VM nodes only
+        nodeSelector:
+          node-role.kubernetes.io/mini: "true"
+        
         storage:
           volumeClaimTemplate:
             spec:
