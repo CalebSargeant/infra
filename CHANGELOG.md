@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.16.4 (2026-02-08)
+
+### Bug Fixes
+
+- **observability**: Scope m.large profile to kube-prometheus-stack only
+  ([`35311d8`](https://github.com/CalebSargeant/infra/commit/35311d8b53a58cacc3d52da3ff76306536d700a5))
+
+
 ## v1.16.3 (2026-02-08)
 
 ### Bug Fixes
