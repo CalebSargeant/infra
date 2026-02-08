@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.16.0 (2026-02-08)
+
+### Bug Fixes
+
+- **observability**: Reduce fluent-bit resource requests for mini nodes
+  ([`91459dc`](https://github.com/CalebSargeant/infra/commit/91459dc458ef3329b0c355c7766715aa5147937a))
+
+
 ## v1.15.2 (2026-02-08)
 
 ### Bug Fixes
