@@ -40,7 +40,7 @@ inputs = {
   admin_password = get_env("OCI_MYSQL_ADMIN_PASSWORD", "ChangeMe123!")
 
   # Backup configuration
-  backup_enabled           = true
+  backup_enabled           = false
   backup_retention_days    = 7
   backup_window_start_time = "02:00"
 

@@ -92,5 +92,4 @@ spec:
       pollingInterval: 600
       
       # AutoRestart configuration
-      autoRestart:
-        enabled: true
+      autoRestart: true
