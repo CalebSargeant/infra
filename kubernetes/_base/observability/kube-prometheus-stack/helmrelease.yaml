@@ -30,9 +30,14 @@ spec:
     # Prometheus configuration
     prometheus:
       prometheusSpec:
-        # Node selector to run on VM nodes only
-        nodeSelector:
-          node-role.kubernetes.io/mini: "true"
+        # Affinity to run on mini nodes only
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: node-role.kubernetes.io/mini
+                  operator: Exists
         
         # External labels for Thanos
         externalLabels:
@@ -89,9 +94,14 @@ spec:
       enabled: true
       adminPassword: admin-change-me
       
-      # Node selector to run on VM nodes only
-      nodeSelector:
-        node-role.kubernetes.io/mini: "true"
+      # Affinity to run on mini nodes only
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/mini
+                operator: Exists
       
       # Persistence
       persistence:
@@ -154,9 +164,14 @@ spec:
     alertmanager:
       enabled: true
       alertmanagerSpec:
-        # Node selector to run on VM nodes only
-        nodeSelector:
-          node-role.kubernetes.io/mini: "true"
+        # Affinity to run on mini nodes only
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: node-role.kubernetes.io/mini
+                  operator: Exists
         
         storage:
           volumeClaimTemplate:
