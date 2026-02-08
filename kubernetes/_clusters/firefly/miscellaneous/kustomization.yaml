@@ -9,3 +9,4 @@ resources:
   - headlamp
   - ../../../_base/miscellaneous/nextcloud
   - ../../../_base/miscellaneous/wordpress
+  - ../../../_base/miscellaneous/excalidraw
