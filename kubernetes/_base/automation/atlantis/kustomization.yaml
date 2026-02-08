@@ -8,6 +8,10 @@ resources:
   - pv.yaml
   - configmap.yaml
   - serviceaccount.yaml
-  - secret.yaml
-  - secret-aws.yaml
-  - secret-azure.yaml
+  # Secrets should be created from templates and encrypted with SOPS:
+  # 1. Copy secret.yaml.template to secret.yaml and fill in values
+  # 2. Encrypt with: sops -e secret.yaml > secret.enc.yaml
+  # 3. Add secret.enc.yaml to resources below
+  # - secret.enc.yaml
+  # - secret-aws.enc.yaml  # Optional: for AWS credentials
+  # - secret-azure.enc.yaml  # Optional: for Azure credentials
