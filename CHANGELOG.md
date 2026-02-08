@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.15.1 (2026-02-08)
+
+### Bug Fixes
+
+- Update encrypted secrets for 1Password Connect with SOPS version upgrade
+  ([`f81594d`](https://github.com/CalebSargeant/infra/commit/f81594d241170172da7e7fdb8aa0d2c9164f8dda))
+
+
 ## v1.15.0 (2026-01-21)
 
 ### Features
