@@ -1,0 +1,6 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: 1password-connect
+resources:
+  - ../../../../_base/core/1password-connect
