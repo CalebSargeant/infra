@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.16.1 (2026-02-08)
+
+### Bug Fixes
+
+- Reference existing secret for 1Password Connect credentials
+  ([`5af4f66`](https://github.com/CalebSargeant/infra/commit/5af4f66741c5c13e1e2d231246546bebf892451f))
+
+
 ## v1.16.0 (2026-02-08)
 
 ### Bug Fixes
