@@ -16,7 +16,7 @@ patches:
         value: pi
     target:
       labelSelector: "app.kubernetes.io/name=external-secrets"
-  
+
   # Resource profile for external-secrets
   - patch: |
       - op: add
