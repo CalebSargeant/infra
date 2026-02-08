@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.17.1 (2026-02-08)
+
+### Bug Fixes
+
+- **loki**: Disable retention to satisfy v3 compactor requirements for now
+  ([`e8188b5`](https://github.com/CalebSargeant/infra/commit/e8188b5e91d8edf7e1a7b8b4bc4960f6ee5c4214))
+
+
 ## v1.17.0 (2026-02-08)
 
 ### Features
