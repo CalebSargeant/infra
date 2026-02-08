@@ -18,13 +18,13 @@ resources:
   - ../../../_base/observability/thanos-compactor
   - ../../../_base/observability/loki
   - ../../../_base/observability/fluent-bit
-  # Resource optimization
-  - ../../../_base/observability/vpa
-  - ../../../_base/observability/goldilocks
+#  # Resource optimization
+#  - ../../../_base/observability/vpa
+#  - ../../../_base/observability/goldilocks
   # Exporters
   - ../../../_base/observability/blackbox-exporter
   # Cost monitoring
-  - ../../../_base/observability/opencost
+#  - ../../../_base/observability/opencost
 #  - ../../../_base/observability/mikrotik-exporter
 #  - ../../../_base/observability/cloudflare-exporter
 #  - ../../../_base/observability/postgres-exporter

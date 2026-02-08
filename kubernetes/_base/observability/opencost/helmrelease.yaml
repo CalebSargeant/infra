@@ -76,6 +76,16 @@ spec:
           enabled: false
           # Secret ref will be: opencost-oci-credentials
       
+      # Cloud integration secret for storage-based configurations
+      # This secret contains cloud-integration.json for Azure Storage cost exports
+      cloudIntegrationSecret: opencost-cloud-integration
+      
+      # Environment variables
+      exporter:
+        extraEnv:
+          CLOUD_COST_CONFIG_PATH:
+            value: "/var/configs/cloud-integration/cloud-integration.json"
+      
       # Custom pricing
       customPricing:
         enabled: false

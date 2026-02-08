@@ -21,10 +21,9 @@ spec:
   values:
     # Connect server configuration
     connect:
-      # Credentials from secret
-      credentials_base64:
-        name: onepassword-credentials
-        key: 1password-credentials.json
+      # Credentials from existing secret
+      credentialsName: onepassword-credentials
+      credentialsKey: 1password-credentials.json
       
       # API server configuration
       api:
@@ -70,10 +69,14 @@ spec:
       # Enable the operator
       create: true
       
-      # Token configuration
-      token:
-        name: onepassword-token
-        key: token
+      # Token configuration - using existing secret via custom environment variables
+      # When token.value is not set, the operator will look for OP_CONNECT_TOKEN env var
+      customEnvVars:
+        - name: OP_CONNECT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: onepassword-token
+              key: token
       
       # Node selector for operator
       nodeSelector:
