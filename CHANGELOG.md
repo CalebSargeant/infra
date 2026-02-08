@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.16.5 (2026-02-08)
+
+### Bug Fixes
+
+- **observability**: Drop m.large label from loki and thanos to restore base resources
+  ([`b65a725`](https://github.com/CalebSargeant/infra/commit/b65a725a93065b255d52ad3039e560672e57906a))
+
+
 ## v1.16.4 (2026-02-08)
 
 ### Bug Fixes
