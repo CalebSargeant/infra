@@ -6,5 +6,4 @@ metadata:
     app.kubernetes.io/sops: enabled
 resources:
   - ../../../_base/database/namespace.yaml
-  - postgres
   - mariadb
