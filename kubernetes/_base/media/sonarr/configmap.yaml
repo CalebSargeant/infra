@@ -1,31 +1,22 @@
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: sonarr-config
-  namespace: media
+    name: sonarr-config
+    namespace: media
 data:
-  config.xml: |
-    <Config>
-      <BindAddress>*</BindAddress>
-      <Port>8989</Port>
-      <SslPort>9898</SslPort>
-      <EnableSsl>False</EnableSsl>
-      <LaunchBrowser>True</LaunchBrowser>
-      <ApiKey>1723f669f01944ec8c6a090d66692b5c</ApiKey>
-      <AuthenticationMethod>Forms</AuthenticationMethod>
-      <AuthenticationRequired>Enabled</AuthenticationRequired>
-      <Branch>main</Branch>
-      <LogLevel>debug</LogLevel>
-      <SslCertPath></SslCertPath>
-      <SslCertPassword></SslCertPassword>
-      <UrlBase></UrlBase>
-      <InstanceName>Sonarr</InstanceName>
-      <UpdateMechanism>Docker</UpdateMechanism>
-      <PostgresUser>admin</PostgresUser>
-      <PostgresPassword>s78x7jKMiWWNpdd</PostgresPassword>
-      <PostgresPort>5432</PostgresPort>
-      <PostgresHost>postgres.database.svc.cluster.local</PostgresHost>
-      <PostgresMainDb>sonarr-main</PostgresMainDb>
-      <PostgresLogDb>sonarr-log</PostgresLogDb>
-    </Config>
+    config.xml: ENC[AES256_GCM,data:zdAgv3+qvRibagjIpv7e7qafnMKxeVrGC+ETfL/etPYaeqD8SQlTylcRZlTlrP0OTj7ScjQfGa112k7pcqGXNeRPjcMlEyocQgtLSCX5NuzLnchZ+6nQzKHkWVLJz9B1IAsrbOrS2pDl7lMINbv9PRsfJaubaFsDcEOyFav5uUDOVqVYttHorNJAG8x5tyL39NtNut7NTjb0BdBCRhX7XxCnoERS1/7LAuQBPfCP5/aDcaCBcpKVKE1g3uhvisPNsd5ll722RAamnrVHYLWTFpfkxeoiz9vW1BrXai2KG4zCpy3fMYd8Lenp/UJ7fpuhr9guJ4ZQNLy2fAll6/5gbLmPZrjhS8u6k0N6fOjSv4EWIRcW/wZg/0nqxhomI80fRwQ3l6PeRS8spB0VHTvwHq6/oCjJuoV7RjA2BNjBVUQe/NwVA1+EW6aEVghcc0YWHLfZ7mGUZrnLJukC9uILD3rk1h4N7whpt79SuZFVwxJYYy0jxgjLsKe+TyWJgJun0jfEEXGxkbkU0m4n9nB51Cm+y47/VO/FdppU7wUrhZ0yF5K0w5abDbacEdWEkMn7QoUThEztdYetBNk8eg21gAMt4rz5PWNlhuGR8CI057iSfrZS0MSxzROyq1mW/FQHJUJ0zEGJXuL2MaF/tleO+vhpDsUFdMEDMCfmvg6A1xOCgNJaWn5NXohiXYVmLvQBIUTHR7WYl5ZZQtJO9/O2JCMhFYwncU1So6WHRpmVCELDM29I9YtatehnsmQBPWobFxG3xTtOFvwlgt52a8gP90NhFzS7WOptBIk+KUIwYE9F9ex8rYdLpvOX3mXO4tJqTmbNE0aJMtFHpl2zYoaOvDVGGHzl2kMid95Qp3KYafKDo6KfdmvTzCkrxBAPIaPpMBPDgT9NkEAG5GwVNV0d3XMnd/afhrsHWyaL6fX1lRAZerky8TGSOr7DouBf0mx0EeVyUeOkfzQYlG57fvvXIGzcukB/emeDc4FqFqGp8qwc1Zpvr4HAji5Mtz6vvtGUsBvwvSDzD45xmVyMb0BrxXvNOYf+XMopzxT0sIOn1yQUgLhfYc5ee2Czxj+CyDTHEZ5e2SUAWY/1djOxLBfWcIO0vvGXwlwgz811KOcgfAQuwfensw/R7DATYYJlcre60rv+WzaRlXhsg8l729LP,iv:UHR9DesFTwLHTWuYXNxF+DFcdvlnkYMlgHXOGCqbEoE=,tag:eOiLxzG0bE4W8VJ8Zr9/tA==,type:str]
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBBRG90NGRiOWVSSEFwMExI
+            WnlnMld3Rnl6SUlrdXRyY0p1alZLSmJ5OW44CmgrQ056YXp0dVdUYmZsS2JPait6
+            cllTRDVaNzZTVE1Fdk5STzZOQUxlV2cKLS0tIGpRUmprM2tRMlpIeVRKQWhPSzd2
+            TStPdFIzQmc2eGdURndrWm8yTDJPQ3MKWnFVsiLqgIDESY1F4wIMuz/codeFAhEZ
+            Mv73yoaC/ItiMKYEZLD1cQFTeV8j1T+fBpJHtkrCekGWTBS2gdxEhw==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-02-08T20:37:22Z"
+    mac: ENC[AES256_GCM,data:wBbXk1FhLoesEiYOqpEup7VCpOTi3kIqb9MRLeL/0MO4ay3oUA4GjhxxlE2gDEHuOnBS+Tljhl1Il2UkTnmi21TgOugeuHf2nQ4sFqvHWzrFxdSs6sztsLJRHGWwwFGK3OY/GQPhWFG3oPabUrGz8xouaZ+EwPcdO2i+lfVYgCU=,iv:YU/s50AWZNgKNIPROhivFPbe81S6vwm9ugBU4NVz8UQ=,tag:aaQ0BqIIuVSv56zkF10EjA==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0

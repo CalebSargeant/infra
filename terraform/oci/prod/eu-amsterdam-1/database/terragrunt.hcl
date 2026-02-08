@@ -33,7 +33,7 @@ inputs = {
   # MySQL configuration
   shape_name              = "MySQL.Free"  # Free tier shape
   data_storage_size_in_gb = 50            # Free tier includes 50GB
-  mysql_version           = "8.0.36"
+  mysql_version           = "9.6.0"
 
   # Admin credentials - use environment variable or SOPS
   admin_username = "admin"

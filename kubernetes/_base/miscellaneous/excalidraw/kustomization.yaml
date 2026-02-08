@@ -3,7 +3,6 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - secret.enc.yaml
-  - setup-job.yaml
   - deployment.yaml
   - service.yaml
   - middleware.yaml

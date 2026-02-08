@@ -1,31 +1,22 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: homeassistant-config
-  namespace: automation
+    name: homeassistant-config
+    namespace: automation
 data:
-  configuration.yaml: |
-    # Loads default set of integrations. Do not remove.
-    default_config:
-
-    # HTTP Configuration for reverse proxy support
-    http:
-      use_x_forwarded_for: true
-      trusted_proxies:
-        - 10.42.0.0/16      # Pod CIDR range
-        - 10.43.0.0/16      # Service CIDR range  
-        - 192.168.19.0/24   # Host network range
-        - 127.0.0.1
-        - ::1
-
-    # Load frontend themes from the themes folder
-    frontend:
-      themes: !include_dir_merge_named themes
-
-    automation: !include automations.yaml
-    script: !include scripts.yaml
-    scene: !include scenes.yaml
-
-    # Database configuration - PostgreSQL
-    recorder:
-      db_url: postgresql://admin:s78x7jKMiWWNpdd@postgres.database.svc.cluster.local:5432/homeassistant
+    configuration.yaml: ENC[AES256_GCM,data:qm11MJ6E1VZr0h8exg+YGt+ufMoTKUcjGPNabp8lZOJRaugJ/B5yu+ktfZ1TvBU2Vg0vcai4hKirR4KsqtR22BTjXpUsOgg/G9r/Cf9+GIRXo4j0t6004rBoVg18Xmxy55aRDkpWyxA7JA95rRwl6NjkPvbzWAlloFkWkfJ3qktoiuxa/yUqRFqBphkdRfDj/A8WUeo6mP9F4Qr191howPrlA0NByUjRAIfpqsbhE/z4xtCkC8srRl0a5lW62yBwm6zKChnWTaKyQZiVnARS0W08P66dXlbw7/YHitfJ9gr7z5FACDFbIQGD094QyTmko6gaKdRP52Igu2NJSVQR9iAIKOW7EcDOEbWfc3is+1NOF3FChwOxTP9Nt0PZJ8jVLsEGnPAorY1xrtWsfYqaw3Nn+zSRwWcn6h3yiIcPHvrrXk/+9IfFpJU/w8Hyq/C6JsPhyJNpG/N/YpUwth7Fjgtzu8hjnGZezr3ugwDc/Xe1b3zxNmG94AvzsaNdMyPn5g7h1r13tEYmZBaAIyMlnXPd68RMr/F6iRUJ9nICSfB+VwkiNPj2rAxlVbpO0+SlPxHtlh1lQesh5YUIDCCnF1FzcftTw/haRr0zGbVVfH3dkoo0MJQifeu5pqECldIkFOvmFKqsYjCTmkNgwY1hlrE6BGCtfdAWU4zO6cR0ulZHcnEuBTJrgTcDfWrAeDFG1u6KMwcQy3n4Vc2EBHS5ISkAzSqQXon0FrKv9JQZV/DVkOwBWYkFslbF6h+sQtlJ6ASXArPVuvPXYLfmAh9XuZPuZIlJv19bL9Em8vZjlM3Ub+8UdR7jiZDxrEP0uTcyt5BiKghRtq4DMlrOMb+hGJDPg0oduivenxtiw83Z/qIjzLo+wakBtaIDJDUd45Zs5d5HOI5/Jd92fPAmbd27zQHWr9fLNCBw7Y4m7haJkxkIzAaHe950roUpw4FeJ89/ZYgBxza/iYo=,iv:YKaU51ugGfvV4cAF6d8YKqoZc80jxlo6aHFf5wKxPVs=,tag:Zed+UjkgkbzuAtWqlg7U2A==,type:str]
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBiRzVlNkpySWtraGsveTZo
+            NGFkbnpxTFZJTGdRSUp3djlnRHdnYmdEdlIwClovWmZweGVrMlVsamNHL1dpOVpL
+            ODVTNGdnTFJKREwxaDlxQ1pjZzBuYXcKLS0tIDJGd290ekxMaHBPd0Q5WCtYNFBi
+            K1kxYlRJQUFOUjZDU3dTVTRDOTJ0SW8KE5C8iUyTXQaMbIIRQTkQvJtsQModUGxL
+            sgMF1XEmu5VgCcOjVan/uCmAfcmqEJOafuPP9AzJzmuDAJLefnciqQ==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-02-08T20:37:27Z"
+    mac: ENC[AES256_GCM,data:SWc8Gi3SA5nXWwgkmaLC7XYHy1hOBsdN0nt3kCG8S6M0yWT0m3TFznvFCmeQnUWwXE5uUrRWK62rHSFOPXWg5I65slL+4wVSY+C765Ke/5V1Z1pmzDf3xqIKc6ggKhshTqm/YTTSh+Y75HuCFixl8OxlcIVAQSwhhNSVUFiqHpI=,iv:nRItZEXI+EjFzKZkVsCorjeqwsxpzhlOHKpeyC3s9Ss=,tag:i0sktxM92PTktcAAiXw0pw==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0

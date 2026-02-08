@@ -26,11 +26,14 @@ resource "oci_mysql_mysql_db_system" "this" {
   admin_username = var.admin_username
   admin_password = var.admin_password
 
-  # Backup configuration
-  backup_policy {
-    is_enabled        = var.backup_enabled
-    retention_in_days = var.backup_retention_days
-    window_start_time = var.backup_window_start_time
+  # Backup configuration (cannot be specified for Always Free shapes)
+  dynamic "backup_policy" {
+    for_each = var.backup_enabled && var.shape_name != "MySQL.Free" ? [1] : []
+    content {
+      is_enabled        = true
+      retention_in_days = var.backup_retention_days
+      window_start_time = var.backup_window_start_time
+    }
   }
 
   # Maintenance configuration
