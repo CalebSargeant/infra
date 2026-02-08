@@ -87,7 +87,7 @@ spec:
   refreshInterval: 1h
   secretStoreRef:
     name: oci-vault
-    kind: SecretStore
+    kind: ClusterSecretStore
   target:
     name: my-app-secret
     creationPolicy: Owner
