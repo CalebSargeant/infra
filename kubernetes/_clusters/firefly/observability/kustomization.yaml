@@ -5,9 +5,6 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 components:
-  - ../../../_components/resource-profiles/t.small
-  - ../../../_components/resource-profiles/m.medium
-  - ../../../_components/resource-profiles/m.large
   - ../../../_components/node-selectors/mini
 resources:
   - ../../../_base/observability/namespace.yaml
@@ -43,12 +40,6 @@ resources:
 #  - ../../../_base/observability/nextcloud-exporter
 #  - ../../../_base/observability/pmacct-netflow
 patches:
-  # Remove resource-profile label from heavy components to use base resources
-  - patch: |
-      - op: remove
-        path: /metadata/labels/resource-profile
-    target:
-      labelSelector: "app.kubernetes.io/name in (loki, thanos-store, thanos-compactor)"
 
   # Node selector for all observability apps
   - patch: |
@@ -58,29 +49,8 @@ patches:
     target:
       labelSelector: "app.kubernetes.io/name in (kube-prometheus-stack, thanos-query, thanos-store, thanos-compactor, loki, fluent-bit, vpa, goldilocks, opencost, mikrotik-exporter, cloudflare-exporter, blackbox-exporter, postgres-exporter, raspberrypi-exporter, smartctl-exporter, nvme-exporter, etcd-exporter, nfs-exporter, restic-exporter, meross-exporter, scraparr, homebridge-exporter, home-assistant-exporter, nginx-exporter, plex-exporter, nextcloud-exporter, pmacct-netflow)"
 
-  # Resource profiles - Small exporters and tools
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: t.small
-    target:
-      labelSelector: "app.kubernetes.io/name in (vpa, goldilocks, mikrotik-exporter, cloudflare-exporter, blackbox-exporter, postgres-exporter, raspberrypi-exporter, smartctl-exporter, nvme-exporter, etcd-exporter, nfs-exporter, restic-exporter, meross-exporter, scraparr, homebridge-exporter, home-assistant-exporter, nginx-exporter, plex-exporter, nextcloud-exporter, pmacct-netflow)"
 
-  # Resource profiles - Medium apps (observability stack)
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: m.medium
-    target:
-      labelSelector: "app.kubernetes.io/name in (thanos-query, opencost)"
 
-  # Resource profiles - Large apps (storage/processing)
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: m.large
-    target:
-      labelSelector: "app.kubernetes.io/name in (kube-prometheus-stack)"
 
   # Override fluent-bit resources (DaemonSet gets m.large by default from component)
   - patch: |
