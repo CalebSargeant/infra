@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.17.2 (2026-02-08)
+
+### Bug Fixes
+
+- Disable backups for MySQL instance and simplify autoRestart config for 1Password Connect
+  ([`bf05f0e`](https://github.com/CalebSargeant/infra/commit/bf05f0e14403aaff0db26efb774c302b424118b2))
+
+
 ## v1.17.1 (2026-02-08)
 
 ### Bug Fixes
