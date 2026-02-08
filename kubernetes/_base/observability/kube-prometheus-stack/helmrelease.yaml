@@ -190,6 +190,13 @@ spec:
     # Node Exporter
     nodeExporter:
       enabled: true
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node.kubernetes.io/unreachable
+                operator: DoesNotExist
     
     # Kube State Metrics
     kubeStateMetrics:
