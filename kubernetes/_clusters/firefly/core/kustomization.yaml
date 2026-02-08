@@ -9,6 +9,7 @@ resources:
   - ../../../_base/core/minio
   - cert-manager
   - cloudflared
+  - 1password-connect
 patches:
   # Node selector for all apps
   - patch: |
