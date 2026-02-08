@@ -1,0 +1,87 @@
+version: 3
+automerge: false
+delete_source_branch_on_merge: false
+parallel_plan: true
+parallel_apply: false
+
+projects:
+  # AWS Terraform projects (if any exist in the future)
+  - name: aws-infrastructure
+    dir: terraform/aws
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["*.tf", "*.tfvars", "*.hcl"]
+      enabled: true
+    apply_requirements: [approved, mergeable]
+
+  # Azure Terraform projects (if any exist in the future)
+  - name: azure-infrastructure
+    dir: terraform/azure
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["*.tf", "*.tfvars", "*.hcl"]
+      enabled: true
+    apply_requirements: [approved, mergeable]
+
+  # OCI (Oracle Cloud Infrastructure) projects
+  - name: oci-infrastructure
+    dir: terraform/oci
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["*.tf", "*.tfvars", "*.hcl"]
+      enabled: true
+    apply_requirements: [approved, mergeable]
+
+  # GCP projects
+  - name: gcp-infrastructure
+    dir: terraform/gcp
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["*.tf", "*.tfvars", "*.hcl"]
+      enabled: true
+    apply_requirements: [approved, mergeable]
+
+  # Cloudflare projects
+  - name: cloudflare-infrastructure
+    dir: terraform/cloudflare
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["*.tf", "*.tfvars", "*.hcl"]
+      enabled: true
+    apply_requirements: [approved, mergeable]
+
+workflows:
+  terragrunt:
+    plan:
+      steps:
+        - init
+        - env:
+            name: TERRAGRUNT_TFPATH
+            command: 'echo "terraform"'
+        - run: |
+            if [ -f "terragrunt.hcl" ]; then
+              terragrunt plan -input=false -out=$PLANFILE
+            else
+              terraform plan -input=false -out=$PLANFILE
+            fi
+    apply:
+      steps:
+        - env:
+            name: TERRAGRUNT_TFPATH
+            command: 'echo "terraform"'
+        - run: |
+            if [ -f "terragrunt.hcl" ]; then
+              terragrunt apply -input=false $PLANFILE
+            else
+              terraform apply -input=false $PLANFILE
+            fi

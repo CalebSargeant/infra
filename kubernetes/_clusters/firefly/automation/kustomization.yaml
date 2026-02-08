@@ -7,6 +7,7 @@ metadata:
 resources:
   - ../../../_base/automation/namespace.yaml
   - ghcr-pull-secret.yaml
+  - atlantis
   - homeassistant
   - homebridge
   - n8n
