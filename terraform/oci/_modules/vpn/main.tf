@@ -89,8 +89,9 @@ resource "oci_core_ipsec_connection_tunnel_management" "tunnel1" {
 
   # Encryption settings
   encryption_domain_config {
-    cpe_traffic_selector    = each.value.static_routes
-    oracle_traffic_selector = var.local_networks
+    # For BGP, use 0.0.0.0/0 to allow BGP inside IPs; for STATIC use specific routes
+    cpe_traffic_selector    = each.value.routing_type == "BGP" ? ["0.0.0.0/0"] : each.value.static_routes
+    oracle_traffic_selector = each.value.routing_type == "BGP" ? ["0.0.0.0/0"] : var.local_networks
   }
 
   # Let OCI auto-generate shared secret
@@ -122,8 +123,9 @@ resource "oci_core_ipsec_connection_tunnel_management" "tunnel2" {
 
   # Encryption settings
   encryption_domain_config {
-    cpe_traffic_selector    = each.value.static_routes
-    oracle_traffic_selector = var.local_networks
+    # For BGP, use 0.0.0.0/0 to allow BGP inside IPs; for STATIC use specific routes
+    cpe_traffic_selector    = each.value.routing_type == "BGP" ? ["0.0.0.0/0"] : each.value.static_routes
+    oracle_traffic_selector = each.value.routing_type == "BGP" ? ["0.0.0.0/0"] : var.local_networks
   }
 
   # Let OCI auto-generate shared secret
