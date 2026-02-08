@@ -15,6 +15,7 @@ resources:
   - ../../../_base/observability/thanos-compactor
   - ../../../_base/observability/loki
   - ../../../_base/observability/fluent-bit
+  - ../../../_base/observability/krr
 #  # Resource optimization
 #  - ../../../_base/observability/vpa
 #  - ../../../_base/observability/goldilocks
