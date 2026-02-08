@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.21.0 (2026-02-08)
+
+### Bug Fixes
+
+- Remove unused namespace.yaml from Excalidraw kustomization
+  ([`ed5545a`](https://github.com/CalebSargeant/infra/commit/ed5545a2f6ab82e3effc1b8ca0100a0fa8b367d3))
+
+
 ## v1.20.0 (2026-02-08)
 
 
