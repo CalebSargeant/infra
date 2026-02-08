@@ -39,8 +39,8 @@ spec:
                   key: postgres-username
             - name: DB_POSTGRESDB_SCHEMA
               value: "public"
-            - name: DB_POSTGRESDB_SSL
-              value: "true"
+            - name: DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED
+              value: "false"
             - name: DB_POSTGRESDB_PASSWORD
               valueFrom:
                 secretKeyRef:
