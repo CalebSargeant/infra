@@ -43,6 +43,13 @@ resources:
 #  - ../../../_base/observability/nextcloud-exporter
 #  - ../../../_base/observability/pmacct-netflow
 patches:
+  # Remove resource-profile label from heavy components to use base resources
+  - patch: |
+      - op: remove
+        path: /metadata/labels/resource-profile
+    target:
+      labelSelector: "app.kubernetes.io/name in (loki, thanos-store, thanos-compactor)"
+
   # Node selector for all observability apps
   - patch: |
       - op: add
