@@ -21,11 +21,7 @@ spec:
   values:
     # Connect server configuration
     connect:
-      # Explicitly disable inline credentials
-      credentials: ""
-      credentials_base64: ""
-      
-      # Credentials from existing secret
+      # Reference existing secret for credentials
       credentialsName: onepassword-credentials
       credentialsKey: 1password-credentials.json
       
