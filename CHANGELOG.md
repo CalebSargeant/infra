@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.15.2 (2026-02-08)
+
+### Bug Fixes
+
+- **observability**: Fix fluent-bit image registry and kube-prometheus-stack timeout
+  ([`69c8afd`](https://github.com/CalebSargeant/infra/commit/69c8afd6c3a5cba24afdec1e2998df2ed5b56c9f))
+
+
 ## v1.15.1 (2026-02-08)
 
 ### Bug Fixes
