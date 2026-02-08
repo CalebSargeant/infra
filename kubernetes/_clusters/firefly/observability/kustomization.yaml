@@ -40,6 +40,29 @@ resources:
 #  - ../../../_base/observability/nextcloud-exporter
 #  - ../../../_base/observability/pmacct-netflow
 patches:
+  # Reduce Loki resources to fit mini nodes
+  - patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 1
+            memory: 2Gi
+    target:
+      kind: StatefulSet
+      labelSelector: "app.kubernetes.io/name=loki"
+
+  # Temporarily scale down Thanos Store to 0 to free resources
+  - patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 0
+    target:
+      kind: StatefulSet
+      labelSelector: "app.kubernetes.io/name=thanos-store"
 
   # Node selector for all observability apps
   - patch: |
