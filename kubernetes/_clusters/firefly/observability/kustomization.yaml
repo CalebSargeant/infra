@@ -73,7 +73,7 @@ patches:
         path: /metadata/labels/resource-profile
         value: m.large
     target:
-      labelSelector: "app.kubernetes.io/name in (kube-prometheus-stack, thanos-store, thanos-compactor, loki)"
+      labelSelector: "app.kubernetes.io/name in (kube-prometheus-stack)"
 
   # Override fluent-bit resources (DaemonSet gets m.large by default from component)
   - patch: |
