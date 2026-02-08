@@ -10,6 +10,7 @@ resources:
   - cert-manager
   - cloudflared
   - 1password-connect
+  - external-secrets
 patches:
   # Node selector for all apps
   - patch: |
