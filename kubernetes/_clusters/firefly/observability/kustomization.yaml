@@ -74,3 +74,18 @@ patches:
         value: m.large
     target:
       labelSelector: "app.kubernetes.io/name in (kube-prometheus-stack, thanos-store, thanos-compactor, loki)"
+
+  # Override fluent-bit resources (DaemonSet gets m.large by default from component)
+  - patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+    target:
+      kind: DaemonSet
+      labelSelector: "app.kubernetes.io/name=fluent-bit"
