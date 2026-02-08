@@ -107,7 +107,7 @@ spec:
               port: 4141
               scheme: HTTP
             initialDelaySeconds: 30
-            periodSeconds: 60
+            periodSeconds: 15
             timeoutSeconds: 5
           readinessProbe:
             httpGet:
@@ -115,7 +115,7 @@ spec:
               port: 4141
               scheme: HTTP
             initialDelaySeconds: 30
-            periodSeconds: 60
+            periodSeconds: 15
       volumes:
         - name: atlantis-data
           persistentVolumeClaim:
