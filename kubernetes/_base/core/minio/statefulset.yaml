@@ -16,6 +16,8 @@ spec:
       labels:
         app.kubernetes.io/name: minio
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: ff-vm1
       containers:
         - name: minio
           image: quay.io/minio/minio:RELEASE.2024-12-18T13-15-44Z
@@ -59,12 +61,8 @@ spec:
               port: 9000
             initialDelaySeconds: 10
             periodSeconds: 5
-  volumeClaimTemplates:
-    - metadata:
-        name: data
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 100Gi
+      volumes:
+        - name: data
+          hostPath:
+            path: /mnt/raid/minio
+            type: DirectoryOrCreate
