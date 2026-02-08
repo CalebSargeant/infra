@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.17.0 (2026-02-08)
+
+### Features
+
+- Add Azure Cost integration and OCI DRG peering modules
+  ([`0e73fd4`](https://github.com/CalebSargeant/infra/commit/0e73fd4222b8e28b1c7c4b233a44a4bcc6c2eb15))
+
+
 ## v1.16.6 (2026-02-08)
 
 
