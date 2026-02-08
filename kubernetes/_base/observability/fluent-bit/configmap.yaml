@@ -60,7 +60,7 @@ data:
         Host loki-gateway.observability.svc.cluster.local
         Port 80
         Labels job=fluentbit, cluster=firefly
-        Label_keys k8s_namespace_name,k8s_pod_name,k8s_container_name
+        Label_keys $k8s_namespace_name,$k8s_pod_name,$k8s_container_name
         Auto_kubernetes_labels on
         Line_format json
 
