@@ -39,7 +39,7 @@ spec:
       - ingress
       - service
 
-    # Policy configuration - only create new records, don't update existing ones
+    # Policy configuration - sync creates, updates, and deletes DNS records
     policy: sync
 
     # Registry configuration - use TXT records to track ownership
