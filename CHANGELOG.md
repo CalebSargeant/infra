@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.16.2 (2026-02-08)
+
+### Bug Fixes
+
+- Use correct format for 1password-connect Helm values
+  ([`f8b5ef5`](https://github.com/CalebSargeant/infra/commit/f8b5ef54ad551400e52ea2b8bf4e5f5e3262819e))
+
+
 ## v1.16.1 (2026-02-08)
 
 ### Bug Fixes
