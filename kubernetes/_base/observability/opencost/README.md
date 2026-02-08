@@ -302,3 +302,55 @@ kubectl get secret -n observability opencost-oci-credentials
 - [OpenCost Documentation](https://www.opencost.io/docs/)
 - [OpenCost GitHub](https://github.com/opencost/opencost)
 - [Cloud Integration Guide](https://www.opencost.io/docs/configuration/cloud-costs)
+
+---
+
+### Azure (Storage-Based Cost Exports)
+
+For external clusters (non-AKS) or when Azure Workload Identity is not available, you can use Azure Storage Account access keys to read cost export data.
+
+#### Prerequisites
+- Azure Storage Account with cost exports configured
+- Cost exports in CSV format (configured via Azure Cost Management)
+
+#### Setup Steps
+
+1. **Verify cost exports exist** in the storage account:
+   ```bash
+   az storage blob list \
+     --account-name <storage-account> \
+     --container-name <container> \
+     --auth-mode key
+   ```
+
+2. **The cloud integration secret is already configured** in `cloud-credentials-secrets.enc.yaml` with:
+   - Storage account name
+   - Container name
+   - Export path
+   - Access key (encrypted with SOPS)
+
+3. **Deploy OpenCost** - the cloud integration is automatically mounted
+
+4. **Access OpenCost UI**:
+   ```bash
+   kubectl port-forward -n observability svc/opencost 9090:9090
+   ```
+   Navigate to the "Cloud Costs" tab to view Azure costs
+
+#### Configuration Details
+
+The Azure storage integration uses the `cloud-integration.json` format which is mounted from the `opencost-cloud-integration` secret. The configuration includes:
+
+- `subscriptionID`: Azure subscription containing the resources
+- `account`: Storage account name where cost exports are stored
+- `container`: Blob container name
+- `path`: Path within the container to the cost export folder
+- `authorizer`: Uses `AzureAccessKey` type with the storage account access key
+
+#### Notes
+
+- This method works for any Kubernetes cluster (AKS, K3s, EKS, GKE, on-premises)
+- Storage account access keys grant full access - rotate regularly
+- Cost data is updated daily by Azure Cost Management
+- OpenCost caches downloaded cost data locally to minimize storage account access
+
