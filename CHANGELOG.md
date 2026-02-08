@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.16.3 (2026-02-08)
+
+### Bug Fixes
+
+- **fluent-bit**: Correct loki label_keys to use record accessor syntax
+  ([`4013c30`](https://github.com/CalebSargeant/infra/commit/4013c305b0a608c6562a2f0de56bf99df47ca99c))
+
+
 ## v1.16.2 (2026-02-08)
 
 ### Bug Fixes
