@@ -24,10 +24,7 @@ spec:
 
     # Cloudflare configuration
     cloudflare:
-      apiToken:
-        secretKeyRef:
-          name: cloudflared-token
-          key: cloudflare-api-token
+      secretName: cloudflared-token
       proxied: false
 
     # Domain filter
