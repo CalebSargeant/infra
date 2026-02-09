@@ -62,7 +62,7 @@ If you're using Flux CD (based on your existing setup):
 Or deploy manually:
 
 ```bash
-kubectl apply -k /home/runner/work/infra/infra/kubernetes/_base/miscellaneous/excalidraw/
+kubectl apply -k kubernetes/_base/miscellaneous/excalidraw/
 ```
 
 ### 5. Verify Deployment
