@@ -15,46 +15,28 @@ spec:
     spec:
       automountServiceAccountToken: false
       containers:
-        # Excalidraw frontend
+        # Excalidraw with persistence (frontend + backend integrated)
         - name: excalidraw
-          image: excalidraw/excalidraw:latest
+          image: ghcr.io/ozencb/excalidraw-persist:0.18.0-persist.1
           ports:
             - containerPort: 80
               name: http
+            - containerPort: 4000
+              name: api
           env:
             - name: TZ
               value: "Europe/Amsterdam"
-          resources:
-            requests:
-              memory: "128Mi"
-              cpu: "50m"
-              ephemeral-storage: "500Mi"
-            limits:
-              memory: "512Mi"
-              cpu: "500m"
-              ephemeral-storage: "1Gi"
-        # Storage backend - using official excalidraw-storage-backend
-        - name: excalidraw-backend
-          image: kiliandeca/excalidraw-storage-backend:latest
-          ports:
-            - containerPort: 8080
-              name: backend
-          env:
-            - name: TZ
-              value: "Europe/Amsterdam"
-            - name: PORT
-              value: "8080"
-            - name: STORAGE_URI
+            - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: excalidraw
-                  key: STORAGE_URI
-            - name: LOG_LEVEL
-              value: "warn"
+                  key: DATABASE_URL
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "50m"
+              memory: "256Mi"
+              cpu: "100m"
+              ephemeral-storage: "500Mi"
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: "1Gi"
+              cpu: "1000m"
+              ephemeral-storage: "1Gi"
