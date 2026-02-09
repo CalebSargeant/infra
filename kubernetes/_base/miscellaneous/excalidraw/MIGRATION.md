@@ -38,6 +38,16 @@ GRANT ALL PRIVILEGES ON DATABASE excalidraw TO admin;
 
 The existing `excalidraw` secret already contains the `STORAGE_URI` field with the PostgreSQL connection string. The deployment has been updated to use this existing field - no secret changes are needed.
 
+**Expected format**: The `STORAGE_URI` should be a PostgreSQL connection string like:
+```
+postgresql://username:password@host:port/database
+```
+
+To verify the secret has the correct format, you can check it with:
+```bash
+kubectl get secret excalidraw -n misc -o jsonpath='{.data.STORAGE_URI}' | base64 -d
+```
+
 ### 3. Deploy the Changes
 
 If using Flux CD:

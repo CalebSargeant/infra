@@ -24,6 +24,8 @@ GRANT ALL PRIVILEGES ON DATABASE excalidraw TO admin;
 
 The secret is already configured with the `STORAGE_URI` field containing the PostgreSQL connection string. The deployment uses this existing secret - no changes needed.
 
+**Note**: Ensure the database referenced in `STORAGE_URI` exists (see step 1 above).
+
 ### 3. Update the Ingress Hostname
 
 Edit `ingress.yaml` and update the hostname to your desired domain:
