@@ -13,9 +13,20 @@ spec:
         app: timemachine
     spec:
       hostNetwork: true # Needed to expose port 445 directly to LAN
+      hostname: firefly
       containers:
         - name: timemachine
           image: mbentley/timemachine
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    sleep 5
+                    sed -i 's/<name replace-wildcards="yes">%h<\/name>/<name replace-wildcards="yes">firefly<\/name>/' /etc/avahi/services/smbd.service
+                    pkill -HUP avahi-daemon
           resources:
             requests:
               memory: "64Mi"
@@ -24,6 +35,8 @@ spec:
               memory: "256Mi"
               cpu: "100m"
           env:
+            - name: AVAHI_NAME
+              value: "firefly"
             - name: CUSTOM_SMB_CONF
               value: "false"
             - name: CUSTOM_USER
@@ -59,7 +72,7 @@ spec:
             - name: SMB_PORT
               value: "445"
             - name: SMB_VFS_OBJECTS
-              value: "acl_xattr fruit streams_xattr"
+              value: "fruit streams_xattr"
             - name: VOLUME_SIZE_LIMIT
               value: "0"
             - name: WORKGROUP

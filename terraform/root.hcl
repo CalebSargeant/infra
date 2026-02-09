@@ -4,7 +4,7 @@ locals {
   aws_version       = "5.82.2"
   routeros_version  = "1.74.0"
   sops_version      = "1.1.1"
-  oci_version       = "6.35.0"
+  oci_version       = "8.0.0"
 
   region_vars      = read_terragrunt_config("${find_in_parent_folders("region.hcl")}")
   environment_vars = read_terragrunt_config("${find_in_parent_folders("environment.hcl")}")

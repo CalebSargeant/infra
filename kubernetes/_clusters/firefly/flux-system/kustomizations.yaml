@@ -58,6 +58,8 @@ spec:
     kind: GitRepository
     name: flux-system
   timeout: 2m
+  wait: true
+  force: true
   decryption:
     provider: sops
     secretRef:
@@ -108,3 +110,113 @@ spec:
       name: sops-keys
   dependsOn:
     - name: database
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: misc
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/sops: enabled
+spec:
+  interval: 1m
+  path: ./kubernetes/_clusters/firefly/miscellaneous
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 2m
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-keys
+  dependsOn:
+    - name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: observability
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/sops: enabled
+spec:
+  interval: 1m
+  path: ./kubernetes/_clusters/firefly/observability
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 2m
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-keys
+  dependsOn:
+    - name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: buxfer-sync
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/sops: enabled
+spec:
+  interval: 1m
+  path: ./k8s/overlays/prod
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: buxfer-sync
+    namespace: flux-system
+  timeout: 5m
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-keys
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: deskbird-booking
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/sops: enabled
+spec:
+  interval: 1m
+  path: ./k8s/overlays/prod
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: deskbird-booking
+    namespace: flux-system
+  timeout: 5m
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-keys
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: fortivpn-gateway
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/sops: enabled
+spec:
+  interval: 1m
+  path: ./k8s/overlays/prod
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: fortivpn-gateway
+    namespace: flux-system
+  timeout: 5m
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-keys

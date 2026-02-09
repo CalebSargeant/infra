@@ -1,0 +1,24 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+    name: headlamp-inject-token-pr-nonprod-aks
+    namespace: misc
+spec:
+    headers:
+        customRequestHeaders:
+            Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IkhYcTd3em1mYkhoOVhHZERWNW5jLUFta2xkc1JDZzk3NHRyS2x5ZVpoclUifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJoZWFkbGFtcCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJoZWFkbGFtcC1hZG1pbi10b2tlbiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJoZWFkbGFtcC1hZG1pbiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjFjNTk3ZGI4LTNkOTItNGEyZi1hNGRiLWMzMzZkOGUzZGMwOSIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpoZWFkbGFtcDpoZWFkbGFtcC1hZG1pbiJ9.g_3otih3g-8N59iY-4werhIv6Ic1rZHtmqKv4_9ouBH2M3WETmgotb4QDAcvkGz7kn8bj-ZDZkUZsyCIAh_mP8LvIl0ZmPiBCsHPgNSb0Lpku-UGPEXY1BERW9eX5brM1hST489a-WhvM6ficZIiH3y_0Ro2Is3AKGGZV--pOgONxeczMs5wRgZG-JndcirGRj3ACrYnym4sVzWJqLxTT4BDiGmSqDoZxtntuJsywvu7jy_I4u_N78o2_FO7Do9BZepfj6HJI3hbiix7SXKYWWZhNq5VRxxEwmiPgvLyM0dX4HWXBRdtfCHn4TN1llbGw_QX-dcd7-D2PC3Tff4HPdw76wyzO-5M0p9_L6t9botEvufKI-8JgOZh81D3Oh03xYgwi0S6TD7v55o8dyH9II_zEs5CZ8MVSxPoncV2g5qpcNzpX0U5iTs-si9Ww8uBWsmzDfYBxyC_AC5n2jAECPTNDWuGVoxDSXImS2YNTl59k2eZ4A0VQTkd8LRR5i0bN9nAvCE0rIlUzrPMx-JMYb_26nP0_NowtQYXcdAZPFzkO9TuEtwGUgnS2Dy3zNdqztaPbFgF2Ral_8cTqTMEhRwAoGyFfVBBroW8OngGvfyqyTh1Lb5MHqkoy-3CadTdZz3AbyL9apw0s7ST3EgMwgZqI50p_PCst-GBXEZb-xs
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBaSm0vTXVtMzZveFRteFJW
+            b0xxOWtPTkJ3QkwvZDgwNm90MC9jd2ZYUVhVCms1NlhPc0VSRmtIeFVqcm9HYXQy
+            d1dnZHlWVUhDSGVUK2dPay9Pc0FLdjQKLS0tIDI1SjhIbW1mbUYwV1FFZjkrQkNB
+            UlBNMXF4WVZSY0NLZmZpTHE1TlI3RzQKwzCjt08tVulSJnrffnUayw7ZDSbyoKDu
+            aTuY0r2n2fcbTyXJWRLIBtozdYnrqjRlfH3IY8WeNp5lxREp2x8icQ==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-01-03T19:46:15Z"
+    mac: ENC[AES256_GCM,data:wabxoyyMStjbvqlzMpzDFDayTIAnNX9hndvXd6gNT/2VRaogu+Esk5xZMnnKn3Ug3BvEfMFXF3sX8yVU+wz7+iEMs8Bd6hz1zXYLJHg+Scft+upqvS8hNtm+kIrKwod218LEsKmOssCevO9jWCatCuUzrBuOCVLPswR29Gpj9k0=,iv:pnkXRZ2PfkwRq4s+kgri6EQDw6hQdCQryYDy+6oWrsQ=,tag:5d+OD0I6GXtWHSiWKdnRfw==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0

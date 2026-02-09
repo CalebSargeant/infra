@@ -29,7 +29,7 @@ spec:
             - name: DB_POSTGRESDB_DATABASE
               value: "n8n"
             - name: DB_POSTGRESDB_HOST
-              value: "postgres.database.svc.cluster.local"
+              value: "ep-solitary-feather-agyeoox8-pooler.c-2.eu-central-1.aws.neon.tech"
             - name: DB_POSTGRESDB_PORT
               value: "5432"
             - name: DB_POSTGRESDB_USER
@@ -39,6 +39,8 @@ spec:
                   key: postgres-username
             - name: DB_POSTGRESDB_SCHEMA
               value: "public"
+            - name: DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED
+              value: "false"
             - name: DB_POSTGRESDB_PASSWORD
               valueFrom:
                 secretKeyRef:
