@@ -76,6 +76,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: excalidraw-backend
+                name: excalidraw
                 port:
-                  number: 3000
+                  number: 4000
