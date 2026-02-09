@@ -26,6 +26,7 @@ spec:
         - --reverse-proxy=false
         - --skip-provider-button=true
         - --redirect-url=https://headlamp.sargeant.co/oauth2/callback
+        - --set-xauthrequest=true
         env:
         - name: OAUTH2_PROXY_CLIENT_ID
           valueFrom:
@@ -58,8 +59,8 @@ spec:
             memory: 128Mi
       volumes:
       - name: emails
-        configMap:
-          name: oauth2-proxy-emails
+        secret:
+          secretName: oauth2-proxy-emails
 ---
 apiVersion: v1
 kind: Service
@@ -73,12 +74,3 @@ spec:
   - port: 4180
     targetPort: 4180
     name: http
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: oauth2-proxy-emails
-  namespace: misc
-data:
-  emails.txt: |
-    caleb@magmamoose.com

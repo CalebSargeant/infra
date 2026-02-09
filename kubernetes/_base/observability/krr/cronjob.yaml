@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: krr
+  namespace: observability
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: krr
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: krr
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: krr
+subjects:
+  - kind: ServiceAccount
+    name: krr
+    namespace: observability
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: krr
+  namespace: observability
+spec:
+  # Run every Monday at 9 AM
+  schedule: "0 9 * * 1"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: krr
+        spec:
+          serviceAccountName: krr
+          restartPolicy: OnFailure
+          containers:
+            - name: krr
+              image: ghcr.io/robusta-dev/krr:latest
+              args:
+                - simple
+                - --prometheus-url=http://prometheus-prometheus.observability.svc.cluster.local:9090
+                - --format=table
+                - --namespace=*
+                # Uncomment to enable Slack notifications:
+                # - --slack-webhook-url=$(SLACK_WEBHOOK_URL)
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+              # Uncomment to enable Slack notifications:
+              # env:
+              #   - name: SLACK_WEBHOOK_URL
+              #     valueFrom:
+              #       secretKeyRef:
+              #         name: krr-secrets
+              #         key: slack-webhook-url

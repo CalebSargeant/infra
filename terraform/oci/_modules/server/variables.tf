@@ -27,8 +27,6 @@ variable "shape" {
 variable "image_ocid" {
   description = "OCID of the image to use for the instance"
   type        = string
-  # Default to Oracle Linux 8 for ARM
-  default     = "ocid1.image.oc1.eu-amsterdam-1.aaaaaaaafkbieqzlgvjlnvdkfzoyy6at5n3xk2nu5wkmu7otjz6wxfn6eqnq"
 }
 
 variable "ssh_public_key_path" {
@@ -37,7 +35,7 @@ variable "ssh_public_key_path" {
 }
 
 variable "subnet_id" {
-  description = "ID of the subnet"
+  description = "ID of the app subnet"
   type        = string
 }
 
@@ -49,13 +47,13 @@ variable "network_security_group_id" {
 variable "ocpus" {
   description = "Number of OCPUs for the instance"
   type        = number
-  default     = 4  # Free tier allows up to 4 OCPUs
+  default     = 2  # 2 OCPUs per server (total 4 for 2 servers = free tier limit)
 }
 
 variable "memory_in_gbs" {
   description = "Amount of memory in GBs for the instance"
   type        = number
-  default     = 24  # Free tier allows up to 24 GB RAM
+  default     = 12  # 12GB per server (total 24GB for 2 servers = free tier limit)
 }
 
 variable "vcn_id" {
@@ -65,10 +63,12 @@ variable "vcn_id" {
 
 variable "servers" {
   description = "Map of servers to create"
-  type        = map(object({
-    fault_domain    = number
-    subnet_cidr     = string
-    edge_instance_key = string  # Key to lookup the edge instance from edge module outputs
+  type = map(object({
+    fault_domain = number
+    private_ip   = optional(string)
   }))
-  default = {}
+  default = {
+    "fd1" = { fault_domain = 0 }
+    "fd2" = { fault_domain = 1 }
+  }
 }

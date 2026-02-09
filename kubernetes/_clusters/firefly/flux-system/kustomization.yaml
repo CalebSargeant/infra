@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - gotk-components.yaml
   - gotk-sync.yaml
+  - _namespaces.yaml
   - gitrepos.yaml
   - kustomizations.yaml
   - helmrepositories.yaml
@@ -10,6 +11,7 @@ resources:
   - github-app-secret.yaml
   - buxfer-sync.yaml
   - deskbird-booking.yaml
+  - notifications.yaml
 components:
   - ../../../_components/resource-profiles/t.nano
   - ../../../_components/node-selectors/pi

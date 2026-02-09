@@ -6,7 +6,8 @@ metadata:
     app.kubernetes.io/sops: enabled
 resources:
   - ../../../_base/miscellaneous/namespace.yaml
-  - rancher
   - headlamp
   - ../../../_base/miscellaneous/nextcloud
   - ../../../_base/miscellaneous/wordpress
+  - ../../../_base/miscellaneous/excalidraw
+  - ../../../_base/miscellaneous/syncthing

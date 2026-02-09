@@ -26,3 +26,17 @@ spec:
   secretRef:
     name: buxfer-sync-github-app
   url: https://github.com/CalebSargeant/deskbird-booking
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: fortivpn-gateway
+  namespace: flux-system
+spec:
+  interval: 1m
+  provider: github
+  ref:
+    branch: main
+  secretRef:
+    name: buxfer-sync-github-app
+  url: https://github.com/CalebSargeant/fortivpn-gateway

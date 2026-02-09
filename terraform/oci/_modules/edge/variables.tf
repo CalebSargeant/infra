@@ -50,6 +50,7 @@ variable "fault_domains" {
   description = "Map of fault domains to create instances in"
   type        = map(object({
     fault_domain = number
+    private_ip   = optional(string)
   }))
   default = {
     "fd1" = { fault_domain = 0 }
