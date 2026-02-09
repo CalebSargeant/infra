@@ -1,0 +1,176 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: slack-bot-token
+    namespace: flux-system
+stringData:
+    address: ENC[AES256_GCM,data:SfgocLH2I+asSWhYJBsstzCfJDke85/EuKtIZUdtYn+ljD58DAU=,iv:qXPTWJ2NFkGFoQV6Apx51kFDPaEPViKP3Va8z+V2G/o=,tag:IgPtJo22FLKjGF17JB4WfA==,type:str]
+    token: ENC[AES256_GCM,data:d7PgUbV7RlYHP+sd8Zsm/Y7IWKDFscE4WWOKMyYK6yfKgG9uh+u5D6yDC9ZCM/CMgMggtw4Wu9P9,iv:vhN68pimtGQ8p1o7UsiWjePH1f0TWOPSTh+c5vFc+ns=,tag:yWj3I+KoXMRY1FrueS73Xw==,type:str]
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBlc3ZFVTBSQ2c2MGxxQVhM
+            VDhTd1F3ZGgva2pLcmUxR21uSmJsbDN3QVRnClJibGx5ZVdub1pxSU1LdFcwTW9v
+            SW9MaEhxSnpObjJIbDgxZlJnejVGdEkKLS0tIDF6NHkzUE1wYzVsSk8xOVJhK2d0
+            ak5BeUkxZyswZXZ6bWMwQkZTOTVvN2sK7Sqz5dRCexAqTXwdmyMEsdH3DF7vLXct
+            GWvapq+hwDTuqSLUq8bdyZW/83UBX7bB0qZAh4jV7iLOcYTKMdCrGw==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-01-19T22:38:10Z"
+    mac: ENC[AES256_GCM,data:p9LcNpXV3hiKP8ktzwkzlV7uTPM5xsf4faGXpHgLWv9/3PSH92KHFLPwPwk3mws0YhYbD/h22Ivo+5N0QzJZ5a1CareVPArVtsoenJJ/F4eq7SO+T9KiwnQhUO7BY1O75RZ6NEI2OPZkanMMY2VVk6tI0IKYk57xs989+8ESHTE=,iv:8vg5YV74r8V6gkAuWw3uQOfEWM1kt/3/s0T4QsvAf6U=,tag:YUlSfHKvtFLME7bKtp3qQA==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+    name: slack-success
+    namespace: flux-system
+spec:
+    type: slack
+    channel: engineering-info
+    secretRef:
+        name: slack-bot-token
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBlc3ZFVTBSQ2c2MGxxQVhM
+            VDhTd1F3ZGgva2pLcmUxR21uSmJsbDN3QVRnClJibGx5ZVdub1pxSU1LdFcwTW9v
+            SW9MaEhxSnpObjJIbDgxZlJnejVGdEkKLS0tIDF6NHkzUE1wYzVsSk8xOVJhK2d0
+            ak5BeUkxZyswZXZ6bWMwQkZTOTVvN2sK7Sqz5dRCexAqTXwdmyMEsdH3DF7vLXct
+            GWvapq+hwDTuqSLUq8bdyZW/83UBX7bB0qZAh4jV7iLOcYTKMdCrGw==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-01-19T22:38:10Z"
+    mac: ENC[AES256_GCM,data:p9LcNpXV3hiKP8ktzwkzlV7uTPM5xsf4faGXpHgLWv9/3PSH92KHFLPwPwk3mws0YhYbD/h22Ivo+5N0QzJZ5a1CareVPArVtsoenJJ/F4eq7SO+T9KiwnQhUO7BY1O75RZ6NEI2OPZkanMMY2VVk6tI0IKYk57xs989+8ESHTE=,iv:8vg5YV74r8V6gkAuWw3uQOfEWM1kt/3/s0T4QsvAf6U=,tag:YUlSfHKvtFLME7bKtp3qQA==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+    name: slack-errors
+    namespace: flux-system
+spec:
+    type: slack
+    channel: engineering-alerts
+    secretRef:
+        name: slack-bot-token
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBlc3ZFVTBSQ2c2MGxxQVhM
+            VDhTd1F3ZGgva2pLcmUxR21uSmJsbDN3QVRnClJibGx5ZVdub1pxSU1LdFcwTW9v
+            SW9MaEhxSnpObjJIbDgxZlJnejVGdEkKLS0tIDF6NHkzUE1wYzVsSk8xOVJhK2d0
+            ak5BeUkxZyswZXZ6bWMwQkZTOTVvN2sK7Sqz5dRCexAqTXwdmyMEsdH3DF7vLXct
+            GWvapq+hwDTuqSLUq8bdyZW/83UBX7bB0qZAh4jV7iLOcYTKMdCrGw==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-01-19T22:38:10Z"
+    mac: ENC[AES256_GCM,data:p9LcNpXV3hiKP8ktzwkzlV7uTPM5xsf4faGXpHgLWv9/3PSH92KHFLPwPwk3mws0YhYbD/h22Ivo+5N0QzJZ5a1CareVPArVtsoenJJ/F4eq7SO+T9KiwnQhUO7BY1O75RZ6NEI2OPZkanMMY2VVk6tI0IKYk57xs989+8ESHTE=,iv:8vg5YV74r8V6gkAuWw3uQOfEWM1kt/3/s0T4QsvAf6U=,tag:YUlSfHKvtFLME7bKtp3qQA==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+    name: success-notifications
+    namespace: flux-system
+spec:
+    summary: "🚀 Firefly Cluster Deployment"
+    providerRef:
+        name: slack-success
+    eventSeverity: info
+    eventSources:
+        - kind: Kustomization
+          name: '*'
+        - kind: HelmRelease
+          name: '*'
+    inclusionList:
+        - ^Reconciliation finished.*
+        - ^Helm install succeeded.*
+        - ^Helm upgrade succeeded.*
+    suspend: false
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBlc3ZFVTBSQ2c2MGxxQVhM
+            VDhTd1F3ZGgva2pLcmUxR21uSmJsbDN3QVRnClJibGx5ZVdub1pxSU1LdFcwTW9v
+            SW9MaEhxSnpObjJIbDgxZlJnejVGdEkKLS0tIDF6NHkzUE1wYzVsSk8xOVJhK2d0
+            ak5BeUkxZyswZXZ6bWMwQkZTOTVvN2sK7Sqz5dRCexAqTXwdmyMEsdH3DF7vLXct
+            GWvapq+hwDTuqSLUq8bdyZW/83UBX7bB0qZAh4jV7iLOcYTKMdCrGw==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-01-19T22:38:10Z"
+    mac: ENC[AES256_GCM,data:p9LcNpXV3hiKP8ktzwkzlV7uTPM5xsf4faGXpHgLWv9/3PSH92KHFLPwPwk3mws0YhYbD/h22Ivo+5N0QzJZ5a1CareVPArVtsoenJJ/F4eq7SO+T9KiwnQhUO7BY1O75RZ6NEI2OPZkanMMY2VVk6tI0IKYk57xs989+8ESHTE=,iv:8vg5YV74r8V6gkAuWw3uQOfEWM1kt/3/s0T4QsvAf6U=,tag:YUlSfHKvtFLME7bKtp3qQA==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+    name: error-notifications
+    namespace: flux-system
+spec:
+    providerRef:
+        name: slack-errors
+    eventSeverity: error
+    eventSources:
+        - kind: Kustomization
+          name: '*'
+        - kind: HelmRelease
+          name: '*'
+    suspend: false
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBlc3ZFVTBSQ2c2MGxxQVhM
+            VDhTd1F3ZGgva2pLcmUxR21uSmJsbDN3QVRnClJibGx5ZVdub1pxSU1LdFcwTW9v
+            SW9MaEhxSnpObjJIbDgxZlJnejVGdEkKLS0tIDF6NHkzUE1wYzVsSk8xOVJhK2d0
+            ak5BeUkxZyswZXZ6bWMwQkZTOTVvN2sK7Sqz5dRCexAqTXwdmyMEsdH3DF7vLXct
+            GWvapq+hwDTuqSLUq8bdyZW/83UBX7bB0qZAh4jV7iLOcYTKMdCrGw==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-01-19T22:38:10Z"
+    mac: ENC[AES256_GCM,data:p9LcNpXV3hiKP8ktzwkzlV7uTPM5xsf4faGXpHgLWv9/3PSH92KHFLPwPwk3mws0YhYbD/h22Ivo+5N0QzJZ5a1CareVPArVtsoenJJ/F4eq7SO+T9KiwnQhUO7BY1O75RZ6NEI2OPZkanMMY2VVk6tI0IKYk57xs989+8ESHTE=,iv:8vg5YV74r8V6gkAuWw3uQOfEWM1kt/3/s0T4QsvAf6U=,tag:YUlSfHKvtFLME7bKtp3qQA==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+    name: github-webhook
+    namespace: flux-system
+spec:
+    type: githubdispatch
+    address: https://github.com/CalebSargeant/infra
+    secretRef:
+        name: github-webhook-token
+---
+apiVersion: v1
+kind: Secret
+metadata:
+    name: github-webhook-token
+    namespace: flux-system
+stringData:
+    token: ghp_YOUR_GITHUB_TOKEN_HERE  # needs repo scope
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+    name: github-deployment-notifications
+    namespace: flux-system
+spec:
+    providerRef:
+        name: github-webhook
+    eventSeverity: info
+    eventSources:
+        - kind: Kustomization
+          name: '*'
+    inclusionList:
+        - ^Reconciliation finished.*

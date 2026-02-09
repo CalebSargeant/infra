@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-redirect
+  namespace: misc
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta http-equiv="refresh" content="0;url=/oauth2/start?rd=/">
+      <title>Redirecting...</title>
+    </head>
+    <body>
+      <p>Redirecting to login...</p>
+      <script>window.location.href='/oauth2/start?rd=' + encodeURIComponent(window.location.pathname);</script>
+    </body>
+    </html>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-redirect
+  namespace: misc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-redirect
+  template:
+    metadata:
+      labels:
+        app: auth-redirect
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            cpu: 50m
+            memory: 32Mi
+      volumes:
+      - name: html
+        configMap:
+          name: auth-redirect
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-redirect
+  namespace: misc
+spec:
+  selector:
+    app: auth-redirect
+  ports:
+  - port: 80
+    targetPort: 80

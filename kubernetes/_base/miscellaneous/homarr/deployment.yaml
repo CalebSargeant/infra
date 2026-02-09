@@ -16,12 +16,20 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: homarr
-          image: ghcr.io/ajnart/homarr:0.15.3
+          image: ghcr.io/homarr-labs/homarr:latest
           ports:
             - containerPort: 7575
           env:
             - name: TZ
               value: "Europe/Amsterdam"
+            - name: DB_URL
+              value: "postgresql://admin:s78x7jKMiWWNpdd@10.42.0.35:5432/homarr"
+            - name: SECRET_ENCRYPTION_KEY
+              value: "3d35e307db58a121aabbb21a444906467510869bc6133952392defbe31e15930"
+            - name: DB_DRIVER
+              value: "nodePostgres"
+            - name: DB_DIALECT
+              value: "postgresql"
           volumeMounts:
             - mountPath: /app/data/configs
               name: homarr-configs

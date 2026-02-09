@@ -5,64 +5,88 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 components:
-  - ../../../_components/resource-profiles/t.small
-  - ../../../_components/resource-profiles/m.medium
-  - ../../../_components/resource-profiles/m.large
   - ../../../_components/node-selectors/mini
 resources:
-  - ../../../_base/observability/alloy
-  - ../../../_base/observability/mimir
+  - ../../../_base/observability/namespace.yaml
+  # Core observability stack
+  - ../../../_base/observability/kube-prometheus-stack
+  - ../../../_base/observability/thanos-query
+  - ../../../_base/observability/thanos-store
+  - ../../../_base/observability/thanos-compactor
   - ../../../_base/observability/loki
-  - ../../../_base/observability/tempo
-  - ../../../_base/observability/pyroscope
-  - ../../../_base/observability/alertmanager
-  - ../../../_base/observability/mikrotik-exporter
-  - ../../../_base/observability/cloudflare-exporter
+  - ../../../_base/observability/fluent-bit
+  - ../../../_base/observability/krr
+#  # Resource optimization
+#  - ../../../_base/observability/vpa
+#  - ../../../_base/observability/goldilocks
+  # Exporters
   - ../../../_base/observability/blackbox-exporter
-  - ../../../_base/observability/postgres-exporter
-  - ../../../_base/observability/raspberrypi_exporter
-  - ../../../_base/observability/smartctl_exporter
-  - ../../../_base/observability/nvme_exporter
-  - ../../../_base/observability/etcd_exporter
-  - ../../../_base/observability/nfs_exporter
-  - ../../../_base/observability/restic_exporter
-  - ../../../_base/observability/meross-exporter
-  - ../../../_base/observability/scraparr
-  - ../../../_base/observability/homebridge-exporter
-  - ../../../_base/observability/home-assistant-exporter
-  - ../../../_base/observability/nginx-exporter
-  - ../../../_base/observability/plex_exporter
-  - ../../../_base/observability/nextcloud-exporter
-  - ../../../_base/observability/pmacct-netflow
+  # Cost monitoring
+#  - ../../../_base/observability/opencost
+#  - ../../../_base/observability/mikrotik-exporter
+#  - ../../../_base/observability/cloudflare-exporter
+#  - ../../../_base/observability/postgres-exporter
+#  - ../../../_base/observability/raspberrypi_exporter
+#  - ../../../_base/observability/smartctl_exporter
+#  - ../../../_base/observability/nvme_exporter
+#  - ../../../_base/observability/etcd_exporter
+#  - ../../../_base/observability/nfs_exporter
+#  - ../../../_base/observability/restic_exporter
+#  - ../../../_base/observability/meross-exporter
+#  - ../../../_base/observability/scraparr
+#  - ../../../_base/observability/homebridge-exporter
+#  - ../../../_base/observability/home-assistant-exporter
+#  - ../../../_base/observability/nginx-exporter
+#  - ../../../_base/observability/plex_exporter
+#  - ../../../_base/observability/nextcloud-exporter
+#  - ../../../_base/observability/pmacct-netflow
 patches:
+  # Reduce Loki resources to fit mini nodes
+  - patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 1
+            memory: 2Gi
+    target:
+      kind: StatefulSet
+      labelSelector: "app.kubernetes.io/name=loki"
+
+  # Temporarily scale down Thanos Store to 0 to free resources
+  - patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 0
+    target:
+      kind: StatefulSet
+      labelSelector: "app.kubernetes.io/name=thanos-store"
+
   # Node selector for all observability apps
   - patch: |
       - op: add
         path: /metadata/labels/node-selector
         value: mini
     target:
-      labelSelector: "app.kubernetes.io/name in (alloy, mimir, loki, tempo, pyroscope, alertmanager, mikrotik-exporter, cloudflare-exporter, blackbox-exporter, postgres-exporter, raspberrypi-exporter, smartctl-exporter, nvme-exporter, etcd-exporter, nfs-exporter, restic-exporter, meross-exporter, scraparr, homebridge-exporter, home-assistant-exporter, nginx-exporter, plex-exporter, nextcloud-exporter, pmacct-netflow)"
+      labelSelector: "app.kubernetes.io/name in (kube-prometheus-stack, thanos-query, thanos-store, thanos-compactor, loki, fluent-bit, vpa, goldilocks, opencost, mikrotik-exporter, cloudflare-exporter, blackbox-exporter, postgres-exporter, raspberrypi-exporter, smartctl-exporter, nvme-exporter, etcd-exporter, nfs-exporter, restic-exporter, meross-exporter, scraparr, homebridge-exporter, home-assistant-exporter, nginx-exporter, plex-exporter, nextcloud-exporter, pmacct-netflow)"
 
-  # Resource profiles - Small exporters
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: t.small
-    target:
-      labelSelector: "app.kubernetes.io/name in (mikrotik-exporter, cloudflare-exporter, blackbox-exporter, postgres-exporter, raspberrypi-exporter, smartctl-exporter, nvme-exporter, etcd-exporter, nfs-exporter, restic-exporter, meross-exporter, scraparr, homebridge-exporter, home-assistant-exporter, nginx-exporter, plex-exporter, nextcloud-exporter, pmacct-netflow)"
 
-  # Resource profiles - Medium apps (observability stack)
-  - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: m.medium
-    target:
-      labelSelector: "app.kubernetes.io/name in (alloy, alertmanager)"
 
-  # Resource profiles - Large apps (storage/processing)
+
+  # Override fluent-bit resources (DaemonSet gets m.large by default from component)
   - patch: |
-      - op: add
-        path: /metadata/labels/resource-profile
-        value: m.large
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
     target:
-      labelSelector: "app.kubernetes.io/name in (mimir, loki, tempo, pyroscope)"
+      kind: DaemonSet
+      labelSelector: "app.kubernetes.io/name=fluent-bit"
