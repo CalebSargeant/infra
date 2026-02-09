@@ -1,47 +1,30 @@
 # Excalidraw Deployment
 
-This directory contains Kubernetes manifests for deploying Excalidraw with MongoDB Atlas storage backend on the firefly cluster.
+This directory contains Kubernetes manifests for deploying Excalidraw with PostgreSQL storage backend on the firefly cluster.
 
 ## Architecture
 
-- **Excalidraw Frontend**: Official excalidraw/excalidraw Docker image
-- **Storage Backend**: Custom Node.js Express API that connects to MongoDB Atlas
-- **Database**: MongoDB Atlas (free tier)
+- **Excalidraw with Persistence**: Uses `ghcr.io/ozencb/excalidraw-persist:0.18.0-persist.1` which includes both frontend and backend in a single container
+- **Database**: PostgreSQL (shared instance, configured via the `STORAGE_URI` secret)
 - **Ingress**: Traefik with automatic HTTPS via Let's Encrypt
 
 ## Setup Instructions
 
-### 1. MongoDB Atlas Setup
+### 1. PostgreSQL Database Setup
 
-1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) and create a free account if you don't have one
-2. Create a new cluster (free M0 tier)
-3. Create a database user:
-   - Go to Database Access
-   - Add a new database user with username and password
-   - Save these credentials
-4. Configure network access:
-   - Go to Network Access
-   - Add IP address: `0.0.0.0/0` (allow from anywhere) or your cluster's public IP
-5. Get your connection string:
-   - Go to your cluster
-   - Click "Connect"
-   - Choose "Connect your application"
-   - Copy the connection string (it will look like: `mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority`)
+The deployment uses the existing PostgreSQL instance. Create a database for Excalidraw:
 
-### 2. Update the Secret
-
-Edit `secret.yaml` and replace the MongoDB connection string:
-
-```yaml
-stringData:
-  MONGODB_URI: "mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/excalidraw?retryWrites=true&w=majority"
+```sql
+CREATE DATABASE excalidraw;
+-- Grant permissions to the admin user if needed
+GRANT ALL PRIVILEGES ON DATABASE excalidraw TO admin;
 ```
 
-**Important**: Replace:
-- `username` with your MongoDB Atlas username
-- `password` with your MongoDB Atlas password
-- `cluster0.xxxxx` with your actual cluster URL
-- The database name is set to `excalidraw`
+### 2. Secret Configuration
+
+The secret is already configured with the `STORAGE_URI` field containing the PostgreSQL connection string. The deployment uses this existing secret - no changes needed.
+
+**Note**: Ensure the database referenced in `STORAGE_URI` exists (see step 1 above).
 
 ### 3. Update the Ingress Hostname
 
@@ -63,7 +46,7 @@ If you're using Flux CD (based on your existing setup):
 Or deploy manually:
 
 ```bash
-kubectl apply -k /Users/caleb/Nextcloud/repos/calebsargeant/infra/kubernetes/_base/miscellaneous/excalidraw/
+kubectl apply -k kubernetes/_base/miscellaneous/excalidraw/
 ```
 
 ### 5. Verify Deployment
@@ -79,30 +62,33 @@ kubectl get ingress -n misc
 Check the logs:
 
 ```bash
-# Frontend logs
-kubectl logs -n misc -l app=excalidraw -c excalidraw
-
-# Backend logs
-kubectl logs -n misc -l app=excalidraw -c excalidraw-backend
+kubectl logs -n misc -l app=excalidraw
 ```
 
 ## API Endpoints
 
-The storage backend provides the following endpoints:
+The excalidraw-persist backend provides the following endpoints on port 4000:
 
 - `GET /health` - Health check
-- `GET /api/drawings` - List all drawings
-- `GET /api/drawings/:id` - Get a specific drawing
-- `POST /api/drawings` - Save a new drawing
-- `PUT /api/drawings/:id` - Update an existing drawing
-- `DELETE /api/drawings/:id` - Delete a drawing
+- `GET /api/boards` - List all boards
+- `GET /api/boards/:id` - Get a specific board
+- `POST /api/boards` - Create a new board
+- `PUT /api/boards/:id` - Update an existing board
+- `DELETE /api/boards/:id` - Delete a board
 
 ## Usage
 
 1. Navigate to `https://excalidraw.sargeant.co` (or your configured domain)
 2. Create your drawings
-3. Drawings are automatically saved to MongoDB Atlas
-4. You can share drawing IDs with others
+3. Drawings are automatically saved to PostgreSQL
+4. You can create multiple boards and share board IDs with others
+
+## Features
+
+- **Persistent Storage**: All drawings are saved to PostgreSQL
+- **Multiple Boards**: Create and manage multiple drawing boards
+- **Collaboration**: Share board links with others for real-time collaboration
+- **Auto-save**: Drawings are automatically saved as you work
 
 ## Customization
 
@@ -113,11 +99,11 @@ Adjust CPU/memory in `deployment.yaml`:
 ```yaml
 resources:
   requests:
-    memory: "128Mi"
-    cpu: "50m"
+    memory: "256Mi"
+    cpu: "100m"
   limits:
-    memory: "512Mi"
-    cpu: "500m"
+    memory: "1Gi"
+    cpu: "1000m"
 ```
 
 ### Timezone
@@ -132,11 +118,12 @@ env:
 
 ## Troubleshooting
 
-### Backend can't connect to MongoDB
+### Backend can't connect to PostgreSQL
 
-1. Check the MongoDB Atlas connection string is correct
-2. Verify network access is configured in MongoDB Atlas
-3. Check backend logs: `kubectl logs -n misc -l app=excalidraw -c excalidraw-backend`
+1. Check the PostgreSQL connection string is correct in the secret
+2. Verify the excalidraw database exists in PostgreSQL
+3. Check backend logs: `kubectl logs -n misc -l app=excalidraw`
+4. Verify PostgreSQL is accessible: `kubectl exec -it -n database <postgres-pod> -- psql -U admin -d excalidraw`
 
 ### Ingress not working
 
@@ -145,9 +132,16 @@ env:
 3. Verify DNS points to your cluster
 4. Check ingress status: `kubectl describe ingress -n misc`
 
+### Application errors
+
+1. Check pod status: `kubectl get pods -n misc`
+2. View logs: `kubectl logs -n misc -l app=excalidraw`
+3. Verify the DATABASE_URL environment variable is set correctly
+4. Check if the database migrations ran successfully
+
 ## Notes
 
-- The backend container builds and installs dependencies on startup, so initial startup may take a minute
-- MongoDB Atlas free tier has storage limits (512 MB)
-- Drawings are stored as JSON documents in the `drawings` collection
-- The frontend uses the official Excalidraw image which gets regular updates
+- The excalidraw-persist image includes both frontend (port 80) and backend (port 4000) in a single container
+- PostgreSQL is shared with other applications in the cluster
+- The application handles database migrations automatically on startup
+- Boards are stored in the PostgreSQL database with versioning support
