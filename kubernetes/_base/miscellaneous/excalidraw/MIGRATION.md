@@ -55,7 +55,7 @@ kubectl get secret excalidraw -n misc -o jsonpath='{.data.STORAGE_URI}' | base64
 If using Flux CD:
 ```bash
 git add .
-git commit -m "Deploy excalidraw-persist migration (deployment/ingress/service updates)"
+git commit -m "Migrate excalidraw to persist fork: update deployment, remove backend service, update ingress"
 git push
 ```
 
