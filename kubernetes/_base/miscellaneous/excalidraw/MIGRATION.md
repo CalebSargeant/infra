@@ -11,15 +11,14 @@ This guide explains how to complete the migration from the previous Excalidraw s
 
 ## Prerequisites
 
-- PostgreSQL instance running at `10.42.0.35:5432` (already deployed in your cluster)
-- SOPS encryption key configured for encrypting secrets
-- PostgreSQL admin credentials
+- PostgreSQL connection string already configured in the `excalidraw` secret (under `STORAGE_URI` key)
+- Ensure the PostgreSQL database exists for Excalidraw
 
 ## Migration Steps
 
-### 1. Create the Excalidraw Database
+### 1. Create the Excalidraw Database (if needed)
 
-Connect to your PostgreSQL instance and create the database:
+Connect to your PostgreSQL instance and create the database if it doesn't exist:
 
 ```bash
 # Connect to the postgres pod
@@ -35,31 +34,9 @@ GRANT ALL PRIVILEGES ON DATABASE excalidraw TO admin;
 \q
 ```
 
-### 2. Update the Secret
+### 2. Secret Configuration
 
-The secret needs to be updated to replace `DB_PASSWORD` and `STORAGE_URI` with `DATABASE_URL`.
-
-1. Create a new unencrypted secret file from the template:
-   ```bash
-   cp secret.yaml.template secret.yaml
-   ```
-
-2. Edit `secret.yaml` and set the correct DATABASE_URL:
-   ```yaml
-   stringData:
-     DATABASE_URL: "postgresql://admin:YOUR_ACTUAL_PASSWORD@10.42.0.35:5432/excalidraw"
-   ```
-   Replace `YOUR_ACTUAL_PASSWORD` with the actual PostgreSQL admin password.
-
-3. Encrypt the secret with SOPS:
-   ```bash
-   sops --encrypt secret.yaml > secret.enc.yaml
-   ```
-
-4. Remove the unencrypted file:
-   ```bash
-   rm secret.yaml
-   ```
+The existing `excalidraw` secret already contains the `STORAGE_URI` field with the PostgreSQL connection string. The deployment has been updated to use this existing field - no secret changes are needed.
 
 ### 3. Deploy the Changes
 
@@ -131,19 +108,19 @@ If you need to rollback to the previous setup:
 Check logs: `kubectl logs -n misc -l app=excalidraw`
 
 Common issues:
-- DATABASE_URL is incorrect or missing
+- STORAGE_URI is incorrect or missing in the secret
 - PostgreSQL is not accessible
 - Database doesn't exist
 
 ### Database connection errors
 
-1. Verify the DATABASE_URL is correct in the secret
+1. Verify the STORAGE_URI is correct in the secret
 2. Check PostgreSQL is running: `kubectl get pods -n database`
 3. Test connectivity from the pod:
    ```bash
    kubectl exec -it -n misc <excalidraw-pod> -- /bin/sh
    apk add postgresql-client  # if not available
-   psql "postgresql://admin:password@10.42.0.35:5432/excalidraw"
+   psql "<connection-string-from-secret>"
    ```
 
 ### Application works but data doesn't persist

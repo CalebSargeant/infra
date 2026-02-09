@@ -30,7 +30,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: excalidraw
-                  key: DATABASE_URL
+                  key: STORAGE_URI
           resources:
             requests:
               memory: "256Mi"

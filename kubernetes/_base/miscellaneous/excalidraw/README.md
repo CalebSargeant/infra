@@ -20,27 +20,9 @@ CREATE DATABASE excalidraw;
 GRANT ALL PRIVILEGES ON DATABASE excalidraw TO admin;
 ```
 
-### 2. Update the Secret
+### 2. Secret Configuration
 
-The secret needs to contain the `DATABASE_URL` for PostgreSQL connection.
-
-1. Copy the template:
-   ```bash
-   cp secret.yaml.template secret.yaml
-   ```
-
-2. Edit `secret.yaml` and update the DATABASE_URL with the correct password:
-   ```yaml
-   stringData:
-     DATABASE_URL: "postgresql://admin:YOUR_PASSWORD@10.42.0.35:5432/excalidraw"
-   ```
-
-3. Encrypt the secret with SOPS:
-   ```bash
-   sops --encrypt secret.yaml > secret.enc.yaml
-   ```
-
-**Important**: Replace `YOUR_PASSWORD` with the actual PostgreSQL admin password.
+The secret is already configured with the `STORAGE_URI` field containing the PostgreSQL connection string. The deployment uses this existing secret - no changes needed.
 
 ### 3. Update the Ingress Hostname
 
