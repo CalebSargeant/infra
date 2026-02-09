@@ -11,6 +11,7 @@ resources:
   - cloudflared
   - 1password-connect
   - external-secrets
+  - external-dns
 patches:
   # Node selector for all apps
   - patch: |
