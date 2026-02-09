@@ -20,7 +20,7 @@ jobs:
       build_openfortivpn: ${{ steps.filter.outputs.openfortivpn }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Check changes
         id: filter
@@ -60,7 +60,7 @@ jobs:
 
       - name: Checkout repository
         if: env.BUILD_NEEDED == 'true'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           sparse-checkout: |
             ${{ matrix.image.path }}
