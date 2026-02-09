@@ -1,0 +1,21 @@
+# Temporary kubeconfig files (contain sensitive tokens)
+*.yaml
+!kustomization.yaml
+!configmap.yaml
+!serviceaccount.yaml
+!serviceaccount-token.yaml
+!clusters/_template.yaml
+!.sops.yaml
+!ingress.yaml
+!oauth2-proxy.yaml
+!oauth2-proxy-p1.yaml
+!middleware-oauth2.yaml
+!middleware-oauth2-p1.yaml
+!middleware-errors.yaml
+!ingressroute.yaml
+!ingressroute-p1.yaml
+!certificate-p1.yaml
+!auth-redirect.yaml
+
+# Keep encrypted files
+!*.enc.yaml

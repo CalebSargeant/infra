@@ -19,6 +19,7 @@ resource "oci_core_instance" "this" {
     assign_public_ip       = true
     nsg_ids                = [var.network_security_group_id]
     skip_source_dest_check = true
+    private_ip             = each.value.private_ip
   }
 
   source_details {

@@ -18,6 +18,7 @@ spec:
       containers:
       - name: nzbhydra2
         image: linuxserver/nzbhydra2:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5076
           name: http

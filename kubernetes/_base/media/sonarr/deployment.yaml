@@ -35,6 +35,9 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: sonarr
+            - mountPath: /config/config.xml
+              name: sonarr-config
+              subPath: config.xml
             - mountPath: /series
               name: series
             - mountPath: /downloads
@@ -43,6 +46,9 @@ spec:
         - name: sonarr
           persistentVolumeClaim:
             claimName: sonarr
+        - name: sonarr-config
+          configMap:
+            name: sonarr-config
         - name: series
           persistentVolumeClaim:
             claimName: series

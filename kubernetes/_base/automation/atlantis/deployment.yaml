@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atlantis
+  namespace: automation
+  labels:
+    app: atlantis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: atlantis
+  template:
+    metadata:
+      labels:
+        app: atlantis
+    spec:
+      serviceAccountName: atlantis
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: atlantis
+          image: ghcr.io/runatlantis/atlantis:v0.31.0
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "100m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+          env:
+            - name: ATLANTIS_REPO_ALLOWLIST
+              value: "github.com/CalebSargeant/infra"
+            - name: ATLANTIS_GH_USER
+              valueFrom:
+                secretKeyRef:
+                  name: atlantis
+                  key: github-user
+            - name: ATLANTIS_GH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: atlantis
+                  key: github-token
+            - name: ATLANTIS_GH_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: atlantis
+                  key: webhook-secret
+            - name: ATLANTIS_PORT
+              value: "4141"
+            - name: ATLANTIS_ATLANTIS_URL
+              value: "https://atlantis.sargeant.co"
+            - name: ATLANTIS_DATA_DIR
+              value: "/atlantis-data"
+            - name: ATLANTIS_REPO_CONFIG_JSON
+              valueFrom:
+                configMapKeyRef:
+                  name: atlantis-config
+                  key: repos.json
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: atlantis-aws
+                  key: access-key-id
+                  optional: true
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: atlantis-aws
+                  key: secret-access-key
+                  optional: true
+            - name: AWS_REGION
+              value: "us-east-1"
+            - name: ARM_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: atlantis-azure
+                  key: client-id
+                  optional: true
+            - name: ARM_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: atlantis-azure
+                  key: client-secret
+                  optional: true
+            - name: ARM_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: atlantis-azure
+                  key: tenant-id
+                  optional: true
+            - name: ARM_SUBSCRIPTION_ID
+              valueFrom:
+                secretKeyRef:
+                  name: atlantis-azure
+                  key: subscription-id
+                  optional: true
+          ports:
+            - name: atlantis
+              containerPort: 4141
+          volumeMounts:
+            - name: atlantis-data
+              mountPath: /atlantis-data
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 4141
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 4141
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 15
+      volumes:
+        - name: atlantis-data
+          persistentVolumeClaim:
+            claimName: atlantis

@@ -12,18 +12,3 @@ spec:
   storageClassName: sabnzbd-config
   hostPath:
     path: /mnt/nvme/sabnzbd-config
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: sabnzbd-downloads
-  namespace: media
-spec:
-  capacity:
-    storage: 50Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: sabnzbd-downloads
-  hostPath:
-    path: /mnt/nvme/sabnzbd-downloads

@@ -6,4 +6,4 @@ resources:
   - ../../../../_base/media/plex
 components:
   - ../../../../_components/resource-profiles/t.medium
-  - ../../../../_components/node-selectors/pi
+  - ../../../../_components/node-selectors/mini

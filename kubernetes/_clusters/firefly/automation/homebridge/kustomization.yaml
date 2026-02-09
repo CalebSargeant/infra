@@ -17,3 +17,18 @@ patches:
       - op: replace
         path: /metadata/name
         value: homebridge
+      - op: replace
+        path: /spec/valuesFrom/0/name
+        value: homebridge-values
+      - op: replace
+        path: /spec/values/ingress/main/hosts/0/host
+        value: homebridge.sargeant.co
+      - op: replace
+        path: /spec/values/ingress/main/hosts/1/host
+        value: homebridge.sargeant.local
+      - op: replace
+        path: /spec/values/ingress/main/tls/0/hosts/0
+        value: homebridge.sargeant.co
+      - op: replace
+        path: /spec/values/ingress/main/tls/0/secretName
+        value: homebridge-tls

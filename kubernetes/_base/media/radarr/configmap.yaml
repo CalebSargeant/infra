@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: radarr-config
+    namespace: media
+data:
+    config.xml: ENC[AES256_GCM,data:bgGHK2kGeGTZNCON41pkQ1TuILjFAKRRvNMj8PkFBb2JG5HKHWvXj+ySBCVtYM1d+X9AQ+xI4WNZiNC+yokyGD5iVEPDgY9Tpti3BIiLGMUGN4pqh7XeiiflZGD5tdlwb57Nu6Ovl/Bdtr6JAhveT5YCC0SMg5mvHrxx3IoEVm5hOnXvZ45svA2WmBRvBYnYH14niqGrtvTKTTfH11W2gofSQVP2fZeu/xZWKASXoPwJ9b8HJ7p9oE23sr3Etf9FvmTGC+l0rxt3+gIpG8G0mT7GK3yWlXVkJeHgeMAPG84TT2nR7SCnY4f8D9T5dj3SlGFg0Bc09cqcQO+2rB1h13QpQeJ36/OZY1WgiQdQAfluVjKjMnRtWnvBubC5X/oeM9ZeqbmkOVdbNqmA7V9SzUjqTE55cvD5Ub0UdmpY8XpQk5zJ1RdLRZHrn/hpvYLU9N0HtlCWXdxXGW4gcqKms5qOD8GwpIHsd18ZMoHCWbyDcR3joyiJxIO1iWbVg//N6GZO7FXdtNoy7d67wN2J7NmrQy4RgXYj2EBM2sULOXB9N/pfw/6EGvAusUnZjx2FkDPQNA/Ar4vwfyIfC3W8DfLPKm7PnOPD/lXYKMwblbvkTDG0z6TXnF1AIF+Q6r4tLH4KctZq5jb59HhXGvBOom+/tsYIFDB5stJ0MVc21T68MhSPJgUs4SLP767r6gMycZr+UptMtVHuqTEhk8uksP8vqhwSGrvb8EN6KtwKiemRNojOz2eydJJ4Wj/25T3rz9zN+Rn/IV/q+R4BjdvhZhwpVuaJQI/zgj4FO3aIbCQCe+C+HDE6wp3gMM71ZKBy+yWBtU5lyx2N+SJFDfTh6pidcwletoJd7vVrUZ50v+ThrpMPecDF1BznvxbX6EnXB961b9Sa1xNYIbULnbVs8vVlbpH82apTZLqyPGWFh2vrakIokgbEGflZArcONeyPcYQPqzTiQcyb4tZL4lqbXWtfP0s14fyiBnO6l709zgCYVPfZQfkXVbBlOovKAAw0lCkM++ar7tHLp3bAv+3ETcwuHy06DGDTOdxcCs2cKumWHZBM2T1UsoqbM4XP0E2vZ55UWltVMg2YO9y6k9NyZoC6sBoi9o6peFiGDxhhpqmfo2KLZ+Q8wC6CEvQnELBqfR1xt1t1fNRfH8OL3VrC6hQUZ9n9GJH50x4746BdxHEDjtk=,iv:dcBL8Ewu3eeXeyU8DoZH/ZQdwiVWKJljTgPT84uCRuo=,tag:O5Z1QrZ/GH5nothVSi/sbQ==,type:str]
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBtN0ZSMHBFMzJUNjh5clB5
+            TDVzRGpJZ21PZlFCZlRLU0NjSHp5VVNKdFFJCk1tc3RMeEs0UzhaSHRBL214MWda
+            S2NzU25vLzRoWFhMQ0JQZ1JDRnU0YTgKLS0tIHp3UUpCOHU5aW5QdDNEMlZBRmZY
+            SkZjMStRUkdrMEcyRFpnRW40aWl4b1kKvAbfHEW/9fNZZEIDWIgk/VaACv+mHUq+
+            m7nqOemxGLmEv8QHYqFGhVLqwJyJW31wK6iUq3a6fjguYXJc/2RcYw==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-02-08T20:37:22Z"
+    mac: ENC[AES256_GCM,data:N3UUoKElYeaN2wzWe78Fy3TGzux2eCLqcSMQzTHXSH71sN1TipnDsw0lJ7SranF5MtN9J3CbctGsd5qPPRLF5+FUEG18YHC12H/s9s6QsgiCBXtOqi8ZnklPWswX/e04Dzu8780BqmYQan21BWhyouimiOqAJlz4FOH0kJlBtag=,iv:uiVwO9bOSAHJaYJuxtVq2vqu93SK3KubPbNubsq9uJY=,tag:k6nPeiSte6xkGyMJ47l4yw==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0
