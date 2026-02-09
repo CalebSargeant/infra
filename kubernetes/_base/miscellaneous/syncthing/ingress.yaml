@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: syncthing.sargeant.dev
+    - host: syncthing.sargeant.co
       http:
         paths:
           - path: /
@@ -20,5 +20,5 @@ spec:
                   number: 8384
   tls:
     - hosts:
-        - syncthing.sargeant.dev
+        - syncthing.sargeant.co
       secretName: syncthing-tls
