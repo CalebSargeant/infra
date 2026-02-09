@@ -1,0 +1,6 @@
+creation_rules:
+  - path_regex: middleware\.yaml$
+    encrypted_regex: '^(Authorization)$'
+    age: "age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0"
+  - encrypted_regex: '^(data|stringData)$'
+    age: "age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0"

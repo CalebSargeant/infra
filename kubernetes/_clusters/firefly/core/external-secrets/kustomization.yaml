@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: external-secrets
+  labels:
+    app.kubernetes.io/sops: enabled
+resources:
+  - ../../../../_base/core/external-secrets
+  - oci-vault-secret-enc.yaml
+  - secret-store.yaml
+patches:
+  # Node selector for external-secrets
+  - patch: |
+      - op: add
+        path: /metadata/labels/node-selector
+        value: pi
+    target:
+      labelSelector: "app.kubernetes.io/name=external-secrets"
+
+  # Resource profile for external-secrets
+  - patch: |
+      - op: add
+        path: /metadata/labels/resource-profile
+        value: t.small
+    target:
+      labelSelector: "app.kubernetes.io/name=external-secrets"

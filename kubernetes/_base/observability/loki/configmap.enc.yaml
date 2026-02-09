@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: loki-config
+    namespace: observability
+data:
+    loki.yaml: ENC[AES256_GCM,data:5rIFS9SS7/Zn39WKvFSpHTxtKqTNmwxbLL/CLXCSExQ+XR+JColcEwJMIFqyg/UX9iWOpxJn644dA0Y7BxPxqyXcyy6BOzUj4znkKNAxhwPx/mTHfDHyco3YsJkmHNJlpYiF9z2ttgRnVmAhHsYu6X1REHKWPwmaOaR4hmM2ONVDiM3nZp/in9rd1wH4ghR22+DP8Bl2BztUZ5nN0PyONmhN4J12F7CKCE5k0xjN2bvuVyfFFc3zgUIJGVES5g64xV7pXcF2sT1lBAS8QJr6N8i4pEA17Y3EfcWXhDu+qmJjOlGJ8qW3y+OtxrTvXTdp1zo2qT7ydNbV9yKquFR8qNomQg0vZswj9AGQuSVCuE4A0ZYqqhXl3k8ojdos2ZsKvN+tYG6JSSqpElFYVdW1bUH3GGrWDsi+74pkXLEZhCD2XMwhCSmppn9Oq7NthgQdrorTFsJgSMfuI4v616w1jig4rAxr4satDPlf6qene5vjzv3KHLDzegR3pxYLrE8VHHfS4rqBm9kzBAo5XAu8kyJ1i1iZ1l6Wjlk9QOnB99Gz9HjhVw//uGBRKTKbfgbsrBKXxwwvwX+JIPyEOmrS2ZecZQCK15HkKCmDttWwsRKahJwUSsi/JiScP30ycw19+AbnAFf0nwDPMxBK943iTIU2h4bbzOqKCwSh+9quOBt9HVQ8kjndN7+7VANHw3ardEm+jRFJk0+XZ16Yk/32DekuwDq5m9Xg2lry1+C8FC9V5BEk772ol7k/JZWDzqtvI56j+Qk5NcA9hGrUb1VYJZKCquOzHqw4I+XsKI3Sy5sWgwwY3gNCLkKah1U5uKxHft7M1iOumNrr/aJgXpCiphFsbEljoiC8VR9L7oWIl7hlo18VNaQEgu99zLddLdm9w1nuDoqHNRz2bigEYrfJRTqkRp75Xek04lT3KW8zsNQLwxGRVUtQDSuV5U8a6TA07UrYO2XJAYnfuEyrlbMq34CSFevC2cmk9NzIi+uM3Gw6Ub2X/ZUtsNPNfQN9JZRimBrHLN6FMaGggXjme8bWq0AMfpJVgnNfIJGfsYbaKYOk4HcmZQzAuTJxiiiqvKt/DtJB0bPQJLt9xsW/K+EvzNAVNy8wXpHqcuL4/AjnxmToJWLyUava1zzxh88kEC3cTNrwynJ6EUD3o7LVpnYOM04nHPUcGOHjj7a+Gn+mNPovw7kDcLjiQnOLKEVPdkSvJkoElpZaXmIXs91u2Fi6FUkLPG4u7ourzE1Xg1dv+7UjFdF8ogxzBZGBFH1fe+Vvz5Jyckh6vC9SVqlbmxJFoMX7pCQ2S/k3sPQebAhlrYtjkieyqcRo62l+il6cFxSebsBa3zm/5FEFfBs3sGGu228+Rgmz6NViDo424kC9LgJy2aGAshm7uKZDc5lrmaTV03/h/HEKJ118Rt7hRpcmT8bDSMWkv6eGm6Jbu45O3G4oEORJKA9QT5HPit8YUWAbgo4qqNi+Pg9rw9fK3D357UuV,iv:WMZ134r81CHhkqtDHvCk3VUfdk4h8PXBLsl8E2FWsm0=,tag:X+0ljoXsBP2TosxV7BLm6w==,type:str]
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBXcXMxQkVKdkhOM3lkVGhk
+            VUhMcXk0elFtUzh0bms4NURJOTZ3bWtmcTJjCmoxOEQzcGhOeVJ5ekxuYUdjNFBz
+            cHozcG4zNUlqZmw1aUJYd3BGQVJVUkkKLS0tIHh1bDZZV25UZmwzNHd0Tjh0a2xR
+            Nm9VM2Y2MEZBSnhsZEVEVlI3aGFDL2cK2GJM5drPWSTHVt333bFcpWmG6lLER9b2
+            BlePQ9bg2VtqqFhS03JH/UvGWc9Oiaysr3LxNCPK2xFPGxrHJX8p2g==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-02-08T22:32:00Z"
+    mac: ENC[AES256_GCM,data:EpC/IWc0zgf+iINt7SvgjYYNi3Ynf8zuYrZ8Zf+KmQAlg6oijtPl7BtJq/t1M1K6gauI++2llpKaU0O2s5W6/OwG/GNnt/G6YQCddHaVLXy3aoXqXIw5tAPXuXDpo8P69K34sT1ScdNa4vtxllSLmf4NaXkFWig6PgpfgHAtpRc=,iv:fEoNTPPToLK0BKqsF1nGD85jpgTZ6RCm/YRZxvGRpyA=,tag:2sL3R4Jk9bVOLxjuJGWcGA==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.11.0

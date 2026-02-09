@@ -1,0 +1,55 @@
+name: FluxCD Deployment Tracker
+
+on:
+  repository_dispatch:
+    types: [reconciliation]
+
+jobs:
+  create-deployment:
+    runs-on: ubuntu-latest
+    permissions:
+      deployments: write
+      contents: read
+    
+    steps:
+      - name: Parse FluxCD Event
+        id: parse
+        run: |
+          # Extract metadata from the webhook payload
+          echo "Event received from FluxCD"
+          echo "metadata=${{ toJson(github.event.client_payload) }}" >> $GITHUB_OUTPUT
+          
+          # Extract resource name and namespace from the event
+          RESOURCE_NAME="${{ github.event.client_payload.involvedObject.name }}"
+          RESOURCE_KIND="${{ github.event.client_payload.involvedObject.kind }}"
+          NAMESPACE="${{ github.event.client_payload.involvedObject.namespace }}"
+          REVISION="${{ github.event.client_payload.metadata.revision }}"
+          
+          echo "resource_name=${RESOURCE_NAME}" >> $GITHUB_OUTPUT
+          echo "resource_kind=${RESOURCE_KIND}" >> $GITHUB_OUTPUT
+          echo "namespace=${NAMESPACE}" >> $GITHUB_OUTPUT
+          echo "revision=${REVISION}" >> $GITHUB_OUTPUT
+          
+          # Create environment name based on cluster
+          # Assumes cluster name is in the path or can be derived
+          ENVIRONMENT="firefly"
+          echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
+
+      - name: Create Deployment
+        uses: chrnorm/deployment-action@v2
+        id: deployment
+        with:
+          token: ${{ github.token }}
+          environment: ${{ steps.parse.outputs.environment }}
+          description: "FluxCD reconciliation: ${{ steps.parse.outputs.resource_kind }}/${{ steps.parse.outputs.resource_name }}"
+          ref: ${{ github.event.client_payload.metadata.revision || github.sha }}
+          auto-merge: false
+          
+      - name: Update Deployment Status - Success
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: ${{ github.token }}
+          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+          state: success
+          environment-url: https://firefly.yourdomain.com  # Update with your cluster URL
+          description: "Deployment completed successfully"

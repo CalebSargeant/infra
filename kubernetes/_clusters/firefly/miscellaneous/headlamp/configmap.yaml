@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: headlamp-values
+  namespace: misc
+data:
+  values.yaml: |
+    config:
+      baseURL: ""
+      inCluster: true
+      enableDynamicClusters: false
+      pluginsDir: /build/plugins
+
+    serviceAccount:
+      create: false
+      name: headlamp-admin
+
+    initContainers:
+      - command:
+          - /bin/sh
+          - -c
+          - mkdir -p /build/plugins && cp -r /plugins/* /build/plugins/ && chown -R 100:101 /build
+        image: ghcr.io/headlamp-k8s/headlamp-plugin-flux:latest
+        imagePullPolicy: Always
+        name: headlamp-plugins
+        securityContext:
+          runAsNonRoot: false
+          privileged: false
+          runAsUser: 0
+          runAsGroup: 0
+        volumeMounts:
+          - mountPath: /build/plugins
+            name: headlamp-plugins
+
+    ingress:
+      enabled: false
+
+    nodeSelector:
+      type: pi
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+
+    volumeMounts:
+      - name: kubeconfigs
+        mountPath: /home/headlamp/.config/Headlamp/kubeconfigs
+        readOnly: true
+      - mountPath: /build/plugins
+        name: headlamp-plugins
+
+    volumes:
+      - name: kubeconfigs
+        secret:
+          secretName: headlamp-kubeconfigs
+      - name: headlamp-plugins
+        emptyDir: {}

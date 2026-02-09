@@ -1,0 +1,81 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: headlamp-p1
+  namespace: misc
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`headlamp1.sargeant.co`) && PathPrefix(`/oauth2`)
+      kind: Rule
+      priority: 200
+      services:
+        - name: oauth2-proxy-p1
+          port: 4180
+    # p1-prod-eks cluster - with token injection
+    - match: Host(`headlamp1.sargeant.co`) && (PathPrefix(`/c/p1-prod-eks`) || PathPrefix(`/clusters/p1-prod-eks`))
+      kind: Rule
+      priority: 100
+      services:
+        - name: headlamp
+          port: 80
+      middlewares:
+        - name: oauth2-errors
+          namespace: misc
+        - name: oauth2-auth-p1
+          namespace: misc
+        - name: headlamp-inject-token-p1-prod-eks
+          namespace: misc
+    # p1-staging-eks cluster - with token injection
+    - match: Host(`headlamp1.sargeant.co`) && (PathPrefix(`/c/p1-staging-eks`) || PathPrefix(`/clusters/p1-staging-eks`))
+      kind: Rule
+      priority: 100
+      services:
+        - name: headlamp
+          port: 80
+      middlewares:
+        - name: oauth2-errors
+          namespace: misc
+        - name: oauth2-auth-p1
+          namespace: misc
+        - name: headlamp-inject-token-p1-staging-eks
+          namespace: misc
+    # Main cluster - NO token injection (users will be prompted)
+    - match: Host(`headlamp1.sargeant.co`) && (PathPrefix(`/c/main`) || PathPrefix(`/clusters/main`))
+      kind: Rule
+      priority: 100
+      services:
+        - name: headlamp
+          port: 80
+      middlewares:
+        - name: oauth2-errors
+          namespace: misc
+        - name: oauth2-auth-p1
+          namespace: misc
+    # PR cluster - NO token injection (users will be prompted)
+    - match: Host(`headlamp1.sargeant.co`) && (PathPrefix(`/c/pr-nonprod-aks`) || PathPrefix(`/clusters/pr-nonprod-aks`))
+      kind: Rule
+      priority: 100
+      services:
+        - name: headlamp
+          port: 80
+      middlewares:
+        - name: oauth2-errors
+          namespace: misc
+        - name: oauth2-auth-p1
+          namespace: misc
+    # Catch-all route
+    - match: Host(`headlamp1.sargeant.co`)
+      kind: Rule
+      priority: 5
+      services:
+        - name: headlamp
+          port: 80
+      middlewares:
+        - name: oauth2-errors
+          namespace: misc
+        - name: oauth2-auth-p1
+          namespace: misc
+  tls:
+    secretName: headlamp1-tls

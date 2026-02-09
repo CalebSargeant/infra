@@ -33,20 +33,60 @@ variable "environment" {
   type        = string
 }
 
-variable "network_cidr" {
-  description = "CIDR block for the VCN"
-  type        = string
-  default     = "10.0.0.0/16"
+variable "vcn_cidr_blocks" {
+  description = "List of CIDR blocks for the VCN"
+  type        = list(string)
+  default     = ["192.168.223.0/24"]
 }
 
-variable "subnet_cidr" {
-  description = "CIDR block for the subnet"
-  type        = string
-  default     = "10.0.1.0/24"
+variable "subnets" {
+  description = "Subnet configuration for edge, app, data, and spare tiers"
+  type = object({
+    edge = object({
+      cidr = string
+    })
+    app = object({
+      cidr = string
+    })
+    data = object({
+      cidr = string
+    })
+    spare = object({
+      cidr = string
+    })
+  })
+  default = {
+    edge = {
+      cidr = "192.168.223.0/26"
+    }
+    app = {
+      cidr = "192.168.223.64/26"
+    }
+    data = {
+      cidr = "192.168.223.128/26"
+    }
+    spare = {
+      cidr = "192.168.223.192/26"
+    }
+  }
+}
+
+variable "enable_vpn" {
+  description = "Enable VPN connectivity (creates DRG)"
+  type        = bool
+  default     = false
+}
+
+variable "remote_networks" {
+  description = "Map of remote networks accessible via VPN"
+  type = map(object({
+    cidr        = string
+    description = string
+  }))
+  default = {}
 }
 
 variable "ssh_public_key_path" {
   description = "Path to the SSH public key"
   type        = string
-  default     = "~/.ssh/id_rsa.pub"
 }

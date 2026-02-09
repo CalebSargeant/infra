@@ -1,0 +1,62 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: external-dns
+  namespace: core
+  labels:
+    app.kubernetes.io/name: external-dns
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: external-dns
+      version: "8.0.*"
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: flux-system
+      interval: 1h
+  install:
+    createNamespace: false
+  values:
+    # Provider configuration
+    provider: cloudflare
+
+    # Cloudflare configuration
+    cloudflare:
+      secretName: cloudflared-token
+      proxied: false
+
+    # Domain filter
+    domainFilters:
+      - sargeant.co
+
+    # Source configuration - watch both Ingress and Service resources
+    sources:
+      - ingress
+      - service
+
+    # Policy configuration - sync creates, updates, and deletes DNS records
+    policy: sync
+
+    # Registry configuration - use TXT records to track ownership
+    registry: txt
+    txtOwnerId: firefly-k8s
+    txtPrefix: externaldns-
+
+    # Resource configuration
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+
+    # Node selector
+    nodeSelector:
+      type: pi
+
+    # Log configuration
+    logLevel: info
+    logFormat: json

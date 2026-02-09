@@ -35,6 +35,9 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: radarr
+            - mountPath: /config/config.xml
+              name: radarr-config
+              subPath: config.xml
             - mountPath: /movies
               name: movies
             - mountPath: /downloads
@@ -43,6 +46,9 @@ spec:
         - name: radarr
           persistentVolumeClaim:
             claimName: radarr
+        - name: radarr-config
+          configMap:
+            name: radarr-config
         - name: movies
           persistentVolumeClaim:
             claimName: movies
