@@ -5,7 +5,7 @@ This directory contains Kubernetes manifests for deploying Excalidraw with Postg
 ## Architecture
 
 - **Excalidraw with Persistence**: Uses `ghcr.io/ozencb/excalidraw-persist:0.18.0-persist.1` which includes both frontend and backend in a single container
-- **Database**: PostgreSQL (shared instance at 10.42.0.35:5432)
+- **Database**: PostgreSQL (shared instance, configured via the `STORAGE_URI` secret)
 - **Ingress**: Traefik with automatic HTTPS via Let's Encrypt
 
 ## Setup Instructions

@@ -38,6 +38,8 @@ GRANT ALL PRIVILEGES ON DATABASE excalidraw TO admin;
 
 The existing `excalidraw` secret already contains the `STORAGE_URI` field with the PostgreSQL connection string. The deployment has been updated to use this existing field - no secret changes are needed.
 
+**Important**: The deployment reads the `STORAGE_URI` secret key and injects it into the container as the `DATABASE_URL` environment variable. This mapping allows the excalidraw-persist image to connect to PostgreSQL.
+
 **Expected format**: The `STORAGE_URI` should be a PostgreSQL connection string like:
 ```
 postgresql://username:password@host:port/database
@@ -53,7 +55,7 @@ kubectl get secret excalidraw -n misc -o jsonpath='{.data.STORAGE_URI}' | base64
 If using Flux CD:
 ```bash
 git add .
-git commit -m "Update excalidraw secret for PostgreSQL"
+git commit -m "Deploy excalidraw-persist migration (deployment/ingress/service updates)"
 git push
 ```
 
@@ -128,9 +130,17 @@ Common issues:
 2. Check PostgreSQL is running: `kubectl get pods -n database`
 3. Test connectivity from the pod:
    ```bash
-   kubectl exec -it -n misc <excalidraw-pod> -- /bin/sh
-   apk add postgresql-client  # if not available
-   psql "<connection-string-from-secret>"
+   # Option A: Test from the excalidraw pod (if psql is already available)
+   kubectl exec -it -n misc <excalidraw-pod> -- psql "<connection-string-from-secret>"
+   
+   # Option B: If psql is NOT available, install it according to the base distro:
+   #   - Alpine-based images:
+   kubectl exec -it -n misc <excalidraw-pod> -- sh -c 'apk add --no-cache postgresql-client && psql "<connection-string-from-secret>"'
+   #   - Debian/Ubuntu-based images:
+   kubectl exec -it -n misc <excalidraw-pod> -- sh -c 'apt-get update && apt-get install -y postgresql-client && psql "<connection-string-from-secret>"'
+   
+   # Option C: Test from the PostgreSQL pod directly:
+   kubectl exec -it -n database <postgres-pod-name> -- psql "<connection-string-from-secret>"
    ```
 
 ### Application works but data doesn't persist
