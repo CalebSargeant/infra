@@ -28,15 +28,18 @@ spec:
               mc mb --ignore-existing myminio/thanos-metrics
               mc mb --ignore-existing myminio/loki-chunks
               mc mb --ignore-existing myminio/loki-ruler
+              mc mb --ignore-existing myminio/postgres-backups
               
               echo "Setting bucket policies to private..."
               mc anonymous set none myminio/thanos-metrics
               mc anonymous set none myminio/loki-chunks
               mc anonymous set none myminio/loki-ruler
+              mc anonymous set none myminio/postgres-backups
               
               echo "Creating service accounts..."
               mc admin user add myminio thanos $THANOS_PASSWORD || echo "User thanos may already exist"
               mc admin user add myminio loki $LOKI_PASSWORD || echo "User loki may already exist"
+              mc admin user add myminio postgres $POSTGRES_PASSWORD || echo "User postgres may already exist"
               
               echo "Creating policies..."
               cat > /tmp/thanos-policy.json <<EOF
@@ -70,11 +73,26 @@ spec:
               }
               EOF
               
+              cat > /tmp/postgres-policy.json <<EOF
+              {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Action": ["s3:*"],
+                    "Resource": ["arn:aws:s3:::postgres-backups", "arn:aws:s3:::postgres-backups/*"]
+                  }
+                ]
+              }
+              EOF
+              
               mc admin policy create myminio thanos-policy /tmp/thanos-policy.json || echo "Policy may already exist"
               mc admin policy create myminio loki-policy /tmp/loki-policy.json || echo "Policy may already exist"
+              mc admin policy create myminio postgres-policy /tmp/postgres-policy.json || echo "Policy may already exist"
               
               mc admin policy attach myminio thanos-policy --user thanos
               mc admin policy attach myminio loki-policy --user loki
+              mc admin policy attach myminio postgres-policy --user postgres
               
               echo "MinIO setup complete!"
           env:
@@ -93,3 +111,8 @@ spec:
                 secretKeyRef:
                   name: minio-credentials
                   key: loki-password
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: minio-credentials
+                  key: postgres-password
