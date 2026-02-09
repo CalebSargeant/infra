@@ -2,6 +2,31 @@
 
 <!-- version list -->
 
+## v1.22.0 (2026-02-09)
+
+### Chores
+
+- **deps**: Bump actions/checkout from 4 to 5
+  ([#135](https://github.com/CalebSargeant/infra/pull/135),
+  [`54a9cfd`](https://github.com/CalebSargeant/infra/commit/54a9cfdb58557ca261449904f256bf78d474e22d))
+
+- **deps**: Bump actions/setup-python from 5 to 6
+  ([#137](https://github.com/CalebSargeant/infra/pull/137),
+  [`168e2f8`](https://github.com/CalebSargeant/infra/commit/168e2f840222b09072a6e95e8df0f9f25987deaa))
+
+- **deps**: Bump actions/upload-pages-artifact from 3 to 4
+  ([#138](https://github.com/CalebSargeant/infra/pull/138),
+  [`bfc96ae`](https://github.com/CalebSargeant/infra/commit/bfc96aedee8edbb5e11ad0ec804d2d1fd8ca59f6))
+
+- **deps**: Bump CalebSargeant/reusable-workflows from 1.0.3 to 1.0.10
+  ([#136](https://github.com/CalebSargeant/infra/pull/136),
+  [`c321553`](https://github.com/CalebSargeant/infra/commit/c321553d7f2785e7d44779c3403e24f37990bc0c))
+
+- **deps**: Bump CalebSargeant/reusable-workflows/.github/workflows/semantic-release.yaml
+  ([#139](https://github.com/CalebSargeant/infra/pull/139),
+  [`603c1f5`](https://github.com/CalebSargeant/infra/commit/603c1f56a8de8b27200c45ba0072c8769807ef42))
+
+
 ## v1.21.1 (2026-02-08)
 
 
