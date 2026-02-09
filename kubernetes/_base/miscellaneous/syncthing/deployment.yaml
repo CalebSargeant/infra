@@ -13,6 +13,7 @@ spec:
       labels:
         app: syncthing
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: syncthing
           image: syncthing/syncthing:1.28.1
@@ -20,9 +21,11 @@ spec:
             requests:
               memory: "128Mi"
               cpu: "100m"
+              ephemeral-storage: "1Gi"
             limits:
               memory: "512Mi"
               cpu: "500m"
+              ephemeral-storage: "2Gi"
           ports:
             - containerPort: 8384
               name: web-ui
