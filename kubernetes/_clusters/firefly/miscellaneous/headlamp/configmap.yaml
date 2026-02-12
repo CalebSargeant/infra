@@ -34,7 +34,7 @@ data:
       - command:
           - /bin/sh
           - -c
-          - cp -r /plugins/* /build/plugins/ && chown -R 100:101 /build
+          - mkdir -p /build/plugins && cp -r /plugins/* /build/plugins/ && chown -R 100:101 /build
         image: quay.io/kubescape/headlamp-plugin:latest
         imagePullPolicy: Always
         name: headlamp-plugin-kubescape
@@ -49,7 +49,7 @@ data:
       - command:
           - /bin/sh
           - -c
-          - cp -r /plugins/* /build/plugins/ && chown -R 100:101 /build
+          - mkdir -p /build/plugins && cp -r /plugins/* /build/plugins/ && chown -R 100:101 /build
         image: ghcr.io/headlamp-k8s/headlamp-plugin-ai-assistant:latest
         imagePullPolicy: Always
         name: headlamp-plugin-ai-assistant
@@ -64,7 +64,7 @@ data:
       - command:
           - /bin/sh
           - -c
-          - cp -r /plugins/* /build/plugins/ && chown -R 100:101 /build
+          - mkdir -p /build/plugins && cp -r /plugins/* /build/plugins/ && chown -R 100:101 /build
         image: ghcr.io/headlamp-k8s/headlamp-plugin-opencost:latest
         imagePullPolicy: Always
         name: headlamp-plugin-opencost
@@ -79,7 +79,7 @@ data:
       - command:
           - /bin/sh
           - -c
-          - cp -r /plugins/* /build/plugins/ && chown -R 100:101 /build
+          - mkdir -p /build/plugins && cp -r /plugins/* /build/plugins/ && chown -R 100:101 /build
         image: ghcr.io/headlamp-k8s/headlamp-plugin-cert-manager:latest
         imagePullPolicy: Always
         name: headlamp-plugin-cert-manager
@@ -94,7 +94,7 @@ data:
       - command:
           - /bin/sh
           - -c
-          - cp -r /plugins/* /build/plugins/ && chown -R 100:101 /build
+          - mkdir -p /build/plugins && cp -r /plugins/* /build/plugins/ && chown -R 100:101 /build
         image: ghcr.io/sozercan/gatekeeper-headlamp-plugin:latest
         imagePullPolicy: Always
         name: headlamp-plugin-gatekeeper
