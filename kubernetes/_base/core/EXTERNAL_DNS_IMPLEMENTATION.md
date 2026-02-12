@@ -61,7 +61,7 @@ Created:
 
 ### 1. Configure MikroTik Router Credentials
 
-The file `kubernetes/_base/core/external-dns-mikrotik/mikrotik-credentials-secret.enc.yaml` contains placeholder credentials. You need to:
+The file `kubernetes/_base/core/external-dns-mikrotik/mikrotik-credentials-secret.enc.yaml` contains placeholder credentials. The `.enc.yaml` extension indicates this file must be encrypted with SOPS before deployment. You need to:
 
 1. Update the credentials with your actual MikroTik router details:
    ```yaml
@@ -70,11 +70,9 @@ The file `kubernetes/_base/core/external-dns-mikrotik/mikrotik-credentials-secre
    password: "your-secure-password"  # Your MikroTik password
    ```
 
-2. Encrypt the file with SOPS:
+2. Encrypt the file in place with SOPS:
    ```bash
    cd kubernetes/_base/core/external-dns-mikrotik
-   # First, you may need to create a .sops.yaml file with your age key
-   # Then encrypt:
    sops --encrypt --in-place mikrotik-credentials-secret.enc.yaml
    ```
 

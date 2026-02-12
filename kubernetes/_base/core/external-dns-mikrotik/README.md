@@ -35,19 +35,19 @@ Ensure the REST API is enabled:
 
 ### 2. Update the Secret
 
-The `mikrotik-credentials-secret.yaml` file contains placeholder credentials. You need to:
+The `mikrotik-credentials-secret.enc.yaml` file contains placeholder credentials. The `.enc.yaml` extension indicates this file must be encrypted with SOPS before deployment.
 
 1. Update the values with your actual MikroTik router details:
    - `baseurl`: Your MikroTik router URL and API port (e.g., `https://192.168.1.1:8729`)
    - `username`: RouterOS username with DNS permissions
    - `password`: RouterOS password
 
-2. Encrypt the file with SOPS before committing:
+2. Encrypt the file in place with SOPS:
 
 ```bash
 # From the repository root
 cd kubernetes/_base/core/external-dns-mikrotik
-sops --encrypt --in-place mikrotik-credentials-secret.yaml
+sops --encrypt --in-place mikrotik-credentials-secret.enc.yaml
 ```
 
 ### 3. Configure Domain Filters
