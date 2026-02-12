@@ -61,12 +61,24 @@ data:
         volumeMounts:
           - mountPath: /build/plugins
             name: headlamp-plugins
+
       - command:
           - /bin/sh
           - -c
-          - mkdir -p /build/plugins && cp -r /plugins/* /build/plugins/ && chown -R 100:101 /build
-        image: ghcr.io/headlamp-k8s/headlamp-plugin-opencost:latest
-        imagePullPolicy: Always
+          - |
+            set -e
+            echo "Building OpenCost plugin from source..."
+            cd /tmp
+            apk add --no-cache git npm
+            git clone --depth 1 https://github.com/filipevrevez/headlamp-plugins.git
+            cd headlamp-plugins/opencost
+            npm install
+            npm run build
+            npx headlamp-plugin extract . /build/plugins/opencost
+            chown -R 100:101 /build
+            echo "OpenCost plugin built successfully"
+        image: node:20-alpine
+        imagePullPolicy: IfNotPresent
         name: headlamp-plugin-opencost
         securityContext:
           runAsNonRoot: false
