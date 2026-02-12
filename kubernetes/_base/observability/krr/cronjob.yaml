@@ -54,7 +54,6 @@ spec:
               args:
                 - simple
                 - --prometheus-url=http://prometheus-prometheus.observability.svc.cluster.local:9090
-                - --formatter=table
                 - --slackoutput=C0AF2SVBL5P
               resources:
                 requests:
