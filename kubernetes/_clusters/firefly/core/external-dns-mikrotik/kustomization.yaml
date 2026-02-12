@@ -1,6 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 metadata:
-  name: external-dns
+  name: external-dns-mikrotik
 resources:
-  - ../../../../_base/core/external-dns
+  - ../../../../_base/core/external-dns-mikrotik
