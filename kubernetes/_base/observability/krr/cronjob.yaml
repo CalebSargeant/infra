@@ -47,14 +47,14 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: krr
-              image: ghcr.io/robusta-dev/krr:latest
+              image: robustadev/krr:v1.28.0
               command:
                 - python
                 - krr.py
               args:
                 - simple
                 - --prometheus-url=http://prometheus-prometheus.observability.svc.cluster.local:9090
-                - --format=table
+                - --formatter=table
                 - --namespace=*
                 # Uncomment to enable Slack notifications:
                 # - --slack-webhook-url=$(SLACK_WEBHOOK_URL)
