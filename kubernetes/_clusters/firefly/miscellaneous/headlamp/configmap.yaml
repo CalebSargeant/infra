@@ -72,9 +72,9 @@ data:
             apk add --no-cache git npm
             git clone --depth 1 https://github.com/filipevrevez/headlamp-plugins.git
             cd headlamp-plugins/opencost
-            npm install --omit=dev
+            npm install
             npm run build
-            npx --no-install headlamp-plugin extract . /build/plugins/opencost
+            npx headlamp-plugin extract . /build/plugins/opencost
             chown -R 100:101 /build
             echo "OpenCost plugin built successfully"
         image: node:20-alpine
