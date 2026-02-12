@@ -48,6 +48,9 @@ spec:
           containers:
             - name: krr
               image: ghcr.io/robusta-dev/krr:latest
+              command:
+                - python
+                - krr.py
               args:
                 - simple
                 - --prometheus-url=http://prometheus-prometheus.observability.svc.cluster.local:9090
