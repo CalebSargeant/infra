@@ -11,7 +11,8 @@ resources:
   - cloudflared
   - 1password-connect
   - external-secrets
-  - external-dns
+  - external-dns-cloudflare
+  - external-dns-mikrotik
 patches:
   # Node selector for all apps
   - patch: |
