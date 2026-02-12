@@ -55,8 +55,7 @@ spec:
                 - simple
                 - --prometheus-url=http://prometheus-prometheus.observability.svc.cluster.local:9090
                 - --formatter=table
-                - --slack-token=$(SLACK_BOT_TOKEN)
-                - --slack-channel=C0AF2SVBL5P
+                - --slackoutput=C0AF2SVBL5P
               resources:
                 requests:
                   cpu: 100m
