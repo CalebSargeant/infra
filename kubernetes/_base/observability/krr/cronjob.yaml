@@ -55,7 +55,6 @@ spec:
                 - simple
                 - --prometheus-url=http://prometheus-prometheus.observability.svc.cluster.local:9090
                 - --formatter=table
-                - --namespace=*
                 # Uncomment to enable Slack notifications:
                 # - --slack-webhook-url=$(SLACK_WEBHOOK_URL)
               resources:
