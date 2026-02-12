@@ -55,8 +55,8 @@ spec:
                 - simple
                 - --prometheus-url=http://prometheus-prometheus.observability.svc.cluster.local:9090
                 - --formatter=table
-                # Uncomment to enable Slack notifications:
-                # - --slack-webhook-url=$(SLACK_WEBHOOK_URL)
+                - --slack-token=$(SLACK_BOT_TOKEN)
+                - --slack-channel=C0AF2SVBL5P
               resources:
                 requests:
                   cpu: 100m
@@ -64,10 +64,9 @@ spec:
                 limits:
                   cpu: 500m
                   memory: 512Mi
-              # Uncomment to enable Slack notifications:
-              # env:
-              #   - name: SLACK_WEBHOOK_URL
-              #     valueFrom:
-              #       secretKeyRef:
-              #         name: krr-secrets
-              #         key: slack-webhook-url
+              env:
+                - name: SLACK_BOT_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: slack-credentials
+                      key: slack-bot-token
