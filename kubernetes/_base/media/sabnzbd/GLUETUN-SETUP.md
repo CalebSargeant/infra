@@ -96,7 +96,7 @@ The Gluetun sidecar is configured with:
 
 ### Changing Server Location
 
-To change the VPN server location, edit the base deployment's kustomization to add a patch:
+To change the VPN server location, add a strategic merge patch to your kustomization:
 
 ```yaml
 patches:
@@ -104,9 +104,18 @@ patches:
       kind: Deployment
       name: sabnzbd
     patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/1/env/3/value
-        value: "United States"
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: sabnzbd
+      spec:
+        template:
+          spec:
+            containers:
+              - name: gluetun
+                env:
+                  - name: SERVER_COUNTRIES
+                    value: "United States"
 ```
 
 Or add more specific filters:
@@ -117,11 +126,20 @@ patches:
       kind: Deployment
       name: sabnzbd
     patch: |-
-      - op: add
-        path: /spec/template/spec/containers/1/env/-
-        value:
-          name: SERVER_REGIONS
-          value: "New York"
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: sabnzbd
+      spec:
+        template:
+          spec:
+            containers:
+              - name: gluetun
+                env:
+                  - name: SERVER_REGIONS
+                    value: "New York"
+                  - name: SERVER_CITIES
+                    value: "Los Angeles"
 ```
 
 ## Troubleshooting

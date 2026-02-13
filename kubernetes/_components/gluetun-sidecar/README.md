@@ -70,7 +70,7 @@ The Gluetun sidecar is pre-configured with:
 
 ### Customizing Server Location
 
-To change the VPN server location, you can patch the environment variables in your deployment's kustomization:
+To change the VPN server location, you can patch the environment variables in your deployment's kustomization using a strategic merge patch:
 
 ```yaml
 patches:
@@ -78,12 +78,21 @@ patches:
       kind: Deployment
       name: your-app
     patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/1/env/3/value
-        value: "United States"
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: your-app
+      spec:
+        template:
+          spec:
+            containers:
+              - name: gluetun
+                env:
+                  - name: SERVER_COUNTRIES
+                    value: "United States"
 ```
 
-Or use multiple filters:
+Or add multiple filters:
 
 ```yaml
 patches:
@@ -91,11 +100,20 @@ patches:
       kind: Deployment
       name: your-app
     patch: |-
-      - op: add
-        path: /spec/template/spec/containers/1/env/-
-        value:
-          name: SERVER_REGIONS
-          value: "New York"
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: your-app
+      spec:
+        template:
+          spec:
+            containers:
+              - name: gluetun
+                env:
+                  - name: SERVER_REGIONS
+                    value: "New York"
+                  - name: SERVER_CITIES
+                    value: "Los Angeles"
 ```
 
 ## What Gets Added

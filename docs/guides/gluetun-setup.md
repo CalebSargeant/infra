@@ -105,7 +105,7 @@ The Gluetun component supports various configuration options through environment
 
 ### Changing VPN Server Location
 
-Default is Netherlands. To change the location, add a patch to your kustomization:
+Default is Netherlands. To change the location, add a strategic merge patch to your kustomization:
 
 ```yaml
 patches:
@@ -113,9 +113,18 @@ patches:
       kind: Deployment
       name: your-app
     patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/env/3/value
-        value: "United States"
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: your-app
+      spec:
+        template:
+          spec:
+            containers:
+              - name: gluetun
+                env:
+                  - name: SERVER_COUNTRIES
+                    value: "United States"
 ```
 
 ### Multiple Location Filters
@@ -128,16 +137,20 @@ patches:
       kind: Deployment
       name: your-app
     patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: SERVER_REGIONS
-          value: "California"
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: SERVER_CITIES
-          value: "Los Angeles"
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: your-app
+      spec:
+        template:
+          spec:
+            containers:
+              - name: gluetun
+                env:
+                  - name: SERVER_REGIONS
+                    value: "California"
+                  - name: SERVER_CITIES
+                    value: "Los Angeles"
 ```
 
 ### Adjusting Firewall Rules
@@ -150,9 +163,18 @@ patches:
       kind: Deployment
       name: your-app
     patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/env/4/value
-        value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10"
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: your-app
+      spec:
+        template:
+          spec:
+            containers:
+              - name: gluetun
+                env:
+                  - name: FIREWALL_OUTBOUND_SUBNETS
+                    value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10"
 ```
 
 ## Verification
