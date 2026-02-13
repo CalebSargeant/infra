@@ -4,7 +4,7 @@ metadata:
   name: calebsargeant
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 10m
   url: https://charts.calebsargeant.com
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta2
@@ -13,7 +13,7 @@ metadata:
   name: bjw-s
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 10m
   url: https://bjw-s-labs.github.io/helm-charts
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta2
@@ -22,7 +22,7 @@ metadata:
   name: rancher-latest
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 10m
   url: https://releases.rancher.com/server-charts/latest
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta2

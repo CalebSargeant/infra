@@ -4,7 +4,7 @@ metadata:
   name: headlamp
   namespace: kube-system
 spec:
-  interval: 1m
+  interval: 10m
   chart:
     spec:
       chart: headlamp
@@ -12,7 +12,7 @@ spec:
         kind: HelmRepository
         name: headlamp
         namespace: flux-system
-      interval: 1m
+      interval: 10m
   valuesFrom:
     - kind: ConfigMap
       name: headlamp-values

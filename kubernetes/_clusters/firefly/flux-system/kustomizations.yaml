@@ -7,7 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 spec:
-  interval: 1m
+  interval: 10m
   path: ./kubernetes/_clusters/firefly/automation
   prune: true
   sourceRef:
@@ -29,7 +29,7 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 spec:
-  interval: 1m
+  interval: 10m
   path: ./kubernetes/_clusters/firefly/backup
   prune: true
   sourceRef:
@@ -51,7 +51,7 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 spec:
-  interval: 1m
+  interval: 10m
   path: ./kubernetes/_clusters/firefly/core
   prune: true
   sourceRef:
@@ -75,7 +75,7 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 spec:
-  interval: 1m
+  interval: 10m
   path: ./kubernetes/_clusters/firefly/database
   prune: true
   sourceRef:
@@ -97,7 +97,7 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 spec:
-  interval: 1m
+  interval: 10m
   path: ./kubernetes/_clusters/firefly/media
   prune: true
   sourceRef:
@@ -119,7 +119,7 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 spec:
-  interval: 1m
+  interval: 10m
   path: ./kubernetes/_clusters/firefly/miscellaneous
   prune: true
   sourceRef:
@@ -141,7 +141,7 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 spec:
-  interval: 1m
+  interval: 10m
   path: ./kubernetes/_clusters/firefly/observability
   prune: true
   sourceRef:
@@ -163,7 +163,7 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 spec:
-  interval: 1m
+  interval: 10m
   path: ./k8s/overlays/prod
   prune: true
   sourceRef:
@@ -185,7 +185,7 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 spec:
-  interval: 1m
+  interval: 10m
   path: ./k8s/overlays/prod
   prune: true
   sourceRef:
@@ -207,7 +207,7 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 spec:
-  interval: 1m
+  interval: 10m
   path: ./k8s/overlays/prod
   prune: true
   sourceRef:

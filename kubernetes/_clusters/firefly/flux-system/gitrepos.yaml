@@ -5,7 +5,7 @@ metadata:
   name: buxfer-sync
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 10m
   provider: github
   ref:
     branch: main
@@ -19,7 +19,7 @@ metadata:
   name: deskbird-booking
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 10m
   provider: github
   ref:
     branch: main
@@ -33,7 +33,7 @@ metadata:
   name: fortivpn-gateway
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 10m
   provider: github
   ref:
     branch: main

@@ -4,7 +4,7 @@ metadata:
   name: apps
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 10m
   url: ssh://git@github.com/CalebSargeant/monolithic-deploy
   ref:
     branch: main
@@ -19,7 +19,7 @@ metadata:
   labels:
     app.kubernetes.io/sops: "enabled"
 spec:
-  interval: 1m
+  interval: 10m
   path: ./clusters/franklin/apps
   prune: true
   sourceRef:
