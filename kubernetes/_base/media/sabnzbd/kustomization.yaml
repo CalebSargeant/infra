@@ -2,16 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 components:
-  - ../../../_components/wireguard-sidecar
-
-patches:
-  - target:
-      kind: Deployment
-      name: sabnzbd
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/volumes/0/secret/secretName
-        value: sabnzbd-wireguard
+  - ../../../_components/gluetun-sidecar
 
 resources:
   - deployment.yaml
