@@ -1,0 +1,67 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: gatekeeper
+  namespace: security
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: gatekeeper
+      version: 3.18.3
+      sourceRef:
+        kind: HelmRepository
+        name: gatekeeper
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    # Enable audit and mutation features
+    audit:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 512Mi
+
+    controllerManager:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 1Gi
+
+    # Enable violations logging
+    auditInterval: 60
+    constraintViolationsLimit: 20
+    auditFromCache: false
+
+    # Exempt namespaces
+    exemptNamespaces:
+      - kube-system
+      - flux-system
+
+    # Enable mutation webhook
+    enableMutation: true
+
+    # Webhook settings
+    webhook:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 512Mi

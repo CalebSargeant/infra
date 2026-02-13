@@ -105,3 +105,21 @@ metadata:
 spec:
   interval: 1h
   url: https://cloudnative-pg.github.io/charts
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: kubescape
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://kubescape.github.io/helm-charts/
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: gatekeeper
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://open-policy-agent.github.io/gatekeeper/charts
