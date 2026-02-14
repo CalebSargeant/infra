@@ -21,6 +21,10 @@ spec:
   upgrade:
     remediation:
       retries: 3
+  test:
+    enable: false
+  driftDetection:
+    mode: enabled
   values:
     crds:
       create: true
