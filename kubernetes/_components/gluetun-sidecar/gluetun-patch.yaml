@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: not-important
+spec:
+  template:
+    spec:
+      containers:
+        - name: gluetun
+          image: qmcgaw/gluetun:v3.40.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: VPN_SERVICE_PROVIDER
+              value: "privado"
+            - name: OPENVPN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: privado-vpn-credentials
+                  key: username
+            - name: OPENVPN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: privado-vpn-credentials
+                  key: password
+            - name: SERVER_COUNTRIES
+              value: "Netherlands"
+            - name: FIREWALL_OUTBOUND_SUBNETS
+              value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+            - name: TZ
+              value: "Europe/Amsterdam"
+            - name: DOT
+              value: "off"
+            - name: HEALTH_VPN_DURATION_INITIAL
+              value: "60s"
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+          volumeMounts:
+            - name: gluetun-tmp
+              mountPath: /tmp/gluetun
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+      volumes:
+        - name: gluetun-tmp
+          emptyDir: {}

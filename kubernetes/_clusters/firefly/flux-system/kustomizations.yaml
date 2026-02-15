@@ -81,13 +81,19 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  timeout: 2m
+  timeout: 5m
+  wait: true
   decryption:
     provider: sops
     secretRef:
       name: sops-keys
   dependsOn:
     - name: flux-system
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: cloudnative-pg-controller-manager
+      namespace: cloudnative-pg
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
