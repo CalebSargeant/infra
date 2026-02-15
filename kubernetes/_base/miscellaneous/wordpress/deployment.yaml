@@ -18,11 +18,10 @@ spec:
           image: wordpress:6.7-apache
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "250m"
+              memory: "100Mi"
+              cpu: "10m"
             limits:
-              memory: "1Gi"
-              cpu: "1000m"
+              memory: "100Mi"
           ports:
             - containerPort: 80
           env:

@@ -156,10 +156,22 @@ spec:
         dashboards:
           enabled: true
           searchNamespace: ALL
+          resources:
+            requests:
+              cpu: 10m
+              memory: 124Mi
+            limits:
+              memory: 124Mi
         datasources:
           enabled: true
           searchNamespace: ALL
-    
+          resources:
+            requests:
+              cpu: 10m
+              memory: 121Mi
+            limits:
+              memory: 121Mi
+
     # AlertManager configuration
     alertmanager:
       enabled: true
@@ -183,12 +195,11 @@ spec:
         
         resources:
           requests:
-            cpu: 100m
-            memory: 256Mi
+            cpu: 10m
+            memory: 100Mi
           limits:
-            cpu: 500m
-            memory: 1Gi
-      
+            memory: 100Mi
+
       ingress:
         enabled: false
     
@@ -196,12 +207,11 @@ spec:
     prometheusOperator:
       resources:
         requests:
-          cpu: 100m
-          memory: 128Mi
+          cpu: 10m
+          memory: 100Mi
         limits:
-          cpu: 500m
-          memory: 512Mi
-    
+          memory: 100Mi
+
     # Node Exporter
     nodeExporter:
       enabled: true
@@ -213,10 +223,28 @@ spec:
               - key: node.kubernetes.io/unreachable
                 operator: DoesNotExist
     
+    # Node Exporter resources
+    prometheus-node-exporter:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 100Mi
+        limits:
+          memory: 100Mi
+
     # Kube State Metrics
     kubeStateMetrics:
       enabled: true
     
+    # Kube State Metrics resources
+    kube-state-metrics:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 100Mi
+        limits:
+          memory: 100Mi
+
     # Default rules and alerts
     defaultRules:
       create: true

@@ -29,11 +29,10 @@ spec:
                     pkill -HUP avahi-daemon
           resources:
             requests:
-              memory: "64Mi"
-              cpu: "25m"
+              memory: "1157Mi"
+              cpu: "103m"
             limits:
-              memory: "256Mi"
-              cpu: "100m"
+              memory: "1157Mi"
           env:
             - name: AVAHI_NAME
               value: "firefly"

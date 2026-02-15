@@ -31,12 +31,11 @@ spec:
               name: overseerr-config
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "100m"
+              memory: "344Mi"
+              cpu: "10m"
               ephemeral-storage: "1Gi"
             limits:
-              memory: "1Gi"
-              cpu: "500m"
+              memory: "344Mi"
               ephemeral-storage: "2Gi"
       volumes:
         - name: overseerr-config

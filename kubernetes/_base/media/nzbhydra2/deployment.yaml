@@ -19,6 +19,12 @@ spec:
       - name: nzbhydra2
         image: linuxserver/nzbhydra2:latest
         imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 10m
+            memory: 710Mi
+          limits:
+            memory: 710Mi
         ports:
         - containerPort: 5076
           name: http

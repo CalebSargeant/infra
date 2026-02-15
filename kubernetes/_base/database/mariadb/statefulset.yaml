@@ -19,11 +19,10 @@ spec:
           image: mariadb:11.2
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "100m"
+              memory: "113Mi"
+              cpu: "10m"
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: "113Mi"
           ports:
             - containerPort: 3306
               name: mysql

@@ -20,11 +20,10 @@ spec:
           image: linuxserver/qbittorrent:5.1.2
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "75m"
+              memory: "466Mi"
+              cpu: "10m"
             limits:
-              memory: "512Mi"
-              cpu: "300m"
+              memory: "466Mi"
           ports:
             - containerPort: 8080   # Web UI
             - containerPort: 55555  # BitTorrent (TCP/UDP)

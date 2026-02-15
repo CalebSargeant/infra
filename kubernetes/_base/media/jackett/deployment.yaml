@@ -18,11 +18,10 @@ spec:
           image: linuxserver/jackett:0.23.17
           resources:
             requests:
-              memory: "64Mi"
-              cpu: "25m"
+              memory: "208Mi"
+              cpu: "10m"
             limits:
-              memory: "256Mi"
-              cpu: "100m"
+              memory: "208Mi"
           ports:
             - containerPort: 9117 # jackett web interface
           env:

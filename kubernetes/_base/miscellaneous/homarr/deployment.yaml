@@ -39,12 +39,11 @@ spec:
               name: homarr-data
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "50m"
+              memory: "208Mi"
+              cpu: "10m"
               ephemeral-storage: "1Gi"
             limits:
-              memory: "512Mi"
-              cpu: "200m"
+              memory: "208Mi"
               ephemeral-storage: "2Gi"
       volumes:
         - name: homarr-configs
