@@ -18,11 +18,10 @@ spec:
           image: linuxserver/bazarr:latest
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "50m"
+              memory: "238Mi"
+              cpu: "10m"
             limits:
-              memory: "512Mi"
-              cpu: "200m"
+              memory: "238Mi"
           ports:
             - containerPort: 6767 # Bazarr web interface
           env:

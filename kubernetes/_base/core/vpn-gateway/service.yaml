@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vpn-gateway
+  namespace: core
+spec:
+  selector:
+    app: vpn-gateway
+  ports:
+    - name: http-proxy
+      port: 8888
+      targetPort: 8888
+      protocol: TCP
+    - name: socks-proxy
+      port: 8388
+      targetPort: 8388
+      protocol: TCP
+

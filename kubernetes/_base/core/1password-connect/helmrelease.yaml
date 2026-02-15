@@ -82,12 +82,11 @@ spec:
       replicas: 1
       resources:
         requests:
-          cpu: 50m
-          memory: 128Mi
+          cpu: 10m
+          memory: 100Mi
         limits:
-          cpu: 200m
-          memory: 256Mi
-      
+          memory: 100Mi
+
       # Polling interval for checking 1Password items
       pollingInterval: 600
       

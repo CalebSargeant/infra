@@ -38,23 +38,21 @@ spec:
       # Resources
       resources:
         requests:
-          cpu: 100m
-          memory: 256Mi
+          cpu: 50m
+          memory: 128Mi
         limits:
-          cpu: 500m
-          memory: 1Gi
-      
+          memory: 512Mi
+
       # Metrics exporter
       exporter:
         enabled: true
         resources:
           requests:
-            cpu: 50m
-            memory: 128Mi
+            cpu: 10m
+            memory: 100Mi
           limits:
-            cpu: 200m
-            memory: 512Mi
-      
+            memory: 100Mi
+
       # Cloud cost configuration
       # Note: Cloud credentials should be provided via secrets
       cloudCost:

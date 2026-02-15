@@ -18,11 +18,10 @@ spec:
           image: linuxserver/radarr:5.27.5
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "50m"
+              memory: "260Mi"
+              cpu: "10m"
             limits:
-              memory: "512Mi"
-              cpu: "200m"
+              memory: "260Mi"
           ports:
             - containerPort: 7878 # Radarr web interface
           env:

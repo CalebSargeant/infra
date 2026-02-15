@@ -18,11 +18,10 @@ spec:
           image: ghcr.io/calebsargeant/n8n:latest@sha256:49e84bc02856fae6c632d15e24972eaa56d007292ebb7c96d3606a4874e4e499
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "50m"
+              memory: "271Mi"
+              cpu: "17m"
             limits:
-              memory: "512Mi"
-              cpu: "200m"
+              memory: "271Mi"
           env:
             - name: DB_TYPE
               value: "postgresdb"

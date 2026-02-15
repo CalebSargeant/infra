@@ -18,11 +18,10 @@ spec:
           image: prom/blackbox-exporter:v0.25.0
           resources:
             requests:
-              memory: "32Mi"
-              cpu: "25m"
+              memory: "100Mi"
+              cpu: "10m"
             limits:
-              memory: "128Mi"
-              cpu: "100m"
+              memory: "100Mi"
 #          args:
 #            - "--config.file=/etc/blackbox-exporter/blackbox-exporter.yml"
           ports:

@@ -19,11 +19,10 @@ spec:
           image: ghcr.io/home-assistant/home-assistant:stable
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "75m"
+              memory: "612Mi"
+              cpu: "10m"
             limits:
-              memory: "512Mi"
-              cpu: "300m"
+              memory: "612Mi"
           ports:
             - containerPort: 8123 # Home Assistant web UI
           env:

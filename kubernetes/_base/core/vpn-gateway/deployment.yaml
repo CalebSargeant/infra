@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpn-gateway
+  namespace: core
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vpn-gateway
+  template:
+    metadata:
+      labels:
+        app: vpn-gateway
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: gluetun
+          image: qmcgaw/gluetun:v3.40.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: VPN_SERVICE_PROVIDER
+              value: "privado"
+            - name: OPENVPN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: privado-vpn-credentials
+                  key: username
+            - name: OPENVPN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: privado-vpn-credentials
+                  key: password
+            - name: SERVER_COUNTRIES
+              value: "Netherlands"
+            - name: FIREWALL_OUTBOUND_SUBNETS
+              value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+            - name: TZ
+              value: "Europe/Amsterdam"
+            - name: DOT
+              value: "off"
+            - name: HEALTH_VPN_DURATION_INITIAL
+              value: "60s"
+            # Enable HTTP Proxy
+            - name: HTTPPROXY
+              value: "on"
+            - name: HTTPPROXY_LISTENING_ADDRESS
+              value: ":8888"
+            # Enable SOCKS5 Proxy (for apps that support it)
+            - name: SHADOWSOCKS
+              value: "on"
+            - name: SHADOWSOCKS_LISTENING_ADDRESS
+              value: ":8388"
+          ports:
+            - name: http-proxy
+              containerPort: 8888
+              protocol: TCP
+            - name: socks-proxy
+              containerPort: 8388
+              protocol: TCP
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+          volumeMounts:
+            - name: gluetun-tmp
+              mountPath: /tmp/gluetun
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9999
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9999
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: gluetun-tmp
+          emptyDir: {}
+

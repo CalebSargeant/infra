@@ -17,6 +17,12 @@ data:
               tag: beta-2025-10-03
             env:
               TZ: Europe/Amsterdam
+            resources:
+              requests:
+                cpu: 14m
+                memory: 553Mi
+              limits:
+                memory: 553Mi
 
     defaultPodOptions:
       hostNetwork: true

@@ -1,0 +1,71 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: HTTP_PROXY
+          value: "http://vpn-gateway.core.svc.cluster.local:8888"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: HTTPS_PROXY
+          value: "http://vpn-gateway.core.svc.cluster.local:8888"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: http_proxy
+          value: "http://vpn-gateway.core.svc.cluster.local:8888"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: https_proxy
+          value: "http://vpn-gateway.core.svc.cluster.local:8888"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: NO_PROXY
+          value: "localhost,127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: no_proxy
+          value: "localhost,127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local"
+  - target:
+      kind: StatefulSet
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: HTTP_PROXY
+          value: "http://vpn-gateway.core.svc.cluster.local:8888"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: HTTPS_PROXY
+          value: "http://vpn-gateway.core.svc.cluster.local:8888"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: http_proxy
+          value: "http://vpn-gateway.core.svc.cluster.local:8888"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: https_proxy
+          value: "http://vpn-gateway.core.svc.cluster.local:8888"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: NO_PROXY
+          value: "localhost,127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: no_proxy
+          value: "localhost,127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local"
+

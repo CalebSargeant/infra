@@ -31,8 +31,7 @@ spec:
                   key: token
           resources:
             requests:
-              memory: "64Mi"
-              cpu: "50m"
+              memory: "100Mi"
+              cpu: "10m"
             limits:
-              memory: "256Mi"
-              cpu: "200m"
+              memory: "100Mi"

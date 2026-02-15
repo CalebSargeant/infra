@@ -33,10 +33,9 @@ spec:
                   key: STORAGE_URI
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "100m"
+              memory: "100Mi"
+              cpu: "10m"
               ephemeral-storage: "500Mi"
             limits:
-              memory: "1Gi"
-              cpu: "1000m"
+              memory: "100Mi"
               ephemeral-storage: "1Gi"
