@@ -4,6 +4,7 @@ metadata:
   name: media
 resources:
   - namespace.yaml
+  - externalsecret-wireguard.yaml
   - bazarr
   - flaresolverr
   - jackett

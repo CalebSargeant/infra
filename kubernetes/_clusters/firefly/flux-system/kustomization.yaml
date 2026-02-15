@@ -13,5 +13,7 @@ resources:
   - deskbird-booking.yaml
   - notifications.yaml
 components:
-  - ../../../_components/resource-profiles/t.nano
   - ../../../_components/node-selectors/pi
+# Note: Removed t.nano resource profile - flux controllers need more resources
+# source-controller needs ~300Mi, kustomize-controller needs ~250Mi
+# Using default flux resources from gotk-components.yaml
