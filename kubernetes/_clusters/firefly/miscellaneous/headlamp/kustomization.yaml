@@ -5,6 +5,7 @@ resources:
   - configmap.yaml
   - serviceaccount.yaml
   - ../../../../_base/_helm-releases/headlamp.yaml
+  - certificate.yaml
   - ingressroute.yaml
   - middleware.enc.yaml
   - middleware-p1-prod-eks.enc.yaml

@@ -14,6 +14,7 @@
 !middleware-errors.yaml
 !ingressroute.yaml
 !ingressroute-p1.yaml
+!certificate.yaml
 !certificate-p1.yaml
 !auth-redirect.yaml
 
