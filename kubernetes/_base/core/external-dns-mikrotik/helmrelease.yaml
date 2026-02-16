@@ -28,6 +28,26 @@ spec:
     # Provider configuration - use webhook for MikroTik
     provider: webhook
 
+    # ServiceAccount configuration
+    serviceAccount:
+      create: false
+      name: external-dns-mikrotik
+
+    # Init containers - wait for webhook to be ready
+    initContainers:
+      - name: wait-for-webhook
+        image: busybox:1.36
+        command:
+          - sh
+          - -c
+          - |
+            echo "Waiting for webhook to be ready..."
+            until nc -z external-dns-mikrotik-webhook.core.svc.cluster.local 8888; do
+              echo "Webhook not ready yet, waiting..."
+              sleep 5
+            done
+            echo "Webhook is ready!"
+
     # Extra arguments for webhook provider
     extraArgs:
       webhook-provider-url: http://external-dns-mikrotik-webhook.core.svc.cluster.local:8888
