@@ -42,6 +42,9 @@ spec:
       - ingress
       - service
 
+    # Annotation filter - only manage resources with this annotation
+    annotationFilter: "external-dns.alpha.kubernetes.io/target=cloudflare"
+
     # Policy configuration - sync creates, updates, and deletes DNS records
     policy: sync
 
