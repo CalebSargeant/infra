@@ -6,5 +6,7 @@ resources:
   - namespace.yaml
   - cert-manager
   - cloudflared
+  - external-dns-mikrotik
+  - external-dns-mikrotik-2
   - minio
   - vpn-gateway
