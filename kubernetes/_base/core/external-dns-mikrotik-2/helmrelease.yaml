@@ -30,7 +30,7 @@ spec:
 
     # Extra arguments for webhook provider
     extraArgs:
-      - --webhook-provider-url=http://external-dns-mikrotik-2-webhook.core.svc.cluster.local:8888
+      webhook-provider-url: http://external-dns-mikrotik-2-webhook.core.svc.cluster.local:8888
 
     # Domain filter - configure for your local domain
     domainFilters:
