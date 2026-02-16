@@ -6,6 +6,7 @@ resources:
   - namespace.yaml
   - cert-manager
   - cloudflared
+  - external-dns-cloudflare
   - external-dns-mikrotik
   - external-dns-mikrotik-2
   - minio

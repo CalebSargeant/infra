@@ -4,3 +4,4 @@ resources:
   - webhook-deployment.yaml
   - externalsecret.yaml
   - helmrelease.yaml
+  - rbac.yaml
