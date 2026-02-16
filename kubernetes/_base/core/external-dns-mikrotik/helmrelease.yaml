@@ -18,6 +18,11 @@ spec:
       interval: 1h
   install:
     createNamespace: false
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
   values:
     # Use kubernetes-sigs image for better ARM64 support
     image:
