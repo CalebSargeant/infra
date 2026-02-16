@@ -19,6 +19,12 @@ spec:
   install:
     createNamespace: false
   values:
+    # Use kubernetes-sigs image for better ARM64 support
+    image:
+      registry: registry.k8s.io
+      repository: external-dns/external-dns
+      tag: v0.20.0
+
     # Provider configuration - use webhook for MikroTik
     provider: webhook
 
