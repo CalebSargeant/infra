@@ -18,7 +18,7 @@ on:
 
 jobs:
   semantic-release:
-    uses: CalebSargeant/reusable-workflows/.github/workflows/semantic-release.yaml@cfe57bf223949ea46241f9742bd9b84f5ae35e85 # v1.0.28
+    uses: CalebSargeant/reusable-workflows/.github/workflows/semantic-release.yaml@6a2f0a9dce2fd359021f0b36656076a39c9f0ce7 # v1.9.2
     with:
       bump: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.bump || '' }}
       working_directory: '.'
