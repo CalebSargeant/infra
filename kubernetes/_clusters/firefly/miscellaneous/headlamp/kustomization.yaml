@@ -12,10 +12,13 @@ resources:
   - middleware-p1-staging-eks.enc.yaml
   - middleware-pr-nonprod-aks.enc.yaml
   - middleware-franklinhouse.enc.yaml
+  - middleware-pr-acc-eurofiber.enc.yaml
   - middleware-oauth2.yaml
   - middleware-oauth2-p1.yaml
   - middleware-errors.yaml
   - headlamp-kubeconfigs.enc.yaml
+  - tunnel-pr-acc-eurofiber.yaml
+  - tunnel-pr-acc-eurofiber-secret.enc.yaml
   - oauth2-proxy.yaml
   - oauth2-proxy-secret.enc.yaml
   - oauth2-proxy-emails.enc.yaml

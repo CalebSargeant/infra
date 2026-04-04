@@ -1,0 +1,24 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+    name: headlamp-inject-token-pr-acc-eurofiber
+    namespace: misc
+spec:
+    headers:
+        customRequestHeaders:
+            Authorization: ENC[AES256_GCM,data:4BRC5hRefTJsGHJGMfCA04+e2TD3Pgvug+SAxc+x7TZTw8OomolYW4tTetNctX2TFVUikcdJb1pc++OveZpFot9FgWQjalQ06PYkPWHqkD+Tv5cyF/gHVOVdZep/Q8Efnb0oMEC85RxnqKfXuoQmdCRVNnFDwFE+NsJ1RIdox0123MR8nIL/NnXpxWLvpGm60n3ekdtPrhkst6VTig9gL4hHNEgyGcIWnDyApnvr0DoVkVGj4igJDWdt0zwYlruLSxx45PcPJ9HSYii1FZHtJsmKUmN957i3k3KKdIL7yS3TgTLsnimeqADAqjsGdP5WUq/CnWMQ5nsUhdSygIhVFg6IGgwgyNx4VoCF3Bsw+02JgjbqWLW6f9X9WsBpe4quMyB5mPxIp0im1p7mPJSKKyPQWuWDbihqY5JjQS7d0Tew+czj3V6O30V0HRN0kKbLHwx8c3uW/H88iNSquFD1ks2JDPAfhRpjEYy8uSStIHpcw/Bdnz9AOiJzo4USgggW/VzKKTXosjrinindnAxav2Lf8PteKOpCs55OxpnUor9/RPlWJb/gFS3pXuTmwLPotyLFbzYtcP9JMw0d6zqXjIrJdz51pRmWCEQYHxXo2Jay5LlncYkLECB9+dK7otV1DJDUTDu4X3aSb7hovMQi5GNq6gqD2P5eCXOT2DIVXwqV4ntVZg5gttH+6lKGNKiCIlpH9A2zSnDS86WI43ebk/MOr6M9bKT3au+ELk+/TCo5haWTOgM7Jf0q/obkkZ9aL2YFwHS7z6t4eTpuAEdl1gjb56HBzjFP+epoZF7UNoUgdPrgus2eBxEgzuPQKD074KFGiSruTcA/iGaXid5VGpjSpoK+gy7VM770HfofuT53sOJCuVYm1sIHxmgOq/uWdTLyWJEqf3LQh57iUFF7b4Yf/iZIQeCanaHwER1wKODmUgVADkR20wNQ9+U9LO9MWPashLezmA88k/f2Qdc2cfgUITYSLhV3W0VdAtX1/wlfMpRBDD3pmcGPILVATlVGiQKy19R/dSDld1d5LxZgibbKotOiMaPr+DkD2Ca5Edk/xSY/5GPJMSK7QYCfhP4JhaN0qUGBdobfnPvwXp2rD3Pd2jdoKzFWqxHVLGeCfrEPh0xFjrsfOif9AQkgt4u+JPda/UnTSxx1tazunfbR1zQ1ZENnQ4/yBakjNDT0Uf2WaR/tI1OoWZSG/x1j1a/1NvYVgJ09NK47rLxogO4Xw0E=,iv:pxbyQh/H5rZQyFnv59dX9JsDLql1HCxO8EQGwSeEBi0=,tag:6gEl9L8+aXOfloYGOx+hqg==,type:str]
+sops:
+    age:
+        - recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBhN25iWlp2dzJ3QXVieU1u
+            SU56NzU4ZDQ3MXBQT2ZwbElyRGdscHZKQmdBCjdZUVNjWXNyeUd0Z1M3UGRhY1dM
+            NWVTWWEwV0Zobm9TdHFYeUpsZmNjWEkKLS0tIHEwMHFSWDBVVXJZajRhNC9zQkFU
+            VTRta0R2SVdwQ3FsemFVSEx3WmFVNXMKYMJddhZ1LN4PuBGhaBdnzMAxKKkHxak9
+            T0PeyJBe/q0JFNekHQu4srjhpXF6hj+F/Z6cLZgTZzfhcIkrhDvE/w==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-04-04T10:09:52Z"
+    mac: ENC[AES256_GCM,data:oNnBWm9HVG7CeNv5OimxXz9rXh6MpN1wvViG9PPH57QXcC47Uqb9UXYmaRmRxYAq4i2mSpWJjU+8YO6SfU9OiGd/wNQ8j2FQIBa7xDY1yJLZaWW/QOhguenK1hNDoJIzSwSITW/c/JfM+xGOUxXTp/W78Ws+4fkqGLkd9XwDesM=,iv:I7QrLzSSK25SqUWOldPhbpSTZ5GQYTq/wz6ieELXGP4=,tag:A9sKsHLhQZjilgvOMYfdnw==,type:str]
+    encrypted_regex: ^(Authorization)$
+    version: 3.11.0
