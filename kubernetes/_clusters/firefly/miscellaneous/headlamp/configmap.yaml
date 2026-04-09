@@ -13,6 +13,7 @@ data:
       enableDynamicClusters: false
       pluginsDir: /build/plugins
       extraArgs:
+        - -kubeconfig=/home/headlamp/.config/Headlamp/kubeconfigs/config
         - -user-plugins-dir=/home/headlamp/.config/Headlamp/user-plugins
 
     serviceAccount:
