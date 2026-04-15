@@ -17,7 +17,6 @@
 !certificate.yaml
 !certificate-p1.yaml
 !auth-redirect.yaml
-!tunnel-pr-acc-eurofiber*.yaml
 
 # Keep encrypted files
 !*.enc.yaml
