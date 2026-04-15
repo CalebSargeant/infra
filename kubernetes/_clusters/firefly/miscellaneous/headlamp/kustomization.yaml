@@ -18,6 +18,7 @@ resources:
   - middleware-errors.yaml
   - headlamp-kubeconfigs.enc.yaml
   - tunnel-pr-acc-eurofiber.yaml
+  - tunnel-pr-acc-eurofiber-web.enc.yaml
   - tunnel-pr-acc-eurofiber-secret.enc.yaml
   - oauth2-proxy.yaml
   - oauth2-proxy-secret.enc.yaml
