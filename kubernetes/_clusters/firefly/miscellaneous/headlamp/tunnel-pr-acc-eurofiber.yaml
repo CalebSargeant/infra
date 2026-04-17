@@ -13,6 +13,10 @@ spec:
       labels:
         app.kubernetes.io/name: pr-acc-eurofiber-apiserver-tunnel
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: ff-pi1
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: tunnel
           image: alpine:3.20
@@ -50,7 +54,7 @@ spec:
               EOF
               exec sshpass -p "${VM_SSH_PASSWORD}" \
                 ssh -F /root/.ssh/config -g -N \
-                -L 0.0.0.0:6443:127.0.0.1:6443 \
+                -L 0.0.0.0:7443:127.0.0.1:6443 \
                 -o ExitOnForwardFailure=yes \
                 -o ServerAliveInterval=30 \
                 -o ServerAliveCountMax=3 \
@@ -62,7 +66,7 @@ spec:
                   name: pr-acc-eurofiber-apiserver-tunnel-ssh
                   key: vm_ssh_password
           ports:
-            - containerPort: 6443
+            - containerPort: 7443
               name: https
               protocol: TCP
           readinessProbe:
