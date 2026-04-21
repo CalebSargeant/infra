@@ -150,7 +150,7 @@ data:
       enabled: false
 
     nodeSelector:
-      type: pi
+      type: mini
 
     resources:
       requests:
