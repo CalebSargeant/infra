@@ -16,7 +16,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet # Required when host networking is used
       containers:
         - name: plex
-          image: docker.io/linuxserver/plex@latest
+          image: lscr.io/linuxserver/plex:latest
           resources:
             requests:
               memory: "1855Mi"
