@@ -8,26 +8,13 @@ resources:
   - certificate.yaml
   - ingressroute.yaml
   - middleware.enc.yaml
-  - middleware-p1-prod-eks.enc.yaml
-  - middleware-p1-staging-eks.enc.yaml
-  - middleware-pr-nonprod-aks.enc.yaml
   - middleware-franklinhouse.enc.yaml
-  - middleware-pr-acc-eurofiber.enc.yaml
   - middleware-oauth2.yaml
-  - middleware-oauth2-p1.yaml
   - middleware-errors.yaml
   - headlamp-kubeconfigs.enc.yaml
-  - tunnel-pr-acc-eurofiber.yaml
-  - tunnel-pr-acc-eurofiber-web.enc.yaml
-  - tunnel-pr-acc-eurofiber-secret.enc.yaml
   - oauth2-proxy.yaml
   - oauth2-proxy-secret.enc.yaml
   - oauth2-proxy-emails.enc.yaml
-  - oauth2-proxy-p1.yaml
-  - oauth2-proxy-secret-p1.enc.yaml
-  - oauth2-proxy-emails-p1.enc.yaml
-  - ingressroute-p1.yaml
-  - certificate-p1.yaml
   - auth-redirect.yaml
 #components:
 #  - ../../../../_components/node-selectors/pi
