@@ -103,8 +103,8 @@ kubectl apply -k kubernetes/_clusters/firefly --dry-run=client
 kubectl diff -k kubernetes/_clusters/firefly
 
 # Manually trigger Flux reconciliation
-flux reconcile source git apps -n flux-system
-flux reconcile kustomization apps -n flux-system
+flux reconcile source git flux-system -n flux-system
+flux reconcile kustomization core -n flux-system    # or: misc, automation, media, etc.
 ```
 
 ### Pre-Commit Hooks
@@ -156,7 +156,7 @@ Located in `kubernetes/_components/resource-profiles/`. Patch deployments with: 
 
 | Service | Purpose | Config Location |
 |---------|---------|-----------------|
-| Google Cloud | Terraform state backend (GCS bucket `sargeant-terraform-states`) | `terraform/root.hcl` remote_state |
+| Google Cloud | Terraform state backend (GCS bucket `${company}-${environment}-terraform-state`, per `terraform/root.hcl`) | `terraform/root.hcl` remote_state |
 | OCI (Oracle) | Cloud infrastructure provisioning | `terraform/oci/` + env vars: OCI_TENANCY_OCID, OCI_USER_OCID, etc. |
 | Cloudflare | DNS automation, edge (external-dns plugin) | `terraform/cloudflare/` |
 | 1Password Connect | Secret injection into Kubernetes | `kubernetes/_base/core/1password-connect/` |
