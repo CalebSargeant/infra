@@ -41,9 +41,12 @@ Multi-layer manifests with cluster-specific patches:
 kubernetes/
   _base/              # Generic, reusable deployments (1password-connect, external-dns, media apps)
   _components/        # Cross-cutting concerns (node-selectors/pi, resource-profiles)
-  _clusters/firefly/  # Cluster A overlays → patches _base resources + applies SOPS decryption
-  _clusters/franklin/ # Cluster B overlays
+  _clusters/firefly/  # Active overlay → patches _base resources + applies SOPS decryption
+  apps/               # New infra-v2-style layout (apps/<app>/{base,prod}/<app>/), being phased in
+  clusters/firefly/   # New cluster-level entry point for the apps/ tree (inert until wired into Flux)
 ```
+
+The `franklinhouse` cluster lives in a separate public repo, [calebsargeant/infra-v2](https://github.com/CalebSargeant/infra-v2); this repo is firefly-only. See `docs/operations/kubernetes-restructure-plan.md` for the in-progress migration from `_base/_clusters/` to `apps/clusters/`.
 
 **Key Pattern**: A firefly overlay `kustomization.yaml` patches all Kustomizations labeled `app.kubernetes.io/sops=enabled` to add SOPS decryption provider. Resource profiles (like `c.medium`: 500m-2 CPU, 1-4Gi memory) are Kustomize components targeting labels.
 
