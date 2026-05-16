@@ -27,7 +27,6 @@ Status: **DRAFT — not yet executed.** Captures findings from the 2026-05-15 au
 
 | Item | Why |
 | --- | --- |
-| `kubernetes/maniforge.yaml` (root) and `kubernetes/_clusters/firefly/maniforge.yaml` | Different content; referenced from `docs/reference/maniforge.md`. Decide if maniforge is still in use. |
 | `ansible/keys/chr.pem` (tracked) | OPENSSH private key, committed `2025-04-18` (commit `d5b8915`). Public repo — already leaked. **Rotate + scrub history.** |
 | `ansible/vars/franklin.yaml`, `ansible/vars/pi.yaml` (gitignored on-disk) | Contain plaintext `ghp_…` GitHub PAT. Not in git history but on disk. **Rotate the PAT.** |
 | `docs/operations/proxmox-gpu-passthrough-recovery.md` (untracked) | Looks intentional — commit when ready |
@@ -226,8 +225,9 @@ f. Delete old paths + old Flux CR in a follow-up PR.
 
 ## 7. Open questions for you
 
-1. **Maniforge.** Is the maniforge custom CR still active, or abandoned? Both root and `_clusters/firefly/maniforge.yaml` exist — keep, consolidate, or delete?
-2. **`headlamp1.sargeant.co` ingress.** `_clusters/firefly/miscellaneous/headlamp/ingressroute-p1.yaml` routes to p1 EKS / AKS clusters. Is this still wanted? (The orphan folder was deleted but the routing file remains.)
-3. **AGENTS.md staged empty.** Intentional first commit? Or unstage?
-4. **`.sops.yaml` at repo root is gitignored but tracked nowhere.** New contributors cloning the repo won't get the AGE recipient. Move into the repo (tracked) since the recipient is public-key material, not a secret?
-5. **External clusters in headlamp.** `headlamp/middleware-franklinhouse.enc.yaml`, `kubeconfig-franklinhouse.enc.yaml` exist. Are those still valid after the franklinhouse cluster moved to `infra-v2`?
+Resolved in this PR per direct user direction: maniforge removed (root + cluster YAMLs + `docs/reference/maniforge.md` + `docs/reference/firefly-consolidation.md`); `headlamp1/` removed; `AGENTS.md` filled and tracked; root `.sops.yaml` tracked; multi-cluster headlamp routing kept (intentional).
+
+Still open:
+
+1. **External-cluster Secret mixing.** `kubernetes/_clusters/firefly/miscellaneous/headlamp/headlamp-kubeconfigs.enc.yaml` is one Secret with kubeconfigs for ALL clusters mixed (home + work). Splitting it into a home-only Secret (tracked here) and a work-only Secret (private repo) is needed to fully meet the "no proprietary in public repo" rule.
+2. **Stale work-cluster references in `ingressroute.yaml`.** After this PR, `headlamp/ingressroute.yaml` still has Traefik route definitions for `/c/p1-prod-eks`, `/c/pr-acc-eurofiber`, etc. The middlewares they need (e.g. `headlamp-inject-token-pr-acc-eurofiber`) were moved out, so those routes will return errors at runtime. Decide whether to (a) leave (paths/cluster names alone aren't sensitive), or (b) trim.
