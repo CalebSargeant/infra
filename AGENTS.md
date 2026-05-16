@@ -146,12 +146,12 @@ Top-level `_base/` directories align with namespaces:
 
 ### Resource Profiles (Cloud Flavor Equivalents)
 
-AWS-style naming mapped to Raspberry Pi constraints:
-- `t.small` → 250m CPU, 512Mi memory
-- `c.medium` → 500m-2 CPU, 1-4Gi memory
-- `m.large` → 2-4 CPU, 4-8Gi memory
+AWS-style naming mapped to Raspberry Pi constraints (requests → limits):
+- `t.small` → cpu 250m → 1, memory 256Mi → 1Gi  (burstable, 1:1)
+- `c.medium` → cpu 500m → 2, memory 1Gi → 4Gi  (compute-optimised, 1:2)
+- `m.large` → cpu 1 → 4, memory 4Gi → 16Gi  (memory-optimised, 1:4)
 
-Located in `kubernetes/_components/resource-profiles/`. Patch deployments with: `kustomize.config.k8s.io/patches: patch: apiVersion...` targeting the profile label.
+Full table in `kubernetes/_components/resource-profiles/kustomization.yaml` (5 families × 8 sizes: `p.*` 2:1 cpu/mem, `t.*` 1:1, `c.*` 1:2, `m.*` 1:4, `r.*` 1:8 — each from `pico` to `2xlarge`). Patch deployments by labelling them with `resource-profile=<name>` and applying the component.
 
 ## Integration Points & Dependencies
 

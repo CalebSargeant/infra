@@ -31,7 +31,6 @@ Status: **DRAFT — not yet executed.** Captures findings from the 2026-05-15 au
 | `ansible/vars/franklin.yaml`, `ansible/vars/pi.yaml` (gitignored on-disk) | Contain plaintext `ghp_…` GitHub PAT. Not in git history but on disk. **Rotate the PAT.** |
 | `docs/operations/proxmox-gpu-passthrough-recovery.md` (untracked) | Looks intentional — commit when ready |
 | `terraform/oci/_modules/mikrotik/`, `terraform/oci/prod/eu-amsterdam-1/mikrotik/`, `terraform/.oci-config.ps1` (untracked) | Out of scope for k8s cleanup; user wants these kept as-is |
-| Empty staged `AGENTS.md` | Decide whether to fill it or unstage |
 | `kubernetes/_base/observability/SECRETS.md` (tracked) | Audit content — make sure no plaintext is in it |
 
 ---
@@ -88,7 +87,7 @@ Currently no plaintext secrets are tracked **except `ansible/keys/chr.pem`** (co
 
 ## 4. Broken Flux state — Phase 0 progress
 
-### `misc` Kustomization — FIX APPLIED (uncommitted)
+### `misc` Kustomization — FIX APPLIED in this PR
 
 **Real root cause** (my earlier sync-conflict-file hypothesis was wrong — Flux only sees git-tracked files, the conflict file was untracked): `kubernetes/_clusters/firefly/miscellaneous/headlamp/tunnel-pr-acc-eurofiber-web.enc.yaml` was encrypted with `encrypted_regex: ^(.*)$` — i.e. EVERY field including `apiVersion`, `kind`, `metadata.name`, `metadata.namespace`. Flux's kustomize-controller `v1.7.2` needs the resource header in plaintext to identify what it's about to decrypt; with everything encrypted it can't determine resource identity and emits a misleading "decryption failed" error. The misleading bit: the resource ID in the error log shows `misc/ENC[...]` — `misc` is the namespace (resolved from `kustomization.yaml`'s `namespace: misc` default), `ENC[...]` is the encrypted `metadata.name`. Local `sops -d` works because it walks the tree without trying to identify the resource first.
 
