@@ -15,7 +15,6 @@ spec:
     name: flux-system
   timeout: 2m
   wait: true
-  suspend: true
   decryption:
     provider: sops
     secretRef:

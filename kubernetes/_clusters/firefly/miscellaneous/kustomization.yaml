@@ -9,5 +9,5 @@ resources:
   - headlamp
   - ../../../_base/miscellaneous/nextcloud
   - ../../../_base/miscellaneous/wordpress
-  - ../../../_base/miscellaneous/excalidraw
+  # excalidraw migrated to kubernetes/apps/excalidraw — owned by Kustomization/flux-system/prod-excalidraw
   - ../../../_base/miscellaneous/syncthing
