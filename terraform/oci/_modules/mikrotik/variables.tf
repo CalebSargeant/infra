@@ -128,3 +128,18 @@ variable "rfc1918_addresses" {
     "RFC1918-10"  = "10.0.0.0/8"
   }
 }
+
+# ---------------------------------------------------------------------------
+# Upstream NAT (act as the default gateway for non-edge OCI subnets)
+# ---------------------------------------------------------------------------
+variable "vcn_masquerade_sources" {
+  description = "CIDRs whose traffic should be masqueraded out the router's WAN interface. Use this to let app/data subnets in the OCI VCN egress to the internet via the MikroTik."
+  type        = list(string)
+  default     = []
+}
+
+variable "wan_interface" {
+  description = "MikroTik WAN interface (used as the out-interface for the VCN masquerade rule)"
+  type        = string
+  default     = "ether1"
+}

@@ -315,3 +315,26 @@ resource "routeros_ip_firewall_nat" "container_masquerade" {
   src_address = var.container_network_cidr
   comment     = local.tf_marker
 }
+
+# Masquerade traffic from configured OCI subnets out the router's WAN so they
+# can egress to the internet via this MikroTik. One rule per (router, source).
+resource "routeros_ip_firewall_nat" "vcn_masquerade" {
+  for_each = {
+    for pair in flatten([
+      for router in local.routers : [
+        for src in var.vcn_masquerade_sources : {
+          key    = "${router}/${src}"
+          router = router
+          src    = src
+        }
+      ]
+    ]) : pair.key => pair
+  }
+  provider = routeros.by_router[each.value.router]
+
+  action        = "masquerade"
+  chain         = "srcnat"
+  src_address   = each.value.src
+  out_interface = var.wan_interface
+  comment       = "OCI VCN egress ${each.value.src} ${local.tf_marker}"
+}

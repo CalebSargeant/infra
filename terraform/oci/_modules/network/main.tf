@@ -102,10 +102,30 @@ resource "oci_core_route_table" "edge" {
   }
 }
 
+# Lookup the OCID of the edge-subnet private IP used as the internet next-hop
+# (MikroTik CHR). OCI routes to in-VCN IPs reference the private-ip OCID, not
+# the address itself, so this data source resolves it at apply time.
+data "oci_core_private_ips" "internet_gateway" {
+  count      = var.internet_gateway_ip != "" ? 1 : 0
+  ip_address = var.internet_gateway_ip
+  subnet_id  = oci_core_subnet.edge.id
+}
+
 resource "oci_core_route_table" "app" {
   compartment_id = var.compartment_ocid
   display_name   = "rt-app-${var.environment}"
   vcn_id         = oci_core_virtual_network.this.id
+
+  # Default route: send internet-bound traffic to the MikroTik CHR for NAT
+  dynamic "route_rules" {
+    for_each = var.internet_gateway_ip != "" ? [1] : []
+    content {
+      destination       = "0.0.0.0/0"
+      destination_type  = "CIDR_BLOCK"
+      network_entity_id = data.oci_core_private_ips.internet_gateway[0].private_ips[0].id
+      description       = "Internet egress via MikroTik (${var.internet_gateway_ip})"
+    }
+  }
 
   # VPN routes to remote networks
   dynamic "route_rules" {
@@ -123,6 +143,17 @@ resource "oci_core_route_table" "data" {
   compartment_id = var.compartment_ocid
   display_name   = "rt-data-${var.environment}"
   vcn_id         = oci_core_virtual_network.this.id
+
+  # Default route: send internet-bound traffic to the MikroTik CHR for NAT
+  dynamic "route_rules" {
+    for_each = var.internet_gateway_ip != "" ? [1] : []
+    content {
+      destination       = "0.0.0.0/0"
+      destination_type  = "CIDR_BLOCK"
+      network_entity_id = data.oci_core_private_ips.internet_gateway[0].private_ips[0].id
+      description       = "Internet egress via MikroTik (${var.internet_gateway_ip})"
+    }
+  }
 
   # VPN routes to remote networks
   dynamic "route_rules" {

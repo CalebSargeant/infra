@@ -43,6 +43,11 @@ inputs = {
   # Enable VPN for site-to-site connectivity
   enable_vpn = true
 
+  # Default route for app + data subnets points at mikrotik-fd1 (in edge subnet)
+  # which masquerades outbound traffic to its public IP. Single-MikroTik for
+  # now; HA via VRRP would let this point at a shared address instead.
+  internet_gateway_ip = "192.168.223.11"
+
   # Remote networks accessible via VPN
   remote_networks = {
     sargeant_onprem = {

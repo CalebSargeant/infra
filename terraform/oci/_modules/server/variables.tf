@@ -72,3 +72,16 @@ variable "servers" {
     "fd2" = { fault_domain = 1 }
   }
 }
+
+variable "k3s_url" {
+  description = "URL of the existing k3s server to join as an agent (e.g. https://192.168.19.10:6443)"
+  type        = string
+  default     = ""
+}
+
+variable "k3s_token" {
+  description = "Node token of the existing k3s cluster. Read from /var/lib/rancher/k3s/server/node-token on the server."
+  type        = string
+  sensitive   = true
+  default     = ""
+}

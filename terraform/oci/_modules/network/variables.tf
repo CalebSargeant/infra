@@ -90,3 +90,9 @@ variable "ssh_public_key_path" {
   description = "Path to the SSH public key"
   type        = string
 }
+
+variable "internet_gateway_ip" {
+  description = "Private IP (in the edge subnet) of the gateway that the app/data subnets use as their 0.0.0.0/0 next-hop, typically a MikroTik CHR doing NAT to its public IP. Empty disables the default route."
+  type        = string
+  default     = ""
+}

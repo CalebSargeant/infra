@@ -36,14 +36,14 @@ resource "oci_core_instance" "this" {
     ssh_authorized_keys = file(var.ssh_public_key_path)
     user_data = base64encode(<<-EOF
       #!/bin/bash
-      # Install k3s
-      curl -sfL https://get.k3s.io | sh -
-      # Allow current user to access k3s config
-      mkdir -p /home/ubuntu/.kube
-      cp /etc/rancher/k3s/k3s.yaml /home/ubuntu/.kube/config
-      chown -R ubuntu:ubuntu /home/ubuntu/.kube
-      # Set correct permissions
-      chmod 600 /home/ubuntu/.kube/config
+      exec > /var/log/k3s-install.log 2>&1
+      echo "Starting k3s agent install at $(date)"
+      curl -sfL https://get.k3s.io | \
+        INSTALL_K3S_EXEC="agent" \
+        K3S_URL="${var.k3s_url}" \
+        K3S_TOKEN="${var.k3s_token}" \
+        sh -
+      echo "k3s-agent service installed at $(date); will retry connection to ${var.k3s_url} until reachable"
     EOF
     )
   }
