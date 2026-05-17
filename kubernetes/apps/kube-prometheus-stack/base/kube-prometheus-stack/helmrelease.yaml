@@ -21,8 +21,20 @@ spec:
     createNamespace: true
     crds: CreateReplace
     timeout: 15m
+    remediation:
+      retries: 3
   upgrade:
     crds: CreateReplace
+    # Skip helm's wait — 3 nodes are NotReady so prometheus pods can't all schedule,
+    # and `helm upgrade` waits on them until the 15m deadline. Flux's Kustomization
+    # health check on the HelmRelease itself is enough.
+    disableWait: true
+    # Without this, a failed upgrade leaves the release "pending-upgrade" and blocks
+    # all subsequent reconciles (see history: v7–v10 all stuck since 2026-02-15).
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
   values:
     # Global settings
     fullnameOverride: prometheus
