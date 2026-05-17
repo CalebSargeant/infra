@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qbittorrent
+  namespace: media
+spec:
+  serviceName: qbittorrent
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qbittorrent
+  template:
+    metadata:
+      labels:
+        app: qbittorrent
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: qbittorrent
+          image: linuxserver/qbittorrent:5.1.2
+          resources:
+            requests:
+              memory: "466Mi"
+              cpu: "10m"
+            limits:
+              memory: "466Mi"
+          ports:
+            - containerPort: 8080   # Web UI
+            - containerPort: 55555  # BitTorrent (TCP/UDP)
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Europe/Amsterdam"
+            - name: WEBUI_PORT
+              value: "8080"
+            - name: TORRENTING_PORT
+              value: "55555"
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: qbittorrent
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: downloads

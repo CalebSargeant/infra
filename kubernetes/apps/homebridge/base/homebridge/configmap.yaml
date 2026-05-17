@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homebridge-values
+  namespace: automation
+data:
+  values.yaml: |
+    # Updated for app-template v3.7.3 schema
+
+    controllers:
+      main:
+        type: daemonset
+        containers:
+          main:
+            image:
+              repository: ghcr.io/homebridge/homebridge
+              tag: beta-2025-10-03
+            env:
+              TZ: Europe/Amsterdam
+            resources:
+              requests:
+                cpu: 14m
+                memory: 553Mi
+              limits:
+                memory: 553Mi
+
+    defaultPodOptions:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+
+    service:
+      main:
+        controller: main
+        ports:
+          http:
+            port: 8581
+            protocol: HTTP
+
+    persistence:
+      config:
+        enabled: true
+        type: hostPath
+        hostPath: /mnt/nvme/homebridge-config
+        globalMounts:
+          - path: /homebridge

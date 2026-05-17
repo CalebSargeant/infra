@@ -7,7 +7,5 @@ metadata:
 resources:
   - ../../../_base/automation/namespace.yaml
   - ghcr-pull-secret.yaml
-  - atlantis
-  - homeassistant
-  - homebridge
-  - n8n
+  # atlantis, homeassistant, homebridge, n8n migrated to kubernetes/apps/<app>/
+  # owned by Kustomization/flux-system/prod-<app>
