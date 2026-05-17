@@ -6,14 +6,7 @@ metadata:
     app.kubernetes.io/sops: enabled
 resources:
   - ../../../_base/media/namespace.yaml
-  - bazarr
-  - flaresolverr
-  - jackett
-  - nzbhydra2
-  - overseerr
-  - plex
-  - prowlarr
-  - qbittorrent
-  - radarr
-  - sabnzbd
-  - sonarr
+  # All media apps migrated to kubernetes/apps/<app>/
+  # owned by Kustomization/flux-system/prod-<app>:
+  # bazarr, flaresolverr, jackett, nzbhydra2, overseerr, plex,
+  # prowlarr, qbittorrent, radarr, sabnzbd, sonarr

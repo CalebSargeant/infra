@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prowlarr
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prowlarr
+  template:
+    metadata:
+      labels:
+        app: prowlarr
+    spec:
+      containers:
+        - name: prowlarr
+          image: linuxserver/prowlarr:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "11m"
+            limits:
+              memory: "100Mi"
+          ports:
+            - containerPort: 9696 # Prowlarr web interface
+          env:
+            - name: PUID
+              value: "1000" # Replace with your user ID
+            - name: PGID
+              value: "1000" # Replace with your group ID
+            - name: TZ
+              value: "Europe/Amsterdam" # Replace with your timezone
+          volumeMounts:
+            - mountPath: /config
+              name: prowlarr
+            - mountPath: /config/config.xml
+              name: prowlarr-config
+              subPath: config.xml
+      volumes:
+        - name: prowlarr
+          persistentVolumeClaim:
+            claimName: prowlarr
+        - name: prowlarr-config
+          configMap:
+            name: prowlarr-config

@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: krr
+  namespace: observability
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: krr
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: krr
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: krr
+subjects:
+  - kind: ServiceAccount
+    name: krr
+    namespace: observability
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: krr
+  namespace: observability
+spec:
+  # Run every Monday at 9 AM
+  schedule: "0 9 * * 1"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: krr
+        spec:
+          serviceAccountName: krr
+          restartPolicy: OnFailure
+          containers:
+            - name: krr
+              image: robustadev/krr:v1.28.0
+              command:
+                - python
+                - krr.py
+              args:
+                - simple
+                - --prometheus-url=http://prometheus-prometheus.observability.svc.cluster.local:9090
+                - --formatter=csv
+                - --slackoutput=C0AF2SVBL5P
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+              env:
+                - name: SLACK_BOT_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: slack-credentials
+                      key: slack-bot-token
