@@ -42,7 +42,6 @@ k3s.yaml
 
 ansible/vars
 
-.sops.yaml
 age.agekey
 .service-account.json
 oci_api_key.pem
@@ -62,3 +61,12 @@ site/
 notneeded/
 .neon_credentials.txtbackups/
 .neon_credentials.txt
+
+# Archive of removed-but-keep-just-in-case content
+.old/
+
+# macOS metadata
+.DS_Store
+
+# Claude Code working tree
+.claude/
