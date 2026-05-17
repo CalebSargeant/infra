@@ -39,6 +39,9 @@ terraform.rc
 # Ignore downloaded k3s config
 k3s.yaml
 *secret.yaml
+# ExternalSecret CRs only reference secrets in OCI Vault / 1Password — they
+# contain no secret material themselves, so they are safe to commit.
+!externalsecret.yaml
 
 ansible/vars
 
