@@ -10,7 +10,7 @@ resource "cloudflare_zero_trust_gateway_policy" "block_adware" {
   action      = "block"
   enabled     = true
   filters     = ["dns"]
-  precedence  = 1
+  precedence  = 13000
   traffic     = "any(dns.domains[*] in {\"doubleclick.net\" \"self.events.data.microsoft.com\" \"metrics.icloud.com\" \"dit.whatsapp.net\" \"mask.icloud.com\" \"app-measurement.com\" \"g.live.com\" \"mask-h2.icloud.com\" \"treatment.grammarly.com\" \"firebaselogging-pa.googleapis.com\" \"partner.googleadservices.com\" \"c.amazon-adsystem.com\" \"pagead2.googlesyndication.com\" \"www.googletagmanager.com\" \"www.google-analytics.com\" \"pdat.matterlytics.com\"})"
 }
 
@@ -21,7 +21,7 @@ resource "cloudflare_zero_trust_gateway_policy" "allow_server_l4" {
   action      = "allow"
   enabled     = true
   filters     = ["l4"]
-  precedence  = 2
+  precedence  = 15000
   traffic     = "net.dst.ip == 192.168.69.110"
 }
 
@@ -32,6 +32,6 @@ resource "cloudflare_zero_trust_gateway_policy" "block_server_l4" {
   action      = "block"
   enabled     = true
   filters     = ["l4"]
-  precedence  = 3
+  precedence  = 16000
   traffic     = "net.dst.ip == 192.168.69.110"
 }

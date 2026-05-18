@@ -6,8 +6,10 @@
 
 resource "cloudflare_zero_trust_access_identity_provider" "one_time_pin" {
   account_id = var.account_id
-  name       = "One-time PIN"
-  type       = "onetimepin"
+  # CF stores an empty string for the OTP IdP name; match exactly so import
+  # is a no-op. (Dashboard displays "One-time PIN" but the API name is "".)
+  name = ""
+  type = "onetimepin"
 }
 
 resource "cloudflare_zero_trust_access_identity_provider" "google" {

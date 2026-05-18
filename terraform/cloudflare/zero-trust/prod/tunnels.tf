@@ -13,12 +13,13 @@ resource "cloudflare_zero_trust_tunnel_cloudflared" "firefly" {
   account_id = var.account_id
   name       = "firefly"
 
-  # Placeholder; ignored after import. tunnel_secret must be base64 of a 32+
-  # byte value but is only consumed at create-time.
-  tunnel_secret = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+  # Placeholder; ignored after import. `secret` must be base64 of a 32+ byte
+  # value but is only consumed at create-time. (Provider v4 renamed this from
+  # tunnel_secret → secret somewhere along the line.)
+  secret = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
 
   lifecycle {
-    ignore_changes = [tunnel_secret]
+    ignore_changes = [secret]
   }
 }
 
@@ -30,9 +31,14 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.firefly.id
 
   config {
+    warp_routing {
+      enabled = true
+    }
+
     ingress_rule {
       hostname = "overseerr.sargeant.co"
       service  = "http://overseerr.media.svc.cluster.local:5055"
+      origin_request {}
     }
 
     # Cloudflared requires the last rule to be a catch-all with no hostname.
