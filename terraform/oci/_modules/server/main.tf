@@ -54,5 +54,10 @@ resource "oci_core_instance" "this" {
       source_details[0].source_id,
       metadata["user_data"]
     ]
+
+    precondition {
+      condition     = var.k3s_url == "" || length(var.k3s_token) > 0
+      error_message = "k3s_token must be set when k3s_url is configured, otherwise cloud-init will install k3s-agent with an empty token and silently fail to join. Run: export K3S_TOKEN=$(ssh firefly \"sudo cat /var/lib/rancher/k3s/server/node-token\")"
+    }
   }
 }

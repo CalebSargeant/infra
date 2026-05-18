@@ -271,9 +271,15 @@ resource "routeros_ip_firewall_filter" "fwd_accept_rfc1918_2" {
   for_each = local.routers
   provider = routeros.by_router[each.key]
 
+  # Yes, this is a second forward-chain accept for src RFC1918 — same as
+  # fwd_accept_rfc1918 above. RouterOS appends API-created rules in order,
+  # and this rule's depends_on chain places it after TRUSTED so RFC1918
+  # traffic gets a second pass after TRUSTED has had its say. The duplicate
+  # is intentional ordering, not a copy-paste bug. (Earlier comment said
+  # "accept input RFC1918" which was a typo; chain is `forward`.)
   action           = "accept"
   chain            = "forward"
-  comment          = "accept input RFC1918 ${local.tf_marker}"
+  comment          = "accept forward RFC1918 (post-TRUSTED) ${local.tf_marker}"
   src_address_list = "RFC1918"
 
   depends_on = [

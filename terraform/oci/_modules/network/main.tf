@@ -109,6 +109,13 @@ data "oci_core_private_ips" "internet_gateway" {
   count      = var.internet_gateway_ip != "" ? 1 : 0
   ip_address = var.internet_gateway_ip
   subnet_id  = oci_core_subnet.edge.id
+
+  lifecycle {
+    postcondition {
+      condition     = length(self.private_ips) > 0
+      error_message = "No private IP ${var.internet_gateway_ip} found in edge subnet — ensure the MikroTik CHR is up and has this IP assigned before applying the network module. (You may need to apply the `edge` module first.)"
+    }
+  }
 }
 
 resource "oci_core_route_table" "app" {
