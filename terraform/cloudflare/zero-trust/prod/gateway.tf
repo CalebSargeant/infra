@@ -6,7 +6,7 @@
 resource "cloudflare_zero_trust_gateway_policy" "block_adware" {
   account_id  = var.account_id
   name        = "Block adware"
-  description = ""
+  description = "Managed by Terraform"
   action      = "block"
   enabled     = true
   filters     = ["dns"]
@@ -17,7 +17,7 @@ resource "cloudflare_zero_trust_gateway_policy" "block_adware" {
 resource "cloudflare_zero_trust_gateway_policy" "allow_server_l4" {
   account_id  = var.account_id
   name        = "Allow rule for Server"
-  description = ""
+  description = "Managed by Terraform"
   action      = "allow"
   enabled     = true
   filters     = ["l4"]
@@ -28,7 +28,7 @@ resource "cloudflare_zero_trust_gateway_policy" "allow_server_l4" {
 resource "cloudflare_zero_trust_gateway_policy" "block_server_l4" {
   account_id  = var.account_id
   name        = "Block rule for Server"
-  description = ""
+  description = "Managed by Terraform"
   action      = "block"
   enabled     = true
   filters     = ["l4"]

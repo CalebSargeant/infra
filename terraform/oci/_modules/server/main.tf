@@ -37,15 +37,37 @@ resource "oci_core_instance" "this" {
     user_data = base64encode(<<-EOF
       #!/bin/bash
       exec > /var/log/k3s-install.log 2>&1
-      echo "Starting k3s agent install at $(date)"
-      curl -sfL https://get.k3s.io | \
-        INSTALL_K3S_EXEC="agent" \
-        K3S_URL="${var.k3s_url}" \
-        K3S_TOKEN="${var.k3s_token}" \
-        sh -
-      echo "k3s-agent service installed at $(date); will retry connection to ${var.k3s_url} until reachable"
+      echo "k3s install starting at $(date)"
+
+      # Three modes:
+      #   k3s_url + k3s_token  -> install as agent joining the cluster
+      #   k3s_url empty        -> install as a standalone k3s server
+      #   k3s_url set, token empty -> blocked by the resource precondition
+      if [ -n "${var.k3s_url}" ]; then
+        echo "agent mode: joining ${var.k3s_url}"
+        curl -sfL https://get.k3s.io | \
+          INSTALL_K3S_EXEC="agent" \
+          K3S_URL="${var.k3s_url}" \
+          K3S_TOKEN="${var.k3s_token}" \
+          sh -
+        echo "k3s-agent service installed at $(date); will retry connection to ${var.k3s_url} until reachable"
+      else
+        echo "server mode: standalone k3s control plane"
+        curl -sfL https://get.k3s.io | sh -
+        mkdir -p /home/ubuntu/.kube
+        cp /etc/rancher/k3s/k3s.yaml /home/ubuntu/.kube/config
+        chown -R ubuntu:ubuntu /home/ubuntu/.kube
+        chmod 600 /home/ubuntu/.kube/config
+        echo "k3s server installed at $(date)"
+      fi
     EOF
     )
+  }
+
+  freeform_tags = {
+    "Environment" = var.environment
+    "Role"        = "k3s-${var.k3s_url == "" ? "server" : "agent"}"
+    "ManagedBy"   = "Terraform"
   }
 
   # Prevent recreation on image changes

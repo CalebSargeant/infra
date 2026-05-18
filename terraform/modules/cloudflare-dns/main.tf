@@ -25,6 +25,7 @@ resource "cloudflare_record" "this" {
   content = each.value.value
   ttl     = each.value.ttl
   proxied = each.value.proxied
+  comment = "Managed by Terraform"
 }
 
 # Import blocks for records that already exist in the dashboard. Empty

@@ -105,6 +105,7 @@ resource "cloudflare_zero_trust_access_application" "warp_login" {
   domain                    = "magmamoose.cloudflareaccess.com/warp"
   tags                      = []
   allowed_idps              = []
+  app_launcher_visible      = false # CF returns null for warp apps; pin false to match
   auto_redirect_to_identity = false
   session_duration          = "24h"
 }
@@ -144,6 +145,7 @@ resource "cloudflare_zero_trust_access_application" "app_launcher" {
   name                      = "App Launcher"
   type                      = "app_launcher"
   domain                    = "magmamoose.cloudflareaccess.com"
+  app_launcher_visible      = false # the launcher itself; CF returns null here, pin false to match
   auto_redirect_to_identity = true
   session_duration          = "24h"
 

@@ -2,10 +2,10 @@
 # so the first `terragrunt apply` is a no-op (state reconciliation only).
 # After the first apply finishes cleanly, these can be deleted.
 #
-# ID format reference:
+# ID format reference (note the literal "account/" prefix for policies):
 #   cloudflare_zero_trust_access_identity_provider: <account_id>/<id>
 #   cloudflare_zero_trust_access_application:       <account_id>/<id>
-#   cloudflare_zero_trust_access_policy:            <account_id>/<app_id>/<id>
+#   cloudflare_zero_trust_access_policy:            account/<account_id>/<app_id>/<id>
 #   cloudflare_zero_trust_tunnel_cloudflared:       <account_id>/<id>
 #   cloudflare_zero_trust_tunnel_cloudflared_config: <account_id>/<tunnel_id>
 #   cloudflare_zero_trust_gateway_policy:           <account_id>/<id>

@@ -6,7 +6,7 @@ resource "cloudflare_zero_trust_device_posture_rule" "mac_disk_encryption" {
   account_id  = var.account_id
   name        = "MacOS Disk Encryption"
   type        = "disk_encryption"
-  description = ""
+  description = "Managed by Terraform"
   schedule    = "5m"
 
   input {
@@ -23,7 +23,7 @@ resource "cloudflare_zero_trust_device_posture_rule" "mac_firewall" {
   account_id  = var.account_id
   name        = "MacOS Firewall"
   type        = "firewall"
-  description = ""
+  description = "Managed by Terraform"
   schedule    = "5m"
 
   input {
@@ -39,7 +39,7 @@ resource "cloudflare_zero_trust_device_posture_rule" "mac_os_version" {
   account_id  = var.account_id
   name        = "MacOS Version"
   type        = "os_version"
-  description = ""
+  description = "Managed by Terraform"
   schedule    = "5m"
 
   input {
