@@ -273,6 +273,24 @@ resource "oci_core_security_list" "edge" {
     }
   }
 
+  # MikroTik API (port 8728, plaintext binary) — only opened to operator IPs
+  # because it's used by the routeros terraform provider, which needs reach
+  # from wherever `terragrunt apply` runs. Auth is challenge-response so
+  # passwords don't traverse the wire in cleartext, but the session itself
+  # is unencrypted; keep this list narrow. Migrate to apis://:8729 (TLS API)
+  # and drop this whole block once the cert situation is sorted.
+  dynamic "ingress_security_rules" {
+    for_each = toset(var.routeros_api_management_cidrs)
+    content {
+      protocol = "6" # TCP
+      source   = ingress_security_rules.value
+      tcp_options {
+        min = 8728
+        max = 8728
+      }
+    }
+  }
+
   # ICMP
   ingress_security_rules {
     protocol = 1 # ICMP

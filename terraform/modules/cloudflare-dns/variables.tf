@@ -1,9 +1,3 @@
-variable "cloudflare_api_token" {
-  description = "Cloudflare API token with Zone.DNS edit on the target zone"
-  type        = string
-  sensitive   = true
-}
-
 variable "zone_id" {
   description = "Cloudflare zone ID to manage records in"
   type        = string

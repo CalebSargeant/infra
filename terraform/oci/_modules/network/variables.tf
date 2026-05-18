@@ -96,3 +96,9 @@ variable "internet_gateway_ip" {
   type        = string
   default     = ""
 }
+
+variable "routeros_api_management_cidrs" {
+  description = "CIDRs allowed to reach the MikroTik CHR plaintext binary API (port 8728) on the public IPs in the edge subnet. The routeros terraform provider requires this access; keep the list narrow because the API session isn't TLS-wrapped. Empty disables the rule entirely."
+  type        = list(string)
+  default     = []
+}

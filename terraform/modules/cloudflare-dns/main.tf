@@ -7,9 +7,9 @@ terraform {
   }
 }
 
-provider "cloudflare" {
-  api_token = var.cloudflare_api_token
-}
+# Provider configuration is the caller's responsibility (see
+# https://developer.hashicorp.com/terraform/language/modules/develop/providers).
+# The calling terragrunt.hcl generates a provider.tf with the api_token.
 
 # Key records by name#type#value so the same name+type can appear twice with
 # different values (round-robin), which is how oci.sargeant.co resolves to

@@ -45,8 +45,16 @@ inputs = {
 
   # Default route for app + data subnets points at mikrotik-fd1 (in edge subnet)
   # which masquerades outbound traffic to its public IP. Single-MikroTik for
-  # now; HA via VRRP would let this point at a shared address instead.
+  # now; HA via VRRP would let this point at a shared address instead — see
+  # docs/reference/oci-infra-improvements.md.
   internet_gateway_ip = "192.168.223.11"
+
+  # Operator IPs allowed to talk to the MikroTik plaintext binary API on the
+  # public IPs in the edge subnet (the routeros terraform provider needs this).
+  # Added so the previously-OCI-CLI-only ingress rule is now in terraform.
+  routeros_api_management_cidrs = [
+    "84.84.15.110/32", # Sargeant House WAN (Eurofiber)
+  ]
 
   # Remote networks accessible via VPN
   remote_networks = {

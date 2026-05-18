@@ -23,13 +23,10 @@ terraform {
 EOF
 }
 
-terraform {
-  source = "${get_repo_root()}/terraform/modules/cloudflare-dns"
-}
-
 # Cloudflare API token lives in OCI Vault (vault-prod / cloudflare-api-token).
-# Fetched at parse time via the oci CLI, which uses ~/.oci/config — no
-# additional env vars needed beyond what terragrunt already wants for OCI.
+# Fetched at parse time via the oci CLI, then exported as CLOUDFLARE_API_TOKEN
+# so the cloudflare provider picks it up via its built-in env-var fallback —
+# avoids writing the secret into a generated .tf file in the cache.
 locals {
   cf_token_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aawodbynrquyvlohrzze2uipxvxawsaqqe3sykv5owulfa"
 
@@ -40,10 +37,31 @@ locals {
   )
 }
 
+terraform {
+  source = "${get_repo_root()}/terraform/modules/cloudflare-dns"
+
+  extra_arguments "cloudflare_token" {
+    commands = ["plan", "apply", "destroy", "import", "refresh", "validate"]
+    env_vars = {
+      CLOUDFLARE_API_TOKEN = local.cloudflare_api_token
+    }
+  }
+}
+
+# Provider config belongs in the caller, not the cloudflare-dns module
+# (terraform module-development guidance). Generated into the working dir at
+# parse time; api_token is read from CLOUDFLARE_API_TOKEN env (above).
+generate "cloudflare_provider" {
+  path      = "cloudflare_provider.tf"
+  if_exists = "overwrite"
+  contents  = <<-EOF
+    provider "cloudflare" {}
+  EOF
+}
+
 inputs = {
-  cloudflare_api_token = local.cloudflare_api_token
   # sargeant.co zone (the previous value here was actually the *account* ID).
-  zone_id              = "e25f6d9e2d13d9c04988e459587101b5"
+  zone_id = "e25f6d9e2d13d9c04988e459587101b5"
 
   records = [
     # Individual records for each OCI MikroTik so you can target one
