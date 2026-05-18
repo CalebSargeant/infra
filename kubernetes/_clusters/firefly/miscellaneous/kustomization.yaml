@@ -7,7 +7,5 @@ metadata:
 resources:
   - ../../../_base/miscellaneous/namespace.yaml
   - headlamp
-  - ../../../_base/miscellaneous/nextcloud
-  - ../../../_base/miscellaneous/wordpress
-  - ../../../_base/miscellaneous/excalidraw
-  - ../../../_base/miscellaneous/syncthing
+  # excalidraw, nextcloud, syncthing, wordpress migrated to kubernetes/apps/<app>/
+  # owned by Kustomization/flux-system/prod-<app>

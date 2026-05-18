@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bazarr-ingress
+  namespace: media
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-dns
+    traefik.ingress.kubernetes.io/service.serversscheme: http
+    traefik.ingress.kubernetes.io/entrypoints: websecure
+  labels:
+    app: bazarr
+spec:
+  rules:
+    - host: bazarr.sargeant.co # Replace with your domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: bazarr
+                port:
+                  number: 6767
+  tls:
+    - hosts:
+        - bazarr.sargeant.co # Replace with your domain
+      secretName: bazarr-tls # Secret for TLS certificate

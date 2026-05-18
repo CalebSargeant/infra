@@ -39,10 +39,12 @@ terraform.rc
 # Ignore downloaded k3s config
 k3s.yaml
 *secret.yaml
+# ExternalSecret CRs only reference secrets in OCI Vault / 1Password — they
+# contain no secret material themselves, so they are safe to commit.
+!externalsecret.yaml
 
 ansible/vars
 
-.sops.yaml
 age.agekey
 .service-account.json
 oci_api_key.pem
@@ -62,3 +64,12 @@ site/
 notneeded/
 .neon_credentials.txtbackups/
 .neon_credentials.txt
+
+# Archive of removed-but-keep-just-in-case content
+.old/
+
+# macOS metadata
+.DS_Store
+
+# Claude Code working tree
+.claude/
