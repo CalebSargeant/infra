@@ -70,4 +70,15 @@ inputs = {
       value = "193.123.39.172"
     },
   ]
+
+  # These four records already exist in the dashboard (someone re-created
+  # them outside terraform after the initial zone_id bug). Importing instead
+  # of re-creating. Safe to delete this block after the first clean apply
+  # lands in state.
+  imports = [
+    { key = "oci1.sargeant.co#A#134.98.139.9", record_id = "06e99fd7050e4fdda75047ae12e45bdf" },
+    { key = "oci2.sargeant.co#A#193.123.39.172", record_id = "df6b1879c47625d404c68a4d31948898" },
+    { key = "oci.sargeant.co#A#134.98.139.9", record_id = "f0cfcdff5ce214beae99477f3c87d839" },
+    { key = "oci.sargeant.co#A#193.123.39.172", record_id = "b76a4a6f0be53e5908552f2072a87b5b" },
+  ]
 }

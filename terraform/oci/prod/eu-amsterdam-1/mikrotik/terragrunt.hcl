@@ -31,13 +31,29 @@ generate "routeros_required" {
   EOF
 }
 
-# Secrets are fetched from 1Password at parse time via the `op` CLI.
-# Requires `op` CLI installed and signed in (`op signin`).
+# Secrets live in OCI Vault (vault-prod) and are fetched at parse time via
+# the `oci` CLI, which uses ~/.oci/config — no extra env vars needed.
+#
+# Previously sourced from 1Password (`op read`), but everything else in this
+# repo's secret access pattern is OCI-Vault-first, and the op flow added a
+# desktop-integration dependency to every terragrunt run on the mikrotik
+# module. The `mikrotik-credentials` secret stores admin creds as JSON
+# `{baseurl,username,password}`; we extract the password with jq.
 locals {
-  op_vault = "Firefly"
+  routeros_password_secret_ocid     = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aaaizjuctq6do5iou2xo5yibpuiirdwwdjurwllubxlima" # vault-prod / mikrotik-credentials (JSON)
+  cloudflared_tunnel_token_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aa2awevyczjklffua7eugrlxbsz4xziug5x5jgpewsbwfa" # vault-prod / cloudflared-tunnel-token-firefly
 
-  routeros_password        = run_cmd("--terragrunt-quiet", "op", "read", "op://${local.op_vault}/Firefly MikroTik Password/password")
-  cloudflared_tunnel_token = run_cmd("--terragrunt-quiet", "op", "read", "op://${local.op_vault}/Firefly Cloudflare Tunnel Token/password")
+  routeros_password = run_cmd(
+    "--terragrunt-quiet",
+    "bash", "-c",
+    "oci secrets secret-bundle get --secret-id ${local.routeros_password_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d | jq -r .password"
+  )
+
+  cloudflared_tunnel_token = run_cmd(
+    "--terragrunt-quiet",
+    "bash", "-c",
+    "oci secrets secret-bundle get --secret-id ${local.cloudflared_tunnel_token_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
+  )
 }
 
 inputs = {

@@ -26,3 +26,12 @@ resource "cloudflare_record" "this" {
   ttl     = each.value.ttl
   proxied = each.value.proxied
 }
+
+# Import blocks for records that already exist in the dashboard. Empty
+# `imports` list = no imports (the steady state once initial migration is
+# done).
+import {
+  for_each = { for i in var.imports : i.key => i }
+  to       = cloudflare_record.this[each.key]
+  id       = "${var.zone_id}/${each.value.record_id}"
+}

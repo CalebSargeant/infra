@@ -20,3 +20,12 @@ variable "records" {
   }))
   default = []
 }
+
+variable "imports" {
+  description = "Pre-existing Cloudflare records to bring under terraform management. Each entry needs the same `name#type#value` key used in `records` plus the record's Cloudflare ID. Used for initial dashboard→terraform migration; can be empty after the first apply lands."
+  type = list(object({
+    key       = string
+    record_id = string
+  }))
+  default = []
+}
