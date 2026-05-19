@@ -129,4 +129,7 @@ spec:
             items:
               - key: app-key-pem
                 path: private-key.pem
-            defaultMode: 0400
+            # 0440 (group-readable) so the atlantis container user can read it
+            # via fsGroup: 1000 (set at the pod securityContext). Not 0400 —
+            # that's owner-only and the container runs non-root.
+            defaultMode: 0440

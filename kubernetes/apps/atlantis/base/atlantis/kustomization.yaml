@@ -13,9 +13,10 @@ resources:
   # Vault keys: atlantis-github-app-id, atlantis-github-app-private-key,
   # atlantis-github-webhook-secret. See README.md for App creation steps.
   #
-  # AWS / Azure credentials are still PAT-style if needed — uncomment the
-  # SOPS files below (and create them) when you want Atlantis to drive
-  # cloud-provider Terraform that requires those credentials.
+  # Optional cloud-provider credentials (AWS access keys / Azure service
+  # principal). These are independent of GitHub auth — they're needed only
+  # if Atlantis is driving Terraform that talks to those clouds. Create
+  # them from the secret-*.yaml.template files via SOPS, then uncomment:
   # - secret-aws.enc.yaml
   # - secret-azure.enc.yaml
 components:
