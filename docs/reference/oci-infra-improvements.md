@@ -27,17 +27,48 @@ Better pattern:
 3. Token rotation then becomes: update the vault secret, the next k3s-agent
    restart picks it up (with a tiny systemd ExecStartPre hook).
 
-## 2. Make k3s install script changes propagate to existing instances
+## 2. Propagate k3s_url / k3s_token / image changes to existing instances
 
-**Resolved.** Added a `terraform_data.user_data_replace_trigger` resource
-in the server module hashing only the inputs that meaningfully change the
-cloud-init outcome (`k3s_url`, `k3s_token`, `image_ocid`). The instance
-resource declares `replace_triggered_by` on it. Result:
+**Resolved (scoped to meaningful inputs only).** Added a
+`terraform_data.user_data_replace_trigger` resource in the server module
+hashing the inputs that meaningfully change cloud-init outcome
+(`k3s_url`, `k3s_token`, `image_ocid`). The instance resource declares
+`replace_triggered_by` on it. Result:
 
 - Cosmetic install-script edits (comments, log wording) don't change the
-  hash → no VM replacement.
+  hash → no VM replacement. **This is intentional.**
 - Changing `k3s_url`, `k3s_token`, or `image_ocid` changes the hash →
   forces VM recreation, new cloud-init runs.
+
+The current `terraform_data` body (live in `terraform/oci/_modules/server/main.tf`
+— keep this snippet in sync with the implementation):
+
+```hcl
+input = sha256(jsonencode({
+  k3s_url   = var.k3s_url
+  k3s_token = var.k3s_token
+  image     = var.image_ocid
+}))
+```
+
+**To force a replacement for a script-only change** (e.g. a new
+cloud-init step that fixes a bug in the install path), bump a sentinel
+field in the hash — easiest is to add a `version` key to the
+`jsonencode({...})` argument and increment it next time you need a
+forced rebuild:
+
+```hcl
+input = sha256(jsonencode({
+  k3s_url   = var.k3s_url
+  k3s_token = var.k3s_token
+  image     = var.image_ocid
+  version   = 1   # bump to force a one-off replacement
+}))
+```
+
+A follow-up PR ([#213](https://github.com/CalebSargeant/infra/pull/213))
+also folds `k3s_token` out of the hash in server mode (`k3s_url == ""`)
+so token rotation doesn't rebuild standalone-server VMs that ignore it.
 
 `ignore_changes = [metadata["user_data"]]` stays as the second layer of
 defence against accidental replacements from re-rendered heredoc whitespace.
