@@ -2,55 +2,41 @@
 
 This configuration deploys Cloudflare Tunnel (cloudflared) as a DaemonSet on the firefly cluster, running on all node types (pi and mini).
 
-## Prerequisites
+## Token source
 
-You need a Cloudflare Tunnel token from the Cloudflare Zero Trust dashboard.
+The tunnel token is **NOT** in this repo. It lives in **OCI Vault** under the secret name `cloudflared-tunnel-token-firefly` and is pulled into the cluster by `externalsecret.yaml` (in this directory) via the `oci-vault` `ClusterSecretStore`. Same flow as `cloudflare-credentials`, `mikrotik-credentials`, `slack-credentials`, etc.
 
-## Configuration
+## Rotating the token
 
-### 1. Add your tunnel token
+1. **Get a new tunnel token** from the Cloudflare Zero Trust dashboard:
+   - Networks → Tunnels → your tunnel → **Refresh token** (or recreate the tunnel)
+2. **Update OCI Vault** — overwrite the value of secret `cloudflared-tunnel-token-firefly` with the new token.
+3. **Force refresh** (optional — ExternalSecret syncs every 1h by default):
+   ```bash
+   kubectl annotate externalsecret cloudflared-token -n core \
+     force-sync="$(date +%s)" --overwrite
+   ```
+4. **Roll the DaemonSet** so pods pick up the new token:
+   ```bash
+   kubectl rollout restart ds/cloudflared -n core
+   ```
 
-Edit the secret file and replace the placeholder with your actual tunnel token:
-
-```bash
-nano kubernetes/_base/core/cloudflared/secret.enc.yaml
-```
-
-Replace `REPLACE_WITH_YOUR_CLOUDFLARE_TUNNEL_TOKEN` with your actual token.
-
-### 2. Encrypt the secret with SOPS
-
-```bash
-cd kubernetes/_base/core/cloudflared
-sops --encrypt --age age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0 --encrypted-regex '^(data|stringData)$' secret.enc.yaml > secret.enc.yaml.tmp
-mv secret.enc.yaml.tmp secret.enc.yaml
-```
-
-### 3. Commit and push
-
-```bash
-git add .
-git commit -m "Add encrypted cloudflared tunnel token"
-git push
-```
-
-Flux will automatically deploy the DaemonSet to all nodes in the firefly cluster.
+No code change or PR needed — the token lives in OCI Vault.
 
 ## Verification
 
-Check that the DaemonSet is running:
-
 ```bash
-kubectl get daemonset -n core cloudflared
-kubectl get pods -n core -l app=cloudflared
+kubectl get externalsecret cloudflared-token -n core   # READY=True, SecretSynced
+kubectl get secret cloudflared-token -n core           # exists, key 'token'
+kubectl get daemonset cloudflared -n core              # DESIRED=CURRENT=READY
+kubectl logs ds/cloudflared -n core --tail=20          # "Connection registered"
 ```
-
-You should see one pod per node in the cluster.
 
 ## Architecture
 
 - **Image**: `cloudflare/cloudflared:latest`
 - **Namespace**: `core`
-- **Node Selector**: `type: all` (runs on both pi and mini nodes)
-- **Resources**: t.nano profile (50m CPU request, 200m limit, 64Mi RAM request, 256Mi limit)
-- **Command**: `tunnel --no-autoupdate run --token $(TUNNEL_TOKEN)`
+- **Scheduling**: no `nodeSelector` or tolerations — the DaemonSet lands on every schedulable node (pi + mini)
+- **Resources**: 10m CPU request / no CPU limit, 100Mi RAM request and limit
+- **Command**: `tunnel --no-autoupdate --protocol quic run --token $(TUNNEL_TOKEN)`
+- **Secret source**: `Secret/core/cloudflared-token` materialized by `ExternalSecret` from OCI Vault key `cloudflared-tunnel-token-firefly`
