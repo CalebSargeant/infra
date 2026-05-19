@@ -14,15 +14,22 @@ data "oci_identity_availability_domains" "ads" {
 }
 
 # Hash of the inputs that *meaningfully* change cloud-init outcome —
-# k3s_url, the secret OCID it should fetch, and the base image. Cosmetic
-# script tweaks don't change the hash so don't recreate VMs.
+# k3s_url, the secret OCID it should fetch (in agent mode), and the base
+# image. Cosmetic script tweaks don't change the hash so don't recreate
+# VMs. Bump `version` below to force a one-off replacement when you do
+# edit the install script meaningfully (e.g. new cloud-init step).
+#
+# k3s_token_secret_ocid is folded out in server mode (k3s_url == "")
+# because the OCID isn't read — pointing it at a different Vault secret
+# shouldn't rebuild standalone-server VMs that ignore it.
 resource "terraform_data" "user_data_replace_trigger" {
   for_each = var.servers
 
   input = sha256(jsonencode({
     k3s_url               = var.k3s_url
-    k3s_token_secret_ocid = var.k3s_token_secret_ocid
+    k3s_token_secret_ocid = var.k3s_url == "" ? "" : var.k3s_token_secret_ocid
     image                 = var.image_ocid
+    version               = 1
   }))
 }
 
@@ -129,7 +136,7 @@ resource "oci_core_instance" "this" {
   }
 
   lifecycle {
-    # source_details: don't fight image version drift if AMI gets republished.
+    # source_details: don't fight image version drift if the OCI image gets republished.
     # metadata.user_data: cosmetic script tweaks shouldn't replace VMs.
     # Meaningful changes (k3s_url / k3s_token_secret_ocid / image) propagate
     # via replace_triggered_by on the user_data_replace_trigger hash.
