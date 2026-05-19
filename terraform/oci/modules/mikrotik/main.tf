@@ -123,15 +123,15 @@ resource "routeros_container" "cloudflared" {
 
   # `name` is read-only on this provider — RouterOS derives it from the
   # remote_image. Rename manually via /container set if the auto name matters.
-  remote_image          = var.cloudflared_image
-  interface             = routeros_interface_veth.cloudflared[each.key].name
-  envlist               = "CLOUDFLARED"
-  cmd                   = "tunnel --no-autoupdate --protocol quic run"
-  logging               = true
-  start_on_boot         = true
-  workdir               = "/home/nonroot"
-  root_dir              = var.container_root_dir
-  comment               = local.tf_marker
+  remote_image  = var.cloudflared_image
+  interface     = routeros_interface_veth.cloudflared[each.key].name
+  envlist       = "CLOUDFLARED"
+  cmd           = "tunnel --no-autoupdate --protocol quic run"
+  logging       = true
+  start_on_boot = true
+  workdir       = "/home/nonroot"
+  root_dir      = var.container_root_dir
+  comment       = local.tf_marker
   # Per-router because r1's RouterOS accepts only "15-SIGTERM" (enum) while
   # r2's accepts only "15" (number). Different firmware/schema versions.
   stop_signal = var.cloudflared_stop_signals[each.key]

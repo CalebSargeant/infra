@@ -42,6 +42,7 @@ generate "routeros_required" {
 locals {
   routeros_password_secret_ocid     = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aaaizjuctq6do5iou2xo5yibpuiirdwwdjurwllubxlima" # vault-prod / mikrotik-credentials (JSON)
   cloudflared_tunnel_token_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aa2awevyczjklffua7eugrlxbsz4xziug5x5jgpewsbwfa" # vault-prod / cloudflared-tunnel-token-firefly
+  recon_blockers_secret_ocid        = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aa7mytuezgibzn4g36jxupsgy57zl4372uq47atgfra2ka" # vault-prod / infra-recon-blockers
 
   routeros_password = run_cmd(
     "--terragrunt-quiet",
@@ -54,6 +55,16 @@ locals {
     "bash", "-c",
     "oci secrets secret-bundle get --secret-id ${local.cloudflared_tunnel_token_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
   )
+
+  # The trusted-address list labels reveal the operator's employer and the
+  # two family residences by name + IP/hostname — moved into OCI Vault so
+  # only the operator's authenticated principals (or atlantis) see them.
+  # JSON sub-key: `mikrotik_trusted_addresses` → map(label -> ip-or-host).
+  recon_blockers = jsondecode(run_cmd(
+    "--terragrunt-quiet",
+    "bash", "-c",
+    "oci secrets secret-bundle get --secret-id ${local.recon_blockers_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
+  ))
 }
 
 inputs = {
@@ -74,6 +85,7 @@ inputs = {
   routeros_username        = "admin"
   routeros_password        = local.routeros_password
   cloudflared_tunnel_token = local.cloudflared_tunnel_token
+  trusted_addresses        = local.recon_blockers.mikrotik_trusted_addresses
 
   # Masquerade outbound traffic from app + data subnets so they can use this
   # MikroTik as their internet gateway (paired with the 0.0.0.0/0 route in the
