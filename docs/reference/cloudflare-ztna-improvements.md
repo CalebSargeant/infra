@@ -129,7 +129,7 @@ a real consumer (e.g. uptime monitoring hitting `overseerr.sargeant.co`).
 Workflow once a token is added:
 
 1. `terragrunt apply`
-2. `terraform output -raw service_token_<name>_client_secret` (sensitive,
+2. `terragrunt output -raw service_token_<name>_client_secret` (sensitive,
    only available at create-time)
 3. Stash in OCI Vault (or pipe directly into the consumer's secret store)
 4. Caller sends `CF-Access-Client-Id` + `CF-Access-Client-Secret` headers
