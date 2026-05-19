@@ -87,6 +87,11 @@ inputs = {
       type  = "A"
       value = "193.123.39.172"
     },
+    {
+      name  = "test.sargeant.co"
+      type  = "A"
+      value = "193.123.39.172"
+    },
 
     # Routes through the `firefly` cloudflared tunnel to the in-cluster
     # radarr service (k8s service: radarr.media.svc.cluster.local:7878,
