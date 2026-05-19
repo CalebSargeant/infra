@@ -1,5 +1,5 @@
 terraform {
-  source = "${get_repo_root()}/terraform/oci/_modules/iam-policy"
+  source = "${get_repo_root()}/terraform/oci/modules/iam-policy"
 }
 
 inputs = {

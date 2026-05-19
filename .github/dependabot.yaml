@@ -17,22 +17,18 @@ updates:
     schedule:
       interval: daily
   - package-ecosystem: terraform
-    directory: /terraform/modules/gcp/project
+    directory: /terraform/oci/modules/edge
     schedule:
       interval: daily
   - package-ecosystem: terraform
-    directory: /terraform/oci/_modules/edge
+    directory: /terraform/oci/modules/network
     schedule:
       interval: daily
   - package-ecosystem: terraform
-    directory: /terraform/oci/_modules/network
+    directory: /terraform/oci/modules/policy
     schedule:
       interval: daily
   - package-ecosystem: terraform
-    directory: /terraform/oci/_modules/policy
-    schedule:
-      interval: daily
-  - package-ecosystem: terraform
-    directory: /terraform/oci/_modules/server
+    directory: /terraform/oci/modules/server
     schedule:
       interval: daily

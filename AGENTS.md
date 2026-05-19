@@ -23,12 +23,15 @@ Terragrunt manages configuration inheritance and state, auto-generating Terrafor
 
 ```
 terraform/
-  root.hcl           # Version pins, remote state config (GCS)
-  terragrunt.hcl     # Default backend configuration
-  modules/gcp/       # Reusable GCP modules
-  gcp/prod/          # Provider-specific environments (uses root.hcl)
-  oci/prod/          # OCI infrastructure
-  cloudflare/prod/   # Cloudflare DNS/edge
+  root.hcl                       # Version pins, remote state config (GCS)
+  terragrunt.hcl                 # Default backend configuration
+  cloudflare/modules/            # Reusable Cloudflare modules (cloudflare-dns)
+  cloudflare/dns/                # Cloudflare DNS records
+  cloudflare/zero-trust/         # Cloudflare ZTNA
+  gcp/prod/                      # GCP environments (uses root.hcl)
+  oci/modules/                   # Reusable OCI modules (network, server, edge, mikrotik, …)
+  oci/prod/                      # OCI environments (uses root.hcl)
+  oci/iam-policy/                # Tenancy-root OCI IAM policies
 ```
 
 **Key Pattern**: Each provider directory structure mirrors cloud regions/environments. Terragrunt auto-generates `backend.tf` and `provider.tf` - **don't manually edit these files** (they're marked `if_exists = "overwrite"`).
@@ -130,7 +133,7 @@ pre-commit run --all-files  # Must pass before committing
 
 ### Terraform Module Naming
 
-Provider-specific modules use `_modules/` subdirectories (e.g., `terraform/oci/_modules/network`). Not to be confused with `terraform/modules/gcp/` which contains modules referenced across environments.
+Modules live under `terraform/<provider>/modules/` (e.g., `terraform/oci/modules/network`, `terraform/cloudflare/modules/cloudflare-dns`). Environment configs in `terraform/<provider>/<env>/<region>/...` instantiate them via `source = "${get_repo_root()}/terraform/<provider>/modules/<name>"`.
 
 ### Kubernetes Namespaces
 

@@ -12,7 +12,7 @@ on first boot and calls `oci secrets secret-bundle get --auth
 instance_principal` against an OCI Vault secret whose OCID is passed
 in as `k3s_token_secret_ocid`. Permission is granted by a dynamic
 group plus a narrow IAM policy in
-[iam.tf](../../terraform/oci/_modules/server/iam.tf) that together
+[iam.tf](../../terraform/oci/modules/server/iam.tf) that together
 scope the read to the specific secret OCID.
 
 Both `k3s_url` and `k3s_token_secret_ocid` must be set together (agent
@@ -43,7 +43,7 @@ resource declares `replace_triggered_by` on it. Result:
   so pointing it at a different Vault secret doesn't rebuild standalone-
   server VMs that ignore it (added in #213).
 
-The current `terraform_data` body (live in `terraform/oci/_modules/server/main.tf`
+The current `terraform_data` body (live in `terraform/oci/modules/server/main.tf`
 — keep this snippet in sync with the implementation):
 
 ```hcl

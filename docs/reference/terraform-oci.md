@@ -55,4 +55,4 @@ To add a new resource:
 
 1. Create a new directory under the appropriate region
 2. Create a terragrunt.hcl file in the new directory
-3. Create a corresponding module in terraform/_modules/oci/ if needed
+3. Create a corresponding module in terraform/oci/modules/ if needed

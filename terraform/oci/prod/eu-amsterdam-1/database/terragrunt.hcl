@@ -3,7 +3,7 @@ include {
 }
 
 terraform {
-  source = "${get_repo_root()}/terraform/oci/_modules/database"
+  source = "${get_repo_root()}/terraform/oci/modules/database"
 }
 
 locals {
