@@ -36,14 +36,21 @@ inputs = {
   mysql_version           = "9.6.0"
 
   # Admin credentials. OCI_MYSQL_ADMIN_PASSWORD MUST be set in the environment
-  # before terragrunt apply — we deliberately don't ship a fallback so a
-  # typo'd / unset env can't silently set the DB to a weak password reachable
-  # over the public-internet MySQL endpoint. A follow-up should migrate this
-  # to OCI Vault to match the rest of the repo's secret pattern (would
-  # require a coordinated password rotation against the live instance, so
-  # not bundled here).
+  # for any terragrunt invocation on this stack (parse-time fetch — plan,
+  # apply, refresh, destroy all evaluate it). The DB system is in the
+  # private `data` subnet (`prohibit_public_ip_on_vnic = true`) so a weak
+  # password isn't directly internet-reachable, but in-VCN compromise +
+  # a guessable admin password is still a credible escalation path.
+  #
+  # 2-arg `get_env(name, "")` matches the repo's convention; the explicit
+  # `regex("^.+$", ...)` is an HCL-level assert that fails the parse with
+  # "regexp pattern did not match" when the env is empty/unset — fail-
+  # closed without depending on the downstream OCI provider catching it
+  # later. A follow-up should migrate this to OCI Vault to match the
+  # rest of the repo's secret pattern (would require a coordinated live
+  # password rotation, so not bundled here).
   admin_username = "admin"
-  admin_password = get_env("OCI_MYSQL_ADMIN_PASSWORD")
+  admin_password = regex("^.+$", get_env("OCI_MYSQL_ADMIN_PASSWORD", ""))
 
   # Backup configuration
   backup_enabled           = false
