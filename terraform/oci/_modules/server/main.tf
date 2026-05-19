@@ -6,17 +6,24 @@ data "oci_identity_availability_domains" "ads" {
 }
 
 # Hash of the inputs that *meaningfully* change the cloud-init outcome —
-# changing the k3s join URL, the token, or the base image should force a VM
-# replacement so the new cloud-init actually runs. Cosmetic tweaks to the
-# install script itself (comments, log message wording, etc.) don't change
-# this hash and so don't trigger replacement.
+# changing the k3s join URL, the token (in agent mode), or the base image
+# should force a VM replacement so the new cloud-init actually runs.
+# Cosmetic tweaks to the install script itself (comments, log message
+# wording, etc.) don't change this hash and so don't trigger replacement.
+# Bump `version` below to force a one-off replacement when you do edit
+# the install script meaningfully (e.g. new cloud-init step).
+#
+# k3s_token is folded out of the hash in server mode (k3s_url == "")
+# because the token isn't read in that mode — rotating it shouldn't
+# rebuild standalone-server VMs that ignore it.
 resource "terraform_data" "user_data_replace_trigger" {
   for_each = var.servers
 
   input = sha256(jsonencode({
     k3s_url   = var.k3s_url
-    k3s_token = var.k3s_token
+    k3s_token = var.k3s_url == "" ? "" : var.k3s_token
     image     = var.image_ocid
+    version   = 1
   }))
 }
 
@@ -86,7 +93,7 @@ resource "oci_core_instance" "this" {
   }
 
   lifecycle {
-    # source_details: don't fight image version drift if AMI gets republished.
+    # source_details: don't fight image version drift if the OCI image gets republished.
     # metadata.user_data: ignore cosmetic install-script edits; meaningful
     # changes (k3s_url / k3s_token / image) trigger replacement via the
     # replace_triggered_by hash above.
