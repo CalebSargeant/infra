@@ -1,276 +1,246 @@
 # Atlantis Setup Guide
 
-## Overview
+This guide covers the setup and configuration of [Atlantis](https://www.runatlantis.io/) for automated Terraform / Terragrunt pull request workflows on the firefly Kubernetes cluster.
 
-This guide covers the setup and configuration of Atlantis for automated Terraform/Terragrunt pull request workflows on the firefly Kubernetes cluster.
+The deployment uses **GitHub App authentication** with credentials sourced from **OCI Vault** via an `ExternalSecret`. The legacy Personal Access Token (PAT) flow is no longer supported.
 
 ## What is Atlantis?
 
-Atlantis is a tool for collaborating on Terraform/Terragrunt through GitHub pull requests. It automatically runs `terraform plan` on pull requests and allows you to apply changes with a simple comment.
+Atlantis is a server that wraps `terraform` / `terragrunt` and exposes them through GitHub pull requests:
+
+- When a PR is opened or updated, Atlantis runs `terragrunt plan` and posts the output as a PR comment.
+- A comment like `atlantis apply` (after PR review) runs `terragrunt apply` against the saved plan.
+- Plans are locked per project: a second PR touching the same paths queues behind the first.
 
 ## Architecture
 
-### Components
+| Component | Where | Notes |
+| --- | --- | --- |
+| Atlantis server | Deployment in `automation` namespace, firefly k3s cluster | One replica, runs as `100:1000` |
+| Persistent storage | PVC `atlantis`, 10Gi, `local-path` storage class | Holds working dirs, plan files, locks |
+| Ingress | `https://atlantis.sargeant.co` via Traefik + Cloudflare Tunnel | Webhook receiver |
+| Auth | GitHub App `atlantis-architect` (App ID `3765954`) | Installed on `CalebSargeant/infra` |
+| Secret source | OCI Vault → `ExternalSecret` → K8s `Secret/atlantis` | Three keys (see below) |
 
-- **Atlantis Server**: Runs as a deployment in the `automation` namespace on the firefly K8s cluster
-- **Persistent Storage**: 10Gi volume for Atlantis data
-- **Ingress**: Accessible at `https://atlantis.sargeant.co`
-- **GitHub Integration**: Webhooks configured to notify Atlantis of PR events
+### Required OCI Vault keys
 
-### Supported Environments
+| OCI Vault secret name | Value |
+| --- | --- |
+| `atlantis-github-app-id` | The numeric App ID (e.g. `3765954`) |
+| `atlantis-github-app-private-key` | Full content of the App's `.pem` file, with `-----BEGIN/END RSA PRIVATE KEY-----` lines |
+| `atlantis-github-webhook-secret` | The webhook secret configured on the App |
 
-Atlantis is configured to support the following cloud providers:
+`ExternalSecret/atlantis` (in `kubernetes/apps/atlantis/base/atlantis/externalsecret.yaml`) pulls these into `Secret/atlantis` in the `automation` namespace with keys `app-id`, `app-key-pem`, and `webhook-secret`.
 
-1. **AWS** - Via AWS credentials stored in secrets
-2. **Azure** - Via Azure service principal credentials (optional)
-3. **GCP** - Via existing GCP service account configuration
-4. **OCI** - Via existing OCI configuration
-5. **Cloudflare** - Via existing Cloudflare configuration
+## Initial Setup (one-time)
 
-## Prerequisites
+### 1. Create the GitHub App
 
-Before deploying Atlantis, you need:
+In a browser (GitHub CLI doesn't support App creation), go to https://github.com/settings/apps/new (or `https://github.com/organizations/<org>/settings/apps/new` for an org-owned App):
 
-1. **GitHub Personal Access Token** with repo permissions
-2. **GitHub Webhook Secret** (random string for webhook validation)
-3. **AWS Credentials** (optional, if deploying AWS infrastructure)
-   - AWS Access Key ID
-   - AWS Secret Access Key
-4. **Azure Credentials** (optional, if deploying Azure infrastructure)
-   - Client ID
-   - Client Secret
-   - Tenant ID
-   - Subscription ID
+| Field | Value |
+| --- | --- |
+| GitHub App name | `atlantis-architect` or any unique name |
+| Homepage URL | `https://atlantis.sargeant.co` |
+| Webhook URL | `https://atlantis.sargeant.co/events` |
+| Webhook secret | Generate with `openssl rand -hex 32` — save it for OCI Vault |
+| Where can this GitHub App be installed? | **Any account** (required if you want to install it on accounts other than the App's owner) |
 
-## Deployment
+**Repository permissions:**
 
-### 1. Configure Secrets
+| Permission | Level |
+| --- | --- |
+| Administration | Read |
+| Checks | Read & Write |
+| Contents | Read & Write |
+| Issues | Read & Write |
+| Metadata | Read (auto-selected) |
+| Pull requests | Read & Write |
+| Commit statuses | Read & Write |
 
-The Atlantis deployment requires several secrets to be configured. These are currently set to placeholder values and must be updated:
+**Subscribe to events:** Issue comment, Pull request, Pull request review, Pull request review comment, Push.
 
-#### GitHub Credentials
+Click **Create GitHub App**, then on the App settings page click **Generate a private key** and save the downloaded `.pem` file.
+
+### 2. Install the App on your repository
+
+App settings → **Install App** → next to your account → **Only select repositories** → pick `CalebSargeant/infra` (and any other Terraform-managed repos) → **Install**.
+
+### 3. Populate OCI Vault
+
+Three values: App ID, the PEM file content, and the webhook secret you generated.
+
+Either via the OCI console (https://cloud.oracle.com/security/kms/vaults → `vault-prod` → Secrets → Create), or via `oci` CLI:
 
 ```bash
-# Edit the secret file
-kubectl create secret generic atlantis \
-  --from-literal=github-user='YOUR_GITHUB_USERNAME' \
-  --from-literal=github-token='YOUR_GITHUB_TOKEN' \
-  --from-literal=webhook-secret='YOUR_WEBHOOK_SECRET' \
-  -n automation --dry-run=client -o yaml | kubectl apply -f -
+VAULT_ID=ocid1.vault.oc1.eu-amsterdam-1.fruyd6i7aagf4.abqw2ljrzcituk5pndpbgsvhtkgenvf2ae7xnlbctmskmcfj2gw6xsjhbgfq
+COMPARTMENT_ID=ocid1.tenancy.oc1..aaaaaaaaq7zpfzcaj4amfz7xwv33rlsopwd4m2ydhgjdidoan67vry5ejlsq
+KEY_ID=ocid1.key.oc1.eu-amsterdam-1.fruyd6i7aagf4.abqw2ljr2tquiix4j3greeqmtg3hxutkve2u5vrhk5umbz2w4drizdoqy3ca
+
+push() {
+  oci vault secret create-base64 \
+    --compartment-id "$COMPARTMENT_ID" --vault-id "$VAULT_ID" --key-id "$KEY_ID" \
+    --secret-name "$1" \
+    --secret-content-content "$(printf '%s' "$2" | base64 | tr -d '\n')"
+}
+
+push atlantis-github-app-id "3765954"
+push atlantis-github-webhook-secret "$(openssl rand -hex 32)"
+
+# PEM: push directly from the file (do NOT round-trip through a shell variable —
+# it picks up surrounding quotes which break PEM parsing).
+B64=$(base64 -i ~/Downloads/atlantis-architect.YYYY-MM-DD.private-key.pem | tr -d '\n')
+oci vault secret create-base64 \
+  --compartment-id "$COMPARTMENT_ID" --vault-id "$VAULT_ID" --key-id "$KEY_ID" \
+  --secret-name atlantis-github-app-private-key \
+  --secret-content-content "$B64"
 ```
 
-Or use SOPS to encrypt the secret:
+Flux's `ExternalSecret` reconciles within 1h, or force-sync immediately:
 
 ```bash
-# Edit kubernetes/_base/automation/atlantis/secret.yaml
-# Replace placeholder values with actual credentials
-# Then encrypt with SOPS
-sops -e -i kubernetes/_base/automation/atlantis/secret.yaml
+kubectl annotate externalsecret atlantis -n automation \
+  force-sync="$(date +%s)" --overwrite
 ```
 
-#### AWS Credentials (Optional)
+### 4. Verify
 
 ```bash
-kubectl create secret generic atlantis-aws \
-  --from-literal=access-key-id='YOUR_AWS_ACCESS_KEY_ID' \
-  --from-literal=secret-access-key='YOUR_AWS_SECRET_ACCESS_KEY' \
-  -n automation --dry-run=client -o yaml | kubectl apply -f -
-```
+# ExternalSecret synced?
+kubectl get externalsecret atlantis -n automation
+# READY=True, STATUS=SecretSynced
 
-Or use SOPS:
+# Secret materialized with all three keys?
+kubectl get secret atlantis -n automation -o jsonpath='{.data}' | jq 'keys'
+# Expect: ["app-id", "app-key-pem", "webhook-secret"]
 
-```bash
-# Edit kubernetes/_base/automation/atlantis/secret-aws.yaml
-# Replace placeholder values with actual credentials
-# Then encrypt with SOPS
-sops -e -i kubernetes/_base/automation/atlantis/secret-aws.yaml
-```
-
-#### Azure Credentials (Optional)
-
-```bash
-kubectl create secret generic atlantis-azure \
-  --from-literal=client-id='YOUR_AZURE_CLIENT_ID' \
-  --from-literal=client-secret='YOUR_AZURE_CLIENT_SECRET' \
-  --from-literal=tenant-id='YOUR_AZURE_TENANT_ID' \
-  --from-literal=subscription-id='YOUR_AZURE_SUBSCRIPTION_ID' \
-  -n automation --dry-run=client -o yaml | kubectl apply -f -
-```
-
-Or use SOPS:
-
-```bash
-# Edit kubernetes/_base/automation/atlantis/secret-azure.yaml
-# Replace placeholder values with actual credentials
-# Then encrypt with SOPS
-sops -e -i kubernetes/_base/automation/atlantis/secret-azure.yaml
-```
-
-### 2. Deploy Atlantis
-
-Once secrets are configured, deploy Atlantis using kustomize:
-
-```bash
-# From the repository root
-kubectl apply -k kubernetes/_clusters/firefly/automation/atlantis
-```
-
-### 3. Configure GitHub Webhook
-
-After Atlantis is deployed and accessible at `https://atlantis.sargeant.co`, configure a webhook in your GitHub repository:
-
-1. Go to your repository settings: `https://github.com/CalebSargeant/infra/settings/hooks`
-2. Click "Add webhook"
-3. Configure:
-   - **Payload URL**: `https://atlantis.sargeant.co/events`
-   - **Content type**: `application/json`
-   - **Secret**: Use the same webhook secret configured in the Atlantis secret
-   - **Events**: Select "Let me select individual events" and choose:
-     - Pull requests
-     - Issue comments
-     - Pull request reviews
-     - Pull request review comments
-4. Click "Add webhook"
-
-### 4. Verify Deployment
-
-Check that Atlantis is running:
-
-```bash
-# Check deployment status
-kubectl get deployment atlantis -n automation
-
-# Check pod status
+# Atlantis pod Ready?
 kubectl get pods -n automation -l app=atlantis
+# atlantis-xxxx 1/1 Running
 
-# Check logs
-kubectl logs -n automation -l app=atlantis -f
+# Logs free of auth errors?
+kubectl logs -n automation -l app=atlantis --tail=20
+# Expect: "Atlantis started - listening on port 4141"
 ```
 
-## Usage
+## Optional Cloud-Provider Credentials
 
-### Basic Workflow
+Atlantis also needs credentials to talk to whichever cloud(s) your Terragrunt code targets. These are independent of the GitHub App auth above.
 
-1. Create a pull request with Terraform/Terragrunt changes
-2. Atlantis automatically runs `plan` on the changed projects
-3. Review the plan output in the PR comments
-4. Approve the PR
-5. Comment `atlantis apply` to apply the changes
-6. Merge the PR
+Templates exist at:
 
-### Atlantis Commands
+- `kubernetes/_base/automation/atlantis/secret-aws.yaml.template`
+- `kubernetes/_base/automation/atlantis/secret-azure.yaml.template`
 
-Comment these on pull requests to interact with Atlantis:
+For each cloud:
 
-- `atlantis plan` - Run terraform plan
-- `atlantis apply` - Run terraform apply (requires PR approval)
-- `atlantis plan -p PROJECT_NAME` - Plan a specific project
-- `atlantis apply -p PROJECT_NAME` - Apply a specific project
-- `atlantis unlock` - Unlock a plan
-
-### Project Configuration
-
-Projects are configured in the `atlantis.yaml` file at the repository root. Current projects:
-
-- `aws-infrastructure` - AWS resources in `terraform/aws`
-- `azure-infrastructure` - Azure resources in `terraform/azure`
-- `oci-infrastructure` - OCI resources in `terraform/oci`
-- `gcp-infrastructure` - GCP resources in `terraform/gcp`
-- `cloudflare-infrastructure` - Cloudflare resources in `terraform/cloudflare`
-
-### Terragrunt Support
-
-Atlantis is configured with a custom `terragrunt` workflow that:
-
-1. Detects if `terragrunt.hcl` exists in the project directory
-2. Uses `terragrunt` commands if found, otherwise falls back to `terraform`
-3. Properly handles Terragrunt's directory structure and dependencies
-
-## Configuration Files
-
-### Repository Configuration
-
-- **`atlantis.yaml`** - Root-level configuration defining projects and workflows
-- **`kubernetes/_base/automation/atlantis/configmap.yaml`** - Server-side configuration
-
-### Workflow Definition
-
-The `terragrunt` workflow is defined to handle both Terraform and Terragrunt:
-
-```yaml
-workflows:
-  terragrunt:
-    plan:
-      steps:
-        - init
-        - run: |
-            if [ -f "terragrunt.hcl" ]; then
-              terragrunt plan -input=false -out=$PLANFILE
-            else
-              terraform plan -input=false -out=$PLANFILE
-            fi
-    apply:
-      steps:
-        - run: |
-            if [ -f "terragrunt.hcl" ]; then
-              terragrunt apply -input=false $PLANFILE
-            else
-              terraform apply -input=false $PLANFILE
-            fi
+```bash
+cd kubernetes/_base/automation/atlantis
+cp secret-aws.yaml.template secret-aws.yaml
+# fill in the values
+sops -e secret-aws.yaml > secret-aws.enc.yaml
+rm secret-aws.yaml
+# add `- secret-aws.enc.yaml` to kustomize resources
 ```
 
-## Security Considerations
+These map to env vars `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `ARM_CLIENT_ID`, etc.
 
-1. **Secrets Management**: All secrets are stored as Kubernetes secrets. Consider using SOPS for encryption at rest
-2. **RBAC**: Atlantis uses a ServiceAccount with minimal permissions (read configmaps only)
-3. **PR Approval**: Atlantis is configured to require PR approval before applying changes
-4. **Webhook Secret**: Validates that webhook events are from GitHub
-5. **Repository Allowlist**: Only allows operations on `github.com/CalebSargeant/infra`
+GCP, OCI, and Cloudflare credentials are provided by the existing platform (1Password Connect / OCI Vault / configmaps) — no extra secret needed.
+
+## Daily Usage
+
+### 1. Open a PR with Terragrunt / Terraform changes
+
+Atlantis sees the webhook, runs `terragrunt plan` against the changed dirs, posts the plan as a PR comment.
+
+### 2. Review the plan
+
+The comment contains the plan diff. If it looks wrong, push more commits — autoplan re-runs.
+
+### 3. Apply
+
+After PR approval, comment `atlantis apply` on the PR. Atlantis re-acquires the lock, runs `terragrunt apply` against the previously saved plan, and posts the result.
+
+### 4. Merge
+
+After apply succeeds, merge the PR. Atlantis releases the project lock.
+
+## Common Commands
+
+| Comment | Action |
+| --- | --- |
+| `atlantis plan` | Re-run plan on the current commit |
+| `atlantis apply` | Apply the saved plan |
+| `atlantis unlock` | Release locks for the current PR (use when discarding a PR) |
+| `atlantis help` | Print the full command reference |
+
+## Rotating the GitHub App's Private Key
+
+1. App settings → **Private keys** → **Generate a private key** (the new one is downloaded, the old one stays valid until you delete it).
+2. Update OCI Vault: overwrite `atlantis-github-app-private-key` with the new PEM content (use the `oci vault secret update-base64` command; **read directly from the file**, don't round-trip through a shell variable).
+3. Force-sync: `kubectl annotate externalsecret atlantis -n automation force-sync="$(date +%s)" --overwrite`.
+4. Roll the deployment: `kubectl rollout restart deploy/atlantis -n automation`.
+5. Verify atlantis is healthy, then delete the old private key in the App settings.
+
+## Rotating the Webhook Secret
+
+1. Generate a new value: `openssl rand -hex 32`.
+2. Update OCI Vault `atlantis-github-webhook-secret`.
+3. Update the App's webhook secret in https://github.com/settings/apps/atlantis-architect → Webhook.
+4. Force-sync the ExternalSecret + roll the Deployment as above.
+5. Verify by opening a test PR — if Atlantis comments, the new secret works.
 
 ## Troubleshooting
 
-### Check Atlantis Logs
+### `error: secret "atlantis" not found`
+
+`ExternalSecret/atlantis` hasn't synced yet, or `ClusterSecretStore/oci-vault` is broken.
 
 ```bash
-kubectl logs -n automation -l app=atlantis -f
+kubectl describe externalsecret atlantis -n automation
+kubectl get clustersecretstore oci-vault
 ```
 
-### Verify Webhook Delivery
+### `wrong number of installations, expected 1, found 2`
 
-1. Go to GitHub repository settings > Webhooks
-2. Click on the Atlantis webhook
-3. Check "Recent Deliveries" for any failed deliveries
+The GitHub App is installed on multiple accounts/orgs and Atlantis doesn't know which one to use. Either uninstall from the extras, or set `ATLANTIS_GH_APP_INSTALLATION_ID` env var on the Deployment, sourced from a new OCI Vault key.
 
-### Reset Atlantis State
-
-If Atlantis gets stuck:
+List installations via the App's JWT:
 
 ```bash
-# Delete the pod to restart
-kubectl delete pod -n automation -l app=atlantis
-
-# Or unlock via comment
-# Comment on PR: atlantis unlock
+APP_ID=3765954
+PEM_PATH=/path/to/private-key.pem
+NOW=$(date +%s); EXP=$((NOW+540))
+HEADER=$(printf '%s' '{"alg":"RS256","typ":"JWT"}' | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+PAYLOAD=$(printf '%s' "{\"iat\":$NOW,\"exp\":$EXP,\"iss\":\"$APP_ID\"}" | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+SIG=$(printf '%s.%s' "$HEADER" "$PAYLOAD" | openssl dgst -binary -sha256 -sign "$PEM_PATH" | base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+JWT="$HEADER.$PAYLOAD.$SIG"
+curl -sH "Authorization: Bearer $JWT" -H "Accept: application/vnd.github+json" \
+  https://api.github.com/app/installations | jq '.[] | {account: .account.login, id, target: .target_type}'
 ```
 
-### Common Issues
+### `could not parse private key: invalid key`
 
-**Issue**: Atlantis doesn't respond to PR comments
-- Check webhook is configured correctly
-- Verify webhook secret matches
-- Check Atlantis logs for errors
+The PEM in OCI Vault is malformed (e.g. round-tripped through `op item get` which wraps values in quotes). Re-upload directly from the original `.pem` file using `base64 -i <file>` — never via a shell variable.
 
-**Issue**: Plan fails with authentication errors
-- Verify cloud provider credentials are correctly set in secrets
-- Check that secrets are mounted in the deployment
+### `unable to create dir "/atlantis-data/...": permission denied`
 
-**Issue**: Terragrunt commands fail
-- Ensure Terragrunt is available in the Atlantis image
-- Verify TERRAGRUNT_TFPATH environment variable is set correctly
+The PVC has files owned by an alien UID. The `fix-data-ownership` init container in `deployment.yaml` handles this: it stat's the volume root and chowns recursively only if not already `100:1000`. Force a re-chown by running:
 
-## References
+```bash
+kubectl exec -n automation -it deploy/atlantis -c fix-data-ownership -- /bin/sh -c \
+  'chown -R 100:1000 /atlantis-data && chmod -R u+rwX,g+rwX /atlantis-data'
+```
 
-- [Atlantis Documentation](https://www.runatlantis.io/)
-- [Atlantis Server Configuration](https://www.runatlantis.io/docs/server-configuration.html)
-- [Atlantis Repo Configuration](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html)
-- [Terragrunt Documentation](https://terragrunt.gruntwork.io/)
+(or just delete the pod — the init runs again automatically).
+
+### Webhook events not arriving
+
+1. App webhook URL points at `https://atlantis.sargeant.co/events` (note the path).
+2. Cloudflare Tunnel is healthy: `kubectl get ds cloudflared -n core` shows desired = ready.
+3. Ingress route exists: `kubectl get ingress atlantis -n automation`.
+4. Check **Recent Deliveries** on the App's Advanced page — GitHub logs each webhook attempt with the response code.
+
+## Migrating to Atlantis Architect (v1)
+
+The Atlantis server documented here is the **v0 dogfood**. A SaaS replacement — Atlantis Architect — is in design (see `magmamoose/atlantis-architect`). When it ships, this in-cluster Atlantis becomes redundant for new repos; the existing App can be repurposed as the Atlantis Architect control-plane App by swapping its webhook URL from `https://atlantis.sargeant.co/events` to the Worker endpoint. No new credential issuance needed.
