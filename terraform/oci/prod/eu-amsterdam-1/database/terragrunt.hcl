@@ -35,9 +35,15 @@ inputs = {
   data_storage_size_in_gb = 50            # Free tier includes 50GB
   mysql_version           = "9.6.0"
 
-  # Admin credentials - use environment variable or SOPS
+  # Admin credentials. OCI_MYSQL_ADMIN_PASSWORD MUST be set in the environment
+  # before terragrunt apply — we deliberately don't ship a fallback so a
+  # typo'd / unset env can't silently set the DB to a weak password reachable
+  # over the public-internet MySQL endpoint. A follow-up should migrate this
+  # to OCI Vault to match the rest of the repo's secret pattern (would
+  # require a coordinated password rotation against the live instance, so
+  # not bundled here).
   admin_username = "admin"
-  admin_password = get_env("OCI_MYSQL_ADMIN_PASSWORD", "ChangeMe123!")
+  admin_password = get_env("OCI_MYSQL_ADMIN_PASSWORD")
 
   # Backup configuration
   backup_enabled           = false

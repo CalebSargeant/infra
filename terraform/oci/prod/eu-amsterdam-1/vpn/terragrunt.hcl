@@ -9,6 +9,19 @@ terraform {
 locals {
   region_vars      = read_terragrunt_config(find_in_parent_folders("region.hcl"))
   environment_vars = read_terragrunt_config(find_in_parent_folders("environment.hcl"))
+
+  # The on-prem peer WAN IP is recon-grade (reveals the operator's residential
+  # ISP and home location) and lives in OCI Vault as `infra-recon-blockers`
+  # (vault-prod). Fetched at parse time using the operator's ~/.oci/config.
+  recon_blockers_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aa7mytuezgibzn4g36jxupsgy57zl4372uq47atgfra2ka"
+
+  recon_blockers = jsondecode(run_cmd(
+    "--terragrunt-quiet",
+    "bash", "-c",
+    "oci secrets secret-bundle get --secret-id ${local.recon_blockers_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
+  ))
+
+  home_wan_peer_ip = local.recon_blockers.vpn_peers.home_wan_peer_ip
 }
 
 dependency "network" {
@@ -37,7 +50,7 @@ inputs = {
   vpn_connections = {
     # Sargeant on-prem MikroTik
     sargeant_onprem = {
-      peer_ip             = "77.169.18.35"
+      peer_ip             = local.home_wan_peer_ip
       cpe_device_shape_id = null  # Generic/Other
       type                = "mikrotik"
       static_routes       = ["192.168.19.0/24"]
