@@ -4,10 +4,24 @@ delete_source_branch_on_merge: false
 parallel_plan: true
 parallel_apply: false
 
+# One project per LEAF terragrunt module (a dir that has its own terragrunt.hcl
+# and runs `terragrunt apply` against a single state file). The earlier
+# provider-level projects (e.g. dir: terraform/cloudflare) didn't work because
+# those parent dirs don't contain any TF/terragrunt config of their own.
+#
+# `when_modified` patterns are GLOBS relative to the project's `dir`. Using
+# `**/*` makes them match files at any depth (the leaf's own files + any
+# `_modules/` or includes living deeper).
+#
+# Shared inputs (root.hcl, parent terragrunt.hcl, modules/) ARE NOT yet watched
+# globally — if you change those, manually trigger atlantis plan via PR comment
+# on the affected PR. Long-term fix: a job that auto-generates this file from
+# the terragrunt graph (e.g. transcend-io/terragrunt-atlantis-config).
+
 projects:
-  # AWS Terraform projects (if any exist in the future)
-  - name: aws-infrastructure
-    dir: terraform/aws
+  # ─── Cloudflare ──────────────────────────────────────────────────────────
+  - name: cloudflare-dns-prod
+    dir: terraform/cloudflare/dns/prod
     workspace: default
     terraform_version: v1.11.3
     workflow: terragrunt
@@ -16,9 +30,8 @@ projects:
       enabled: true
     apply_requirements: [approved, mergeable]
 
-  # Azure Terraform projects (if any exist in the future)
-  - name: azure-infrastructure
-    dir: terraform/azure
+  - name: cloudflare-zero-trust-prod
+    dir: terraform/cloudflare/zero-trust/prod
     workspace: default
     terraform_version: v1.11.3
     workflow: terragrunt
@@ -27,9 +40,9 @@ projects:
       enabled: true
     apply_requirements: [approved, mergeable]
 
-  # OCI (Oracle Cloud Infrastructure) projects
-  - name: oci-infrastructure
-    dir: terraform/oci
+  # ─── GCP ─────────────────────────────────────────────────────────────────
+  - name: gcp-prod-project
+    dir: terraform/gcp/prod/europe-west4/project
     workspace: default
     terraform_version: v1.11.3
     workflow: terragrunt
@@ -38,9 +51,9 @@ projects:
       enabled: true
     apply_requirements: [approved, mergeable]
 
-  # GCP projects
-  - name: gcp-infrastructure
-    dir: terraform/gcp
+  # ─── OCI: tenancy-level IAM policy ───────────────────────────────────────
+  - name: oci-iam-policy
+    dir: terraform/oci/iam-policy
     workspace: default
     terraform_version: v1.11.3
     workflow: terragrunt
@@ -49,9 +62,79 @@ projects:
       enabled: true
     apply_requirements: [approved, mergeable]
 
-  # Cloudflare projects
-  - name: cloudflare-infrastructure
-    dir: terraform/cloudflare
+  # ─── OCI prod / eu-amsterdam-1 (8 leaves) ────────────────────────────────
+  - name: oci-prod-eu-amsterdam-1-network
+    dir: terraform/oci/prod/eu-amsterdam-1/network
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
+      enabled: true
+    apply_requirements: [approved, mergeable]
+
+  - name: oci-prod-eu-amsterdam-1-edge
+    dir: terraform/oci/prod/eu-amsterdam-1/edge
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
+      enabled: true
+    apply_requirements: [approved, mergeable]
+
+  - name: oci-prod-eu-amsterdam-1-server
+    dir: terraform/oci/prod/eu-amsterdam-1/server
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
+      enabled: true
+    apply_requirements: [approved, mergeable]
+
+  - name: oci-prod-eu-amsterdam-1-mikrotik
+    dir: terraform/oci/prod/eu-amsterdam-1/mikrotik
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
+      enabled: true
+    apply_requirements: [approved, mergeable]
+
+  - name: oci-prod-eu-amsterdam-1-vpn
+    dir: terraform/oci/prod/eu-amsterdam-1/vpn
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
+      enabled: true
+    apply_requirements: [approved, mergeable]
+
+  - name: oci-prod-eu-amsterdam-1-database
+    dir: terraform/oci/prod/eu-amsterdam-1/database
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
+      enabled: true
+    apply_requirements: [approved, mergeable]
+
+  - name: oci-prod-eu-amsterdam-1-drg-peering
+    dir: terraform/oci/prod/eu-amsterdam-1/drg-peering
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
+      enabled: true
+    apply_requirements: [approved, mergeable]
+
+  - name: oci-prod-eu-amsterdam-1-policy
+    dir: terraform/oci/prod/eu-amsterdam-1/policy
     workspace: default
     terraform_version: v1.11.3
     workflow: terragrunt
