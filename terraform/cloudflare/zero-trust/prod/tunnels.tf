@@ -47,6 +47,15 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # GitHub webhooks → Atlantis (firefly cluster). This + the cloudflare
+    # tunnel auto-creates the public CNAME atlantis.sargeant.co →
+    # <tunnel-id>.cfargotunnel.com so the App's webhook URL resolves.
+    ingress_rule {
+      hostname = "atlantis.sargeant.co"
+      service  = "http://atlantis.automation.svc.cluster.local:80"
+      origin_request {}
+    }
+
     # Cloudflared requires the last rule to be a catch-all with no hostname.
     ingress_rule {
       service = "http_status:404"
