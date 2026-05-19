@@ -97,15 +97,9 @@ import {
   id = "6e26afa31c37dee1dc82ad2f214f9b3c/1d4dfdb4-5a37-47c6-ab39-e00e6764e549"
 }
 
-import {
-  to = cloudflare_zero_trust_gateway_policy.allow_server_l4
-  id = "6e26afa31c37dee1dc82ad2f214f9b3c/29a5daaf-2151-4501-acfc-23dd821c9625"
-}
-
-import {
-  to = cloudflare_zero_trust_gateway_policy.block_server_l4
-  id = "6e26afa31c37dee1dc82ad2f214f9b3c/7cf7a3a5-0d68-4fa0-b311-74140a04a201"
-}
+# (Removed: import blocks for allow_server_l4 / block_server_l4 — those
+# resources were deleted in the same PR that resolved cloudflare-ztna-
+# improvements.md #8. See git blame on gateway.tf for the rationale.)
 
 # Device posture rules
 import {
