@@ -7,6 +7,15 @@ metadata:
     app: atlantis
 spec:
   replicas: 1
+  # Single replica pinned to type=pi (ff-pi1) which doesn't have headroom
+  # for two atlantis pods simultaneously. RollingUpdate (default) wants
+  # new pod Ready before old terminates and starves on
+  #   "0/2 nodes available: 1 Insufficient cpu/memory, 1 didn't match
+  #   node affinity/selector".
+  # Recreate: kill old → start new. Brief atlantis outage (seconds during
+  # image pull) is acceptable for a PR-only tool.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: atlantis
