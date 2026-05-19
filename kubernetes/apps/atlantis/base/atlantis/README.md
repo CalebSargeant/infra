@@ -49,7 +49,7 @@ App settings → note the **App ID** (a number) → **Private keys** → **Gener
 | `atlantis-github-app-private-key` | Full content of the `.pem` file (multi-line, including `-----BEGIN/END RSA PRIVATE KEY-----` lines) |
 | `atlantis-github-webhook-secret` | The webhook secret you generated in step 1 |
 
-The same vault/`ClusterSecretStore` is already wired (see `core/external-dns-cloudflare/externalsecret.yaml`, `core/cloudflared/externalsecret.yaml` for examples).
+The same vault/`ClusterSecretStore` is already wired (see `kubernetes/_base/core/external-dns-cloudflare/externalsecret.yaml`, `kubernetes/_base/core/cloudflared/externalsecret.yaml` for examples).
 
 ### 5. Deploy
 
