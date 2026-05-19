@@ -2,15 +2,80 @@
 # are flagged with extended descriptions so a future reader understands the
 # semantics — see comments + descriptions below.
 
+# Curated ad / tracker / telemetry blocklist for the free Zero Trust tier
+# (CF's "Ads" managed category is paid-tier only — see improvements memo
+# #7). Organised in `local.adware_domains` for ease of editing; rule body
+# is templated from the list.
+locals {
+  adware_domains = [
+    # Google ads & analytics
+    "doubleclick.net",
+    "www.google-analytics.com",
+    "www.googletagmanager.com",
+    "pagead2.googlesyndication.com",
+    "partner.googleadservices.com",
+    "stats.g.doubleclick.net",
+    "ad.doubleclick.net",
+    "firebaselogging-pa.googleapis.com",
+    "googleadservices.com",
+    "google-analytics.com",
+    "ssl.google-analytics.com",
+    "adservice.google.com",
+    "app-measurement.com",
+    # Facebook / Meta trackers
+    "connect.facebook.net",
+    "pixel.facebook.com",
+    "graph.facebook.com",
+    "an.facebook.com",
+    # Amazon advertising
+    "c.amazon-adsystem.com",
+    "aax-eu.amazon-adsystem.com",
+    "fls-eu.amazon.com",
+    "fls-na.amazon.com",
+    # Microsoft telemetry
+    "self.events.data.microsoft.com",
+    "v10.events.data.microsoft.com",
+    "settings-win.data.microsoft.com",
+    "watson.microsoft.com",
+    "vortex.data.microsoft.com",
+    "vortex-win.data.microsoft.com",
+    "telemetry.microsoft.com",
+    # Apple analytics / iCloud metrics
+    "metrics.icloud.com",
+    "mask.icloud.com",
+    "mask-h2.icloud.com",
+    "stocks-analytics-events.apple.com",
+    "weather-analytics-events.apple.com",
+    # Other common trackers
+    "treatment.grammarly.com",
+    "pdat.matterlytics.com",
+    "g.live.com",
+    "dit.whatsapp.net",
+    "ct.pinterest.com",
+    "analytics.tiktok.com",
+    "log.pinterest.com",
+    "events.split.io",
+    "track.hubspot.com",
+    "events.youtube.com",
+    # Yandex / Russian trackers (often hit even on western sites)
+    "mc.yandex.ru",
+    "mc.yandex.com",
+    "yandex.com/clck",
+  ]
+}
+
 resource "cloudflare_zero_trust_gateway_policy" "block_adware" {
   account_id  = var.account_id
   name        = "Block adware"
-  description = "Managed by Terraform — manual domain list; long-term replace with CF managed categories (see docs/reference/cloudflare-ztna-improvements.md #7)"
+  description = "Managed by Terraform — curated free-tier blocklist (no CF Ads category on free plan; see improvements memo #7)"
   action      = "block"
   enabled     = true
   filters     = ["dns"]
   precedence  = 13000
-  traffic     = "any(dns.domains[*] in {\"doubleclick.net\" \"self.events.data.microsoft.com\" \"metrics.icloud.com\" \"dit.whatsapp.net\" \"mask.icloud.com\" \"app-measurement.com\" \"g.live.com\" \"mask-h2.icloud.com\" \"treatment.grammarly.com\" \"firebaselogging-pa.googleapis.com\" \"partner.googleadservices.com\" \"c.amazon-adsystem.com\" \"pagead2.googlesyndication.com\" \"www.googletagmanager.com\" \"www.google-analytics.com\" \"pdat.matterlytics.com\"})"
+  # `any(dns.domains[*] in {"a" "b" ...})` matches when the queried name
+  # is any of the listed domains. We compose the brace-list from the local
+  # so the source-of-truth stays human-readable.
+  traffic = "any(dns.domains[*] in {${join(" ", [for d in local.adware_domains : "\"${d}\""])}})"
 }
 
 # L4 allow + block pair on 192.168.69.110 — UNREACHABLE BLOCK as currently
