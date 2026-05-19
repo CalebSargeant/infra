@@ -36,17 +36,35 @@ and a 404 catch-all. Step-by-step:
 
 ## 2. Fix r1's cloudflared HA (availability gap)
 
-`oci network ip-sec-tunnel list` shows tunnel UP from both routers but the
-firefly Cloudflare tunnel only has live colo connections from
-`193.123.39.172` (r2). r1's `cloudflared` container isn't connecting. The
-HA design pays for two MikroTiks but only one is doing work — if r2 dies,
-the tunnel goes with it.
+**Resolved 2026-05-19.** r1's container had been stopped since 2026-05-11
+(stale ingress config caused cloudflared to crash; `auto-restart-interval`
+defaulted to `none`, so RouterOS never restarted it). Started manually via
+the API; `auto-restart-interval` set to `30s` on r1 so it self-heals next
+time. r2 took the load all that time.
 
-Investigation pointers:
+Both routers now active: 8 colo connections to the `firefly` tunnel (4
+each, full HA). Cloudflare reports `status: healthy`.
 
-- SSH into r1 (now reachable via Winbox; terraform also reaches it on 8728)
-- Check `/container/print` for the cloudflared container state
-- Compare `/container/print run-time` between r1 and r2
+**Residual gap — r2 firmware** doesn't accept the `auto-restart-interval`
+parameter (older RouterOS schema; `unknown parameter` error from the API).
+If r2's cloudflared crashes, it won't auto-restart. Two options:
+
+- Upgrade r2's RouterOS firmware to match r1, then set the same 30s
+  interval. Cleanest.
+- Add a RouterOS `/system/scheduler` job on r2 that runs every minute and
+  starts the cloudflared container if it's stopped. Works on older
+  firmware. Copy-paste-safe script (matches the container by `name` — the
+  container name is `cloudflared:latest`, derived from `remote_image`):
+
+  ```routeros
+  /system/scheduler/add \
+    name=cloudflared-watchdog \
+    interval=1m \
+    on-event=":local cid [/container find where name=\"cloudflared:latest\"]; :if ([:len \$cid] = 1 && [/container get \$cid stopped] = true) do={ /container start \$cid; :log info \"cloudflared-watchdog: started stopped container\" }"
+  ```
+
+  Codify this in the mikrotik terraform module via a `routeros_system_scheduler`
+  resource, gated by an input that defaults off but is enabled for r2.
 
 ## 3. Extract repeated email lists into Access Groups
 
@@ -84,25 +102,6 @@ Macs have the system firewall off). The HCL is staged as a comment in
 Three macOS posture rules (Disk Encryption, Firewall, OS Version >=
 13.0.1) exist but **none are referenced**. They're dead code until #3 is
 resolved.
-
-## 4. Wire device posture rules into Access policies
-
-Three macOS posture rules exist (Disk Encryption, Firewall, OS Version >=
-13.0.1) — and **none of them are referenced**. They're dead code.
-
-Add a `require` block on the Caleb policy for Overseerr (or anything more
-sensitive), e.g.:
-
-```hcl
-require {
-  device_posture = [
-    cloudflare_zero_trust_device_posture_rule.mac_disk_encryption.id,
-    cloudflare_zero_trust_device_posture_rule.mac_firewall.id,
-  ]
-}
-```
-
-Otherwise the posture rules might as well not exist.
 
 ## 5. Move tunnel credentials into OCI Vault
 
