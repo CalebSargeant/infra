@@ -123,14 +123,36 @@ The existing `oci_core_private_ips` data-source lookup resolves it
 correctly via the IP-address-to-OCID mapping. App + data route tables
 auto-update.
 
-#### `terraform/oci/modules/server/iam.tf` (pattern reuse)
+#### `terraform/oci/modules/edge/iam.tf` (new file — edge-only dynamic group + policy)
 
-Add a second IAM policy + reuse the existing dynamic group (or extend
-the matching rule to include both server and edge instances) that
-grants the edge instance principals permission to manage their own
-VNICs' secondary private IPs:
+Pattern mirrors `terraform/oci/modules/server/iam.tf` (added in #210)
+but with **a separate, edge-only dynamic group**. Reusing the server
+module's group would broaden the k3s nodes' privileges to include VNIC
+failover, and broaden the edge routers' privileges to include the k3s
+Vault-read — both directions are unnecessary privilege expansion.
+Keeping them disjoint preserves least privilege.
+
+Matching rule scopes to just the edge instances by display name (or by
+freeform tag, if we add one):
 
 ```hcl
+locals {
+  vrrp_enabled = var.use_reserved_public_ips && var.enable_vrrp_failover
+}
+
+resource "oci_identity_dynamic_group" "edge_failover" {
+  count = local.vrrp_enabled ? 1 : 0
+
+  compartment_id = var.tenancy_ocid
+  name           = "edge-${var.environment}-failover"
+  description    = "Edge MikroTik instances in ${var.compartment_ocid}; grants VNIC failover for the floating private IP"
+  # Match by display name pattern — the edge module names instances
+  # ${environment}-mikrotik-chr-${fd}. Tighter than "every instance in
+  # compartment" (which is what the server module's group does) so a
+  # future non-edge instance landing here doesn't gain VNIC-manage.
+  matching_rule = "all {instance.compartment.id = '${var.compartment_ocid}', any {instance.id = '${oci_core_instance.this["fd1"].id}', instance.id = '${oci_core_instance.this["fd2"].id}'}}"
+}
+
 resource "oci_identity_policy" "edge_vnic_failover" {
   count = local.vrrp_enabled ? 1 : 0
 
@@ -139,65 +161,121 @@ resource "oci_identity_policy" "edge_vnic_failover" {
   description    = "Allow edge MikroTik instances to reassign the floating secondary private IP for VRRP HA"
 
   statements = [
-    # Need: use vnic, manage private-ips, use instance
-    # Scoped to the edge instances' VNICs only (via the floating private IP's parent VNIC)
-    "Allow dynamic-group edge-${var.environment} to manage private-ips in compartment ${var.compartment_ocid} where target.private-ip.id = '${var.floating_private_ip_ocid}'",
-    "Allow dynamic-group edge-${var.environment} to use vnics in compartment ${var.compartment_ocid}",
-    "Allow dynamic-group edge-${var.environment} to read instances in compartment ${var.compartment_ocid}",
+    # Scoped to the specific floating private IP — not any private IP.
+    "Allow dynamic-group ${oci_identity_dynamic_group.edge_failover[0].name} to manage private-ips in compartment ${var.compartment_ocid} where target.private-ip.id = '${oci_core_private_ip.floating.id}'",
+    # Need read on the target VNICs (both r1's and r2's) to discover the
+    # current owner before swapping. The provider needs `use vnics` rather
+    # than just read for the attach/detach call.
+    "Allow dynamic-group ${oci_identity_dynamic_group.edge_failover[0].name} to use vnics in compartment ${var.compartment_ocid}",
+    "Allow dynamic-group ${oci_identity_dynamic_group.edge_failover[0].name} to read instances in compartment ${var.compartment_ocid}",
   ]
 }
 ```
 
-(The exact statement scoping needs an OCI-policy-quirks pass — `manage
-private-ips` may need `where any {target.vnic.id = ..., target.vnic.id = ...}`
-for both VNICs. Verify with a least-privilege test before applying.)
+(The exact statement scoping needs an OCI-policy-quirks pass — `use
+vnics` might need narrowing further via `where any {target.vnic.id =
+..., ...}` listing both r1's and r2's VNIC OCIDs. Verify with a
+least-privilege test before applying.)
 
 ### MikroTik changes (RouterOS — the trickier part)
 
 #### VRRP interface
 
-Each router gets a `/interface vrrp` on the edge subnet interface
-(`ether1` on the OCI CHR), with the virtual address set to `.10`:
+Each router needs three RouterOS objects, all on the OCI edge subnet
+interface (`ether1` on the CHR):
 
-```routeros
-/interface/vrrp/add \
-  name=vrrp-edge \
-  interface=ether1 \
-  vrid=10 \
-  priority=200 \
-  v3-protocol=ipv4 \
-  on-backup=":log info \"vrrp-edge: backup state\""
-```
+1. The VRRP virtual interface (state machine):
 
-Priority `200` on r1 (master) and `100` on r2 (backup). VRID `10`
-arbitrary but consistent across routers.
+   ```routeros
+   /interface/vrrp/add \
+     name=vrrp-edge \
+     interface=ether1 \
+     vrid=10 \
+     priority=200 \
+     v3-protocol=ipv4 \
+     on-master=":log info \"vrrp-edge: master state — triggering failover\"; /tool/fetch url=http://172.17.0.3/promote keep-result=no" \
+     on-backup=":log info \"vrrp-edge: backup state — letting master own .10\""
+   ```
 
-#### Failover script
+   Priority `200` on r1 (master) and `100` on r2 (backup). VRID `10`
+   arbitrary but consistent across routers.
 
-Triggered via `on-backup` / `on-master` hooks on the VRRP interface.
-RouterOS scripts can invoke `/tool/fetch` for HTTPS calls, which we
-chain into a tiny one-shot to flip the floating IP via OCI API. Two
-realistic paths:
+2. The virtual IP address on the VRRP interface:
 
-1. **Container-based failover helper**: small Python script in a
-   container running on the MikroTik (same pattern as cloudflared) that
-   exposes a localhost HTTP endpoint. The VRRP hook does `/tool/fetch
-   url=http://172.17.0.3/promote` to trigger it. The container uses
-   `oci-cli --auth instance_principal` to do the reassignment.
-2. **External webhook**: a small Lambda/Cloud Function the routers POST
-   to; it does the OCI API call. Centralises auth + logging but adds an
-   external dependency in the failover path (counterproductive — if the
-   webhook is in the same region and that region's control plane is
-   degraded, failover doesn't work).
+   ```routeros
+   /ip/address/add \
+     address=192.168.223.10/26 \
+     interface=vrrp-edge \
+     comment="VRRP virtual IP — owned by the master at any time"
+   ```
 
-**Recommendation: option 1.** Co-locates the failover logic with the
-router, no cross-cloud dependency in the failover path, reuses the
-container runtime that's already on each router.
+3. The failover-helper container (next section). The `on-master` hook
+   above POSTs to it via the container bridge (cloudflared lives at
+   `.2`; the helper takes `.3`).
 
-The container would be a custom-built image (~20 MB Python + oci-cli)
-pushed to a registry. The terraform `routeros_container` resource
-already exists in this module — adding one more container per router
-is the same pattern as cloudflared.
+Both routers get all three objects via the existing `routeros_*`
+terraform resources iterating with `for_each = local.routers`. The
+priority value is per-router; everything else identical.
+
+#### Failover trigger
+
+When VRRP transitions r1 or r2 to master, *something* needs to make the
+OCI API call that reassigns the floating private IP `.10` to the new
+master's VNIC. RouterOS itself can't run `oci-cli` (no general Linux
+shell), so the trigger has to delegate. Three realistic homes for that
+code:
+
+**Option A — Custom container per MikroTik (recommended for self-containment)**
+
+Same pattern as the existing cloudflared container on each router. New
+image built in-repo at `dockerfiles/oci-vrrp-failover/Dockerfile`,
+published to `ghcr.io/calebsargeant/oci-vrrp-failover:<semver>` by the
+existing semantic-release docker pipeline, then deployed via a new
+`routeros_container.failover_helper` resource alongside the cloudflared
+one. Image stack: `python:3.13-slim` + `pip install oci-cli` + a tiny
+FastAPI/aiohttp server (~20 MB total). On hitting `POST /promote` from
+the VRRP `on-master` hook, it shells `oci network private-ip update
+--private-ip-id <floating> --vnic-id <local>` with `--auth
+instance_principal` (auth principal is the MikroTik host VM, which the
+new IAM policy in this design grants).
+
+Pros: failover logic lives on the routers themselves; no cross-network
+dependency in the failover path — if the home internet is down, the
+routers still flip; matches the existing cloudflared container
+pattern, so the operator already knows how to debug.
+
+Cons: builds an additional in-house image; instance-principal auth
+from inside a container on a MikroTik CHR requires confirming the
+container can reach `169.254.169.254` (the OCI metadata service) — if
+it can't, fall back to mounting a long-lived API key file.
+
+**Option B — Controller pod on the firefly k3s cluster (recommended if
+you want fewer custom images to maintain)**
+
+A small Deployment on firefly running the same script logic, but
+triggered by polling rather than VRRP webhooks. Pings r1 + r2 every
+5–10 s; if r1's health-check fails for N successive intervals, calls
+the OCI API to fail the floating IP over to r2.
+
+Pros: no new docker image (just a tiny custom container or even a
+`bitnami/oci-cli` image with a shell script); easier to monitor and
+log via the existing observability stack; firefly is geographically
+diverse from the OCI region (firefly's egress is via the on-prem
+MikroTik, not via OCI), so OCI-side failures don't break the controller.
+
+Cons: failover detection latency tied to poll interval (5–30 s
+typical); if firefly k3s is unavailable, no failover happens; adds
+operational coupling between the on-prem cluster and OCI's network
+plane.
+
+**Option C — External webhook (Lambda / Cloud Function)**
+
+Considered and rejected. Adds an external dependency in the failover
+path, which is exactly the part you don't want fragile.
+
+**Decision needed:** Option A is what the rest of this doc assumes,
+but Option B is simpler operationally. Pick one before the
+implementation PR (see Open Questions).
 
 #### Edge VNIC config
 
@@ -217,8 +295,20 @@ on the edge module's VNIC config.
    the failover script. Confirm state convergence (`/interface/vrrp/print`
    shows master/backup as expected, no flapping).
 3. **Failover script standalone**: invoke the script manually on each
-   router and confirm it reassigns the floating IP correctly via
-   `oci network vnic get` against both VNICs.
+   router and confirm it reassigns the floating IP correctly. `oci
+   network vnic get` only reports the VNIC's *primary* private IP — to
+   check secondary-IP ownership, list the private IPs attached to each
+   VNIC and confirm the floating one moves:
+
+   ```bash
+   # Look up the floating private-IP OCID once
+   FLOAT_OCID=$(oci network private-ip get --private-ip-id <floating-ocid> --query 'data."vnic-id"' --raw-output)
+   echo "floating IP currently attached to VNIC: $FLOAT_OCID"
+
+   # Or list all private IPs per VNIC and grep for the floating address
+   oci network private-ip list --vnic-id <r1-vnic> --query 'data[].{ip:"ip-address",primary:"is-primary"}'
+   oci network private-ip list --vnic-id <r2-vnic> --query 'data[].{ip:"ip-address",primary:"is-primary"}'
+   ```
 4. **End-to-end failover**: stop r1's RouterOS VM. Time how long until
    `traceroute 1.1.1.1` from an app subnet VM starts succeeding again.
    Target: under 30 s.
@@ -263,10 +353,22 @@ floating IP somewhere inactive.
    between VNICs in the same subnet (per Oracle docs), but worth
    confirming on the actual edge subnet before betting the design
    on it.
-4. **Container-based failover helper image distribution**: does this
-   live in the same OCI Container Registry that already hosts the
-   MikroTik CHR image? Or in Docker Hub like cloudflared? Decision
-   needed before implementation PR.
+4. **Failover trigger choice — Option A vs B** (see "Failover trigger"
+   section). Defaults differ on operational philosophy:
+   - **Option A (container on each MikroTik)**: new image at
+     `ghcr.io/calebsargeant/oci-vrrp-failover:<semver>`, built via
+     `dockerfiles/oci-vrrp-failover/Dockerfile` and the existing
+     semantic-release docker pipeline. Self-contained per-router
+     failover with no cross-network dependency. Need to verify that
+     a RouterOS container can reach OCI's `169.254.169.254` metadata
+     service for instance-principal auth — fallback is an API key
+     file mounted in.
+   - **Option B (controller on firefly k3s)**: tiny Deployment using
+     an off-the-shelf image like `bitnami/oci-cli` + a short Python
+     watchdog. Polls r1/r2 health; if r1 down for N intervals,
+     fails over via OCI API. No custom image to maintain, easier
+     observability, but failover detection latency is poll-bounded
+     and depends on firefly being up.
 
 ## Out of scope (intentionally)
 
