@@ -78,32 +78,10 @@ resource "cloudflare_zero_trust_gateway_policy" "block_adware" {
   traffic = "any(dns.domains[*] in {${join(" ", [for d in local.adware_domains : "\"${d}\""])}})"
 }
 
-# L4 allow + block pair on 192.168.69.110 — UNREACHABLE BLOCK as currently
-# written: precedence 15000 (allow) is evaluated before 16000 (block), so
-# the allow always wins and the block is dead code. This is either:
-#   a) intentional plumbing for a future condition on the allow (e.g.
-#      "allow only if identity == foo"; block as catch-all), or
-#   b) a leftover that should be deleted.
-# Tracked as docs/reference/cloudflare-ztna-improvements.md #8. Until the
-# intent is clarified, keep both so we don't silently change behaviour.
-resource "cloudflare_zero_trust_gateway_policy" "allow_server_l4" {
-  account_id  = var.account_id
-  name        = "Allow rule for Server"
-  description = "Managed by Terraform — pair with block_server_l4; intentional override pattern, see gateway.tf comment + improvements memo #8"
-  action      = "allow"
-  enabled     = true
-  filters     = ["l4"]
-  precedence  = 15000
-  traffic     = "net.dst.ip == 192.168.69.110"
-}
-
-resource "cloudflare_zero_trust_gateway_policy" "block_server_l4" {
-  account_id  = var.account_id
-  name        = "Block rule for Server"
-  description = "Managed by Terraform — currently UNREACHABLE (allow_server_l4 at lower precedence matches first); see gateway.tf comment + improvements memo #8"
-  action      = "block"
-  enabled     = true
-  filters     = ["l4"]
-  precedence  = 16000
-  traffic     = "net.dst.ip == 192.168.69.110"
-}
+# Note: an L4 allow+block pair on 192.168.69.110 (Franklin Cape Town
+# network) lived here until cloudflare-ztna-improvements.md #8 was
+# resolved. Both rules were dead code: the allow at precedence 15000
+# matched first so the block at 16000 never fired, and Gateway default-
+# allows traffic anyway so the allow was a no-op too. Access to .110
+# already goes via the on-prem MikroTik VPN + DRG peering, not through
+# Cloudflare WARP, so dropping the policies has no data-plane effect.

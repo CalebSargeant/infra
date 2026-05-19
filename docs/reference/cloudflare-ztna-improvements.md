@@ -155,15 +155,16 @@ Options:
 
 ## 8. Document or consolidate the L4 allow + block rules on `192.168.69.110`
 
-**Partially landed.** Both resources now carry descriptions making the
-override pattern explicit (allow at precedence 15000 wins; block at
-16000 is currently unreachable). Inline comment in `gateway.tf` calls out
-the two interpretations (intentional plumbing for a future identity
-condition on the allow, or leftover dead code).
-
-**Outstanding decision:** confirm whether the block is meant to be the
-catch-all for a not-yet-added identity-conditional allow. If yes, add the
-identity condition. If no, delete the block resource.
+**Resolved — deleted as dead code.** The pair was leftover from the
+dashboard→terraform import (#199), policing traffic to a Franklin Cape
+Town server (`.110` on the same `192.168.69.0/24` segment as the Franklin
+hosts in `ansible/hosts.yaml`). Operator confirmed both rules were
+unintentional carry-over: actual access to `.110` already goes via the
+on-prem MikroTik VPN + DRG peering, not through Cloudflare WARP, so the
+Gateway rules had no data-plane effect. Removed in the same PR that
+records this resolution; `gateway.tf` keeps a one-paragraph comment
+where the rules used to live so a future operator reading git blame
+sees the deletion rationale.
 
 ## 9. Rename the "firefly" tunnel to something OCI-specific
 
