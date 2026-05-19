@@ -12,7 +12,7 @@ projects:
     terraform_version: v1.11.3
     workflow: terragrunt
     autoplan:
-      when_modified: ["*.tf", "*.tfvars", "*.hcl"]
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
     apply_requirements: [approved, mergeable]
 
@@ -23,7 +23,7 @@ projects:
     terraform_version: v1.11.3
     workflow: terragrunt
     autoplan:
-      when_modified: ["*.tf", "*.tfvars", "*.hcl"]
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
     apply_requirements: [approved, mergeable]
 
@@ -34,7 +34,7 @@ projects:
     terraform_version: v1.11.3
     workflow: terragrunt
     autoplan:
-      when_modified: ["*.tf", "*.tfvars", "*.hcl"]
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
     apply_requirements: [approved, mergeable]
 
@@ -45,7 +45,7 @@ projects:
     terraform_version: v1.11.3
     workflow: terragrunt
     autoplan:
-      when_modified: ["*.tf", "*.tfvars", "*.hcl"]
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
     apply_requirements: [approved, mergeable]
 
@@ -56,7 +56,7 @@ projects:
     terraform_version: v1.11.3
     workflow: terragrunt
     autoplan:
-      when_modified: ["*.tf", "*.tfvars", "*.hcl"]
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
     apply_requirements: [approved, mergeable]
 
