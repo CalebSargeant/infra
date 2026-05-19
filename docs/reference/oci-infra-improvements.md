@@ -92,3 +92,32 @@ captures this. Once cert is sorted, switch to 8729 + TLS, then drop the
 `routeros_api_management_cidrs` ingress rule on the edge security list
 (currently the only thing preventing 8728 from being closed to the
 internet).
+
+## 5. Reserved (not ephemeral) public IPs for edge MikroTiks
+
+**Capability landed; cutover pending.** The edge module now exposes
+`var.use_reserved_public_ips` (default `false`). Setting it to `true`
+detaches the ephemeral public IPs and allocates two OCI Reserved Public
+IPs (free tier: 2 reserved IPs per tenancy at no cost), attached to the
+same primary private IPs. The cutover changes the public IP values once,
+after which the IPs survive instance recreate.
+
+DNS auto-follows via the [`cloudflare/dns/prod`](../../terraform/cloudflare/dns/prod/terragrunt.hcl)
+terragrunt dependency on `oci/prod/eu-amsterdam-1/edge` (added in #218)
+— the same apply that creates the reserved IPs also rewrites the
+`oci1`/`oci2`/`oci.sargeant.co` A records.
+
+Recommended sequencing for the flip:
+
+1. `terragrunt apply` in `terraform/oci/prod/eu-amsterdam-1/edge` with
+   `inputs.use_reserved_public_ips = true`. Public IPs change.
+2. (Same chain, or immediately after) `terragrunt apply` in
+   `terraform/cloudflare/dns/prod`. A records update.
+3. (Same chain, or immediately after) `terragrunt apply` in
+   `terraform/oci/prod/eu-amsterdam-1/mikrotik` if the router-side
+   address-lists reference the public IPs directly (today they don't —
+   they reference hostnames + RFC1918, so this step is a no-op).
+
+Expected disruption window: tens of seconds while DNS TTL expires for
+clients with cached old IPs. Inbound traffic to `oci*.sargeant.co`
+during that window times out at the old IPs.

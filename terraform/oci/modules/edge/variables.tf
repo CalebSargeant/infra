@@ -10,7 +10,7 @@ variable "compartment_ocid" {
 
 variable "vcn_id" {
   description = "OCID of the VCN"
-  type = string
+  type        = string
 }
 
 variable "environment" {
@@ -21,14 +21,14 @@ variable "environment" {
 variable "shape" {
   description = "Shape of the instance"
   type        = string
-  default     = "VM.Standard.E2.1.Micro"  # Free tier x86 instance
+  default     = "VM.Standard.E2.1.Micro" # Free tier x86 instance
 }
 
 variable "image_ocid" {
   description = "OCID of the image to use for the instance"
   type        = string
   # Default to Oracle Linux 8 for x86
-  default     = "ocid1.image.oc1.eu-amsterdam-1.aaaaaaaawxrjyvekcjkpi3zo6x3fphepbrjrbvr2dkcdxwir7xdwpv2yfvqa"
+  default = "ocid1.image.oc1.eu-amsterdam-1.aaaaaaaawxrjyvekcjkpi3zo6x3fphepbrjrbvr2dkcdxwir7xdwpv2yfvqa"
 }
 
 variable "ssh_public_key_path" {
@@ -48,11 +48,17 @@ variable "network_security_group_id" {
 
 variable "fault_domains" {
   description = "Map of fault domains to create instances in"
-  type        = map(object({
+  type = map(object({
     fault_domain = number
     private_ip   = optional(string)
   }))
   default = {
     "fd1" = { fault_domain = 0 }
   }
+}
+
+variable "use_reserved_public_ips" {
+  description = "When true, the edge instances' VNICs use OCI Reserved public IPs instead of ephemeral ones — keeps the IP stable across instance recreates. Default false matches historical behaviour. Flipping false → true on existing infra is a deliberate one-off cutover: the ephemeral IP is released and a new reserved IP is allocated, so the public IP value WILL change at that apply (and DNS records sourced from this module's outputs will follow). OCI Always Free allows 2 reserved public IPs per tenancy at no cost, which is exactly the edge fleet size."
+  type        = bool
+  default     = false
 }
