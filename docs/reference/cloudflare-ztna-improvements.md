@@ -89,25 +89,6 @@ Three macOS posture rules (Disk Encryption, Firewall, OS Version >=
 13.0.1) exist but **none are referenced**. They're dead code until #3 is
 resolved.
 
-## 4. Wire device posture rules into Access policies
-
-Three macOS posture rules exist (Disk Encryption, Firewall, OS Version >=
-13.0.1) — and **none of them are referenced**. They're dead code.
-
-Add a `require` block on the Caleb policy for Overseerr (or anything more
-sensitive), e.g.:
-
-```hcl
-require {
-  device_posture = [
-    cloudflare_zero_trust_device_posture_rule.mac_disk_encryption.id,
-    cloudflare_zero_trust_device_posture_rule.mac_firewall.id,
-  ]
-}
-```
-
-Otherwise the posture rules might as well not exist.
-
 ## 5. Move tunnel credentials into OCI Vault
 
 Today the cloudflared tunnel token lives in 1Password (`Firefly Cloudflare
