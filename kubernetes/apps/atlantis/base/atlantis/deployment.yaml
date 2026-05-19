@@ -57,7 +57,7 @@ spec:
               mountPath: /atlantis-data
       containers:
         - name: atlantis
-          image: ghcr.io/runatlantis/atlantis:v0.31.0
+          image: ghcr.io/runatlantis/atlantis:v0.43.0
           resources:
             requests:
               memory: "512Mi"
