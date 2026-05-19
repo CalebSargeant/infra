@@ -50,59 +50,44 @@ Investigation pointers:
 
 ## 3. Extract repeated email lists into Access Groups
 
-**Partially landed.** Four reusable Access Groups defined in
-`access_groups.tf`: `friends`, `caleb`, `household`, `magma_moose_domain`.
-Membership of each lives in exactly one place now.
-
-**Blocker — v4 provider limitation:** the existing policies in CF
+**Done.** Four Access Groups in `access_groups.tf`: `friends`, `caleb`,
+`household`, `magma_moose_domain`. The four affected policies
 (`overseerr_friends`, `overseerr_caleb`, `warp_allow_emails`,
-`app_launcher_magma`) are all *reusable* policies, not app-scoped. The
-cloudflare/cloudflare v4 provider can only update policies through the
-app-scoped endpoint and returns API error 12130 — "can not update reusable
-policies through this endpoint" — when you try. So the
-`include = { group = [...] }` refactor can't be applied via terraform
-without one of:
+`app_launcher_magma`) had to be recreated as app-scoped first because
+the imported originals were reusable in CF and the v4 provider returns
+error 12130 when updating reusable policies via the app-scoped endpoint.
 
-- Migrate to provider v5 once the relevant resource exists for reusable
-  policies, then switch include blocks to `group = [...]`.
-- Recreate each policy as app-scoped (delete + create — brief access
-  disruption while CF cuts over).
-- Update the include via the CF dashboard (lose the terraform-as-source
-  property; not recommended).
+Cutover that landed this work:
+1. Detached all policies from each affected app via
+   `PUT /accounts/<acct>/access/apps/<id>` with `policies: []`.
+2. `DELETE /accounts/<acct>/access/policies/<id>` on each old reusable
+   policy.
+3. `terraform state rm` the 5 policy resources (the 4 reusable plus
+   `warp_email_domain`, which was incidentally detached in step 1).
+4. `terragrunt apply` recreated all 5 policies as `reusable: false` with
+   group-based includes and (for `overseerr_caleb`) the posture
+   `require` block — see #4.
 
-Until then the access_groups are scaffolding for *new* app-scoped policies
-created via terraform; existing ones stay inline.
-
-## 4. Wire device posture rules into Access policies
-
-**Blocked by the same v4-provider reusable-policy limit (#3).** The
-intent was to add a `require { device_posture = [...] }` block on
-`overseerr_caleb` (FileVault + macOS version, not firewall — many dev
-Macs have the system firewall off). The HCL is staged as a comment in
-`access_apps.tf` for when the limit is unblocked.
-
-Three macOS posture rules (Disk Encryption, Firewall, OS Version >=
-13.0.1) exist but **none are referenced**. They're dead code until #3 is
-resolved.
+Access gap was ~30s between detach and apply; affected apps denied all
+requests during that window.
 
 ## 4. Wire device posture rules into Access policies
 
-Three macOS posture rules exist (Disk Encryption, Firewall, OS Version >=
-13.0.1) — and **none of them are referenced**. They're dead code.
-
-Add a `require` block on the Caleb policy for Overseerr (or anything more
-sensitive), e.g.:
+**Done as part of #3.** `overseerr_caleb` now carries:
 
 ```hcl
 require {
   device_posture = [
     cloudflare_zero_trust_device_posture_rule.mac_disk_encryption.id,
-    cloudflare_zero_trust_device_posture_rule.mac_firewall.id,
+    cloudflare_zero_trust_device_posture_rule.mac_os_version.id,
   ]
 }
 ```
 
-Otherwise the posture rules might as well not exist.
+Caleb's session is only valid from a macOS device with FileVault on and
+OS version ≥ 13.0.1. Firewall posture rule intentionally not required
+(many dev Macs have the system firewall off). Friends policy stays
+posture-less so mixed-device family/friends aren't locked out.
 
 ## 5. Move tunnel credentials into OCI Vault
 
