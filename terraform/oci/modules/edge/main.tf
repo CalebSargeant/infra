@@ -40,11 +40,24 @@ resource "oci_core_instance" "this" {
 # (OCI requires a private-IP OCID, not the IP string, for the attachment).
 # The two data sources are also gated on the variable so the default
 # `false` path doesn't run unnecessary API queries.
+#
+# OCI's vnic_attachments list doesn't expose `is_primary` directly — to
+# filter deterministically we'd need a per-VNIC `oci_core_vnic` lookup
+# (cascade of data sources). Edge instances are single-VNIC by design,
+# so we postcondition on length == 1 instead; future multi-VNIC topology
+# tripping the postcondition is the signal to add the per-VNIC filter.
 data "oci_core_vnic_attachments" "primary" {
   for_each = var.use_reserved_public_ips ? oci_core_instance.this : {}
 
   compartment_id = var.compartment_ocid
   instance_id    = each.value.id
+
+  lifecycle {
+    postcondition {
+      condition     = length(self.vnic_attachments) == 1
+      error_message = "Edge instance ${self.instance_id} has ${length(self.vnic_attachments)} VNIC attachments; reserved-IP module assumes exactly 1. Extend the module to filter attachments on a per-VNIC is_primary lookup before adding secondary VNICs."
+    }
+  }
 }
 
 data "oci_core_private_ips" "primary" {
@@ -59,7 +72,13 @@ resource "oci_core_public_ip" "reserved" {
   compartment_id = var.compartment_ocid
   lifetime       = "RESERVED"
   display_name   = "${var.environment}-edge-${each.key}-reserved-ip"
-  private_ip_id  = data.oci_core_private_ips.primary[each.key].private_ips[0].id
+  # `one()` returns the single matching element OR fails the plan if zero
+  # or many — built-in assertion that there's exactly one primary private
+  # IP, instead of trusting the list's order at index 0.
+  private_ip_id = one([
+    for ip in data.oci_core_private_ips.primary[each.key].private_ips :
+    ip.id if ip.is_primary
+  ])
 
   freeform_tags = {
     "Environment" = var.environment
