@@ -79,14 +79,8 @@ variable "k3s_url" {
   default     = ""
 }
 
-variable "k3s_token" {
-  description = "Node token of the existing k3s cluster. Read from /var/lib/rancher/k3s/server/node-token on the server. Must be non-empty if k3s_url is set, otherwise cloud-init silently produces a broken k3s-agent service."
+variable "k3s_token_secret_ocid" {
+  description = "OCID of the OCI Vault secret holding the k3s node-token. The instance fetches this at boot via instance principal — see the dynamic group + IAM policy in this module. Empty disables agent mode (same effect as k3s_url == \"\")."
   type        = string
-  sensitive   = true
   default     = ""
-
-  validation {
-    condition     = var.k3s_token == "" || length(var.k3s_token) >= 16
-    error_message = "k3s_token looks too short to be a real K3S node-token. Get the real value via: ssh firefly \"sudo cat /var/lib/rancher/k3s/server/node-token\""
-  }
 }

@@ -1,13 +1,34 @@
-# This instance will be a k3s instance using the ARM64 free tier OCI
-# Servers are placed in the app subnet from the network module
+# k3s instances on the OCI ARM64 free tier, placed in the app subnet.
+#
+# Two modes:
+#   k3s_url + k3s_token_secret_ocid set  -> install as agent joining the cluster
+#   both empty                          -> install as standalone k3s server
+#
+# The join token is *not* baked into instance metadata. The agent-mode
+# cloud-init script uses instance principal auth to fetch the token from
+# OCI Vault at boot. Permission to read that specific secret is granted
+# by the dynamic group + IAM policy in iam.tf.
 
 data "oci_identity_availability_domains" "ads" {
   compartment_id = var.tenancy_ocid
 }
 
+# Hash of the inputs that *meaningfully* change cloud-init outcome —
+# k3s_url, the secret OCID it should fetch, and the base image. Cosmetic
+# script tweaks don't change the hash so don't recreate VMs.
+resource "terraform_data" "user_data_replace_trigger" {
+  for_each = var.servers
+
+  input = sha256(jsonencode({
+    k3s_url               = var.k3s_url
+    k3s_token_secret_ocid = var.k3s_token_secret_ocid
+    image                 = var.image_ocid
+  }))
+}
+
 resource "oci_core_instance" "this" {
   for_each = var.servers
-  
+
   availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
   compartment_id      = var.compartment_ocid
   display_name        = "${var.environment}-server-${each.key}"
@@ -37,20 +58,49 @@ resource "oci_core_instance" "this" {
     user_data = base64encode(<<-EOF
       #!/bin/bash
       exec > /var/log/k3s-install.log 2>&1
+      set -e
       echo "k3s install starting at $(date)"
 
-      # Three modes:
-      #   k3s_url + k3s_token  -> install as agent joining the cluster
-      #   k3s_url empty        -> install as a standalone k3s server
-      #   k3s_url set, token empty -> blocked by the resource precondition
       if [ -n "${var.k3s_url}" ]; then
-        echo "agent mode: joining ${var.k3s_url}"
+        echo "agent mode: will join ${var.k3s_url}"
+
+        # Fetch the node-token from OCI Vault via instance principal.
+        # oci-cli's `--auth instance_principal` flag uses the metadata
+        # service to acquire a short-lived JWT from OCI's auth service
+        # and signs subsequent API calls — no static credentials, no
+        # token in instance metadata.
+        echo "installing oci-cli..."
+        apt-get update -qq
+        apt-get install -y -qq python3-pip
+        # oci-cli on python 3.12+ needs PEP 668 bypass.
+        pip3 install --quiet --break-system-packages oci-cli
+
+        echo "fetching k3s token from OCI Vault (instance principal)..."
+        for attempt in 1 2 3 4 5; do
+          K3S_TOKEN_VALUE=$(oci secrets secret-bundle get \
+            --secret-id ${var.k3s_token_secret_ocid} \
+            --region ${var.region} \
+            --auth instance_principal \
+            --query 'data."secret-bundle-content".content' \
+            --raw-output 2>/var/log/oci-secret-fetch.log | base64 -d || true)
+          if [ -n "$K3S_TOKEN_VALUE" ]; then break; fi
+          echo "attempt $attempt failed; retrying in 10s..."
+          sleep 10
+        done
+
+        if [ -z "$K3S_TOKEN_VALUE" ]; then
+          echo "ERROR: couldn't fetch k3s token from Vault after 5 tries. See /var/log/oci-secret-fetch.log."
+          exit 1
+        fi
+        echo "token fetched (len=$${#K3S_TOKEN_VALUE})"
+
         curl -sfL https://get.k3s.io | \
           INSTALL_K3S_EXEC="agent" \
           K3S_URL="${var.k3s_url}" \
-          K3S_TOKEN="${var.k3s_token}" \
+          K3S_TOKEN="$K3S_TOKEN_VALUE" \
           sh -
-        echo "k3s-agent service installed at $(date); will retry connection to ${var.k3s_url} until reachable"
+
+        echo "k3s-agent service installed at $(date); will retry connection until ${var.k3s_url} is reachable"
       else
         echo "server mode: standalone k3s control plane"
         curl -sfL https://get.k3s.io | sh -
@@ -70,16 +120,31 @@ resource "oci_core_instance" "this" {
     "ManagedBy"   = "Terraform"
   }
 
-  # Prevent recreation on image changes
   lifecycle {
+    # source_details: don't fight image version drift if AMI gets republished.
+    # metadata.user_data: cosmetic script tweaks shouldn't replace VMs.
+    # Meaningful changes (k3s_url / k3s_token_secret_ocid / image) propagate
+    # via replace_triggered_by on the user_data_replace_trigger hash.
     ignore_changes = [
       source_details[0].source_id,
       metadata["user_data"]
     ]
 
+    replace_triggered_by = [
+      terraform_data.user_data_replace_trigger[each.key],
+    ]
+
     precondition {
-      condition     = var.k3s_url == "" || length(var.k3s_token) > 0
-      error_message = "k3s_token must be set when k3s_url is configured, otherwise cloud-init will install k3s-agent with an empty token and silently fail to join. Run: export K3S_TOKEN=$(ssh firefly \"sudo cat /var/lib/rancher/k3s/server/node-token\")"
+      condition     = (var.k3s_url == "" && var.k3s_token_secret_ocid == "") || (var.k3s_url != "" && var.k3s_token_secret_ocid != "")
+      error_message = "k3s_url and k3s_token_secret_ocid must be set together (agent mode) or both empty (standalone server mode). Setting one without the other is silently broken."
     }
   }
+
+  depends_on = [
+    # Make sure the dynamic group + IAM policy exist before the VM boots and
+    # tries to fetch the secret. IAM eventual consistency means a freshly
+    # created instance might still fail the first fetch — that's why the
+    # cloud-init has a 5-attempt retry with backoff.
+    oci_identity_policy.k3s_servers_vault_read,
+  ]
 }
