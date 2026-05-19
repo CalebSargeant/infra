@@ -9,14 +9,22 @@ parallel_apply: false
 # provider-level projects (e.g. dir: terraform/cloudflare) didn't work because
 # those parent dirs don't contain any TF/terragrunt config of their own.
 #
-# `when_modified` patterns are GLOBS relative to the project's `dir`. Using
-# `**/*` makes them match files at any depth (the leaf's own files + any
-# `_modules/` or includes living deeper).
+# `when_modified` patterns are GLOBS relative to the project's `dir`. They
+# only cover files INSIDE the leaf's own subtree — they cannot reach files
+# at parent/sibling paths.
 #
-# Shared inputs (root.hcl, parent terragrunt.hcl, modules/) ARE NOT yet watched
-# globally — if you change those, manually trigger atlantis plan via PR comment
-# on the affected PR. Long-term fix: a job that auto-generates this file from
-# the terragrunt graph (e.g. transcend-io/terragrunt-atlantis-config).
+# This means changes to shared inputs DO NOT trigger autoplan here:
+#   - terraform/root.hcl
+#   - terraform/<provider>/region.hcl
+#   - terraform/<provider>/modules/**
+#   - any parent terragrunt.hcl an `include` chain points at
+#
+# Workaround for now: comment `atlantis plan -p <project>` on the affected PR
+# for each leaf that depends on the shared file you changed.
+#
+# Long-term fix: auto-generate this file from the terragrunt graph (e.g.
+# transcend-io/terragrunt-atlantis-config) so each leaf's `when_modified`
+# explicitly lists every shared file it depends on via `..` relative paths.
 
 projects:
   # ─── Cloudflare ──────────────────────────────────────────────────────────
@@ -145,9 +153,14 @@ projects:
 
 workflows:
   terragrunt:
+    # IMPORTANT: do NOT include the built-in `- init` step here.
+    # Atlantis's `init` step always runs `terraform init` in the project dir.
+    # Terragrunt-only leaves (e.g. cloudflare/dns/prod) contain only
+    # terragrunt.hcl and no .tf files — `terraform init` aborts there with
+    # "No configuration files". Instead, the shell-conditional below picks
+    # the right init+plan/apply pair: terragrunt auto-inits when invoked.
     plan:
       steps:
-        - init
         - env:
             name: TERRAGRUNT_TFPATH
             command: 'echo "terraform"'
@@ -155,6 +168,7 @@ workflows:
             if [ -f "terragrunt.hcl" ]; then
               terragrunt plan -input=false -out=$PLANFILE
             else
+              terraform init -input=false
               terraform plan -input=false -out=$PLANFILE
             fi
     apply:
