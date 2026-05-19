@@ -17,7 +17,33 @@ spec:
     spec:
       serviceAccountName: atlantis
       securityContext:
+        # Atlantis upstream image uses UID 100 / GID 1000 for the atlantis user.
+        # Be explicit so a kubelet that ignores image USER doesn't fall back to root.
+        runAsUser: 100
+        runAsGroup: 1000
         fsGroup: 1000
+        # The PVC was first mounted long ago with different ownership; force k8s
+        # to recursively chgrp the volume root on each pod start until it matches.
+        fsGroupChangePolicy: OnRootMismatch
+      initContainers:
+        # The existing PVC has files owned by old UIDs (created before this
+        # securityContext was set). fsGroup chgrp's but doesn't chown the existing
+        # files — atlantis still can't *create* new entries because the dir itself
+        # is owned by an alien user. This one-shot init container recursively
+        # chowns the volume to atlantis (100:1000) so the main container can write.
+        - name: fix-data-ownership
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - chown -R 100:1000 /atlantis-data && chmod -R u+rwX,g+rwX /atlantis-data
+          securityContext:
+            runAsUser: 0          # need root to chown
+            runAsGroup: 0
+            runAsNonRoot: false
+          volumeMounts:
+            - name: atlantis-data
+              mountPath: /atlantis-data
       containers:
         - name: atlantis
           image: ghcr.io/runatlantis/atlantis:v0.31.0
