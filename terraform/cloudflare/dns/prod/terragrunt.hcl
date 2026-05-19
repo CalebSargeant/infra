@@ -37,6 +37,30 @@ locals {
   )
 }
 
+# Source the OCI MikroTik public IPs from the edge module's state instead of
+# hardcoding them here. Today the edge module's VNICs use ephemeral public IPs
+# (`assign_public_ip = true`) — those would change on instance recreate, and
+# the literal-IP version of this file would silently leave DNS pointing at
+# nothing. With the dependency, the apply graph re-renders DNS whenever the
+# edge module re-allocates an IP. Mock outputs let `terragrunt plan/validate`
+# work without read access to the edge state.
+#
+# Follow-up: add reserved public IPs to the edge module so the IPs survive
+# instance recreate in the first place — that turns this dependency from
+# "DNS automatically follows the IP" into "the IP doesn't change at all".
+dependency "edge" {
+  config_path = "../../../oci/prod/eu-amsterdam-1/edge"
+
+  mock_outputs = {
+    instances = {
+      fd1 = { public_ip = "0.0.0.0" }
+      fd2 = { public_ip = "0.0.0.0" }
+    }
+  }
+  mock_outputs_allowed_terraform_commands = ["validate", "plan", "init"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+}
+
 terraform {
   source = "${get_repo_root()}/terraform/modules/cloudflare-dns"
 
@@ -68,24 +92,24 @@ inputs = {
     {
       name  = "oci1.sargeant.co"
       type  = "A"
-      value = "134.98.139.9"
+      value = dependency.edge.outputs.instances["fd1"].public_ip
     },
     {
       name  = "oci2.sargeant.co"
       type  = "A"
-      value = "193.123.39.172"
+      value = dependency.edge.outputs.instances["fd2"].public_ip
     },
 
     # Two A records under the same name produce DNS round-robin between r1+r2
     {
       name  = "oci.sargeant.co"
       type  = "A"
-      value = "134.98.139.9"
+      value = dependency.edge.outputs.instances["fd1"].public_ip
     },
     {
       name  = "oci.sargeant.co"
       type  = "A"
-      value = "193.123.39.172"
+      value = dependency.edge.outputs.instances["fd2"].public_ip
     },
 
     # Routes through the `firefly` cloudflared tunnel to the in-cluster
