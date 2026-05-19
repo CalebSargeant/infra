@@ -69,11 +69,19 @@ resource "oci_core_instance" "this" {
         # service to acquire a short-lived JWT from OCI's auth service
         # and signs subsequent API calls — no static credentials, no
         # token in instance metadata.
+        #
+        # pip on Ubuntu 22.04 doesn't recognise `--break-system-packages`
+        # (introduced when PEP 668 marked external installs); only 23.04+
+        # ships pip new enough. Detect the flag and add it only when
+        # supported so the script works across image versions.
         echo "installing oci-cli..."
         apt-get update -qq
         apt-get install -y -qq python3-pip
-        # oci-cli on python 3.12+ needs PEP 668 bypass.
-        pip3 install --quiet --break-system-packages oci-cli
+        PIP_ARGS="--quiet"
+        if pip3 install --help 2>&1 | grep -q break-system-packages; then
+          PIP_ARGS="$PIP_ARGS --break-system-packages"
+        fi
+        pip3 install $PIP_ARGS oci-cli
 
         echo "fetching k3s token from OCI Vault (instance principal)..."
         for attempt in 1 2 3 4 5; do
