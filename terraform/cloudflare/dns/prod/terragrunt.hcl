@@ -87,6 +87,20 @@ inputs = {
       type  = "A"
       value = "193.123.39.172"
     },
+
+    # Routes through the `firefly` cloudflared tunnel to the in-cluster
+    # radarr service (k8s service: radarr.media.svc.cluster.local:7878,
+    # see kubernetes/_base/media/radarr/service.yaml). Pairs with the
+    # tunnel ingress rule in terraform/cloudflare/zero-trust/prod/tunnels.tf
+    # and the cloudflare_zero_trust_access_application.radarr
+    # self_hosted entry (no longer a bookmark). Must be proxied so CF
+    # recognises the cfargotunnel.com target and routes via the tunnel.
+    {
+      name    = "radarr.sargeant.co"
+      type    = "CNAME"
+      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
+      proxied = true
+    },
   ]
 
   # These four records already exist in the dashboard (someone re-created
