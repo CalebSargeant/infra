@@ -20,6 +20,20 @@ Overseerr is correctly `self_hosted`. Either:
 Either way, the current state is the worst of both worlds: Access shows it
 in the launcher but doesn't actually protect it.
 
+**Pairing required:** promotion only works if the `firefly` cloudflared
+tunnel also has an ingress rule for `radarr.sargeant.co`. Today the
+ingress config has just `overseerr.sargeant.co` → `http://overseerr...`
+and a 404 catch-all. Step-by-step:
+
+1. Add a `cloudflare_zero_trust_tunnel_cloudflared_config` ingress_rule
+   for `radarr.sargeant.co` pointing at the actual radarr URL (likely
+   `http://radarr.media.svc.cluster.local:7878` if it's in the firefly
+   k3s cluster — but verify, since the OCI cloudflared can only resolve
+   `.svc.cluster.local` if it's somehow joined to the cluster's DNS).
+2. Flip Radarr's `type` to `self_hosted` and attach a policy.
+3. Drop the existing `bookmark` resource (or keep as a managed
+   bookmark — distinct from the self_hosted entry).
+
 ## 2. Fix r1's cloudflared HA (availability gap)
 
 `oci network ip-sec-tunnel list` shows tunnel UP from both routers but the
@@ -106,19 +120,35 @@ After this migration:
 
 ## 6. Service tokens for automation paths
 
-No service tokens are defined. As soon as you want CI to hit an
-Access-protected endpoint, or a script to call an internal API, a
-short-lived service token is the right answer (instead of an authenticated
-user session). At minimum, model the pattern in terraform so adding one is
-a single resource + policy update.
+**Scaffold landed.** `terraform/cloudflare/zero-trust/prod/service_tokens.tf`
+documents the pattern (commented-out example resource + matching
+non_identity policy + outputs for `client_id` / `client_secret`). No
+service tokens are actually defined yet — add the first one when there's
+a real consumer (e.g. uptime monitoring hitting `overseerr.sargeant.co`).
+
+Workflow once a token is added:
+
+1. `terragrunt apply`
+2. `terraform output -raw service_token_<name>_client_secret` (sensitive,
+   only available at create-time)
+3. Stash in OCI Vault (or pipe directly into the consumer's secret store)
+4. Caller sends `CF-Access-Client-Id` + `CF-Access-Client-Secret` headers
 
 ## 7. Replace the manual adware list with CF managed categories
 
-The "Block adware" gateway DNS rule has ~16 manually-curated domains. CF
-ships managed categories (Ads & Tracking, Malware, etc.) that cover the
-same use case with continuous updates. Replace `traffic = "any(dns.domains[*]
-in {…})"` with `traffic = "any(dns.content_category[*] in {…})"` using the
-appropriate category IDs.
+**Blocked — Zero Trust tier.** Discovered via
+`GET /accounts/<acct>/gateway/categories`: the categories that would
+replace the manual adware list (`Ads`, `Deceptive Ads`, plus broader
+`Trackers` / `Adult Themes`-adjacent things) are all `class: "premium"`
+on this account. Only `Adult Themes` and `Security threats` are `free`.
+
+Options:
+
+- Stay with the manual list (current state — keeps zero recurring cost).
+- Upgrade to a Zero Trust paid seat / plan that includes the premium
+  categories, then swap `traffic = "any(dns.domains[*] in {…})"` to
+  `traffic = "any(dns.content_category[*] in {1, 4, …})"` using the IDs
+  returned by the categories endpoint.
 
 ## 8. Document or consolidate the L4 allow + block rules on `192.168.69.110`
 
@@ -134,27 +164,85 @@ identity condition. If no, delete the block resource.
 
 ## 9. Rename the "firefly" tunnel to something OCI-specific
 
-The cloudflared tunnel is named `firefly` but runs on the OCI MikroTik CHRs
-— not on the firefly cluster. Confusing when reading the dashboard. Rename
-to `magmamoose-oci` (or similar). Tunnel name is immutable on the v4
-provider, so this means create-new + cutover, not in-place rename.
+**Needs scheduled cutover — not a quick fix.** Tunnel name is immutable
+post-creation; the rename is actually a recreate + cutover:
+
+1. `cloudflare_zero_trust_tunnel_cloudflared "magmamoose_oci"` defined in
+   addition to the existing `firefly` (don't replace yet).
+2. New tunnel token issued; push to both MikroTik cloudflared containers
+   via the existing OCI Vault flow.
+3. Migrate ingress configuration to the new tunnel
+   (`cloudflare_zero_trust_tunnel_cloudflared_config "magmamoose_oci"`).
+4. Wait for the new tunnel to register healthy connections from both
+   routers.
+5. Delete the `firefly` tunnel and its ingress config.
+
+Expected window of disruption: ~30s while cloudflared restarts with the
+new token on each router (do them sequentially so the old tunnel keeps
+serving until the new one is up). Schedule in a low-traffic window.
 
 ## 10. Browser isolation for risky apps
 
-For apps that handle externally-sourced content (Overseerr requests,
-anything Plex/Jellyfin-adjacent), enable CF's browser isolation so the
-session runs in CF's sandbox. Adds a real defence layer at minor latency
-cost.
+**Blocked — Zero Trust tier.** Browser isolation is a paid CF Zero Trust
+feature. Same blocker as #7 — needs a Zero Trust plan upgrade. Once
+unlocked, the implementation is a `cloudflare_zero_trust_gateway_policy`
+with `action = "isolate"` (HTTP filter) targeting the relevant
+hostnames, e.g.:
+
+```hcl
+resource "cloudflare_zero_trust_gateway_policy" "isolate_overseerr" {
+  account_id = var.account_id
+  name       = "Isolate overseerr"
+  action     = "isolate"
+  filters    = ["http"]
+  precedence = 17000
+  traffic    = "http.request.host == \"overseerr.sargeant.co\""
+}
+```
 
 ## 11. WARP profile / device enrollment policy in terraform
 
-The WARP Login App exists but the actual WARP profile (split-tunnel
-routes, gateway settings, posture requirements) isn't modelled. If you use
-WARP regularly, codify the profile so it survives a dashboard wipe.
+**Needs separate scoping.** The cloudflare/cloudflare provider v4 has
+`cloudflare_zero_trust_device_settings_policy` (named profiles) and
+`cloudflare_zero_trust_device_default_profile` (the org-wide default),
+plus `cloudflare_zero_trust_device_managed_networks` for split-tunnel
+network detection. Implementation outline:
+
+1. Codify the default profile (auto-connect timeout, allowed-to-leave
+   behaviour, gateway DNS / gateway proxy enabled, etc.).
+2. Add a posture-restricted profile for Caleb-only that includes the
+   posture rules (FileVault + OS version) on top of the default.
+3. Reference the existing `magma_moose_domain` access group in the
+   enrolment policy so only `@magmamoose.com` emails can register.
+
+Risk: poorly-configured WARP profile can lock the operator out of the
+device. Do this in a controlled change window after confirming the
+current dashboard profile is captured in import block form.
 
 ## 12. Logpush for Access + Gateway events
 
-CF retains Access/Gateway logs for ~30 days in the UI. Logpush them to GCS
-(same bucket as terraform state, or a new audit bucket) for long-term
-forensic capability. Cheap to set up, costs almost nothing in storage at
-your volume.
+**Likely blocked on tier.** Logpush historically required an Enterprise
+plan; the Zero Trust paid tier may include limited Logpush. Confirm in
+the CF dashboard before terraform work.
+
+Once available, the implementation is two pieces:
+
+1. **GCS destination** (separate bucket `sargeant-prod-cf-logs` or similar
+   in `magmamoose-terraform`, with a dedicated service account granted
+   `storage.objectCreator`).
+2. **Logpush jobs** — one per dataset you want, via
+   `cloudflare_logpush_job`:
+
+   ```hcl
+   resource "cloudflare_logpush_job" "access_requests" {
+     account_id          = var.account_id
+     name                = "access-requests"
+     dataset             = "access_requests"
+     destination_conf    = "gs://sargeant-prod-cf-logs/access/{DATE}?cf-cred-key=...&format=ndjson"
+     enabled             = true
+     logpull_options     = "fields=AccessRequestID,AccountID,Action,AppDomain,AppUUID,Country,CreatedAt,Email,IPAddress,RayID,UserUID&timestamps=rfc3339"
+   }
+   ```
+
+3. (Optional) `gateway_dns`, `gateway_http`, `gateway_network` datasets
+   for the gateway side.
