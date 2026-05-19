@@ -1,6 +1,8 @@
-# Cloudflare Zero Trust Gateway policies. The two L4 rules for 192.168.69.110
-# are flagged with extended descriptions so a future reader understands the
-# semantics — see comments + descriptions below.
+# Cloudflare Zero Trust Gateway policies. Currently just `block_adware`
+# (DNS-filter rule built from `local.adware_domains` below); an L4
+# allow+block pair on 192.168.69.110 used to live here too but was
+# removed when ZTNA improvements memo #8 was resolved — see comment
+# further down where those resources used to be.
 
 # Curated ad / tracker / telemetry blocklist for the free Zero Trust tier
 # (CF's "Ads" managed category is paid-tier only — see improvements memo
