@@ -109,14 +109,9 @@ variable "container_registry_url" {
 # Firewall address lists
 # ---------------------------------------------------------------------------
 variable "trusted_addresses" {
-  description = "Entries for the TRUSTED address-list (comment => address-or-host)"
+  description = "Entries for the TRUSTED address-list (comment => address-or-host). Default empty so the module never carries identifying labels (employer name, family residences) in this public repo — the operator's actual list lives in OCI Vault (`infra-recon-blockers`) and is passed in by the prod terragrunt config."
   type        = map(string)
-  default = {
-    "Pink Roccade office"           = "212.61.158.12"
-    "Sargeant House, Venray, NL"    = "vpn.sargeant.co"
-    "Franklin House, Cape Town, ZA" = "vpn.franklinhouse.co.za"
-    "Sargeant OCI, Amsterdam, NL"   = "oci.sargeant.co"
-  }
+  default     = {}
 }
 
 variable "rfc1918_addresses" {

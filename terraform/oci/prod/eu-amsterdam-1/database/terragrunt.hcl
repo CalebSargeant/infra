@@ -3,7 +3,7 @@ include {
 }
 
 terraform {
-  source = "${get_repo_root()}/terraform/oci/_modules/database"
+  source = "${get_repo_root()}/terraform/oci/modules/database"
 }
 
 locals {
@@ -35,9 +35,22 @@ inputs = {
   data_storage_size_in_gb = 50            # Free tier includes 50GB
   mysql_version           = "9.6.0"
 
-  # Admin credentials - use environment variable or SOPS
+  # Admin credentials. OCI_MYSQL_ADMIN_PASSWORD MUST be set in the environment
+  # for any terragrunt invocation on this stack (parse-time fetch — plan,
+  # apply, refresh, destroy all evaluate it). The DB system is in the
+  # private `data` subnet (`prohibit_public_ip_on_vnic = true`) so a weak
+  # password isn't directly internet-reachable, but in-VCN compromise +
+  # a guessable admin password is still a credible escalation path.
+  #
+  # 2-arg `get_env(name, "")` matches the repo's convention; the explicit
+  # `regex("^.+$", ...)` is an HCL-level assert that fails the parse with
+  # "regexp pattern did not match" when the env is empty/unset — fail-
+  # closed without depending on the downstream OCI provider catching it
+  # later. A follow-up should migrate this to OCI Vault to match the
+  # rest of the repo's secret pattern (would require a coordinated live
+  # password rotation, so not bundled here).
   admin_username = "admin"
-  admin_password = get_env("OCI_MYSQL_ADMIN_PASSWORD", "ChangeMe123!")
+  admin_password = regex("^.+$", get_env("OCI_MYSQL_ADMIN_PASSWORD", ""))
 
   # Backup configuration
   backup_enabled           = false

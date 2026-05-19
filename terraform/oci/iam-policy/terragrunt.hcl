@@ -1,5 +1,21 @@
 terraform {
-  source = "${get_repo_root()}/terraform/oci/_modules/iam-policy"
+  source = "${get_repo_root()}/terraform/oci/modules/iam-policy"
+}
+
+# The peer tenancy OCID is recon-grade (enumerates cross-tenant trust) and
+# lives in OCI Vault as `infra-recon-blockers` (vault-prod). Fetched at parse
+# time using the operator's ~/.oci/config and decoded as JSON; only the
+# franklinhouse_tenancy_ocid sub-key is consumed here.
+locals {
+  recon_blockers_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aa7mytuezgibzn4g36jxupsgy57zl4372uq47atgfra2ka"
+
+  recon_blockers = jsondecode(run_cmd(
+    "--terragrunt-quiet",
+    "bash", "-c",
+    "oci secrets secret-bundle get --secret-id ${local.recon_blockers_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
+  ))
+
+  franklinhouse_tenancy_ocid = local.recon_blockers.iam_peers.franklinhouse_tenancy_ocid
 }
 
 inputs = {
@@ -12,7 +28,7 @@ inputs = {
   description = "Allow FranklinHouse tenancy to peer DRGs with Sargeant"
 
   statements = [
-    "Define tenancy franklinhouse as ocid1.tenancy.oc1..aaaaaaaaa4edy346b3as4gv6wpf5aaworbp6ls3u36lr3sulhkkjkrzz6tfa",
+    "Define tenancy franklinhouse as ${local.franklinhouse_tenancy_ocid}",
     "Endorse group Administrators to manage remote-peering-to in tenancy franklinhouse"
   ]
 }
