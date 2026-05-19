@@ -36,7 +36,7 @@ kubectl logs ds/cloudflared -n core --tail=20          # "Connection registered"
 
 - **Image**: `cloudflare/cloudflared:latest`
 - **Namespace**: `core`
-- **Node Selector**: `type: all` (runs on both pi and mini nodes)
-- **Resources**: 100m CPU request / no CPU limit, 100Mi RAM request and limit
+- **Scheduling**: no `nodeSelector` or tolerations — the DaemonSet lands on every schedulable node (pi + mini)
+- **Resources**: 10m CPU request / no CPU limit, 100Mi RAM request and limit
 - **Command**: `tunnel --no-autoupdate --protocol quic run --token $(TUNNEL_TOKEN)`
 - **Secret source**: `Secret/core/cloudflared-token` materialized by `ExternalSecret` from OCI Vault key `cloudflared-tunnel-token-firefly`
