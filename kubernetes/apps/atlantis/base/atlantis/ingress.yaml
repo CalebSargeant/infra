@@ -8,7 +8,13 @@ metadata:
   annotations:
     # Cert-manager: issue + renew the Let's Encrypt cert for atlantis.sargeant.co
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    # Traefik-equivalent of the old nginx ssl-redirect annotation.
+    # Bind this route to Traefik's HTTPS entrypoint only. This is NOT an
+    # HTTP→HTTPS redirect (which the old nginx ssl-redirect annotation did) —
+    # plain http:// requests to atlantis.sargeant.co won't match any route and
+    # will get a 404 from Traefik. That's fine for this use case: GitHub
+    # webhooks always POST to https://, and no human reaches Atlantis via
+    # browser. If we ever need a redirect, add an http→https middleware via
+    # an IngressRoute (Traefik CRD) on a sibling :web entrypoint.
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
