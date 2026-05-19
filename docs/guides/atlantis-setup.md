@@ -84,8 +84,11 @@ push() {
     --secret-content-content "$(printf '%s' "$2" | base64 | tr -d '\n')"
 }
 
-push atlantis-github-app-id "3765954"
-push atlantis-github-webhook-secret "$(openssl rand -hex 32)"
+# Use YOUR App ID (numeric, from the App settings page) and YOUR App's
+# webhook secret — the one you saved in step 1 when creating the App.
+# DO NOT generate a new secret here; it must match what GitHub sends.
+push atlantis-github-app-id "<YOUR_APP_ID>"
+push atlantis-github-webhook-secret "<THE_VALUE_FROM_STEP_1>"
 
 # PEM: push directly from the file (do NOT round-trip through a shell variable —
 # it picks up surrounding quotes which break PEM parsing).
