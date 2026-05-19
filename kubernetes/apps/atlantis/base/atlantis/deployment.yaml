@@ -29,14 +29,25 @@ spec:
         # The existing PVC has files owned by old UIDs (created before this
         # securityContext was set). fsGroup chgrp's but doesn't chown the existing
         # files — atlantis still can't *create* new entries because the dir itself
-        # is owned by an alien user. This one-shot init container recursively
-        # chowns the volume to atlantis (100:1000) so the main container can write.
+        # is owned by an alien user. This init container repairs ownership on
+        # first run and is a no-op on every subsequent pod start: it stat's the
+        # volume root and only walks the tree if owner != 100:1000.
         - name: fix-data-ownership
           image: busybox:1.36
           command:
             - sh
             - -c
-            - chown -R 100:1000 /atlantis-data && chmod -R u+rwX,g+rwX /atlantis-data
+            - |
+              set -e
+              OWNER=$(stat -c '%u:%g' /atlantis-data)
+              if [ "$OWNER" = "100:1000" ]; then
+                echo "ownership already correct ($OWNER), skipping chown"
+                exit 0
+              fi
+              echo "current owner $OWNER != 100:1000, repairing..."
+              chown -R 100:1000 /atlantis-data
+              chmod -R u+rwX,g+rwX /atlantis-data
+              echo "done"
           securityContext:
             runAsUser: 0          # need root to chown
             runAsGroup: 0
