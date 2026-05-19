@@ -40,22 +40,8 @@ resource "cloudflare_zero_trust_access_policy" "radarr_friends" {
   precedence       = 1
   session_duration = "24h"
 
-  # Same membership as Overseerr Friends (will switch to
-  # `group = [cloudflare_zero_trust_access_group.friends.id]` once #206
-  # is merged in).
   include {
-    email = [
-      "calebsargeant@gmail.com",
-      "nicholas_smith_@msn.com",
-      "dvs.sargeant@gmail.com",
-      "dirkie.jvrensburg@gmail.com",
-      "sabinekersten@hotmail.com",
-      "srgnat001@gmail.com",
-      "traceyleigh.sargeant@gmail.com",
-      "ogenrwotaron@gmail.com",
-      "llew.adamson@icloud.com",
-      "tracey@magmamoose.com",
-    ]
+    group = [cloudflare_zero_trust_access_group.friends.id]
   }
 }
 
@@ -68,7 +54,18 @@ resource "cloudflare_zero_trust_access_policy" "radarr_caleb" {
   session_duration = "24h"
 
   include {
-    email = ["caleb@magmamoose.com"]
+    group = [cloudflare_zero_trust_access_group.caleb.id]
+  }
+
+  # Mirror overseerr_caleb's posture requirements: Caleb's Radarr session
+  # only valid from a macOS device with FileVault on + current OS version.
+  # Firewall posture intentionally omitted (many dev Macs have system
+  # firewall off; revisit when that changes).
+  require {
+    device_posture = [
+      cloudflare_zero_trust_device_posture_rule.mac_disk_encryption.id,
+      cloudflare_zero_trust_device_posture_rule.mac_os_version.id,
+    ]
   }
 }
 
