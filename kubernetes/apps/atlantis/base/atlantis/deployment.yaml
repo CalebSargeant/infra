@@ -83,6 +83,12 @@ spec:
                 secretKeyRef:
                   name: atlantis
                   key: webhook-secret
+            # Required when using GitHub App auth — Atlantis writes a temporary
+            # git credentials file to /home/atlantis/.git-credentials so `git clone`
+            # via the App installation token works. Without this flag the server
+            # refuses to start: "Github App requires --write-git-creds to support cloning".
+            - name: ATLANTIS_WRITE_GIT_CREDS
+              value: "true"
             - name: ATLANTIS_PORT
               value: "4141"
             - name: ATLANTIS_ATLANTIS_URL
