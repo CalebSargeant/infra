@@ -16,21 +16,28 @@ data "oci_identity_availability_domains" "ads" {
 # Hash of the inputs that *meaningfully* change cloud-init outcome —
 # k3s_url, the secret OCID it should fetch (in agent mode), and the base
 # image. Cosmetic script tweaks don't change the hash so don't recreate
-# VMs. Bump `version` below to force a one-off replacement when you do
-# edit the install script meaningfully (e.g. new cloud-init step).
+# VMs.
 #
 # k3s_token_secret_ocid is folded out in server mode (k3s_url == "")
 # because the OCID isn't read — pointing it at a different Vault secret
 # shouldn't rebuild standalone-server VMs that ignore it.
+#
+# Escape hatch: set `cloud_init_rebuild_token` to any non-empty value to
+# force a one-off replacement when you do edit the install script
+# meaningfully (e.g. new cloud-init step). When unset (the default), the
+# extra key is omitted entirely so the hash stays stable across applies
+# and the default code path never surprises you with a fleet rebuild.
 resource "terraform_data" "user_data_replace_trigger" {
   for_each = var.servers
 
-  input = sha256(jsonencode({
-    k3s_url               = var.k3s_url
-    k3s_token_secret_ocid = var.k3s_url == "" ? "" : var.k3s_token_secret_ocid
-    image                 = var.image_ocid
-    version               = 1
-  }))
+  input = sha256(jsonencode(merge(
+    {
+      k3s_url               = var.k3s_url
+      k3s_token_secret_ocid = var.k3s_url == "" ? "" : var.k3s_token_secret_ocid
+      image                 = var.image_ocid
+    },
+    var.cloud_init_rebuild_token == "" ? {} : { rebuild_token = var.cloud_init_rebuild_token }
+  )))
 }
 
 resource "oci_core_instance" "this" {

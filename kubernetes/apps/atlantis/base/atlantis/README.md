@@ -23,7 +23,7 @@ Browser-only (gh CLI doesn't support App creation). Go to https://github.com/set
 
 | Field | Value |
 | --- | --- |
-| GitHub App name | `atlantis-firefly` (any unique name) |
+| GitHub App name | `atlantis-architect` (this repo's actual App; any unique name works if you're forking) |
 | Homepage URL | `https://atlantis.sargeant.co` |
 | Webhook URL | `https://atlantis.sargeant.co/events` |
 | Webhook secret | Generate with `openssl rand -hex 32` — save this |
@@ -39,7 +39,7 @@ App settings → **Install App** → next to your account → **Only select repo
 
 ### 3. Generate the App's private key
 
-App settings → note the **App ID** (a number) → **Private keys** → **Generate a private key** → downloads `atlantis-firefly.YYYY-MM-DD.private-key.pem`.
+App settings → note the **App ID** (a number) → **Private keys** → **Generate a private key** → downloads `atlantis-architect.YYYY-MM-DD.private-key.pem` (or whatever you named the App).
 
 ### 4. Store the 3 values in OCI Vault
 
@@ -86,7 +86,7 @@ Once deployed, Atlantis will:
 2. Post the plan output as a PR comment
 3. Apply with `atlantis apply` (after PR approval, depending on workflow)
 
-See `../../../../docs/guides/atlantis-setup.md` for detailed setup and usage instructions.
+See [`docs/guides/atlantis-setup.md`](../../../../../docs/guides/atlantis-setup.md) for detailed setup and usage instructions.
 
 ## Why GitHub App over PAT
 

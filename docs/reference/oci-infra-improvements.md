@@ -6,46 +6,37 @@ MikroTik). None blocking; ranked roughly by impact × effort.
 
 ## 1. Move k3s join token out of OCI instance metadata
 
-[terraform/oci/_modules/server/main.tf](../../terraform/oci/_modules/server/main.tf)
-interpolates `var.k3s_token` directly into the cloud-init user_data heredoc.
-That value ends up base64-encoded in OCI instance metadata for the life of
-the instance — anyone with `instance:read` on the compartment can decode
-it, and rotating the cluster token won't propagate to existing nodes (the
-lifecycle ignores `metadata["user_data"]`).
+**Resolved.** The server module no longer interpolates `var.k3s_token`
+into user_data. Instead the cloud-init script installs `oci-cli` on first
+boot and calls `oci secrets secret-bundle get --auth instance_principal`
+against an OCI Vault secret whose OCID is passed in as
+`k3s_token_secret_ocid`. Permission is granted by a dynamic group +
+narrow IAM policy in [iam.tf](../../terraform/oci/_modules/server/iam.tf)
+that scope the read to the specific secret OCID.
 
-Better pattern:
+Both `k3s_url` and `k3s_token_secret_ocid` must be set together (agent
+mode) or both empty (standalone server mode); a variable validation +
+instance precondition enforce that. The IAM resources are only created
+in agent mode so standalone server applies don't touch tenancy IAM.
 
-1. Grant the OCI dynamic group containing these instances `read` on the
-   `node-token` secret in `vault-prod`.
-2. Replace the inline token in user_data with a small script that fetches
-   from OCI Vault using the instance principal:
-   ```bash
-   TOKEN=$(curl -s -H "Authorization: Bearer $(curl -s http://169.254.169.254/opc/v2/instance/) " \
-     "https://secrets.vaults.<region>.oci.oraclecloud.com/.../bundle" | jq -r ...)
-   curl -sfL https://get.k3s.io | K3S_URL=... K3S_TOKEN="$TOKEN" sh -
-   ```
-3. Token rotation then becomes: update the vault secret, the next k3s-agent
-   restart picks it up (with a tiny systemd ExecStartPre hook).
+Token rotation now means: update the Vault secret. Existing nodes keep
+their cached token (k3s only reads it at join), and new nodes pick up
+the rotated value automatically on boot.
 
 ## 2. Make k3s install script changes propagate to existing instances
 
-[terraform/oci/_modules/server/main.tf](../../terraform/oci/_modules/server/main.tf)'s
-`lifecycle.ignore_changes = [metadata["user_data"]]` is currently load-bearing
-— without it, every cosmetic tweak to the install script would force-replace
-both VMs. But it also means any *meaningful* install-script fix (extra
-cloud-init steps to recover stalled joins, a new sysctl, etc.) silently
-no-ops on existing nodes; the operator has to remember to destroy+apply
-manually.
+**Resolved.** Added a `terraform_data.user_data_replace_trigger` resource
+in the server module hashing only the inputs that meaningfully change the
+cloud-init outcome (`k3s_url`, `k3s_token`, `image_ocid`). The instance
+resource declares `replace_triggered_by` on it. Result:
 
-Two reasonable approaches, pick one:
+- Cosmetic install-script edits (comments, log wording) don't change the
+  hash → no VM replacement.
+- Changing `k3s_url`, `k3s_token`, or `image_ocid` changes the hash →
+  forces VM recreation, new cloud-init runs.
 
-- Drop `metadata["user_data"]` from `ignore_changes` and live with the
-  recreation-on-cosmetic-change blast radius. Acceptable for stateless k3s
-  agents that re-register automatically.
-- Add a `replace_triggered_by = [terraform_data.user_data_meaningful_hash]`
-  where the hash covers only the inputs you genuinely want to force
-  replacement on (k3s_url, k3s_token, INSTALL_K3S_EXEC). Cosmetic shell
-  tweaks then no-op, but real config changes recreate.
+`ignore_changes = [metadata["user_data"]]` stays as the second layer of
+defence against accidental replacements from re-rendered heredoc whitespace.
 
 ## 3. HA: route OCI VCN egress via both MikroTiks, not just r1
 
