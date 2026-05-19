@@ -86,7 +86,7 @@ resource "oci_core_instance" "this" {
   }
 
   lifecycle {
-    # source_details: don't fight image version drift if AMI gets republished.
+    # source_details: don't fight image version drift if the OCI image gets republished.
     # metadata.user_data: ignore cosmetic install-script edits; meaningful
     # changes (k3s_url / k3s_token / image) trigger replacement via the
     # replace_triggered_by hash above.

@@ -8,10 +8,11 @@
 # Usage pattern:
 #   1. Define the service token here.
 #   2. Attach it to one or more Access policies via `include { service_token = [...] }`.
-#   3. Pull the secret via:
-#        terraform output -raw service_token_<name>_secret
-#      and stash in OCI Vault. The secret is only available at create-time;
-#      rotating means destroy + recreate.
+#   3. Pull the secret via (terragrunt — this module isn't run with bare tofu):
+#        terragrunt output -raw service_token_<name>_client_secret
+#        terragrunt output -raw service_token_<name>_client_id
+#      and stash in OCI Vault. The client_secret is only readable at
+#      create-time; rotating means destroy + recreate the resource.
 #
 # Currently no service tokens defined — leaving this file as the scaffold
 # and pattern reference. Add one when there's a real consumer (e.g.
