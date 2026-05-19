@@ -17,7 +17,44 @@ spec:
     spec:
       serviceAccountName: atlantis
       securityContext:
+        # Atlantis upstream image uses UID 100 / GID 1000 for the atlantis user.
+        # Be explicit so a kubelet that ignores image USER doesn't fall back to root.
+        runAsUser: 100
+        runAsGroup: 1000
         fsGroup: 1000
+        # The PVC was first mounted long ago with different ownership; force k8s
+        # to recursively chgrp the volume root on each pod start until it matches.
+        fsGroupChangePolicy: OnRootMismatch
+      initContainers:
+        # The existing PVC has files owned by old UIDs (created before this
+        # securityContext was set). fsGroup chgrp's but doesn't chown the existing
+        # files — atlantis still can't *create* new entries because the dir itself
+        # is owned by an alien user. This init container repairs ownership on
+        # first run and is a no-op on every subsequent pod start: it stat's the
+        # volume root and only walks the tree if owner != 100:1000.
+        - name: fix-data-ownership
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              OWNER=$(stat -c '%u:%g' /atlantis-data)
+              if [ "$OWNER" = "100:1000" ]; then
+                echo "ownership already correct ($OWNER), skipping chown"
+                exit 0
+              fi
+              echo "current owner $OWNER != 100:1000, repairing..."
+              chown -R 100:1000 /atlantis-data
+              chmod -R u+rwX,g+rwX /atlantis-data
+              echo "done"
+          securityContext:
+            runAsUser: 0          # need root to chown
+            runAsGroup: 0
+            runAsNonRoot: false
+          volumeMounts:
+            - name: atlantis-data
+              mountPath: /atlantis-data
       containers:
         - name: atlantis
           image: ghcr.io/runatlantis/atlantis:v0.31.0
@@ -31,21 +68,27 @@ spec:
           env:
             - name: ATLANTIS_REPO_ALLOWLIST
               value: "github.com/CalebSargeant/infra"
-            - name: ATLANTIS_GH_USER
+            # GitHub App auth (replaces ATLANTIS_GH_USER/_TOKEN PAT flow).
+            # The App ID and PEM key come from the Secret 'atlantis' which is
+            # materialized by externalsecret.yaml pulling from OCI Vault.
+            - name: ATLANTIS_GH_APP_ID
               valueFrom:
                 secretKeyRef:
                   name: atlantis
-                  key: github-user
-            - name: ATLANTIS_GH_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: atlantis
-                  key: github-token
+                  key: app-id
+            - name: ATLANTIS_GH_APP_KEY_FILE
+              value: /etc/atlantis/github-app/private-key.pem
             - name: ATLANTIS_GH_WEBHOOK_SECRET
               valueFrom:
                 secretKeyRef:
                   name: atlantis
                   key: webhook-secret
+            # Required when using GitHub App auth — Atlantis writes a temporary
+            # git credentials file to /home/atlantis/.git-credentials so `git clone`
+            # via the App installation token works. Without this flag the server
+            # refuses to start: "Github App requires --write-git-creds to support cloning".
+            - name: ATLANTIS_WRITE_GIT_CREDS
+              value: "true"
             - name: ATLANTIS_PORT
               value: "4141"
             - name: ATLANTIS_ATLANTIS_URL
@@ -101,6 +144,9 @@ spec:
           volumeMounts:
             - name: atlantis-data
               mountPath: /atlantis-data
+            - name: github-app-key
+              mountPath: /etc/atlantis/github-app
+              readOnly: true
           livenessProbe:
             httpGet:
               path: /healthz
@@ -120,3 +166,13 @@ spec:
         - name: atlantis-data
           persistentVolumeClaim:
             claimName: atlantis
+        - name: github-app-key
+          secret:
+            secretName: atlantis
+            items:
+              - key: app-key-pem
+                path: private-key.pem
+            # 0440 (group-readable) so the atlantis container user can read it
+            # via fsGroup: 1000 (set at the pod securityContext). Not 0400 —
+            # that's owner-only and the container runs non-root.
+            defaultMode: 0440

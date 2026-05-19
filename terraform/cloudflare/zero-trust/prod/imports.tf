@@ -69,32 +69,27 @@ import {
   id = "6e26afa31c37dee1dc82ad2f214f9b3c/47ace2ca-6dbf-4ee3-8e6f-d2756b928b49"
 }
 
-# Access policies — format requires literal "account/" prefix:
-#   account/<account_id>/<application_id>/<policy_id>
-import {
-  to = cloudflare_zero_trust_access_policy.overseerr_friends
-  id = "account/6e26afa31c37dee1dc82ad2f214f9b3c/68dd94ac-564d-40a7-9804-2fb8e12b69dc/d57845aa-a79c-454e-839c-518889733351"
-}
-
-import {
-  to = cloudflare_zero_trust_access_policy.overseerr_caleb
-  id = "account/6e26afa31c37dee1dc82ad2f214f9b3c/68dd94ac-564d-40a7-9804-2fb8e12b69dc/fb6794a4-431b-4973-a8b2-4cf690a5669d"
-}
-
-import {
-  to = cloudflare_zero_trust_access_policy.warp_email_domain
-  id = "account/6e26afa31c37dee1dc82ad2f214f9b3c/e613a2bf-7391-434c-8b57-ce0a17681ccf/9d145c1e-efec-4178-8419-1eb38c1f4a5c"
-}
-
-import {
-  to = cloudflare_zero_trust_access_policy.warp_allow_emails
-  id = "account/6e26afa31c37dee1dc82ad2f214f9b3c/e613a2bf-7391-434c-8b57-ce0a17681ccf/4f2ee5b7-787d-481b-8d33-8e411bfd530f"
-}
-
-import {
-  to = cloudflare_zero_trust_access_policy.app_launcher_magma
-  id = "account/6e26afa31c37dee1dc82ad2f214f9b3c/47ace2ca-6dbf-4ee3-8e6f-d2756b928b49/17d82583-c5be-49dd-ac01-1c3be3534978"
-}
+# Access policy imports for the *original* (reusable, dashboard-created)
+# policies were removed: the v4 provider couldn't update them, so they
+# were deleted via API and recreated app-scoped with group-based
+# includes + posture require. The new policies are already in state.
+#
+# State-recovery caveat: if you ever blow away the terraform state for
+# this module (lost GCS object, accidental `terragrunt state rm`, etc.)
+# the recreated policies still exist in Cloudflare but terraform won't
+# know about them and the next apply will try to create duplicates.
+# Recovery procedure is:
+#   1. List the live policies via CF API:
+#        curl -s -H "Authorization: Bearer $CF_TOKEN" \
+#          "https://api.cloudflare.com/client/v4/accounts/<acct>/access/apps/<app_id>/policies"
+#   2. For each terraform resource, run
+#        terragrunt import 'cloudflare_zero_trust_access_policy.<name>' \
+#          'account/<acct>/<app_id>/<policy_id>'
+#      (the literal "account/" prefix is required — see ID format
+#      reference at the top of this file).
+# Add per-policy `import { }` blocks here when that recovery is ever
+# actually needed; leaving them out for the steady state keeps the file
+# small.
 
 # Gateway policies
 import {
