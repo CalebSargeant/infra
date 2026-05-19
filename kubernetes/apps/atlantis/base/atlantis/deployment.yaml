@@ -70,6 +70,12 @@ spec:
         # start — cheap (~25MB binary) and avoids maintaining a custom Docker
         # image. Architecture-aware so this works on both pi (arm64) and
         # vm1 (amd64) if nodeSelector ever changes.
+        #
+        # SHA256 is pinned per-architecture and verified before chmod+exec.
+        # When bumping VERSION, also update both SHA256 values — pull them
+        # from the matching release's SHA256SUMS file at
+        # https://github.com/gruntwork-io/terragrunt/releases/download/<VERSION>/SHA256SUMS
+        # The PR-review-time pairing is the supply-chain guard.
         - name: install-terragrunt
           image: alpine:3.20
           command:
@@ -78,15 +84,19 @@ spec:
             - |
               set -e
               VERSION=v1.0.5
+              SHA256_ARM64=36dd76fe7f211aedf79920f6f1794eed22e7d7142fe969f4cfff5d863f6593f3
+              SHA256_AMD64=729d59f7655e25e8db4abd73a422d002d80720ef1edbd2f4a03322e79e444101
               ARCH=$(uname -m)
               case "$ARCH" in
-                aarch64|arm64) GOARCH=arm64 ;;
-                x86_64|amd64)  GOARCH=amd64 ;;
+                aarch64|arm64) GOARCH=arm64; EXPECTED=$SHA256_ARM64 ;;
+                x86_64|amd64)  GOARCH=amd64; EXPECTED=$SHA256_AMD64 ;;
                 *) echo "unsupported arch: $ARCH" >&2; exit 1 ;;
               esac
               echo "downloading terragrunt $VERSION for linux/$GOARCH"
               wget -qO /tools/terragrunt \
                 "https://github.com/gruntwork-io/terragrunt/releases/download/${VERSION}/terragrunt_linux_${GOARCH}"
+              echo "verifying SHA256..."
+              echo "${EXPECTED}  /tools/terragrunt" | sha256sum -c -
               chmod 0755 /tools/terragrunt
               /tools/terragrunt --version
           volumeMounts:
