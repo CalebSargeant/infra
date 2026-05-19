@@ -38,8 +38,19 @@ If r2's cloudflared crashes, it won't auto-restart. Two options:
 - Upgrade r2's RouterOS firmware to match r1, then set the same 30s
   interval. Cleanest.
 - Add a RouterOS `/system/scheduler` job on r2 that runs every minute and
-  starts the container if `[/container/get [find] stopped] = true`. Works
-  on older firmware. Codify in the mikrotik terraform module.
+  starts the cloudflared container if it's stopped. Works on older
+  firmware. Copy-paste-safe script (matches the container by `name` — the
+  container name is `cloudflared:latest`, derived from `remote_image`):
+
+  ```routeros
+  /system/scheduler/add \
+    name=cloudflared-watchdog \
+    interval=1m \
+    on-event=":local cid [/container find where name=\"cloudflared:latest\"]; :if ([:len \$cid] = 1 && [/container get \$cid stopped] = true) do={ /container start \$cid; :log info \"cloudflared-watchdog: started stopped container\" }"
+  ```
+
+  Codify this in the mikrotik terraform module via a `routeros_system_scheduler`
+  resource, gated by an input that defaults off but is enabled for r2.
 
 ## 3. Extract repeated email lists into Access Groups
 

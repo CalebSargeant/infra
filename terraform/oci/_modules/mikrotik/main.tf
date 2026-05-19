@@ -136,17 +136,20 @@ resource "routeros_container" "cloudflared" {
   # r2's accepts only "15" (number). Different firmware/schema versions.
   stop_signal = var.cloudflared_stop_signals[each.key]
 
-  # `auto-restart-interval = "30s"` is set out-of-band on both routers via
-  # the API (the routeros provider 1.99.1 doesn't expose this attribute on
-  # routeros_container). Without it, a single cloudflared crash leaves the
-  # container stopped — r1 had been silently dead this way since 2026-05-11.
+  # `auto-restart-interval = "30s"` is set out-of-band via the API on r1
+  # only — r2's older RouterOS firmware rejects the parameter ("unknown
+  # parameter auto-restart-interval"). The routeros provider 1.99.1 doesn't
+  # expose this attribute on routeros_container either, so it can't go here.
+  # Without it, a single cloudflared crash leaves the container stopped
+  # (r1 had been silently dead this way since 2026-05-11). The r2 gap is
+  # tracked in docs/reference/cloudflare-ztna-improvements.md (#2).
 
   lifecycle {
     # `stop_signal` round-trips in different formats per firmware version
     # (enum on r1, number on r2). `running` looks like drift on every plan
     # because the provider doesn't invoke /container/start on apply — the
-    # 30s auto-restart-interval set above is what actually keeps the
-    # container alive. Both are noise.
+    # 30s auto-restart-interval set via the API on r1 is what actually
+    # keeps that container alive between crashes. Both are noise.
     ignore_changes = [stop_signal, running]
   }
 
