@@ -36,29 +36,40 @@ Investigation pointers:
 
 ## 3. Extract repeated email lists into Access Groups
 
-The Overseerr "Friends" policy has 10 emails inlined. Same for the WARP
-"Allow emails" policy. Same emails will appear again when you add the next
-"family-can-use-this" app. An Access Group is the right abstraction:
+**Partially landed.** Four reusable Access Groups defined in
+`access_groups.tf`: `friends`, `caleb`, `household`, `magma_moose_domain`.
+Membership of each lives in exactly one place now.
 
-```hcl
-resource "cloudflare_zero_trust_access_group" "friends" {
-  account_id = var.account_id
-  name       = "Friends"
+**Blocker — v4 provider limitation:** the existing policies in CF
+(`overseerr_friends`, `overseerr_caleb`, `warp_allow_emails`,
+`app_launcher_magma`) are all *reusable* policies, not app-scoped. The
+cloudflare/cloudflare v4 provider can only update policies through the
+app-scoped endpoint and returns API error 12130 — "can not update reusable
+policies through this endpoint" — when you try. So the
+`include = { group = [...] }` refactor can't be applied via terraform
+without one of:
 
-  include {
-    email = ["calebsargeant@gmail.com", "nicholas_smith_@msn.com", ...]
-  }
-}
+- Migrate to provider v5 once the relevant resource exists for reusable
+  policies, then switch include blocks to `group = [...]`.
+- Recreate each policy as app-scoped (delete + create — brief access
+  disruption while CF cuts over).
+- Update the include via the CF dashboard (lose the terraform-as-source
+  property; not recommended).
 
-resource "cloudflare_zero_trust_access_policy" "overseerr_friends" {
-  # …
-  include {
-    group = [cloudflare_zero_trust_access_group.friends.id]
-  }
-}
-```
+Until then the access_groups are scaffolding for *new* app-scoped policies
+created via terraform; existing ones stay inline.
 
-Removes drift between policies, makes membership a single edit.
+## 4. Wire device posture rules into Access policies
+
+**Blocked by the same v4-provider reusable-policy limit (#3).** The
+intent was to add a `require { device_posture = [...] }` block on
+`overseerr_caleb` (FileVault + macOS version, not firewall — many dev
+Macs have the system firewall off). The HCL is staged as a comment in
+`access_apps.tf` for when the limit is unblocked.
+
+Three macOS posture rules (Disk Encryption, Firewall, OS Version >=
+13.0.1) exist but **none are referenced**. They're dead code until #3 is
+resolved.
 
 ## 4. Wire device posture rules into Access policies
 
@@ -111,12 +122,15 @@ appropriate category IDs.
 
 ## 8. Document or consolidate the L4 allow + block rules on `192.168.69.110`
 
-`Allow rule for Server` (precedence 15000) and `Block rule for Server`
-(precedence 16000) both target the same IP. The block is strictly less
-preferred than the allow, so the block does nothing right now — unless
-there's a planned identity/posture condition on the allow that hasn't been
-added yet. Either drop one or document the intent in the resource
-description.
+**Partially landed.** Both resources now carry descriptions making the
+override pattern explicit (allow at precedence 15000 wins; block at
+16000 is currently unreachable). Inline comment in `gateway.tf` calls out
+the two interpretations (intentional plumbing for a future identity
+condition on the allow, or leftover dead code).
+
+**Outstanding decision:** confirm whether the block is meant to be the
+catch-all for a not-yet-added identity-conditional allow. If yes, add the
+identity condition. If no, delete the block resource.
 
 ## 9. Rename the "firefly" tunnel to something OCI-specific
 
