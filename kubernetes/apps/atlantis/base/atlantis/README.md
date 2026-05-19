@@ -86,7 +86,7 @@ Once deployed, Atlantis will:
 2. Post the plan output as a PR comment
 3. Apply with `atlantis apply` (after PR approval, depending on workflow)
 
-See `../../../../docs/guides/atlantis-setup.md` for detailed setup and usage instructions.
+See [`docs/guides/atlantis-setup.md`](../../../../../docs/guides/atlantis-setup.md) for detailed setup and usage instructions.
 
 ## Why GitHub App over PAT
 
