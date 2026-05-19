@@ -73,15 +73,27 @@ defence against accidental replacements from re-rendered heredoc whitespace.
 `internet_gateway_ip = "192.168.223.11"` hard-codes mikrotik-fd1 as the
 single next-hop for app+data subnets. If r1 fails, both subnets lose
 internet egress even though r2 exists, is configured identically for
-masquerade, and is in the same subnet. OCI route tables can only hold one
-default route per RT, so true HA needs VRRP (or similar) on the MikroTiks
-to present a shared virtual IP, then point the OCI route at that VIP.
+masquerade, and is in the same subnet.
 
-Concretely:
-- Configure VRRP between r1+r2 with a virtual address in `192.168.223.0/26`.
-- Change `internet_gateway_ip` to that virtual IP.
-- Confirm `skip-source-dest-check = true` on the VRRP IP's owning VNIC at
-  any given time.
+**Design captured in [oci-vrrp-ha-design.md](./oci-vrrp-ha-design.md).**
+Approach: VRRPv3 between r1+r2 over the OCI edge subnet for state
+determination, plus an OCI-API failover script (running in a tiny
+container on each MikroTik, auth via instance principal) that
+reassigns a *floating* secondary private IP (`192.168.223.10`)
+between the two routers' VNICs on master change. OCI route tables
+permanently point at `.10`; whichever VNIC currently owns `.10`
+gets the traffic.
+
+OCI's SDN doesn't honour gratuitous-ARP-based VRRP failover (the
+classic L2 trick), and OCI route tables enforce destination uniqueness
+so ECMP across two equal default routes isn't an option. The
+VRRP-for-state + API-for-action pattern is Oracle's reference HA
+architecture for this exact problem.
+
+Implementation lands as a separate PR after the design is agreed —
+the design doc includes a pre-implementation smoke test (manual OCI
+API floating-IP reassignment) to validate the OCI control-plane
+latency before committing to the approach.
 
 ## 4. Migrate `api://...:8728` to `apis://...:8729` (TLS-wrapped binary API)
 
