@@ -31,16 +31,16 @@ spec:
           env:
             - name: ATLANTIS_REPO_ALLOWLIST
               value: "github.com/CalebSargeant/infra"
-            - name: ATLANTIS_GH_USER
+            # GitHub App auth (replaces ATLANTIS_GH_USER/_TOKEN PAT flow).
+            # The App ID and PEM key come from the Secret 'atlantis' which is
+            # materialized by externalsecret.yaml pulling from OCI Vault.
+            - name: ATLANTIS_GH_APP_ID
               valueFrom:
                 secretKeyRef:
                   name: atlantis
-                  key: github-user
-            - name: ATLANTIS_GH_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: atlantis
-                  key: github-token
+                  key: app-id
+            - name: ATLANTIS_GH_APP_KEY_FILE
+              value: /etc/atlantis/github-app/private-key.pem
             - name: ATLANTIS_GH_WEBHOOK_SECRET
               valueFrom:
                 secretKeyRef:
@@ -101,6 +101,9 @@ spec:
           volumeMounts:
             - name: atlantis-data
               mountPath: /atlantis-data
+            - name: github-app-key
+              mountPath: /etc/atlantis/github-app
+              readOnly: true
           livenessProbe:
             httpGet:
               path: /healthz
@@ -120,3 +123,13 @@ spec:
         - name: atlantis-data
           persistentVolumeClaim:
             claimName: atlantis
+        - name: github-app-key
+          secret:
+            secretName: atlantis
+            items:
+              - key: app-key-pem
+                path: private-key.pem
+            # 0440 (group-readable) so the atlantis container user can read it
+            # via fsGroup: 1000 (set at the pod securityContext). Not 0400 —
+            # that's owner-only and the container runs non-root.
+            defaultMode: 0440
