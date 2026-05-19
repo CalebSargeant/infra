@@ -101,6 +101,20 @@ inputs = {
       value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
       proxied = true
     },
+
+    # Routes through the `firefly` tunnel to in-cluster Atlantis
+    # (k8s service: atlantis.automation.svc.cluster.local:80). Pairs with
+    # the ingress_rule added in terraform/cloudflare/zero-trust/prod/
+    # tunnels.tf. Must be proxied — without it CF returns the
+    # cfargotunnel.com hostname directly to GitHub and webhook delivery
+    # fails. GitHub webhooks are HTTPS-only, which is fine: the proxied
+    # CNAME terminates TLS at Cloudflare's edge.
+    {
+      name    = "atlantis.sargeant.co"
+      type    = "CNAME"
+      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
+      proxied = true
+    },
   ]
 
   # These four records already exist in the dashboard (someone re-created
