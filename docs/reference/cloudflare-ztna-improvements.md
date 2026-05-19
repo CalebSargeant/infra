@@ -22,17 +22,24 @@ in the launcher but doesn't actually protect it.
 
 ## 2. Fix r1's cloudflared HA (availability gap)
 
-`oci network ip-sec-tunnel list` shows tunnel UP from both routers but the
-firefly Cloudflare tunnel only has live colo connections from
-`193.123.39.172` (r2). r1's `cloudflared` container isn't connecting. The
-HA design pays for two MikroTiks but only one is doing work — if r2 dies,
-the tunnel goes with it.
+**Resolved 2026-05-19.** r1's container had been stopped since 2026-05-11
+(stale ingress config caused cloudflared to crash; `auto-restart-interval`
+defaulted to `none`, so RouterOS never restarted it). Started manually via
+the API; `auto-restart-interval` set to `30s` on r1 so it self-heals next
+time. r2 took the load all that time.
 
-Investigation pointers:
+Both routers now active: 8 colo connections to the `firefly` tunnel (4
+each, full HA). Cloudflare reports `status: healthy`.
 
-- SSH into r1 (now reachable via Winbox; terraform also reaches it on 8728)
-- Check `/container/print` for the cloudflared container state
-- Compare `/container/print run-time` between r1 and r2
+**Residual gap — r2 firmware** doesn't accept the `auto-restart-interval`
+parameter (older RouterOS schema; `unknown parameter` error from the API).
+If r2's cloudflared crashes, it won't auto-restart. Two options:
+
+- Upgrade r2's RouterOS firmware to match r1, then set the same 30s
+  interval. Cleanest.
+- Add a RouterOS `/system/scheduler` job on r2 that runs every minute and
+  starts the container if `[/container/get [find] stopped] = true`. Works
+  on older firmware. Codify in the mikrotik terraform module.
 
 ## 3. Extract repeated email lists into Access Groups
 
