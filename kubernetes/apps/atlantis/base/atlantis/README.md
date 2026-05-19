@@ -1,81 +1,96 @@
 # Atlantis for Terragrunt/Terraform Pull Request Automation
 
-This directory contains the Kubernetes manifests for deploying Atlantis on the firefly cluster.
+This directory contains the Kubernetes manifests for deploying Atlantis on the firefly cluster. Auth uses a **GitHub App** with credentials sourced from **OCI Vault** via `ExternalSecret`.
 
-## Quick Start
+## What's included
 
-1. **Configure secrets** - Create and encrypt secret files:
-   ```bash
-   # Copy template files
-   cd kubernetes/_base/automation/atlantis
-   cp secret.yaml.template secret.yaml
-   cp secret-aws.yaml.template secret-aws.yaml  # Optional for AWS
-   cp secret-azure.yaml.template secret-azure.yaml  # Optional for Azure
-   
-   # Edit files and replace placeholder values with actual credentials
-   # Then encrypt with SOPS
-   sops -e secret.yaml > secret.enc.yaml
-   sops -e secret-aws.yaml > secret-aws.enc.yaml  # Optional
-   sops -e secret-azure.yaml > secret-azure.enc.yaml  # Optional
-   
-   # Delete unencrypted files
-   rm secret.yaml secret-aws.yaml secret-azure.yaml
-   
-   # Update kustomization.yaml to include the encrypted secrets
-   ```
+| File | Purpose |
+| --- | --- |
+| `deployment.yaml` | Atlantis server, mounts the App PEM at `/etc/atlantis/github-app/private-key.pem` |
+| `service.yaml` | ClusterIP service |
+| `ingress.yaml` | Public ingress at `atlantis.sargeant.co` |
+| `pv.yaml` + `pvc.yaml` | Persistent storage for `/atlantis-data` |
+| `configmap.yaml` | Server-side Atlantis config (Terragrunt workflow, repo allow-list) |
+| `serviceaccount.yaml` | RBAC |
+| `externalsecret.yaml` | Pulls App ID + PEM + webhook secret from OCI Vault into `Secret/atlantis` |
+| `secret-aws.yaml.template`, `secret-azure.yaml.template` | Optional SOPS-encrypted cloud-provider creds (AWS access keys / Azure SP) — orthogonal to GitHub auth |
 
-2. **Update kustomization.yaml** to include your encrypted secrets in the resources list
+## Initial setup (one-time)
 
-3. **Deploy**:
-   ```bash
-   kubectl apply -k kubernetes/_clusters/firefly/automation/atlantis
-   ```
+### 1. Create the GitHub App
 
-4. **Configure GitHub webhook** at `https://atlantis.sargeant.co/events`
+Browser-only (gh CLI doesn't support App creation). Go to https://github.com/settings/apps/new and fill in:
 
-## What's Included
+| Field | Value |
+| --- | --- |
+| GitHub App name | `atlantis-firefly` (any unique name) |
+| Homepage URL | `https://atlantis.sargeant.co` |
+| Webhook URL | `https://atlantis.sargeant.co/events` |
+| Webhook secret | Generate with `openssl rand -hex 32` — save this |
+| Repository permissions | Administration: Read · Checks: R/W · Contents: R/W · Issues: R/W · Pull requests: R/W · Commit statuses: R/W (Metadata: auto-checked Read) |
+| Subscribe to events | Issue comment, Pull request, Pull request review, Pull request review comment, Push |
+| Where can this GitHub App be installed | Only on this account |
 
-- **deployment.yaml** - Atlantis server deployment
-- **service.yaml** - ClusterIP service for Atlantis
-- **ingress.yaml** - Ingress for external access at atlantis.sargeant.co
-- **pv.yaml** & **pvc.yaml** - Persistent storage for Atlantis data
-- **configmap.yaml** - Atlantis configuration including Terragrunt workflow
-- **serviceaccount.yaml** - RBAC configuration
-- **secret.yaml.template** - Template for GitHub credentials
-- **secret-aws.yaml.template** - Template for AWS credentials (optional)
-- **secret-azure.yaml.template** - Template for Azure credentials (optional)
+Click **Create GitHub App**.
 
-## Supported Environments
+### 2. Install the App on your repo(s)
 
-- ✅ AWS (via AWS credentials)
-- ✅ Azure (via Azure service principal)
-- ✅ GCP (via existing service account)
-- ✅ OCI (via existing configuration)
-- ✅ Cloudflare (via existing configuration)
+App settings → **Install App** → next to your account → **Only select repositories** → pick `CalebSargeant/infra` (and any other Terraform-managed repos) → **Install**.
+
+### 3. Generate the App's private key
+
+App settings → note the **App ID** (a number) → **Private keys** → **Generate a private key** → downloads `atlantis-firefly.YYYY-MM-DD.private-key.pem`.
+
+### 4. Store the 3 values in OCI Vault
+
+| OCI Vault secret name | Value |
+| --- | --- |
+| `atlantis-github-app-id` | App ID number (as a string) |
+| `atlantis-github-app-private-key` | Full content of the `.pem` file (multi-line, including `-----BEGIN/END RSA PRIVATE KEY-----` lines) |
+| `atlantis-github-webhook-secret` | The webhook secret you generated in step 1 |
+
+The same vault/`ClusterSecretStore` is already wired (see `kubernetes/_base/core/external-dns-cloudflare/externalsecret.yaml`, `kubernetes/_base/core/cloudflared/externalsecret.yaml` for examples).
+
+### 5. Deploy
+
+`externalsecret.yaml` is already part of the Kustomization. After Flux reconciles, `Secret/atlantis` is materialized in `automation` namespace with keys `app-id`, `app-key-pem`, `webhook-secret`. The Deployment mounts the PEM and starts the server with App auth.
+
+## Optional cloud-provider credentials
+
+For Atlantis to actually drive Terraform that needs AWS / Azure / etc., create the optional secrets:
+
+```bash
+cp secret-aws.yaml.template secret-aws.yaml
+# Edit secret-aws.yaml — fill in your credentials
+sops -e secret-aws.yaml > secret-aws.enc.yaml
+rm secret-aws.yaml
+
+# Then add `- secret-aws.enc.yaml` to kustomization.yaml's resources
+```
+
+These map to env vars `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `ARM_CLIENT_ID`, etc. — they're independent of the GitHub App auth above.
+
+## Supported environments
+
+- AWS (via AWS credentials)
+- Azure (via Azure service principal)
+- GCP (via existing service account)
+- OCI (via existing configuration)
+- Cloudflare (via existing configuration)
 
 ## Usage
 
-Once deployed, Atlantis will automatically:
+Once deployed, Atlantis will:
 
-1. Run `terraform plan` when you create/update a PR with infrastructure changes
+1. Run `terraform plan` (or `terragrunt plan`) when a PR with infrastructure changes is opened/updated
 2. Post the plan output as a PR comment
-3. Allow you to apply changes with `atlantis apply` comment (after PR approval)
+3. Apply with `atlantis apply` (after PR approval, depending on workflow)
 
-See the [full documentation](../../../../docs/guides/atlantis-setup.md) for detailed setup and usage instructions.
+See `../../../../docs/guides/atlantis-setup.md` for detailed setup and usage instructions.
 
-## Configuration
+## Why GitHub App over PAT
 
-The Atlantis configuration supports both Terraform and Terragrunt:
-
-- Repository-level config: `/atlantis.yaml`
-- Server-side config: `configmap.yaml`
-- Custom workflow: `terragrunt` (auto-detects Terragrunt vs Terraform)
-
-## Security Notes
-
-⚠️ **Before deploying**:
-- Create secrets from templates and encrypt with SOPS
-- Replace placeholder secrets with actual credentials
-- Ensure webhook secret is set in both Atlantis and GitHub
-- Verify repository allowlist includes only your repository
-- Never commit unencrypted secret files to version control
+- Per-installation, short-lived tokens (auto-rotated by Atlantis using the PEM to mint a fresh JWT) vs static PAT
+- Granular per-repo permissions (no need for a broad `repo` scope on a user account)
+- Not tied to any user — survives team-member changes
+- Better audit trail in GitHub
