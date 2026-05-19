@@ -1,13 +1,19 @@
 # Terraform Modules: Consolidate or Keep Separate?
 
+> **Note (post-reorg):** `calebsargeant/infra` now uses `terraform/<provider>/modules/`
+> per provider (e.g. `terraform/oci/modules/server`, `terraform/cloudflare/modules/cloudflare-dns`)
+> instead of a single top-level `terraform/modules/`. The old `terraform/modules/gcp/project/`
+> module described below was deleted as unused. The "consolidate to shared terraform-modules
+> repo" thesis below is still relevant — this doc is the planning artifact for that.
+
 ## The Problem You've Identified
 
-You maintain three infra repos, each with `terraform/_modules/`:
+You maintain three infra repos, each with provider-scoped module trees:
 
 ```
-calebsargeant/infra/terraform/modules/
-├── gcp/
-│   └── project/
+calebsargeant/infra/terraform/
+├── cloudflare/modules/cloudflare-dns/
+└── oci/modules/                       # network, server, edge, mikrotik, …
 
 magmamoose/infra/terraform/_modules/
 ├── gcp/
@@ -31,7 +37,7 @@ tengensystems/platform1-infra/terraform/aws/_modules/
 And Azure modules too!
 ```
 
-Looking at `gcp/project/` across repos: **They're 80% identical** but with slight variations (labels, deletion_policy, variable handling).
+Looking at `gcp/project/` across repos: **They're 80% identical** but with slight variations (labels, deletion_policy, variable handling). The calebsargeant copy was deleted (unused locally); the magmamoose one is the candidate for promoting to the shared repo.
 
 **Question:** Shouldn't these be in a shared `terraform-modules/` repo like `helm-charts/` or `reusable-workflows/`?
 
@@ -290,18 +296,23 @@ cp ../magmamoose/infra/terraform/_modules/gcp/project/* gcp/project/
 # Ensure all are parameterized (no defaults = local references)
 ```
 
-### Step 3: Update calebsargeant/infra/terraform/modules/gcp/project/main.tf
+### Step 3: Update each consuming repo to reference the shared module
 ```hcl
-# Before: local module
+# Before: local module (e.g. magmamoose still uses this pattern)
 module "gcp_project" {
-  source = "../_modules/gcp/project"  # Local
+  source = "../_modules/gcp/project"  # Local path inside the repo
 }
 
-# After: remote module
+# After: remote module from the shared terraform-modules repo
 module "gcp_project" {
   source = "git::https://github.com/calebsargeant/terraform-modules.git//gcp/project?ref=v1.0.0"  # Remote
 }
 ```
+
+(Historical note: calebsargeant/infra used to have its own
+`terraform/modules/gcp/project/`, but it was deleted as unused before the
+shared-repo strategy was actioned. The step above applies to any repo that
+still carries a local copy of `gcp/project`.)
 
 ### Step 4: Verify
 ```bash

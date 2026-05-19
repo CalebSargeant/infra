@@ -38,7 +38,7 @@ locals {
 }
 
 terraform {
-  source = "${get_repo_root()}/terraform/modules/cloudflare-dns"
+  source = "${get_repo_root()}/terraform/cloudflare/modules/cloudflare-dns"
 
   extra_arguments "cloudflare_token" {
     commands = ["plan", "apply", "destroy", "import", "refresh", "validate"]

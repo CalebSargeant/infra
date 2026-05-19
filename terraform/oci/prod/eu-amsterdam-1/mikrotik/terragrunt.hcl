@@ -3,7 +3,7 @@ include "root" {
 }
 
 terraform {
-  source = "${get_repo_root()}/terraform/oci/_modules/mikrotik"
+  source = "${get_repo_root()}/terraform/oci/modules/mikrotik"
 }
 
 # No `generate "provider"` override: terragrunt v0.63.6 errors on duplicate

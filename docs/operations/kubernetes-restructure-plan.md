@@ -30,7 +30,7 @@ Status: **DRAFT — not yet executed.** Captures findings from the 2026-05-15 au
 | `ansible/keys/chr.pem` (tracked) | OPENSSH private key, committed `2025-04-18` (commit `d5b8915`). Public repo — already leaked. **Rotate + scrub history.** |
 | `ansible/vars/franklin.yaml`, `ansible/vars/pi.yaml` (gitignored on-disk) | Contain plaintext `ghp_…` GitHub PAT. Not in git history but on disk. **Rotate the PAT.** |
 | `docs/operations/proxmox-gpu-passthrough-recovery.md` (untracked) | Looks intentional — commit when ready |
-| `terraform/oci/_modules/mikrotik/`, `terraform/oci/prod/eu-amsterdam-1/mikrotik/`, `terraform/.oci-config.ps1` (untracked) | Out of scope for k8s cleanup; user wants these kept as-is |
+| `terraform/oci/modules/mikrotik/`, `terraform/oci/prod/eu-amsterdam-1/mikrotik/`, `terraform/.oci-config.ps1` (untracked) | Out of scope for k8s cleanup; user wants these kept as-is |
 | `kubernetes/_base/observability/SECRETS.md` (tracked) | Audit content — make sure no plaintext is in it |
 
 ---

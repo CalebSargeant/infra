@@ -1,6 +1,6 @@
 # Cloudflared tunnels. The `firefly` tunnel was created in the dashboard and
 # its credentials are currently held by the cloudflared container running on
-# the OCI MikroTik CHRs (see terraform/oci/_modules/mikrotik/).
+# the OCI MikroTik CHRs (see terraform/oci/modules/mikrotik/).
 #
 # tunnel_secret is required by the resource but is only used at *creation*;
 # importing an existing tunnel doesn't let us read the original secret back
