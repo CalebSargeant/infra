@@ -54,6 +54,7 @@ oci_api_key_public.pem
 .idea/
 .terragrunt-cache/
 provider.tf
+backend.tf
 
 Screenshot 2025-10-11 at 20.15.25.png
 

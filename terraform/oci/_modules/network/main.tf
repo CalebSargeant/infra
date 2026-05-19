@@ -102,10 +102,37 @@ resource "oci_core_route_table" "edge" {
   }
 }
 
+# Lookup the OCID of the edge-subnet private IP used as the internet next-hop
+# (MikroTik CHR). OCI routes to in-VCN IPs reference the private-ip OCID, not
+# the address itself, so this data source resolves it at apply time.
+data "oci_core_private_ips" "internet_gateway" {
+  count      = var.internet_gateway_ip != "" ? 1 : 0
+  ip_address = var.internet_gateway_ip
+  subnet_id  = oci_core_subnet.edge.id
+
+  lifecycle {
+    postcondition {
+      condition     = length(self.private_ips) > 0
+      error_message = "No private IP ${var.internet_gateway_ip} found in edge subnet — ensure the MikroTik CHR is up and has this IP assigned before applying the network module. (You may need to apply the `edge` module first.)"
+    }
+  }
+}
+
 resource "oci_core_route_table" "app" {
   compartment_id = var.compartment_ocid
   display_name   = "rt-app-${var.environment}"
   vcn_id         = oci_core_virtual_network.this.id
+
+  # Default route: send internet-bound traffic to the MikroTik CHR for NAT
+  dynamic "route_rules" {
+    for_each = var.internet_gateway_ip != "" ? [1] : []
+    content {
+      destination       = "0.0.0.0/0"
+      destination_type  = "CIDR_BLOCK"
+      network_entity_id = data.oci_core_private_ips.internet_gateway[0].private_ips[0].id
+      description       = "Internet egress via MikroTik (${var.internet_gateway_ip})"
+    }
+  }
 
   # VPN routes to remote networks
   dynamic "route_rules" {
@@ -123,6 +150,17 @@ resource "oci_core_route_table" "data" {
   compartment_id = var.compartment_ocid
   display_name   = "rt-data-${var.environment}"
   vcn_id         = oci_core_virtual_network.this.id
+
+  # Default route: send internet-bound traffic to the MikroTik CHR for NAT
+  dynamic "route_rules" {
+    for_each = var.internet_gateway_ip != "" ? [1] : []
+    content {
+      destination       = "0.0.0.0/0"
+      destination_type  = "CIDR_BLOCK"
+      network_entity_id = data.oci_core_private_ips.internet_gateway[0].private_ips[0].id
+      description       = "Internet egress via MikroTik (${var.internet_gateway_ip})"
+    }
+  }
 
   # VPN routes to remote networks
   dynamic "route_rules" {
@@ -232,6 +270,24 @@ resource "oci_core_security_list" "edge" {
     tcp_options {
       min = 8291
       max = 8291
+    }
+  }
+
+  # MikroTik API (port 8728, plaintext binary) — only opened to operator IPs
+  # because it's used by the routeros terraform provider, which needs reach
+  # from wherever `terragrunt apply` runs. Auth is challenge-response so
+  # passwords don't traverse the wire in cleartext, but the session itself
+  # is unencrypted; keep this list narrow. Migrate to apis://:8729 (TLS API)
+  # and drop this whole block once the cert situation is sorted.
+  dynamic "ingress_security_rules" {
+    for_each = toset(var.routeros_api_management_cidrs)
+    content {
+      protocol = "6" # TCP
+      source   = ingress_security_rules.value
+      tcp_options {
+        min = 8728
+        max = 8728
+      }
     }
   }
 
