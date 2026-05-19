@@ -11,7 +11,7 @@ data:
           "id": "github.com/CalebSargeant/infra",
           "workflow": "terragrunt",
           "apply_requirements": ["approved", "mergeable"],
-          "allowed_overrides": ["workflow"],
+          "allowed_overrides": ["workflow", "apply_requirements"],
           "allow_custom_workflows": true,
           "delete_source_branch_on_merge": false
         }
@@ -47,6 +47,7 @@ data:
           - mergeable
         allowed_overrides:
           - workflow
+          - apply_requirements
         allow_custom_workflows: true
         delete_source_branch_on_merge: false
     
