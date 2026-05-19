@@ -39,7 +39,7 @@ App settings → **Install App** → next to your account → **Only select repo
 
 ### 3. Generate the App's private key
 
-App settings → note the **App ID** (a number) → **Private keys** → **Generate a private key** → downloads `atlantis-firefly.YYYY-MM-DD.private-key.pem`.
+App settings → note the **App ID** (a number) → **Private keys** → **Generate a private key** → downloads `atlantis-architect.YYYY-MM-DD.private-key.pem` (or whatever you named the App).
 
 ### 4. Store the 3 values in OCI Vault
 

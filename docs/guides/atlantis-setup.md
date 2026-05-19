@@ -84,10 +84,14 @@ push() {
     --secret-content-content "$(printf '%s' "$2" | base64 | tr -d '\n')"
 }
 
-# Use YOUR App ID (numeric, from the App settings page) and YOUR App's
-# webhook secret — the one you saved in step 1 when creating the App.
-# DO NOT generate a new secret here; it must match what GitHub sends.
-push atlantis-github-app-id "<YOUR_APP_ID>"
+# This guide is firefly-specific: the App ID below is the actual App
+# (3765954, atlantis-architect). Substitute your own value if you're
+# forking this for a different cluster/App.
+#
+# The webhook secret IS genuinely secret — paste the value you saved
+# in step 1 when creating the App. Do NOT regenerate it here; it
+# must match what GitHub signs requests with.
+push atlantis-github-app-id "3765954"
 push atlantis-github-webhook-secret "<THE_VALUE_FROM_STEP_1>"
 
 # PEM: push directly from the file (do NOT round-trip through a shell variable —
