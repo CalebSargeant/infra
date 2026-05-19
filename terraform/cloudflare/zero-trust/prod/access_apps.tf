@@ -2,16 +2,74 @@
 # field that the CF dashboard set is mirrored here so the first apply is a
 # pure state reconciliation.
 
-# --- bookmark: Radarr -------------------------------------------------------
+# --- self_hosted: Radarr ----------------------------------------------------
+# Was a bookmark before — that meant the launcher icon existed but the app
+# itself wasn't gated by Access at all (bookmarks don't authenticate).
+# Now properly self_hosted, behind the same Friends + Caleb policies as
+# Overseerr. Reachable via the firefly cloudflared tunnel (ingress in
+# tunnels.tf) + the radarr CNAME in cloudflare/dns/prod (created in same PR).
+#
+# NOTE: this is a ForceNew type change (bookmark → self_hosted) — terraform
+# destroys the old bookmark app and creates the new self_hosted one. Brief
+# launcher-icon flicker during apply; the URL itself stays
+# `https://radarr.sargeant.co` (was the bookmark target, now the
+# self_hosted domain).
 resource "cloudflare_zero_trust_access_application" "radarr" {
   account_id                = var.account_id
   name                      = "Radarr"
-  type                      = "bookmark"
-  domain                    = "https://radarr.sargeant.co"
+  type                      = "self_hosted"
+  domain                    = "radarr.sargeant.co"
   logo_url                  = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/radarr-4k.png"
   tags                      = ["Sargeant"]
   app_launcher_visible      = true
   auto_redirect_to_identity = false
+  session_duration          = "24h"
+
+  allowed_idps = [
+    cloudflare_zero_trust_access_identity_provider.google_workspace.id,
+    cloudflare_zero_trust_access_identity_provider.one_time_pin.id,
+    cloudflare_zero_trust_access_identity_provider.google.id,
+  ]
+}
+
+resource "cloudflare_zero_trust_access_policy" "radarr_friends" {
+  account_id       = var.account_id
+  application_id   = cloudflare_zero_trust_access_application.radarr.id
+  name             = "Friends"
+  decision         = "allow"
+  precedence       = 1
+  session_duration = "24h"
+
+  # Same membership as Overseerr Friends (will switch to
+  # `group = [cloudflare_zero_trust_access_group.friends.id]` once #206
+  # is merged in).
+  include {
+    email = [
+      "calebsargeant@gmail.com",
+      "nicholas_smith_@msn.com",
+      "dvs.sargeant@gmail.com",
+      "dirkie.jvrensburg@gmail.com",
+      "sabinekersten@hotmail.com",
+      "srgnat001@gmail.com",
+      "traceyleigh.sargeant@gmail.com",
+      "ogenrwotaron@gmail.com",
+      "llew.adamson@icloud.com",
+      "tracey@magmamoose.com",
+    ]
+  }
+}
+
+resource "cloudflare_zero_trust_access_policy" "radarr_caleb" {
+  account_id       = var.account_id
+  application_id   = cloudflare_zero_trust_access_application.radarr.id
+  name             = "Caleb"
+  decision         = "allow"
+  precedence       = 2
+  session_duration = "24h"
+
+  include {
+    email = ["caleb@magmamoose.com"]
+  }
 }
 
 # --- bookmark: AWS Access Portal (magmamoose) -------------------------------
