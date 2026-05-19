@@ -27,18 +27,30 @@ EOF
 # Has both DNS:Edit and Zero Trust:Edit, separate from the narrower
 # cloudflare-api-token used by the dns module + cert-manager. Fetched at parse
 # time via the oci CLI (uses ~/.oci/config).
+#
+# Access-group membership (family + friends email addresses) also lives in
+# OCI Vault — the public repo intentionally doesn't list PII. JSON shape:
+#   { "friends": ["…"], "caleb": ["…"], "household": ["…"], "caleb_personal": ["…"] }
 locals {
   cf_token_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aajtdkg5uwvfie4raijqushv4s3bep4feep6goh5hsnbpa"
+  cf_access_groups_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aalypl7o6qeuuf3lk57oicmyt43uu5rknpurzczmrsv4mq"
 
   cloudflare_api_token = run_cmd(
     "--terragrunt-quiet",
     "bash", "-c",
     "oci secrets secret-bundle get --secret-id ${local.cf_token_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
   )
+
+  cf_access_groups_membership = jsondecode(run_cmd(
+    "--terragrunt-quiet",
+    "bash", "-c",
+    "oci secrets secret-bundle get --secret-id ${local.cf_access_groups_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
+  ))
 }
 
 inputs = {
-  cloudflare_api_token = local.cloudflare_api_token
-  account_id           = "6e26afa31c37dee1dc82ad2f214f9b3c"
-  sargeant_co_zone_id  = "e25f6d9e2d13d9c04988e459587101b5"
+  cloudflare_api_token        = local.cloudflare_api_token
+  account_id                  = "6e26afa31c37dee1dc82ad2f214f9b3c"
+  sargeant_co_zone_id         = "e25f6d9e2d13d9c04988e459587101b5"
+  cf_access_groups_membership = local.cf_access_groups_membership
 }
