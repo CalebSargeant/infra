@@ -90,3 +90,9 @@ variable "k3s_token" {
     error_message = "k3s_token looks too short to be a real K3S node-token. Get the real value via: ssh firefly \"sudo cat /var/lib/rancher/k3s/server/node-token\""
   }
 }
+
+variable "cloud_init_rebuild_token" {
+  description = "Opt-in escape hatch for forcing a VM rebuild after a meaningful cloud-init edit. Set to any non-empty value (e.g. \"2026-05-19\" or \"1\") to fold it into the user_data hash so existing VMs replace. Leave empty (the default) and routine applies won't replace VMs purely because the install script's wording changed."
+  type        = string
+  default     = ""
+}
