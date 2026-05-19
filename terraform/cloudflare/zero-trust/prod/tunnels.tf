@@ -41,6 +41,12 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    ingress_rule {
+      hostname = "radarr.sargeant.co"
+      service  = "http://radarr.media.svc.cluster.local:7878"
+      origin_request {}
+    }
+
     # Cloudflared requires the last rule to be a catch-all with no hostname.
     ingress_rule {
       service = "http_status:404"
