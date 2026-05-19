@@ -21,7 +21,7 @@ variable "environment" {
 variable "shape" {
   description = "Shape of the instance"
   type        = string
-  default     = "VM.Standard.A1.Flex"  # Free tier ARM instance
+  default     = "VM.Standard.A1.Flex" # Free tier ARM instance
 }
 
 variable "image_ocid" {
@@ -47,13 +47,13 @@ variable "network_security_group_id" {
 variable "ocpus" {
   description = "Number of OCPUs for the instance"
   type        = number
-  default     = 2  # 2 OCPUs per server (total 4 for 2 servers = free tier limit)
+  default     = 2 # 2 OCPUs per server (total 4 for 2 servers = free tier limit)
 }
 
 variable "memory_in_gbs" {
   description = "Amount of memory in GBs for the instance"
   type        = number
-  default     = 12  # 12GB per server (total 24GB for 2 servers = free tier limit)
+  default     = 12 # 12GB per server (total 24GB for 2 servers = free tier limit)
 }
 
 variable "vcn_id" {
@@ -74,20 +74,24 @@ variable "servers" {
 }
 
 variable "k3s_url" {
-  description = "URL of the existing k3s server to join as an agent (e.g. https://192.168.19.10:6443). Empty disables agent mode."
+  description = "URL of the existing k3s server to join as an agent (e.g. https://192.168.19.10:6443). Empty disables agent mode (server-mode install instead). Must be set together with k3s_token_secret_ocid."
   type        = string
-  default     = ""
-}
-
-variable "k3s_token" {
-  description = "Node token of the existing k3s cluster. Read from /var/lib/rancher/k3s/server/node-token on the server. Must be non-empty if k3s_url is set, otherwise cloud-init silently produces a broken k3s-agent service."
-  type        = string
-  sensitive   = true
   default     = ""
 
   validation {
-    condition     = var.k3s_token == "" || length(var.k3s_token) >= 16
-    error_message = "k3s_token looks too short to be a real K3S node-token. Get the real value via: ssh firefly \"sudo cat /var/lib/rancher/k3s/server/node-token\""
+    condition     = var.k3s_url == "" || can(regex("^https?://", var.k3s_url))
+    error_message = "k3s_url must start with http:// or https:// (or be empty for server mode)."
+  }
+}
+
+variable "k3s_token_secret_ocid" {
+  description = "OCID of the OCI Vault secret holding the k3s node-token. The instance fetches this at boot via instance principal — see the dynamic group + IAM policy in this module. Empty disables agent mode (same effect as k3s_url == \"\"). Must be set together with k3s_url."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.k3s_token_secret_ocid == "" || can(regex("^ocid1\\.vaultsecret\\.", var.k3s_token_secret_ocid))
+    error_message = "k3s_token_secret_ocid must be an OCI Vault Secret OCID (starting with ocid1.vaultsecret.) or empty."
   }
 }
 
@@ -95,4 +99,15 @@ variable "cloud_init_rebuild_token" {
   description = "Opt-in escape hatch for forcing a VM rebuild after a meaningful cloud-init edit. Set to any non-empty value (e.g. \"2026-05-19\" or \"1\") to fold it into the user_data hash so existing VMs replace. Leave empty (the default) and routine applies won't replace VMs purely because the install script's wording changed."
   type        = string
   default     = ""
+}
+
+variable "oci_cli_version" {
+  description = "PyPI version of oci-cli that the cloud-init script pins (so node boots are reproducible — a future oci-cli release that changes the secret-bundle CLI shape can't silently break new VMs). Set to empty string to skip the pin and install latest (not recommended)."
+  type        = string
+  default     = "3.73.1"
+
+  validation {
+    condition     = var.oci_cli_version == "" || can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.oci_cli_version))
+    error_message = "oci_cli_version must be a PyPI version (e.g. \"3.73.1\") or empty to install latest."
+  }
 }

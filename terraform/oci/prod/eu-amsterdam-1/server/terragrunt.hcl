@@ -47,8 +47,11 @@ inputs = {
     "fd2" = { fault_domain = 1, private_ip = "192.168.223.72" }  # Fault Domain 2
   }
 
-  # Join the existing firefly k3s cluster as agents. Values come from env vars
-  # so the token never lands in git.
-  k3s_url   = get_env("K3S_URL", "https://192.168.19.10:6443")
-  k3s_token = get_env("K3S_TOKEN", "")
+  # Join the existing firefly k3s cluster as agents. The actual node-token
+  # never travels through terraform — the OCID below points at the OCI
+  # Vault secret (`k3s-firefly-node-token` in vault-prod) that the VMs
+  # fetch at boot via instance principal. See iam.tf for the dynamic
+  # group + policy that grants that read.
+  k3s_url               = get_env("K3S_URL", "https://192.168.19.10:6443")
+  k3s_token_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aam3bqx2dsmdg6wrdjvdhc6mcgnqil766lofkbv6nlujoa"
 }

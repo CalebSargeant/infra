@@ -6,69 +6,63 @@ MikroTik). None blocking; ranked roughly by impact × effort.
 
 ## 1. Move k3s join token out of OCI instance metadata
 
-[terraform/oci/_modules/server/main.tf](../../terraform/oci/_modules/server/main.tf)
-interpolates `var.k3s_token` directly into the cloud-init user_data heredoc.
-That value ends up base64-encoded in OCI instance metadata for the life of
-the instance — anyone with `instance:read` on the compartment can decode
-it, and rotating the cluster token won't propagate to existing nodes (the
-lifecycle ignores `metadata["user_data"]`).
+**Resolved.** The server module no longer interpolates the k3s join
+token into user_data. Instead the cloud-init script installs `oci-cli`
+on first boot and calls `oci secrets secret-bundle get --auth
+instance_principal` against an OCI Vault secret whose OCID is passed
+in as `k3s_token_secret_ocid`. Permission is granted by a dynamic
+group plus a narrow IAM policy in
+[iam.tf](../../terraform/oci/_modules/server/iam.tf) that together
+scope the read to the specific secret OCID.
 
-Better pattern:
+Both `k3s_url` and `k3s_token_secret_ocid` must be set together (agent
+mode) or both empty (standalone server mode); a variable validation
+catches OCID-shape typos at plan time, and an instance precondition
+catches the "only one of the two set" mistake before any IAM resources
+are created. The IAM resources are themselves gated on the same agent-
+mode condition, so standalone server applies don't touch tenancy IAM
+at all.
 
-1. Grant the OCI dynamic group containing these instances `read` on the
-   `node-token` secret in `vault-prod`.
-2. Replace the inline token in user_data with a small script that fetches
-   from OCI Vault using the instance principal:
-   ```bash
-   TOKEN=$(curl -s -H "Authorization: Bearer $(curl -s http://169.254.169.254/opc/v2/instance/) " \
-     "https://secrets.vaults.<region>.oci.oraclecloud.com/.../bundle" | jq -r ...)
-   curl -sfL https://get.k3s.io | K3S_URL=... K3S_TOKEN="$TOKEN" sh -
-   ```
-3. Token rotation then becomes: update the vault secret, the next k3s-agent
-   restart picks it up (with a tiny systemd ExecStartPre hook).
+Token rotation now means: update the Vault secret. Existing nodes keep
+their cached token (k3s only reads it at join), and new nodes pick up
+the rotated value automatically on boot.
 
-## 2. Propagate k3s_url / k3s_token / image changes to existing instances
+## 2. Propagate k3s_url / k3s_token_secret_ocid / image changes to existing instances
 
 **Resolved (scoped to meaningful inputs only).** Added a
 `terraform_data.user_data_replace_trigger` resource in the server module
 hashing the inputs that meaningfully change cloud-init outcome
-(`k3s_url`, `k3s_token`, `image_ocid`). The instance resource declares
-`replace_triggered_by` on it. Result:
+(`k3s_url`, `k3s_token_secret_ocid`, `image_ocid`). The instance
+resource declares `replace_triggered_by` on it. Result:
 
 - Cosmetic install-script edits (comments, log wording) don't change the
   hash → no VM replacement. **This is intentional.**
-- Changing `k3s_url`, `k3s_token`, or `image_ocid` changes the hash →
-  forces VM recreation, new cloud-init runs.
+- Changing `k3s_url`, `k3s_token_secret_ocid`, or `image_ocid` changes
+  the hash → forces VM recreation, new cloud-init runs.
+- In server mode (`k3s_url == ""`) the OCID is folded out of the hash
+  so pointing it at a different Vault secret doesn't rebuild standalone-
+  server VMs that ignore it (added in #213).
 
 The current `terraform_data` body (live in `terraform/oci/_modules/server/main.tf`
 — keep this snippet in sync with the implementation):
 
 ```hcl
-input = sha256(jsonencode({
-  k3s_url   = var.k3s_url
-  k3s_token = var.k3s_token
-  image     = var.image_ocid
-}))
+input = sha256(jsonencode(merge(
+  {
+    k3s_url               = var.k3s_url
+    k3s_token_secret_ocid = var.k3s_url == "" ? "" : var.k3s_token_secret_ocid
+    image                 = var.image_ocid
+  },
+  var.cloud_init_rebuild_token == "" ? {} : { rebuild_token = var.cloud_init_rebuild_token }
+)))
 ```
 
 **To force a replacement for a script-only change** (e.g. a new
-cloud-init step that fixes a bug in the install path), bump a sentinel
-field in the hash — easiest is to add a `version` key to the
-`jsonencode({...})` argument and increment it next time you need a
-forced rebuild:
-
-```hcl
-input = sha256(jsonencode({
-  k3s_url   = var.k3s_url
-  k3s_token = var.k3s_token
-  image     = var.image_ocid
-  version   = 1   # bump to force a one-off replacement
-}))
-```
-
-A follow-up PR ([#213](https://github.com/CalebSargeant/infra/pull/213))
-also folds `k3s_token` out of the hash in server mode (`k3s_url == ""`)
-so token rotation doesn't rebuild standalone-server VMs that ignore it.
+cloud-init step that fixes a bug in the install path), set the
+`cloud_init_rebuild_token` variable to any non-empty value (a date is
+the easy convention). The `merge()` then folds an extra key into the
+hashed object, the hash changes, and every VM rebuilds. Clear the
+variable again afterwards and routine applies stop replacing VMs.
 
 `ignore_changes = [metadata["user_data"]]` stays as the second layer of
 defence against accidental replacements from re-rendered heredoc whitespace.
