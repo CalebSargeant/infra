@@ -69,12 +69,27 @@ import {
   id = "6e26afa31c37dee1dc82ad2f214f9b3c/47ace2ca-6dbf-4ee3-8e6f-d2756b928b49"
 }
 
-# Access policies imports removed: the original imported policies were
-# reusable in CF, which the v4 provider couldn't update. They were deleted
-# (via API) and recreated app-scoped with the group-based include + posture
-# require by the apply that ran with this change. New policies are
-# already in state under the same terraform resource names; no further
-# imports needed.
+# Access policy imports for the *original* (reusable, dashboard-created)
+# policies were removed: the v4 provider couldn't update them, so they
+# were deleted via API and recreated app-scoped with group-based
+# includes + posture require. The new policies are already in state.
+#
+# State-recovery caveat: if you ever blow away the terraform state for
+# this module (lost GCS object, accidental `terragrunt state rm`, etc.)
+# the recreated policies still exist in Cloudflare but terraform won't
+# know about them and the next apply will try to create duplicates.
+# Recovery procedure is:
+#   1. List the live policies via CF API:
+#        curl -s -H "Authorization: Bearer $CF_TOKEN" \
+#          "https://api.cloudflare.com/client/v4/accounts/<acct>/access/apps/<app_id>/policies"
+#   2. For each terraform resource, run
+#        terragrunt import 'cloudflare_zero_trust_access_policy.<name>' \
+#          'account/<acct>/<app_id>/<policy_id>'
+#      (the literal "account/" prefix is required — see ID format
+#      reference at the top of this file).
+# Add per-policy `import { }` blocks here when that recovery is ever
+# actually needed; leaving them out for the steady state keeps the file
+# small.
 
 # Gateway policies
 import {

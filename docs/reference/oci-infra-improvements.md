@@ -6,34 +6,63 @@ MikroTik). None blocking; ranked roughly by impact × effort.
 
 ## 1. Move k3s join token out of OCI instance metadata
 
-**Resolved.** The server module no longer interpolates `var.k3s_token`
-into user_data. Instead the cloud-init script installs `oci-cli` on first
-boot and calls `oci secrets secret-bundle get --auth instance_principal`
-against an OCI Vault secret whose OCID is passed in as
-`k3s_token_secret_ocid`. Permission is granted by a dynamic group +
-narrow IAM policy in [iam.tf](../../terraform/oci/_modules/server/iam.tf)
-that scope the read to the specific secret OCID.
+**Resolved.** The server module no longer interpolates the k3s join
+token into user_data. Instead the cloud-init script installs `oci-cli`
+on first boot and calls `oci secrets secret-bundle get --auth
+instance_principal` against an OCI Vault secret whose OCID is passed
+in as `k3s_token_secret_ocid`. Permission is granted by a dynamic
+group plus a narrow IAM policy in
+[iam.tf](../../terraform/oci/_modules/server/iam.tf) that together
+scope the read to the specific secret OCID.
 
 Both `k3s_url` and `k3s_token_secret_ocid` must be set together (agent
-mode) or both empty (standalone server mode); a variable validation +
-instance precondition enforce that. The IAM resources are only created
-in agent mode so standalone server applies don't touch tenancy IAM.
+mode) or both empty (standalone server mode); a variable validation
+catches OCID-shape typos at plan time, and an instance precondition
+catches the "only one of the two set" mistake before any IAM resources
+are created. The IAM resources are themselves gated on the same agent-
+mode condition, so standalone server applies don't touch tenancy IAM
+at all.
 
 Token rotation now means: update the Vault secret. Existing nodes keep
 their cached token (k3s only reads it at join), and new nodes pick up
 the rotated value automatically on boot.
 
-## 2. Make k3s install script changes propagate to existing instances
+## 2. Propagate k3s_url / k3s_token_secret_ocid / image changes to existing instances
 
-**Resolved.** Added a `terraform_data.user_data_replace_trigger` resource
-in the server module hashing only the inputs that meaningfully change the
-cloud-init outcome (`k3s_url`, `k3s_token`, `image_ocid`). The instance
+**Resolved (scoped to meaningful inputs only).** Added a
+`terraform_data.user_data_replace_trigger` resource in the server module
+hashing the inputs that meaningfully change cloud-init outcome
+(`k3s_url`, `k3s_token_secret_ocid`, `image_ocid`). The instance
 resource declares `replace_triggered_by` on it. Result:
 
 - Cosmetic install-script edits (comments, log wording) don't change the
-  hash → no VM replacement.
-- Changing `k3s_url`, `k3s_token`, or `image_ocid` changes the hash →
-  forces VM recreation, new cloud-init runs.
+  hash → no VM replacement. **This is intentional.**
+- Changing `k3s_url`, `k3s_token_secret_ocid`, or `image_ocid` changes
+  the hash → forces VM recreation, new cloud-init runs.
+- In server mode (`k3s_url == ""`) the OCID is folded out of the hash
+  so pointing it at a different Vault secret doesn't rebuild standalone-
+  server VMs that ignore it (added in #213).
+
+The current `terraform_data` body (live in `terraform/oci/_modules/server/main.tf`
+— keep this snippet in sync with the implementation):
+
+```hcl
+input = sha256(jsonencode(merge(
+  {
+    k3s_url               = var.k3s_url
+    k3s_token_secret_ocid = var.k3s_url == "" ? "" : var.k3s_token_secret_ocid
+    image                 = var.image_ocid
+  },
+  var.cloud_init_rebuild_token == "" ? {} : { rebuild_token = var.cloud_init_rebuild_token }
+)))
+```
+
+**To force a replacement for a script-only change** (e.g. a new
+cloud-init step that fixes a bug in the install path), set the
+`cloud_init_rebuild_token` variable to any non-empty value (a date is
+the easy convention). The `merge()` then folds an extra key into the
+hashed object, the hash changes, and every VM rebuilds. Clear the
+variable again afterwards and routine applies stop replacing VMs.
 
 `ignore_changes = [metadata["user_data"]]` stays as the second layer of
 defence against accidental replacements from re-rendered heredoc whitespace.

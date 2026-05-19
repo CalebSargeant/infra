@@ -72,7 +72,9 @@ resource "oci_core_instance" "this" {
     user_data = base64encode(<<-EOF
       #!/bin/bash
       exec > /var/log/k3s-install.log 2>&1
-      set -e
+      # pipefail so a failing `oci` in the secret-fetch pipeline doesn't
+      # get silently masked by a succeeding `base64 -d ""` returning 0.
+      set -eo pipefail
       echo "k3s install starting at $(date)"
 
       if [ -n "${var.k3s_url}" ]; then
@@ -88,35 +90,55 @@ resource "oci_core_instance" "this" {
         # (introduced when PEP 668 marked external installs); only 23.04+
         # ships pip new enough. Detect the flag and add it only when
         # supported so the script works across image versions.
-        echo "installing oci-cli..."
+        #
+        # oci-cli is pinned to var.oci_cli_version (default in variables.tf)
+        # so node boots are reproducible; bumping the variable is the
+        # explicit upgrade path. Empty string skips the pin (== "latest").
+        echo "installing oci-cli (pin: ${var.oci_cli_version != "" ? var.oci_cli_version : "latest"})..."
         apt-get update -qq
         apt-get install -y -qq python3-pip
         PIP_ARGS="--quiet"
         if pip3 install --help 2>&1 | grep -q break-system-packages; then
           PIP_ARGS="$PIP_ARGS --break-system-packages"
         fi
+        %{if var.oci_cli_version != ""~}
+        pip3 install $PIP_ARGS "oci-cli==${var.oci_cli_version}"
+        %{else~}
         pip3 install $PIP_ARGS oci-cli
+        %{endif~}
 
         # Per-attempt stderr from BOTH `oci` and `base64 -d` is appended to
         # /var/log/oci-secret-fetch.log (the brace group + 2>> captures the
         # whole pipeline, and >> avoids truncating between retries so we can
         # see why all five attempts failed, not just the last one).
+        #
+        # The fetch loop relies on `set -o pipefail` (top of script): the
+        # `oci | base64` pipeline exits non-zero when `oci` fails, so the
+        # `if` condition is false and we retry. We additionally validate
+        # the decoded value smells like a k3s node-token (starts with
+        # `K10`, length >= 32) — defensive against the CLI ever returning
+        # an unexpected stdout shape that survives base64-decoding to a
+        # non-empty but invalid string.
         echo "fetching k3s token from OCI Vault (instance principal)..."
         for attempt in 1 2 3 4 5; do
           echo "=== attempt $attempt at $(date -u +%FT%TZ) ===" >> /var/log/oci-secret-fetch.log
-          K3S_TOKEN_VALUE=$({ oci secrets secret-bundle get \
-            --secret-id ${var.k3s_token_secret_ocid} \
-            --region ${var.region} \
-            --auth instance_principal \
-            --query 'data."secret-bundle-content".content' \
-            --raw-output | base64 -d; } 2>>/var/log/oci-secret-fetch.log || true)
-          if [ -n "$K3S_TOKEN_VALUE" ]; then break; fi
-          echo "attempt $attempt failed; retrying in 10s..."
+          if K3S_TOKEN_VALUE=$({ oci secrets secret-bundle get \
+              --secret-id ${var.k3s_token_secret_ocid} \
+              --region ${var.region} \
+              --auth instance_principal \
+              --query 'data."secret-bundle-content".content' \
+              --raw-output | base64 -d; } 2>>/var/log/oci-secret-fetch.log) \
+             && [[ "$K3S_TOKEN_VALUE" == K10* ]] \
+             && [ $${#K3S_TOKEN_VALUE} -ge 32 ]; then
+            break
+          fi
+          K3S_TOKEN_VALUE=""
+          echo "attempt $attempt failed (or token shape rejected); retrying in 10s..."
           sleep 10
         done
 
         if [ -z "$K3S_TOKEN_VALUE" ]; then
-          echo "ERROR: couldn't fetch k3s token from Vault after 5 tries. See /var/log/oci-secret-fetch.log."
+          echo "ERROR: couldn't fetch a well-formed k3s token from Vault after 5 tries. See /var/log/oci-secret-fetch.log."
           exit 1
         fi
         echo "token fetched (len=$${#K3S_TOKEN_VALUE})"

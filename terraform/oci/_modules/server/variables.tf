@@ -21,7 +21,7 @@ variable "environment" {
 variable "shape" {
   description = "Shape of the instance"
   type        = string
-  default     = "VM.Standard.A1.Flex"  # Free tier ARM instance
+  default     = "VM.Standard.A1.Flex" # Free tier ARM instance
 }
 
 variable "image_ocid" {
@@ -47,13 +47,13 @@ variable "network_security_group_id" {
 variable "ocpus" {
   description = "Number of OCPUs for the instance"
   type        = number
-  default     = 2  # 2 OCPUs per server (total 4 for 2 servers = free tier limit)
+  default     = 2 # 2 OCPUs per server (total 4 for 2 servers = free tier limit)
 }
 
 variable "memory_in_gbs" {
   description = "Amount of memory in GBs for the instance"
   type        = number
-  default     = 12  # 12GB per server (total 24GB for 2 servers = free tier limit)
+  default     = 12 # 12GB per server (total 24GB for 2 servers = free tier limit)
 }
 
 variable "vcn_id" {
@@ -99,4 +99,15 @@ variable "cloud_init_rebuild_token" {
   description = "Opt-in escape hatch for forcing a VM rebuild after a meaningful cloud-init edit. Set to any non-empty value (e.g. \"2026-05-19\" or \"1\") to fold it into the user_data hash so existing VMs replace. Leave empty (the default) and routine applies won't replace VMs purely because the install script's wording changed."
   type        = string
   default     = ""
+}
+
+variable "oci_cli_version" {
+  description = "PyPI version of oci-cli that the cloud-init script pins (so node boots are reproducible — a future oci-cli release that changes the secret-bundle CLI shape can't silently break new VMs). Set to empty string to skip the pin and install latest (not recommended)."
+  type        = string
+  default     = "3.73.1"
+
+  validation {
+    condition     = var.oci_cli_version == "" || can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.oci_cli_version))
+    error_message = "oci_cli_version must be a PyPI version (e.g. \"3.73.1\") or empty to install latest."
+  }
 }

@@ -174,8 +174,11 @@ resource "cloudflare_zero_trust_access_policy" "warp_email_domain" {
   precedence       = 1
   session_duration = "24h"
 
+  # Was inline `email = ["caleb.sargeant@icloud.com"]` — now references
+  # the caleb_personal group whose membership lives in OCI Vault, so the
+  # personal email address isn't published in the public repo.
   include {
-    email = ["caleb.sargeant@icloud.com"]
+    group = [cloudflare_zero_trust_access_group.caleb_personal.id]
   }
 }
 

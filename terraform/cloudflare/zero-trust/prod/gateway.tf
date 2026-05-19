@@ -60,7 +60,7 @@ locals {
     # Yandex / Russian trackers (often hit even on western sites)
     "mc.yandex.ru",
     "mc.yandex.com",
-    "yandex.com/clck",
+    "yandex.ru",
   ]
 }
 
