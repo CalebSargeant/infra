@@ -127,20 +127,22 @@ kubectl logs -n automation -l app=atlantis --tail=20
 
 Atlantis also needs credentials to talk to whichever cloud(s) your Terragrunt code targets. These are independent of the GitHub App auth above.
 
-Templates exist at:
+Templates exist at the **active** Atlantis path (the one `prod-atlantis` Flux Kustomization reconciles):
 
-- `kubernetes/_base/automation/atlantis/secret-aws.yaml.template`
-- `kubernetes/_base/automation/atlantis/secret-azure.yaml.template`
+- `kubernetes/apps/atlantis/base/atlantis/secret-aws.yaml.template`
+- `kubernetes/apps/atlantis/base/atlantis/secret-azure.yaml.template`
+
+(The same templates also still exist under `kubernetes/_base/automation/atlantis/` from before the Phase 2 migration — those are inert. Edit and encrypt in `kubernetes/apps/atlantis/base/atlantis/` only.)
 
 For each cloud:
 
 ```bash
-cd kubernetes/_base/automation/atlantis
+cd kubernetes/apps/atlantis/base/atlantis
 cp secret-aws.yaml.template secret-aws.yaml
 # fill in the values
 sops -e secret-aws.yaml > secret-aws.enc.yaml
 rm secret-aws.yaml
-# add `- secret-aws.enc.yaml` to kustomize resources
+# uncomment `- secret-aws.enc.yaml` in kustomization.yaml
 ```
 
 These map to env vars `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `ARM_CLIENT_ID`, etc.
@@ -225,14 +227,48 @@ The PEM in OCI Vault is malformed (e.g. round-tripped through `op item get` whic
 
 ### `unable to create dir "/atlantis-data/...": permission denied`
 
-The PVC has files owned by an alien UID. The `fix-data-ownership` init container in `deployment.yaml` handles this: it stat's the volume root and chowns recursively only if not already `100:1000`. Force a re-chown by running:
+The PVC has files owned by an alien UID. The `fix-data-ownership` init container in `deployment.yaml` handles this: it stat's the volume root and chowns recursively only if not already `100:1000`.
+
+**If you suspect ownership has drifted** (or the init container's idempotent check is wrong about the current state), the simplest recovery is to **delete the pod** so the init re-runs on the next scheduled pod:
 
 ```bash
-kubectl exec -n automation -it deploy/atlantis -c fix-data-ownership -- /bin/sh -c \
-  'chown -R 100:1000 /atlantis-data && chmod -R u+rwX,g+rwX /atlantis-data'
+kubectl delete pod -n automation -l app=atlantis
 ```
 
-(or just delete the pod — the init runs again automatically).
+**If you need to force a chown without rolling the Deployment** (e.g. atlantis is mid-apply and you can't disturb it), run a one-shot Job that mounts the same PVC:
+
+```bash
+kubectl apply -f - <<'EOF'
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: atlantis-data-chown
+  namespace: automation
+spec:
+  ttlSecondsAfterFinished: 60
+  template:
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsUser: 0
+      containers:
+        - name: chown
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - chown -R 100:1000 /atlantis-data && chmod -R u+rwX,g+rwX /atlantis-data
+          volumeMounts:
+            - name: data
+              mountPath: /atlantis-data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: atlantis
+EOF
+```
+
+Note: `kubectl exec` into the init container is **not** an option — init containers exit after they complete, so there's no running process to exec into.
 
 ### Webhook events not arriving
 
