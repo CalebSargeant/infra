@@ -9,6 +9,17 @@ terraform {
 locals {
   region_vars      = read_terragrunt_config(find_in_parent_folders("region.hcl"))
   environment_vars = read_terragrunt_config(find_in_parent_folders("environment.hcl"))
+
+  # Operator management CIDRs (currently just the Sargeant House WAN) live in
+  # OCI Vault as `operator-mgmt-cidrs` so the public repo doesn't leak which
+  # IP a hacker should target. Stored as JSON: `["A.B.C.D/32", ...]`.
+  operator_mgmt_cidrs_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aaqvgllhc77ptjy7npdstq6jp67j5auvhn4y4keiqcqhwa"
+
+  operator_mgmt_cidrs = jsondecode(run_cmd(
+    "--terragrunt-quiet",
+    "bash", "-c",
+    "oci secrets secret-bundle get --secret-id ${local.operator_mgmt_cidrs_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
+  ))
 }
 
 inputs = {
@@ -51,10 +62,9 @@ inputs = {
 
   # Operator IPs allowed to talk to the MikroTik plaintext binary API on the
   # public IPs in the edge subnet (the routeros terraform provider needs this).
-  # Added so the previously-OCI-CLI-only ingress rule is now in terraform.
-  routeros_api_management_cidrs = [
-    "84.84.15.110/32", # Sargeant House WAN (Eurofiber)
-  ]
+  # Loaded from OCI Vault (see local.operator_mgmt_cidrs above) so the public
+  # repo doesn't broadcast which IP is whitelisted.
+  routeros_api_management_cidrs = local.operator_mgmt_cidrs
 
   # Remote networks accessible via VPN
   remote_networks = {
