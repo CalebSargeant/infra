@@ -74,13 +74,23 @@ variable "servers" {
 }
 
 variable "k3s_url" {
-  description = "URL of the existing k3s server to join as an agent (e.g. https://192.168.19.10:6443). Empty disables agent mode."
+  description = "URL of the existing k3s server to join as an agent (e.g. https://192.168.19.10:6443). Empty disables agent mode (server-mode install instead). Must be set together with k3s_token_secret_ocid."
   type        = string
   default     = ""
+
+  validation {
+    condition     = var.k3s_url == "" || can(regex("^https?://", var.k3s_url))
+    error_message = "k3s_url must start with http:// or https:// (or be empty for server mode)."
+  }
 }
 
 variable "k3s_token_secret_ocid" {
-  description = "OCID of the OCI Vault secret holding the k3s node-token. The instance fetches this at boot via instance principal — see the dynamic group + IAM policy in this module. Empty disables agent mode (same effect as k3s_url == \"\")."
+  description = "OCID of the OCI Vault secret holding the k3s node-token. The instance fetches this at boot via instance principal — see the dynamic group + IAM policy in this module. Empty disables agent mode (same effect as k3s_url == \"\"). Must be set together with k3s_url."
   type        = string
   default     = ""
+
+  validation {
+    condition     = var.k3s_token_secret_ocid == "" || can(regex("^ocid1\\.vaultsecret\\.", var.k3s_token_secret_ocid))
+    error_message = "k3s_token_secret_ocid must be an OCI Vault Secret OCID (starting with ocid1.vaultsecret.) or empty."
+  }
 }

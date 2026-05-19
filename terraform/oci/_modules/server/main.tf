@@ -90,14 +90,19 @@ resource "oci_core_instance" "this" {
         fi
         pip3 install $PIP_ARGS oci-cli
 
+        # Per-attempt stderr from BOTH `oci` and `base64 -d` is appended to
+        # /var/log/oci-secret-fetch.log (the brace group + 2>> captures the
+        # whole pipeline, and >> avoids truncating between retries so we can
+        # see why all five attempts failed, not just the last one).
         echo "fetching k3s token from OCI Vault (instance principal)..."
         for attempt in 1 2 3 4 5; do
-          K3S_TOKEN_VALUE=$(oci secrets secret-bundle get \
+          echo "=== attempt $attempt at $(date -u +%FT%TZ) ===" >> /var/log/oci-secret-fetch.log
+          K3S_TOKEN_VALUE=$({ oci secrets secret-bundle get \
             --secret-id ${var.k3s_token_secret_ocid} \
             --region ${var.region} \
             --auth instance_principal \
             --query 'data."secret-bundle-content".content' \
-            --raw-output 2>/var/log/oci-secret-fetch.log | base64 -d || true)
+            --raw-output | base64 -d; } 2>>/var/log/oci-secret-fetch.log || true)
           if [ -n "$K3S_TOKEN_VALUE" ]; then break; fi
           echo "attempt $attempt failed; retrying in 10s..."
           sleep 10
