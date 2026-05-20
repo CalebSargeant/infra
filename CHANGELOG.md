@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.23.1 (2026-05-20)
+
+### Bug Fixes
+
+- **atlantis**: Install terragrunt at pod start + restore Recreate strategy
+  ([#232](https://github.com/CalebSargeant/infra/pull/232),
+  [`553d9f8`](https://github.com/CalebSargeant/infra/commit/553d9f89c0a41c0f4d5a8ae605f236d9e858c7ca))
+
+- **atlantis**: Verify terragrunt SHA256 before exec (Copilot #232)
+  ([#232](https://github.com/CalebSargeant/infra/pull/232),
+  [`553d9f8`](https://github.com/CalebSargeant/infra/commit/553d9f89c0a41c0f4d5a8ae605f236d9e858c7ca))
+
+
 ## v1.23.0 (2026-05-19)
 
 ### Bug Fixes
