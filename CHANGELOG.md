@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v1.23.4 (2026-05-20)
+
+### Bug Fixes
+
+- **atlantis**: Mount GCP SA key so terragrunt can read GCS state
+  ([#237](https://github.com/CalebSargeant/infra/pull/237),
+  [`413409d`](https://github.com/CalebSargeant/infra/commit/413409d997d3eb4e9257a69dbc0e71784711ae17))
+
+### Documentation
+
+- **atlantis**: Reuse existing terraform SA, drop new-SA runbook
+  ([#237](https://github.com/CalebSargeant/infra/pull/237),
+  [`413409d`](https://github.com/CalebSargeant/infra/commit/413409d997d3eb4e9257a69dbc0e71784711ae17))
+
+- **atlantis**: Strip base64 wrap for portability (#237 review)
+  ([#237](https://github.com/CalebSargeant/infra/pull/237),
+  [`413409d`](https://github.com/CalebSargeant/infra/commit/413409d997d3eb4e9257a69dbc0e71784711ae17))
+
+
 ## v1.23.3 (2026-05-20)
 
 ### Bug Fixes
