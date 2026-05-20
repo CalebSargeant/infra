@@ -9,6 +9,11 @@ resources:
   - configmap.yaml
   - serviceaccount.yaml
   - externalsecret.yaml
+  # Materializes Secret/atlantis-gcp from OCI Vault `atlantis-gcp-sa-key` —
+  # the JSON key for the atlantis@ GCP service account. Mounted (optional)
+  # by deployment.yaml as GOOGLE_APPLICATION_CREDENTIALS so terragrunt can
+  # read GCS state and the google provider can impersonate deployer@.
+  - externalsecret-gcp.yaml
   # OCI API key + config for the oci CLI baked into the atlantis-firefly
   # image. Mounted by deployment.yaml at /home/atlantis/.oci/ so terragrunt
   # parse-time `run_cmd("oci secrets secret-bundle get ...")` calls
