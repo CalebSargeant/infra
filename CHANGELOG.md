@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.23.2 (2026-05-20)
+
+### Bug Fixes
+
+- **atlantis**: Bake oci-cli + terragrunt into custom image
+  ([#235](https://github.com/CalebSargeant/infra/pull/235),
+  [`567659a`](https://github.com/CalebSargeant/infra/commit/567659ac0d54b270a08d5212a86dd620fa21a82b))
+
+
 ## v1.23.1 (2026-05-20)
 
 ### Bug Fixes
