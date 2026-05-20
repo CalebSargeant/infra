@@ -59,54 +59,32 @@ The same vault/`ClusterSecretStore` is already wired (see `kubernetes/_base/core
 
 All terragrunt projects in this repo use a GCS backend (`sargeant-prod-terraform-state`) and the google provider impersonates `deployer@magmamoose-terraform.iam.gserviceaccount.com`. Atlantis needs a service-account key to (a) read/write the state bucket and (b) mint impersonation tokens for the deployer SA. Without this, terragrunt fails at dependency resolution with `Backend initialization required` → cascading `Unknown variable: dependency` errors.
 
-One-time setup:
+For v0 we **reuse the same SA key that local terragrunt uses** — the JSON file `terraform/.service-account.json` falls under the `credentials = ...` lookup in `terraform/terragrunt.hcl`. That SA already has the right state-bucket + impersonation bindings (since local plans work), so no new IAM is needed.
+
+One-time upload (run once):
 
 ```bash
-PROJECT=magmamoose-terraform
-SA=atlantis@${PROJECT}.iam.gserviceaccount.com
-DEPLOYER=deployer@${PROJECT}.iam.gserviceaccount.com
-BUCKET=sargeant-prod-terraform-state
+VAULT=ocid1.vault.oc1.eu-amsterdam-1.fruyd6i7aagf4.abqw2ljrzcituk5pndpbgsvhtkgenvf2ae7xnlbctmskmcfj2gw6xsjhbgfq
+COMPARTMENT=ocid1.tenancy.oc1..aaaaaaaaq7zpfzcaj4amfz7xwv33rlsopwd4m2ydhgjdidoan67vry5ejlsq
+# Same KMS key used by atlantis-github-app-id et al; look up via:
+#   oci vault secret list --compartment-id $COMPARTMENT --region eu-amsterdam-1 \
+#     --query 'data[?"secret-name"==`atlantis-github-app-id`]."key-id"' --raw-output
+KEY=ocid1.key.oc1.eu-amsterdam-1.fruyd6i7aagf4.abqw2ljr2tquiix4j3greeqmtg3hxutkve2u5vrhk5umbz2w4drizdoqy3ca
 
-# 1. Create the SA
-gcloud iam service-accounts create atlantis \
-  --project=${PROJECT} \
-  --display-name="Atlantis (firefly cluster)" \
-  --description="terragrunt plan/apply runner — reads sargeant-prod state, impersonates deployer"
-
-# 2. Grant state-bucket access (read + write objects + list)
-gcloud storage buckets add-iam-policy-binding gs://${BUCKET} \
-  --member=serviceAccount:${SA} \
-  --role=roles/storage.objectUser
-
-# 3. Grant impersonation on the deployer SA
-gcloud iam service-accounts add-iam-policy-binding ${DEPLOYER} \
-  --project=${PROJECT} \
-  --member=serviceAccount:${SA} \
-  --role=roles/iam.serviceAccountTokenCreator
-
-# 4. Generate a key (saves to /tmp so we can shred it after upload)
-gcloud iam service-accounts keys create /tmp/atlantis-gcp-sa-key.json \
-  --iam-account=${SA}
-
-# 5. Upload to OCI Vault. Match the existing pattern: base64-encode the
-#    JSON and use the create-base64 form. Find the prod vault OCID with
-#    `oci vault vault list --compartment-id <compartment> | jq '.data[].id'`.
-VAULT_OCID=ocid1.vault.oc1.eu-amsterdam-1.fruyd6i7aagf4.abqw2ljrzcituk5pndpbgsvhtkgenvf2ae7xnlbctmskmcfj2gw6xsjhbgfq
-COMPARTMENT_OCID=ocid1.tenancy.oc1..aaaaaaaaq7zpfzcaj4amfz7xwv33rlsopwd4m2ydhgjdidoan67vry5ejlsq
 oci vault secret create-base64 \
-  --compartment-id ${COMPARTMENT_OCID} \
-  --vault-id ${VAULT_OCID} \
+  --compartment-id $COMPARTMENT \
+  --vault-id $VAULT \
+  --key-id $KEY \
   --secret-name atlantis-gcp-sa-key \
-  --secret-content-content "$(base64 -i /tmp/atlantis-gcp-sa-key.json)" \
+  --secret-content-content "$(base64 -i terraform/.service-account.json)" \
   --region eu-amsterdam-1
-
-# 6. Securely delete the local copy
-shred -u /tmp/atlantis-gcp-sa-key.json
 ```
 
 After Flux reconciles, `externalsecret-gcp.yaml` materializes `Secret/atlantis-gcp` with key `key.json`, the deployment mounts it at `/etc/atlantis/gcp/key.json`, and `GOOGLE_APPLICATION_CREDENTIALS` points the GCS backend + google provider at it.
 
-Rotation: re-run steps 4–6 (the existing `gcloud iam service-accounts keys list ${SA}` lets you find + delete the old key after the new one is in OCI Vault and the pod has rolled).
+Rotation: generate a new key on the SA, re-run the `oci vault secret create-base64` command (OCI versions secret content automatically; ESO picks up the new version on its next refresh — `kubectl -n automation annotate externalsecret atlantis-gcp force-sync=$(date +%s)` to force).
+
+**Future hardening (tracked, not v0)**: cut a dedicated `atlantis@magmamoose-terraform.iam.gserviceaccount.com` SA with least-privilege bindings (`storage.objectUser` on the state bucket + `serviceAccountTokenCreator` on `deployer@`), so atlantis isn't running as the same identity as your local terragrunt.
 
 ## Optional cloud-provider credentials
 
