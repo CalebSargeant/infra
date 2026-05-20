@@ -87,6 +87,12 @@ spec:
               memory: "2Gi"
               cpu: "1000m"
           env:
+            # k8s secret mounts default to root-owned with group-readable
+            # mode (we set 0440 below); oci CLI prints a noisy warning on
+            # private-key files that aren't 600. Suppress so terragrunt
+            # run_cmd output stays clean in PR comments.
+            - name: OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING
+              value: "True"
             - name: ATLANTIS_REPO_ALLOWLIST
               value: "github.com/CalebSargeant/infra"
             # GitHub App auth (replaces ATLANTIS_GH_USER/_TOKEN PAT flow).
@@ -168,6 +174,13 @@ spec:
             - name: github-app-key
               mountPath: /etc/atlantis/github-app
               readOnly: true
+            # OCI CLI looks for config + key at $HOME/.oci/. terragrunt.hcl
+            # files use parse-time run_cmd("oci secrets secret-bundle get ...")
+            # to fetch tokens (e.g. cloudflare API token) from OCI Vault — the
+            # cli would otherwise hang on a "create config file? [Y/n]" prompt.
+            - name: oci-cli
+              mountPath: /home/atlantis/.oci
+              readOnly: true
           livenessProbe:
             httpGet:
               path: /healthz
@@ -196,4 +209,12 @@ spec:
             # 0440 (group-readable) so the atlantis container user can read it
             # via fsGroup: 1000 (set at the pod securityContext). Not 0400 —
             # that's owner-only and the container runs non-root.
+            defaultMode: 0440
+        # Secret atlantis-oci-cli (SOPS-decrypted by Flux at apply time —
+        # see oci-cli-secret-enc.yaml) carries two files:
+        #   - config  → /home/atlantis/.oci/config   (oci CLI default path)
+        #   - key.pem → /home/atlantis/.oci/key.pem  (referenced by config)
+        - name: oci-cli
+          secret:
+            secretName: atlantis-oci-cli
             defaultMode: 0440
