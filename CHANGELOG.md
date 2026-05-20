@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.24.0 (2026-05-20)
+
+### Features
+
+- Add comment-commander GitRepository and Kustomization configurations
+  ([#238](https://github.com/CalebSargeant/infra/pull/238),
+  [`76f688c`](https://github.com/CalebSargeant/infra/commit/76f688ca1c229f27a9b6a47856bd12a5875ad9ad))
+
+
 ## v1.23.4 (2026-05-20)
 
 ### Bug Fixes
