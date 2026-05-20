@@ -76,8 +76,11 @@ oci vault secret create-base64 \
   --vault-id $VAULT \
   --key-id $KEY \
   --secret-name atlantis-gcp-sa-key \
-  --secret-content-content "$(base64 -i terraform/.service-account.json)" \
+  --secret-content-content "$(base64 -i terraform/.service-account.json | tr -d '\n')" \
   --region eu-amsterdam-1
+# `tr -d '\n'` strips line wrapping that GNU `base64` adds at 76 chars
+# (macOS `base64` doesn't wrap by default, but the pipe is harmless there
+# and keeps the runbook portable across both).
 ```
 
 After Flux reconciles, `externalsecret-gcp.yaml` materializes `Secret/atlantis-gcp` with key `key.json`, the deployment mounts it at `/etc/atlantis/gcp/key.json`, and `GOOGLE_APPLICATION_CREDENTIALS` points the GCS backend + google provider at it.
