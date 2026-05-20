@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.23.3 (2026-05-20)
+
+### Bug Fixes
+
+- **atlantis**: Mount OCI CLI config + key so terragrunt run_cmd auths
+  ([#236](https://github.com/CalebSargeant/infra/pull/236),
+  [`d434054`](https://github.com/CalebSargeant/infra/commit/d434054d25151938b7e7580722a1a893d042ddfa))
+
+
 ## v1.23.2 (2026-05-20)
 
 ### Bug Fixes
