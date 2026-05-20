@@ -7,17 +7,26 @@ on:
     tags:
       - "n8n-v*"
       - "openfortivpn-v*"
+      - "atlantis-firefly-v*"
   pull_request:
     paths:
       - "dockerfiles/n8n/**"
       - "dockerfiles/openfortivpn/**"
+      - "dockerfiles/atlantis-firefly/**"
 
 jobs:
   determine-changes:
     runs-on: ubuntu-latest
+    # paths-filter outputs are read back via `steps.filter.outputs.<key>` —
+    # dot notation, so the keys can't contain hyphens (those parse as
+    # subtraction). The matrix `image.name` (used downstream to look up
+    # `build_<name>`) must match the filter key, so internal identifiers use
+    # underscores. The registry name + git tag prefix + path keep the
+    # hyphenated user-facing form.
     outputs:
       build_n8n: ${{ steps.filter.outputs.n8n }}
       build_openfortivpn: ${{ steps.filter.outputs.openfortivpn }}
+      build_atlantis_firefly: ${{ steps.filter.outputs.atlantis_firefly }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -31,6 +40,8 @@ jobs:
               - 'dockerfiles/n8n/**'
             openfortivpn:
               - 'dockerfiles/openfortivpn/**'
+            atlantis_firefly:
+              - 'dockerfiles/atlantis-firefly/**'
 
   build:
     needs: determine-changes
@@ -40,6 +51,7 @@ jobs:
         image:
           - { name: "n8n", path: "dockerfiles/n8n", tag_prefix: "n8n-v", registry_name: "n8n" }
           - { name: "openfortivpn", path: "dockerfiles/openfortivpn", tag_prefix: "openfortivpn-v", registry_name: "openfortivpn" }
+          - { name: "atlantis_firefly", path: "dockerfiles/atlantis-firefly", tag_prefix: "atlantis-firefly-v", registry_name: "atlantis-firefly" }
 
     steps:
       - name: Determine if Build is Needed
