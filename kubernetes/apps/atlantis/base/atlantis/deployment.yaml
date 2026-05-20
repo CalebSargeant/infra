@@ -93,6 +93,15 @@ spec:
             # run_cmd output stays clean in PR comments.
             - name: OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING
               value: "True"
+            # GCP service-account key file (Secret atlantis-gcp materialized
+            # by externalsecret-gcp.yaml). Picked up by the GCS backend (for
+            # state reads/writes) and the google provider (which then
+            # impersonates deployer@ — see terraform/root.hcl). The mount
+            # below is optional: true so the pod still rolls before you've
+            # uploaded `atlantis-gcp-sa-key` to OCI Vault — terragrunt plan
+            # will just error with a clear "no GCP credentials" message.
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/atlantis/gcp/key.json
             - name: ATLANTIS_REPO_ALLOWLIST
               value: "github.com/CalebSargeant/infra"
             # GitHub App auth (replaces ATLANTIS_GH_USER/_TOKEN PAT flow).
@@ -181,6 +190,13 @@ spec:
             - name: oci-cli
               mountPath: /home/atlantis/.oci
               readOnly: true
+            # GCP SA JSON key for terragrunt's GCS backend + google provider
+            # impersonation. Referenced by GOOGLE_APPLICATION_CREDENTIALS env
+            # above. The volume (below) is optional: true so the pod can roll
+            # before atlantis-gcp-sa-key is uploaded to OCI Vault.
+            - name: gcp-sa-key
+              mountPath: /etc/atlantis/gcp
+              readOnly: true
           livenessProbe:
             httpGet:
               path: /healthz
@@ -217,4 +233,13 @@ spec:
         - name: oci-cli
           secret:
             secretName: atlantis-oci-cli
+            defaultMode: 0440
+        # Secret atlantis-gcp materialized by externalsecret-gcp.yaml from
+        # OCI Vault `atlantis-gcp-sa-key`. optional: true so the pod stays
+        # Up before the OCI Vault upload is done — terragrunt plans error
+        # with a clear "no GCP credentials" instead of pod stuck in mount.
+        - name: gcp-sa-key
+          secret:
+            secretName: atlantis-gcp
+            optional: true
             defaultMode: 0440

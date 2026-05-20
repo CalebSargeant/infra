@@ -55,6 +55,59 @@ The same vault/`ClusterSecretStore` is already wired (see `kubernetes/_base/core
 
 `externalsecret.yaml` is already part of the Kustomization. After Flux reconciles, `Secret/atlantis` is materialized in `automation` namespace with keys `app-id`, `app-key-pem`, `webhook-secret`. The Deployment mounts the PEM and starts the server with App auth.
 
+## GCP service account (required for any terragrunt project with GCS state)
+
+All terragrunt projects in this repo use a GCS backend (`sargeant-prod-terraform-state`) and the google provider impersonates `deployer@magmamoose-terraform.iam.gserviceaccount.com`. Atlantis needs a service-account key to (a) read/write the state bucket and (b) mint impersonation tokens for the deployer SA. Without this, terragrunt fails at dependency resolution with `Backend initialization required` → cascading `Unknown variable: dependency` errors.
+
+One-time setup:
+
+```bash
+PROJECT=magmamoose-terraform
+SA=atlantis@${PROJECT}.iam.gserviceaccount.com
+DEPLOYER=deployer@${PROJECT}.iam.gserviceaccount.com
+BUCKET=sargeant-prod-terraform-state
+
+# 1. Create the SA
+gcloud iam service-accounts create atlantis \
+  --project=${PROJECT} \
+  --display-name="Atlantis (firefly cluster)" \
+  --description="terragrunt plan/apply runner — reads sargeant-prod state, impersonates deployer"
+
+# 2. Grant state-bucket access (read + write objects + list)
+gcloud storage buckets add-iam-policy-binding gs://${BUCKET} \
+  --member=serviceAccount:${SA} \
+  --role=roles/storage.objectUser
+
+# 3. Grant impersonation on the deployer SA
+gcloud iam service-accounts add-iam-policy-binding ${DEPLOYER} \
+  --project=${PROJECT} \
+  --member=serviceAccount:${SA} \
+  --role=roles/iam.serviceAccountTokenCreator
+
+# 4. Generate a key (saves to /tmp so we can shred it after upload)
+gcloud iam service-accounts keys create /tmp/atlantis-gcp-sa-key.json \
+  --iam-account=${SA}
+
+# 5. Upload to OCI Vault. Match the existing pattern: base64-encode the
+#    JSON and use the create-base64 form. Find the prod vault OCID with
+#    `oci vault vault list --compartment-id <compartment> | jq '.data[].id'`.
+VAULT_OCID=ocid1.vault.oc1.eu-amsterdam-1.fruyd6i7aagf4.abqw2ljrzcituk5pndpbgsvhtkgenvf2ae7xnlbctmskmcfj2gw6xsjhbgfq
+COMPARTMENT_OCID=ocid1.tenancy.oc1..aaaaaaaaq7zpfzcaj4amfz7xwv33rlsopwd4m2ydhgjdidoan67vry5ejlsq
+oci vault secret create-base64 \
+  --compartment-id ${COMPARTMENT_OCID} \
+  --vault-id ${VAULT_OCID} \
+  --secret-name atlantis-gcp-sa-key \
+  --secret-content-content "$(base64 -i /tmp/atlantis-gcp-sa-key.json)" \
+  --region eu-amsterdam-1
+
+# 6. Securely delete the local copy
+shred -u /tmp/atlantis-gcp-sa-key.json
+```
+
+After Flux reconciles, `externalsecret-gcp.yaml` materializes `Secret/atlantis-gcp` with key `key.json`, the deployment mounts it at `/etc/atlantis/gcp/key.json`, and `GOOGLE_APPLICATION_CREDENTIALS` points the GCS backend + google provider at it.
+
+Rotation: re-run steps 4–6 (the existing `gcloud iam service-accounts keys list ${SA}` lets you find + delete the old key after the new one is in OCI Vault and the pod has rolled).
+
 ## Optional cloud-provider credentials
 
 For Atlantis to actually drive Terraform that needs AWS / Azure / etc., create the optional secrets:
