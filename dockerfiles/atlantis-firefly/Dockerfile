@@ -57,6 +57,7 @@ RUN apk add --no-cache \
         openssl \
         python3 \
         py3-pip \
+        wget \
     && pip install --no-cache-dir --break-system-packages \
         "oci-cli==${OCI_CLI_VERSION}" \
     && oci --version
