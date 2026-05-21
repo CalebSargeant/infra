@@ -2,6 +2,30 @@
 
 <!-- version list -->
 
+## v1.25.0 (2026-05-21)
+
+### Bug Fixes
+
+- **cloudflare**: Manage comment-commander.magmamoose.com CNAME explicitly
+  ([#240](https://github.com/CalebSargeant/infra/pull/240),
+  [`62d1d0e`](https://github.com/CalebSargeant/infra/commit/62d1d0eda8f55d9f8d72c1539185b22318fe0b50))
+
+### Documentation
+
+- **oci-vrrp**: Pivot to route-table-update after smoke test
+  ([#233](https://github.com/CalebSargeant/infra/pull/233),
+  [`32ab3a7`](https://github.com/CalebSargeant/infra/commit/32ab3a7d57cb31f85d1363a3b0b3fada46c66004))
+
+### Features
+
+- Register zoey with Flux on firefly ([#239](https://github.com/CalebSargeant/infra/pull/239),
+  [`346b3e1`](https://github.com/CalebSargeant/infra/commit/346b3e17da2e5194ed0513a55896d72179396762))
+
+- **cloudflare**: Route comment-commander.magmamoose.com via firefly tunnel
+  ([#240](https://github.com/CalebSargeant/infra/pull/240),
+  [`62d1d0e`](https://github.com/CalebSargeant/infra/commit/62d1d0eda8f55d9f8d72c1539185b22318fe0b50))
+
+
 ## v1.24.0 (2026-05-20)
 
 ### Features
