@@ -9,7 +9,8 @@ spec:
   chart:
     spec:
       chart: mikrotik-minder-agent
-      version: "0.1.0"
+      # >= 0.1.1 picks up the chart fix in CalebSargeant/helm-charts#10
+      version: ">=0.1.1 <0.2.0"
       sourceRef:
         kind: HelmRepository
         name: calebsargeant
