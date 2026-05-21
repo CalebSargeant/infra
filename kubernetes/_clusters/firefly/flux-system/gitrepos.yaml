@@ -68,3 +68,17 @@ spec:
   secretRef:
     name: buxfer-sync-github-app
   url: https://github.com/CalebSargeant/zoey
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: comment-commander-pro
+  namespace: flux-system
+spec:
+  interval: 10m
+  provider: github
+  ref:
+    branch: main
+  secretRef:
+    name: buxfer-sync-github-app
+  url: https://github.com/CalebSargeant/comment-commander-pro
