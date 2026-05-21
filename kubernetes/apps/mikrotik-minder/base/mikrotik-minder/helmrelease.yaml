@@ -1,0 +1,75 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: mikrotik-minder-agent
+  namespace: automation
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: mikrotik-minder-agent
+      version: ">=0.1.0 <1.0.0"
+      sourceRef:
+        kind: HelmRepository
+        name: calebsargeant
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    image:
+      pullPolicy: IfNotPresent
+
+    config:
+      server:
+        url: https://mikrotik-minder.sargeant.workers.dev
+        agent_token_env: MTM_AGENT_TOKEN
+        timeout_seconds: 10
+      defaults:
+        transport:
+          primary: api
+          fallback: ssh
+        heartbeat_interval_seconds: 300
+        export_interval_seconds: 3600
+        update_check_interval_seconds: 21600
+        backup_interval_seconds: 86400
+        connect_timeout_seconds: 8
+      git:
+        repo: /var/lib/mikrotik-minder/configs
+        # Add a remote when you have a private config repo for this fleet:
+        # remote:
+        #   url: git@github.com:calebsargeant/mikrotik-configs.git
+        #   branch: main
+        #   ssh_key_path: /etc/mikrotik-minder/ssh/git_deploy
+      backup:
+        dir: /var/lib/mikrotik-minder/backups
+        password_env: MTM_BACKUP_PASSWORD
+        retention: 14
+      devices:
+        - name: oci-rtr-01
+          address: 193.123.39.172
+          username: test
+          password_env: OCI_RTR_01_PASSWORD
+          site: oci
+          role: lab
+
+    secrets:
+      # The env-var Secret is reconciled by external-secrets (see externalsecret.yaml).
+      create: false
+      existingSecretName: mikrotik-minder-agent-env
+
+    persistence:
+      enabled: true
+      size: 5Gi
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
