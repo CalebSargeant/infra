@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.25.2 (2026-05-21)
+
+### Bug Fixes
+
+- **1password-connect**: Repair Connect bootstrap + grant Tech vault access
+  ([#241](https://github.com/CalebSargeant/infra/pull/241),
+  [`4b2bfb7`](https://github.com/CalebSargeant/infra/commit/4b2bfb7163562713ea315523b053fa9c1ee5db75))
+
+
 ## v1.25.1 (2026-05-21)
 
 ### Bug Fixes
