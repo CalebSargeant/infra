@@ -24,7 +24,7 @@ spec:
   values:
     image:
       # Chart's appVersion is the agent's __version__ (e.g. "0.0.1"), but the
-      # release-runner workflow re-tags the image with v1.X.Y on every release.
+      # release-runner workflow re-tags the image with 1.X.Y on every release.
       # Pin a concrete release tag here so HelmRelease isn't tied to appVersion.
       tag: "1.2.0"
       pullPolicy: IfNotPresent
