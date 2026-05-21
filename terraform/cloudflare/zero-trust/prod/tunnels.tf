@@ -57,8 +57,10 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
     }
 
     # GitHub PR-review webhooks → comment-commander (firefly cluster).
-    # Auto-creates comment-commander.magmamoose.com →
-    # <tunnel-id>.cfargotunnel.com.
+    # Pairs with the explicit proxied CNAME in
+    # terraform/cloudflare/dns-magmamoose/prod/terragrunt.hcl
+    # (comment-commander.magmamoose.com → <tunnel-id>.cfargotunnel.com).
+    # Same pattern as atlantis.sargeant.co / radarr.sargeant.co.
     ingress_rule {
       hostname = "comment-commander.magmamoose.com"
       service  = "http://comment-commander.comment-commander.svc.cluster.local:8000"
