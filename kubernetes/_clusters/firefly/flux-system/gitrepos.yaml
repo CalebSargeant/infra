@@ -82,3 +82,4 @@ spec:
   secretRef:
     name: buxfer-sync-github-app
   url: https://github.com/CalebSargeant/comment-commander-pro
+  suspend: true
