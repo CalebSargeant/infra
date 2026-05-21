@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.26.0 (2026-05-21)
+
+### Features
+
+- Add mikrotik-minder agent to firefly cluster
+  ([#242](https://github.com/CalebSargeant/infra/pull/242),
+  [`cb5b790`](https://github.com/CalebSargeant/infra/commit/cb5b7901141ede64c121ce64115fac47c8558731))
+
+- Deploy mikrotik-minder agent on firefly ([#242](https://github.com/CalebSargeant/infra/pull/242),
+  [`cb5b790`](https://github.com/CalebSargeant/infra/commit/cb5b7901141ede64c121ce64115fac47c8558731))
+
+- Register zoey with Flux on firefly ([#242](https://github.com/CalebSargeant/infra/pull/242),
+  [`cb5b790`](https://github.com/CalebSargeant/infra/commit/cb5b7901141ede64c121ce64115fac47c8558731))
+
+
 ## v1.25.2 (2026-05-21)
 
 ### Bug Fixes
