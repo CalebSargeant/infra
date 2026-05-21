@@ -114,7 +114,7 @@ inputs = {
     {
       name  = "test.sargeant.co"
       type  = "A"
-      value = "193.123.39.172"
+      value = dependency.edge.outputs.instances["fd2"].public_ip
     },
 
     # Routes through the `firefly` cloudflared tunnel to the in-cluster
