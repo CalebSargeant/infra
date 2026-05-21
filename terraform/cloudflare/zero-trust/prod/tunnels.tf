@@ -56,6 +56,15 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # GitHub PR-review webhooks → comment-commander (firefly cluster).
+    # Auto-creates comment-commander.magmamoose.com →
+    # <tunnel-id>.cfargotunnel.com.
+    ingress_rule {
+      hostname = "comment-commander.magmamoose.com"
+      service  = "http://comment-commander.comment-commander.svc.cluster.local:8000"
+      origin_request {}
+    }
+
     # Cloudflared requires the last rule to be a catch-all with no hostname.
     ingress_rule {
       service = "http_status:404"
