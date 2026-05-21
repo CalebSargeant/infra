@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.26.1 (2026-05-21)
+
+### Bug Fixes
+
+- **mikrotik-minder**: Narrow Helm chart version constraint to <0.2.0
+  ([#244](https://github.com/CalebSargeant/infra/pull/244),
+  [`efdd40b`](https://github.com/CalebSargeant/infra/commit/efdd40b9e031d6cd5f8ab2579a6331722efd1848))
+
+- **mikrotik-minder**: Pin chart to >=0.1.1 <1.0.0
+  ([#244](https://github.com/CalebSargeant/infra/pull/244),
+  [`efdd40b`](https://github.com/CalebSargeant/infra/commit/efdd40b9e031d6cd5f8ab2579a6331722efd1848))
+
+
 ## v1.26.0 (2026-05-21)
 
 ### Features
