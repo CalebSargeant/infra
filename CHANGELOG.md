@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.25.1 (2026-05-21)
+
+### Bug Fixes
+
+- **external-dns-cloudflare**: Drop self-conflicting annotation filter, add magmamoose.com
+  ([#243](https://github.com/CalebSargeant/infra/pull/243),
+  [`2f1276e`](https://github.com/CalebSargeant/infra/commit/2f1276eab47ce67300671fe53a8c2805dcf1eac4))
+
+
 ## v1.25.0 (2026-05-21)
 
 ### Bug Fixes
