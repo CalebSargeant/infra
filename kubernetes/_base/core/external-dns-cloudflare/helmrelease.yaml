@@ -33,17 +33,20 @@ spec:
       secretName: cloudflare-credentials
       proxied: false
 
-    # Domain filter
+    # Zones managed by this external-dns instance. The mikrotik sibling
+    # only manages `.local`, so domain filters alone scope us cleanly —
+    # no need for an annotation filter (the previous one self-conflicted
+    # with the same annotation's role as the DNS target value, and the
+    # pod has been logging "All records are already up to date" for the
+    # last 32 days because no resource could ever satisfy it).
     domainFilters:
       - sargeant.co
+      - magmamoose.com
 
     # Source configuration - watch both Ingress and Service resources
     sources:
       - ingress
       - service
-
-    # Annotation filter - only manage resources with this annotation
-    annotationFilter: "external-dns.alpha.kubernetes.io/target=cloudflare"
 
     # Policy configuration - sync creates, updates, and deletes DNS records
     policy: sync
