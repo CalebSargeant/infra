@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.26.2 (2026-05-21)
+
+### Bug Fixes
+
+- **mikrotik-minder**: Align comment with actual tag format
+  ([#245](https://github.com/CalebSargeant/infra/pull/245),
+  [`8105471`](https://github.com/CalebSargeant/infra/commit/81054710cb92fe2b5a30fbbda12479e92e18c7e9))
+
+- **mikrotik-minder**: Pin image.tag to release-runner's actual version
+  ([#245](https://github.com/CalebSargeant/infra/pull/245),
+  [`8105471`](https://github.com/CalebSargeant/infra/commit/81054710cb92fe2b5a30fbbda12479e92e18c7e9))
+
+
 ## v1.26.1 (2026-05-21)
 
 ### Bug Fixes
