@@ -286,6 +286,28 @@ spec:
   dependsOn:
     - name: core
 ---
+# Zoey — DB secret is mirrored from CNPG's `postgres-app` and the ghcr pull
+# secret is mirrored from flux-system, both via external-secrets' kubernetes
+# provider. No SOPS-encrypted resources in this overlay.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: zoey
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./k8s/overlays/prod
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: zoey
+    namespace: flux-system
+  timeout: 5m
+  wait: true
+  dependsOn:
+    - name: core
+    - name: database
+---
 # Phase 2: wraps the new infra-v2-style layout in kubernetes/clusters/firefly.
 # Its output is just the per-app Flux Kustomization CRs (currently only
 # prod-excalidraw, which is itself suspend: true). No app resources cross

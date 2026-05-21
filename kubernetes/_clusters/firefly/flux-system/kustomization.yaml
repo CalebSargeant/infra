@@ -13,6 +13,7 @@ resources:
   - deskbird-booking.yaml
   - comment-commander.yaml
   - notifications.yaml
+  - zoey.yaml
 components:
   - ../../../_components/node-selectors/pi
 # Note: Removed t.nano resource profile - flux controllers need more resources
