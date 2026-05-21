@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: mikrotik-minder-agent
-      version: ">=0.1.0 <1.0.0"
+      version: "0.1.0"
       sourceRef:
         kind: HelmRepository
         name: calebsargeant
@@ -40,11 +40,6 @@ spec:
         connect_timeout_seconds: 8
       git:
         repo: /var/lib/mikrotik-minder/configs
-        # Add a remote when you have a private config repo for this fleet:
-        # remote:
-        #   url: git@github.com:calebsargeant/mikrotik-configs.git
-        #   branch: main
-        #   ssh_key_path: /etc/mikrotik-minder/ssh/git_deploy
       backup:
         dir: /var/lib/mikrotik-minder/backups
         password_env: MTM_BACKUP_PASSWORD
@@ -58,7 +53,6 @@ spec:
           role: lab
 
     secrets:
-      # The env-var Secret is reconciled by external-secrets (see externalsecret.yaml).
       create: false
       existingSecretName: mikrotik-minder-agent-env
 
