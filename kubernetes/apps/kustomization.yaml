@@ -5,6 +5,7 @@ resources:
   - ./atlantis
   - ./homeassistant
   - ./homebridge
+  - ./mikrotik-minder
   - ./n8n
   # media
   - ./bazarr
