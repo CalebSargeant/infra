@@ -38,6 +38,16 @@ projects:
       enabled: true
     apply_requirements: [approved, mergeable]
 
+  - name: cloudflare-dns-magmamoose-prod
+    dir: terraform/cloudflare/dns-magmamoose/prod
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
+      enabled: true
+    apply_requirements: [approved, mergeable]
+
   - name: cloudflare-zero-trust-prod
     dir: terraform/cloudflare/zero-trust/prod
     workspace: default
