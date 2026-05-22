@@ -7,9 +7,9 @@ resources:
   - pvc.yaml
   - pv.yaml
 components:
-  - ../../../../_components/wireguard-sidecar
-  - ../../../../_components/resource-profiles/c.micro
-  - ../../../../_components/node-selectors/mini
+  - ../../../../components/wireguard-sidecar
+  - ../../../../components/resource-profiles/c.micro
+  - ../../../../components/node-selectors/mini
 patches:
   - target:
       kind: StatefulSet

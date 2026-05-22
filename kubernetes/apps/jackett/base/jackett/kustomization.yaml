@@ -7,9 +7,9 @@ resources:
   - pvc.yaml
   - pv.yaml
 components:
-  - ../../../../_components/wireguard-sidecar
-  - ../../../../_components/resource-profiles/c.pico
-  - ../../../../_components/node-selectors/mini
+  - ../../../../components/wireguard-sidecar
+  - ../../../../components/resource-profiles/c.pico
+  - ../../../../components/node-selectors/mini
 patches:
   - target:
       kind: Deployment

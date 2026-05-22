@@ -4,7 +4,7 @@ resources:
   - statefulset.yaml
   - service.yaml
 components:
-  - ../../../../_components/node-selectors/mini
+  - ../../../../components/node-selectors/mini
 patches:
   # Temporarily scale down Thanos Store to 0 to free resources
   - patch: |

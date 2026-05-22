@@ -5,5 +5,5 @@ resources:
   - service.yaml
   - ingress.yaml
 components:
-  - ../../../../_components/resource-profiles/c.micro
-  - ../../../../_components/node-selectors/mini
+  - ../../../../components/resource-profiles/c.micro
+  - ../../../../components/node-selectors/mini

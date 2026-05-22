@@ -14,4 +14,4 @@ resources:
   # The category-level patches (Loki resources, Thanos Store replicas:0,
   # node-selector label, fluent-bit DaemonSet resources) have been
   # inlined into each per-app base/<app>/kustomization.yaml. The
-  # _components/node-selectors/mini component is also applied per-app.
+  # components/node-selectors/mini component is also applied per-app.

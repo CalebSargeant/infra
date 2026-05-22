@@ -4,7 +4,7 @@ namespace: misc
 resources:
   - configmap.yaml
   - serviceaccount.yaml
-  - ../../../../_base/_helm-releases/headlamp.yaml
+  - ../../../../components/helm-releases/headlamp.yaml
   - certificate.yaml
   - ingressroute.yaml
   - middleware.enc.yaml
@@ -17,9 +17,9 @@ resources:
   - oauth2-proxy-emails.enc.yaml
   - auth-redirect.yaml
 #components:
-#  - ../../../../_components/node-selectors/pi
-#  - ../../../../_components/ingress-standards/sargeant.co
-#  - ../../../../_components/helm-release-standards/configmap-values
+#  - ../../../../components/node-selectors/pi
+#  - ../../../../components/ingress-standards/sargeant.co
+#  - ../../../../components/helm-release-standards/configmap-values
 
 patches:
   - target:

@@ -5,5 +5,5 @@ metadata:
 resources:
   - ../../../../_base/core/cert-manager
 components:
-  - ../../../../_components/resource-profiles/t.nano
-  - ../../../../_components/node-selectors/pi
+  - ../../../../components/resource-profiles/t.nano
+  - ../../../../components/node-selectors/pi

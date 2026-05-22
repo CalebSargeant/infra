@@ -32,5 +32,5 @@ resources:
   # - secret-aws.enc.yaml
   # - secret-azure.enc.yaml
 components:
-  - ../../../../_components/resource-profiles/c.medium
-  - ../../../../_components/node-selectors/pi
+  - ../../../../components/resource-profiles/c.medium
+  - ../../../../components/node-selectors/pi
