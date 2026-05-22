@@ -6,4 +6,5 @@ metadata:
     app.kubernetes.io/sops: enabled
 resources:
   - ../../../_base/backup/namespace.yaml
-  - timemachine
+  # timemachine migrated to kubernetes/apps/timemachine/
+  # owned by Kustomization/flux-system/prod-timemachine

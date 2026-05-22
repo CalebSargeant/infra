@@ -7,6 +7,10 @@ resources:
   - ./homebridge
   - ./mikrotik-minder
   - ./n8n
+  # backup
+  - ./timemachine
+  # miscellaneous (dashboard)
+  - ./headlamp
   # media
   - ./bazarr
   - ./flaresolverr

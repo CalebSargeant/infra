@@ -6,6 +6,5 @@ metadata:
     app.kubernetes.io/sops: enabled
 resources:
   - ../../../_base/miscellaneous/namespace.yaml
-  - headlamp
-  # excalidraw, nextcloud, syncthing, wordpress migrated to kubernetes/apps/<app>/
-  # owned by Kustomization/flux-system/prod-<app>
+  # excalidraw, nextcloud, syncthing, wordpress, headlamp migrated to
+  # kubernetes/apps/<app>/ — owned by Kustomization/flux-system/prod-<app>
