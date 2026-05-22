@@ -3,6 +3,9 @@
 # prefix to "terraform/gcp_project" and uses a different bucket — colocating
 # everything under sargeant-prod-terraform-state keeps state in one place.
 
+# The GCS backend below authenticates with the dedicated
+# atlantis@magmamoose-terraform service-account key (OCI Vault secret
+# atlantis-gcp-sa-key) — see kubernetes/apps/atlantis/base/atlantis/README.md.
 remote_state {
   backend = "gcs"
   config = {
