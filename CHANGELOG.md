@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v1.32.0 (2026-05-22)
+
+### Bug Fixes
+
+- **cloudflare**: Add trailing slash to Zoey Slack bypass domain
+  ([#255](https://github.com/CalebSargeant/infra/pull/255),
+  [`b4b8122`](https://github.com/CalebSargeant/infra/commit/b4b8122275a60c71c8d30035398cb6641d1eff85))
+
+- **ztna**: Gate Mikrotik Minder Pro's Pages deployment URLs
+  ([#254](https://github.com/CalebSargeant/infra/pull/254),
+  [`ee309ff`](https://github.com/CalebSargeant/infra/commit/ee309ff27d7669bee13daaf183674d9897ef27d6))
+
+### Features
+
+- **ztna**: Broaden Zoey's Slack Access bypass to /api/v1/slack
+  ([#255](https://github.com/CalebSargeant/infra/pull/255),
+  [`b4b8122`](https://github.com/CalebSargeant/infra/commit/b4b8122275a60c71c8d30035398cb6641d1eff85))
+
+
 ## v1.31.1 (2026-05-22)
 
 ### Bug Fixes
