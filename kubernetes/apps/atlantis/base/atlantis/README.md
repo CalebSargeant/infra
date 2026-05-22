@@ -59,35 +59,37 @@ The same vault/`ClusterSecretStore` is already wired (see `kubernetes/_base/core
 
 All terragrunt projects in this repo use a GCS backend (`sargeant-prod-terraform-state`) and the google provider impersonates `deployer@magmamoose-terraform.iam.gserviceaccount.com`. Atlantis needs a service-account key to (a) read/write the state bucket and (b) mint impersonation tokens for the deployer SA. Without this, terragrunt fails at dependency resolution with `Backend initialization required` → cascading `Unknown variable: dependency` errors.
 
-For v0 we **reuse the same SA key that local terragrunt uses** — the JSON file `terraform/.service-account.json` falls under the `credentials = ...` lookup in `terraform/terragrunt.hcl`. That SA already has the right state-bucket + impersonation bindings (since local plans work), so no new IAM is needed.
+Atlantis runs as the dedicated **`atlantis@magmamoose-terraform.iam.gserviceaccount.com`** SA with least-privilege bindings:
 
-One-time upload (run once):
+- `roles/storage.objectAdmin` on `gs://sargeant-prod-terraform-state` — the GCS backend uses this key directly (the backend config carries no impersonation).
+- `roles/iam.serviceAccountTokenCreator` on `deployer@magmamoose-terraform` — lets the google provider impersonate `deployer@` for resource ops.
+
+Its JSON key lives in OCI Vault as `atlantis-gcp-sa-key`; `externalsecret-gcp.yaml` materializes it into `Secret/atlantis-gcp`, the deployment mounts it at `/etc/atlantis/gcp/key.json`, and `GOOGLE_APPLICATION_CREDENTIALS` points there.
+
+> **Org-policy gotcha for a rebuild.** The `magmamoose.com` org enforces `iam.disableServiceAccountKeyCreation` (Google's secure-by-default policy), so `gcloud iam service-accounts keys create` is blocked unless a project-scoped policy override turns that constraint off for `magmamoose-terraform`. Impersonation also needs `iamcredentials.googleapis.com` enabled on the project. Both are already in place.
+
+### Rotating the key
 
 ```bash
-VAULT=ocid1.vault.oc1.eu-amsterdam-1.fruyd6i7aagf4.abqw2ljrzcituk5pndpbgsvhtkgenvf2ae7xnlbctmskmcfj2gw6xsjhbgfq
-COMPARTMENT=ocid1.tenancy.oc1..aaaaaaaaq7zpfzcaj4amfz7xwv33rlsopwd4m2ydhgjdidoan67vry5ejlsq
-# Same KMS key used by atlantis-github-app-id et al; look up via:
-#   oci vault secret list --compartment-id $COMPARTMENT --region eu-amsterdam-1 \
-#     --query 'data[?"secret-name"==`atlantis-github-app-id`]."key-id"' --raw-output
-KEY=ocid1.key.oc1.eu-amsterdam-1.fruyd6i7aagf4.abqw2ljr2tquiix4j3greeqmtg3hxutkve2u5vrhk5umbz2w4drizdoqy3ca
+SA=atlantis@magmamoose-terraform.iam.gserviceaccount.com
+SECRET=ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aa4xoor56xht5nfiwmlxp4sthoihyaedfvafummky4v4xa
 
-oci vault secret create-base64 \
-  --compartment-id $COMPARTMENT \
-  --vault-id $VAULT \
-  --key-id $KEY \
-  --secret-name atlantis-gcp-sa-key \
-  --secret-content-content "$(base64 -i terraform/.service-account.json | tr -d '\n')" \
-  --region eu-amsterdam-1
-# `tr -d '\n'` strips line wrapping that GNU `base64` adds at 76 chars
-# (macOS `base64` doesn't wrap by default, but the pipe is harmless there
-# and keeps the runbook portable across both).
+# 1. Mint a fresh key (needs the org-policy override noted above).
+gcloud iam service-accounts keys create /tmp/atlantis-sa-key.json --iam-account "$SA"
+
+# 2. Push it to OCI Vault as a new version of the existing secret.
+oci vault secret update-base64 --secret-id "$SECRET" \
+  --secret-content-content "$(base64 < /tmp/atlantis-sa-key.json | tr -d '\n')" \
+  --region eu-amsterdam-1 --force
+
+# 3. Resync ESO, then restart Atlantis to pick up the new key file.
+kubectl -n automation annotate externalsecret atlantis-gcp force-sync="$(date +%s)" --overwrite
+kubectl -n automation rollout restart deployment/atlantis
+
+rm -f /tmp/atlantis-sa-key.json   # don't leave the key on disk
 ```
 
-After Flux reconciles, `externalsecret-gcp.yaml` materializes `Secret/atlantis-gcp` with key `key.json`, the deployment mounts it at `/etc/atlantis/gcp/key.json`, and `GOOGLE_APPLICATION_CREDENTIALS` points the GCS backend + google provider at it.
-
-Rotation: generate a new key on the SA, re-run the `oci vault secret create-base64` command (OCI versions secret content automatically; ESO picks up the new version on its next refresh — `kubectl -n automation annotate externalsecret atlantis-gcp force-sync=$(date +%s)` to force).
-
-**Future hardening (tracked, not v0)**: cut a dedicated `atlantis@magmamoose-terraform.iam.gserviceaccount.com` SA with least-privilege bindings (`storage.objectUser` on the state bucket + `serviceAccountTokenCreator` on `deployer@`), so atlantis isn't running as the same identity as your local terragrunt.
+The OCI Vault secret already exists, so rotation uses `update-base64`; the original secret was created with `create-base64` (which additionally needs `--compartment-id`/`--vault-id`/`--key-id`). Afterwards revoke the superseded key with `gcloud iam service-accounts keys delete <KEY_ID> --iam-account "$SA"`.
 
 ## Optional cloud-provider credentials
 
