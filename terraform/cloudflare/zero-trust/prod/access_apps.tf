@@ -266,3 +266,51 @@ resource "cloudflare_zero_trust_access_policy" "comment_commander_pro_caleb" {
     ]
   }
 }
+
+# --- self_hosted: Mikrotik Minder Pro ---------------------------------------
+# The licensed Mikrotik Minder operator UI — github.com/MagmaMoose/mikrotik-minder-pro.
+# Unlike comment-commander-pro, this is a Cloudflare Pages app, not a k8s
+# workload: there's no cloudflared tunnel and no DNS record to manage — Pages
+# already serves mikrotik-minder-pro.pages.dev on the CF edge. Access is the
+# only thing gating it (the app has no in-app auth yet — MVP). Caleb-only with
+# the same macOS device posture as Radarr/Overseerr/comment-commander-pro.
+#
+# A custom domain (mikrotik-minder-pro.magmamoose.com) is a possible follow-up;
+# it would need a cloudflare_pages_domain + a dns-magmamoose CNAME, after which
+# the `domain` below would point there instead.
+resource "cloudflare_zero_trust_access_application" "mikrotik_minder_pro" {
+  account_id                = var.account_id
+  name                      = "Mikrotik Minder Pro"
+  type                      = "self_hosted"
+  domain                    = "mikrotik-minder-pro.pages.dev"
+  tags                      = ["Magma Moose"]
+  app_launcher_visible      = true
+  auto_redirect_to_identity = false
+  session_duration          = "24h"
+
+  allowed_idps = [
+    cloudflare_zero_trust_access_identity_provider.google_workspace.id,
+    cloudflare_zero_trust_access_identity_provider.one_time_pin.id,
+    cloudflare_zero_trust_access_identity_provider.google.id,
+  ]
+}
+
+resource "cloudflare_zero_trust_access_policy" "mikrotik_minder_pro_caleb" {
+  account_id       = var.account_id
+  application_id   = cloudflare_zero_trust_access_application.mikrotik_minder_pro.id
+  name             = "Caleb"
+  decision         = "allow"
+  precedence       = 1
+  session_duration = "24h"
+
+  include {
+    group = [cloudflare_zero_trust_access_group.caleb.id]
+  }
+
+  require {
+    device_posture = [
+      cloudflare_zero_trust_device_posture_rule.mac_disk_encryption.id,
+      cloudflare_zero_trust_device_posture_rule.mac_os_version.id,
+    ]
+  }
+}
