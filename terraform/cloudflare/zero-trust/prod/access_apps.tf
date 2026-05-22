@@ -266,8 +266,10 @@ resource "cloudflare_zero_trust_access_policy" "comment_commander_pro_caleb" {
 # Unlike comment-commander-pro, this is a Cloudflare Pages app, not a k8s
 # workload: there's no cloudflared tunnel and no DNS record to manage — Pages
 # already serves mikrotik-minder-pro.pages.dev on the CF edge. Access is the
-# only thing gating it (the app has no in-app auth yet — MVP). Caleb-only with
-# the same macOS device posture as Radarr/Overseerr/comment-commander-pro.
+# only thing gating it (the app has no in-app auth yet — MVP). Caleb-only, no
+# device-posture `require` — same reasoning as comment-commander-pro and Zoey:
+# the posture rules need a WARP-enrolled device Caleb doesn't have, so requiring
+# it is a hard lockout (and the Pro UI is one he'll want from mobile too).
 #
 # A custom domain (mikrotik-minder-pro.magmamoose.com) is a possible follow-up;
 # it would need a cloudflare_pages_domain + a dns-magmamoose CNAME, after which
@@ -299,13 +301,6 @@ resource "cloudflare_zero_trust_access_policy" "mikrotik_minder_pro_caleb" {
 
   include {
     group = [cloudflare_zero_trust_access_group.caleb.id]
-  }
-
-  require {
-    device_posture = [
-      cloudflare_zero_trust_device_posture_rule.mac_disk_encryption.id,
-      cloudflare_zero_trust_device_posture_rule.mac_os_version.id,
-    ]
   }
 }
 
