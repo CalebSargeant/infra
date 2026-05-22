@@ -7,7 +7,7 @@ resources:
   - cloudnative-pg
 patches:
   # cert-manager node placement + resource-profile labels — carried over
-  # verbatim from the legacy clusters/firefly/core/kustomization.yaml
+  # verbatim from the legacy _clusters/firefly/core/kustomization.yaml
   # category-level patch block.
   - patch: |
       - op: add
