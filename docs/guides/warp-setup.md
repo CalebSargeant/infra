@@ -34,7 +34,7 @@ kubernetes/
 The cluster uses Flux v2 for declarative GitOps-based deployments. Configurations are applied through a hierarchy:
 
 1. **Base configurations** (`_base/`): Generic, reusable workload definitions
-2. **Cluster overlays** (`_clusters/firefly/`): Cluster-specific customizations via Kustomize
+2. **Cluster overlays** (`clusters/firefly/`): Cluster-specific customizations via Kustomize
 3. **Flux sync**: Flux monitors this repository and applies changes automatically
 
 ### Kustomize Layering
@@ -60,20 +60,20 @@ See `_components/resource-profiles/README.md` for complete reference.
 
 ```bash
 # Validate Kustomize structure for a cluster
-kustomize build _clusters/firefly > /tmp/firefly-manifest.yaml
+kustomize build clusters/firefly > /tmp/firefly-manifest.yaml
 
 # Validate specific namespace/component
-kustomize build _clusters/firefly/media > /tmp/media-manifest.yaml
+kustomize build clusters/firefly/media > /tmp/media-manifest.yaml
 
 # Dry-run apply to verify what would be deployed
-kubectl apply -k _clusters/firefly --dry-run=client --output yaml
+kubectl apply -k clusters/firefly --dry-run=client --output yaml
 ```
 
 ### Deploy
 
 ```bash
 # Apply cluster configuration (if Flux is not auto-syncing)
-kubectl apply -k _clusters/firefly
+kubectl apply -k clusters/firefly
 
 # Force Flux reconciliation
 flux reconcile kustomization firefly-root --with-source
@@ -89,7 +89,7 @@ flux get kustomization
 flux logs --kustomization=firefly-media --all-namespaces
 
 # Inspect rendered manifests for a specific kustomization
-kustomize build _clusters/firefly/media
+kustomize build clusters/firefly/media
 ```
 
 ### Working with Bases and Overlays
@@ -100,7 +100,7 @@ mkdir -p _base/myapp/{app,config}
 # Create kustomization.yaml with resources
 
 # Reference in cluster overlay
-# _clusters/firefly/kustomization.yaml
+# clusters/firefly/kustomization.yaml
 resources:
   - ../../_base/myapp
 ```

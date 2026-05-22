@@ -102,7 +102,7 @@ If this works, your permissions are correctly configured.
 
 ### 4.1 Update secret-store.yaml
 
-Edit `kubernetes/_clusters/firefly/core/external-secrets/secret-store.yaml`:
+Edit `kubernetes/clusters/firefly/core/external-secrets/secret-store.yaml`:
 
 ```yaml
 apiVersion: external-secrets.io/v1beta1
@@ -135,7 +135,7 @@ spec:
 
 1. Open the private key file you downloaded in Part 2.3
 2. Copy its entire contents (including BEGIN/END lines)
-3. Edit `kubernetes/_clusters/firefly/core/external-secrets/oci-vault-secret-enc.yaml`:
+3. Edit `kubernetes/clusters/firefly/core/external-secrets/oci-vault-secret-enc.yaml`:
 
 ```yaml
 apiVersion: v1
@@ -156,7 +156,7 @@ stringData:
 ### 4.3 Encrypt the Secret
 
 ```bash
-cd kubernetes/_clusters/firefly/core/external-secrets
+cd kubernetes/clusters/firefly/core/external-secrets
 sops -e -i oci-vault-secret-enc.yaml
 ```
 

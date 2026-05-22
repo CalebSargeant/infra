@@ -51,11 +51,11 @@ Configuration:
 ### 4. Updated Cluster Configuration
 
 Modified:
-- `kubernetes/_clusters/firefly/core/kustomization.yaml` - Updated to reference both providers
+- `kubernetes/clusters/firefly/core/kustomization.yaml` - Updated to reference both providers
 
 Created:
-- `kubernetes/_clusters/firefly/core/external-dns-cloudflare/kustomization.yaml`
-- `kubernetes/_clusters/firefly/core/external-dns-mikrotik/kustomization.yaml`
+- `kubernetes/clusters/firefly/core/external-dns-cloudflare/kustomization.yaml`
+- `kubernetes/clusters/firefly/core/external-dns-mikrotik/kustomization.yaml`
 
 ## Next Steps Required
 

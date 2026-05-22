@@ -38,27 +38,38 @@ terraform/
 
 ### 2. Kustomize Hierarchical Overlays (kubernetes/)
 
-Multi-layer manifests with cluster-specific patches:
+Layout (`infra-v2`-style — restructure completed across PRs #258, #259, #260, #263, and Phase E; the legacy `_base/` + `_clusters/` trees no longer exist):
 
 ```
 kubernetes/
-  _base/              # Generic, reusable deployments (1password-connect, external-dns, media apps)
-  _components/        # Cross-cutting concerns (node-selectors/pi, resource-profiles)
-  _clusters/firefly/  # Active overlay → patches _base resources + applies SOPS decryption
-  apps/               # New infra-v2-style layout (apps/<app>/{base,prod}/<app>/), being phased in
-  clusters/firefly/   # New cluster-level entry point for the apps/ tree (inert until wired into Flux)
+  apps/<app>/                    # Per-app: base/<app>/ (manifests) + prod/<app>/ (flux-kustomization)
+  clusters/firefly/
+    flux-system/                 # Flux bootstrap — gotk-sync points here; the root Kustomization
+    kustomization.yaml           # Meta — resources: [../../apps, ../../infrastructure]
+  components/                    # Reusable kustomize Components: node-selectors/, resource-profiles/,
+                                 # gluetun-sidecar/, wireguard-sidecar/, helm-releases/, ingress-standards/
+  infrastructure/
+    configs/                     # Cluster-wide namespaces (Flux Kustomization: infrastructure-configs)
+    controllers/                 # cert-manager, external-secrets, 1password-connect, cloudnative-pg
+                                 # (Flux Kustomization: infrastructure-controllers, dependsOn configs)
+    services/                    # cloudflared, minio, external-dns×2, postgres, mariadb
+                                 # (Flux Kustomization: infrastructure-services, dependsOn controllers)
 ```
 
-The `franklinhouse` cluster lives in a separate public repo, [calebsargeant/infra-v2](https://github.com/CalebSargeant/infra-v2); this repo is firefly-only. See `docs/operations/kubernetes-restructure-plan.md` for the in-progress migration from `_base/_clusters/` to `apps/clusters/`.
+The `franklinhouse` cluster lives in a separate public repo, [calebsargeant/infra-v2](https://github.com/CalebSargeant/infra-v2); this repo is firefly-only.
 
-**Key Pattern**: A firefly overlay `kustomization.yaml` patches all Kustomizations labeled `app.kubernetes.io/sops=enabled` to add SOPS decryption provider. Resource profiles (like `c.medium`: 500m-2 CPU, 1-4Gi memory) are Kustomize components targeting labels.
+**Key patterns**:
+- Each `apps/<app>/prod/<app>/flux-kustomization.yaml` emits a `prod-<app>` Flux Kustomization CR; its `path:` points at `apps/<app>/base/<app>` (the manifests).
+- Each infrastructure tier's `flux-kustomization.yaml` emits one Flux Kustomization CR per tier (`infrastructure-configs`, `-controllers`, `-services`), `path:` → `infrastructure/<tier>/stack` (or `configs/namespaces`).
+- Kustomizations labeled `app.kubernetes.io/sops=enabled` carry an inline `decryption:` block referencing the `sops-keys` Secret in `flux-system`.
+- Resource profiles (`components/resource-profiles/c.medium`: 500m-2 CPU, 1-4Gi memory etc.) are kustomize Components targeting labels on workloads.
 
 ### 3. Secret Management (Preferred → Fallback Order)
 
 **Always prefer external secret stores over in-Git encryption.** Use the following priority order:
 
-1. **OCI Vault + ExternalSecrets** (preferred for runtime cluster secrets) — store the secret in OCI Vault, then create an `ExternalSecret` CR pointing to it. Config lives in `kubernetes/_clusters/firefly/core/external-secrets/`.
-2. **1Password Connect + ExternalSecrets** (preferred for app credentials & shared team secrets) — store in 1Password, inject via `OnePasswordItem` or `ExternalSecret`. Config lives in `kubernetes/_base/core/1password-connect/`.
+1. **OCI Vault + ExternalSecrets** (preferred for runtime cluster secrets) — store the secret in OCI Vault, then create an `ExternalSecret` CR pointing to it. Config lives in `kubernetes/infrastructure/controllers/stack/external-secrets/`.
+2. **1Password Connect + ExternalSecrets** (preferred for app credentials & shared team secrets) — store in 1Password, inject via `OnePasswordItem` or `ExternalSecret`. Config lives in `kubernetes/infrastructure/controllers/stack/1password-connect/`.
 3. **SOPS + Age** (last resort — only when a secret must live in Git with no external store available) — Age key created in `flux-system` namespace (Ansible role: `k3s-sops-age-secret`); Kustomization resources labeled `app.kubernetes.io/sops=enabled` are auto-decrypted by Flux. Workflow: `sops -e secret.yaml > secret.enc.yaml` → commit only `.enc.yaml`.
 
 **Never commit plaintext secrets regardless of which method is used.** The SOPS `.sops.yaml` configuration is in the repo root if fallback encryption is needed.
@@ -100,13 +111,13 @@ ansible-playbook -i hosts your-playbook.yml          # Execute
 
 ```bash
 # Validate Kustomize builds correctly
-kustomize build kubernetes/_clusters/firefly
+kustomize build kubernetes/clusters/firefly
 
 # Test w/o applying
-kubectl apply -k kubernetes/_clusters/firefly --dry-run=client
+kubectl apply -k kubernetes/clusters/firefly --dry-run=client
 
 # Preview changes
-kubectl diff -k kubernetes/_clusters/firefly
+kubectl diff -k kubernetes/clusters/firefly
 
 # Manually trigger Flux reconciliation
 flux reconcile source git flux-system -n flux-system
@@ -137,7 +148,7 @@ Modules live under `terraform/<provider>/modules/` (e.g., `terraform/oci/modules
 
 ### Kubernetes Namespaces
 
-Top-level `_base/` directories align with namespaces:
+Namespaces live in `kubernetes/infrastructure/configs/namespaces/`. Mapping:
 - `core/` → networking, secrets, DNS (1password-connect, cloudflared, external-dns)
 - `database/` → postgres, stateful systems
 - `media/` → media apps (sonarr, radarr, etc. w/ gluetun sidecars)
@@ -145,7 +156,7 @@ Top-level `_base/` directories align with namespaces:
 - `observability/` → monitoring (Prometheus metrics in opencost, fluent-bit)
 - `kube-system/` → cluster infrastructure
 
-**Sidecar Component Pattern**: Media apps use Kustomize components to inject gluetun/wireguard sidecars for VPN bypass (e.g., `kubectl apply -k kubernetes/_clusters/firefly/media/radarr`).
+**Sidecar Component Pattern**: Media apps use Kustomize components to inject gluetun/wireguard sidecars for VPN bypass (e.g., `kubectl apply -k kubernetes/clusters/firefly/media/radarr`).
 
 ### Resource Profiles (Cloud Flavor Equivalents)
 
@@ -154,7 +165,7 @@ AWS-style naming mapped to Raspberry Pi constraints (requests → limits):
 - `c.medium` → cpu 500m → 2, memory 1Gi → 4Gi  (compute-optimised, 1:2)
 - `m.large` → cpu 1 → 4, memory 4Gi → 16Gi  (memory-optimised, 1:4)
 
-Full table in `kubernetes/_components/resource-profiles/kustomization.yaml` (5 families × 8 sizes: `p.*` 2:1 cpu/mem, `t.*` 1:1, `c.*` 1:2, `m.*` 1:4, `r.*` 1:8 — each from `pico` to `2xlarge`). Patch deployments by labelling them with `resource-profile=<name>` and applying the component.
+Full table in `kubernetes/components/resource-profiles/kustomization.yaml` (5 families × 8 sizes: `p.*` 2:1 cpu/mem, `t.*` 1:1, `c.*` 1:2, `m.*` 1:4, `r.*` 1:8 — each from `pico` to `2xlarge`). Patch deployments by labelling them with `resource-profile=<name>` and applying the component.
 
 ## Integration Points & Dependencies
 
@@ -165,8 +176,8 @@ Full table in `kubernetes/_components/resource-profiles/kustomization.yaml` (5 f
 | Google Cloud | Terraform state backend (GCS bucket `${company}-${environment}-terraform-state`, per `terraform/root.hcl`) | `terraform/root.hcl` remote_state |
 | OCI (Oracle) | Cloud infrastructure provisioning | `terraform/oci/` + env vars: OCI_TENANCY_OCID, OCI_USER_OCID, etc. |
 | Cloudflare | DNS automation, edge (external-dns plugin) | `terraform/cloudflare/` |
-| 1Password Connect | Secret injection into Kubernetes | `kubernetes/_base/core/1password-connect/` |
-| Flux GitRepository | Git polling for deployments | `kubernetes/_clusters/firefly/flux-system/` defines git URLs |
+| 1Password Connect | Secret injection into Kubernetes | `kubernetes/infrastructure/controllers/stack/1password-connect/` |
+| Flux GitRepository | Git polling for deployments | `kubernetes/clusters/firefly/flux-system/` defines git URLs |
 
 ### Cross-Component Communication
 
@@ -180,7 +191,7 @@ All PostgreSQL workloads run through **one shared CloudNativePG (CNPG) cluster**
 
 ### The Single-Instance Rule
 
-- The shared cluster is defined in `kubernetes/_base/database/postgres/cluster.yaml` (`name: postgres`, `namespace: database`)
+- The shared cluster is defined in `kubernetes/infrastructure/services/stack/postgres/cluster.yaml` (`name: postgres`, `namespace: database`)
 - When an app needs a database, create a new **database + user** inside the existing cluster — not a new `Cluster` resource
 - Services available to apps:
   - Read-write: `postgres-rw.database.svc.cluster.local:5432`
@@ -214,7 +225,7 @@ spec:
 
 **If you encounter an app using SQLite, migrate it to CNPG.** SQLite binds data to a single disk and breaks portability, HA, and backups. It is not acceptable for persistent workloads in this cluster.
 
-- Known outstanding migration: Home Assistant (`kubernetes/_base/automation/homeassistant/daemonset.yaml`) — marked `# todo: move from sqlite to postgres`
+- Known outstanding migration: Home Assistant (`kubernetes/apps/homeassistant/base/homeassistant/daemonset.yaml`) — marked `# todo: move from sqlite to postgres`
 - When migrating, provision a new database in the shared cluster (see pattern above), update the app's connection env vars to point at `postgres-rw.database.svc.cluster.local`, and remove any SQLite volume mounts
 - If the app doesn't natively support PostgreSQL, check for a supported adapter/plugin before assuming SQLite is the only option
 
@@ -229,9 +240,9 @@ spec:
 
 ### Before Editing Kubernetes Manifests
 
-- Changes to `_base/` affect all clusters
-- Changes to `_clusters/firefly/` affect only firefly
-- Run `kustomize build kubernetes/_clusters/firefly` to validate
+- Changes to `kubernetes/infrastructure/` or `kubernetes/components/` are cluster-agnostic (would affect any cluster reconciled from this repo)
+- Changes to `clusters/firefly/` affect only firefly
+- Run `kustomize build kubernetes/clusters/firefly` to validate
 - Test labels match resource profiles/node selectors
 - Encrypted secrets: remember `.enc.yaml` suffix
 
@@ -262,7 +273,7 @@ This is **not** generic Kubernetes:
 | `atlantis.yaml` | Terraform PR automation config |
 | `ATLANTIS_SETUP.md` | Deployment and secret setup guide |
 | `terraform/root.hcl` | Terragrunt inheritance root + version pins |
-| `kubernetes/_clusters/firefly/kustomization.yaml` | Entry point for cluster deployment |
+| `kubernetes/clusters/firefly/kustomization.yaml` | Entry point for cluster deployment |
 | `ansible/hosts.yaml` | Inventory (IP addresses, groups) |
 
 ## Public Repository — Security Rules (Non-Negotiable)
@@ -300,7 +311,7 @@ This applies to all work: new Kubernetes apps, Terraform modules, Ansible roles,
 
 1. Read `README.md` for high-level overview
 2. Explore `terraform/root.hcl` to understand version pinning + state management
-3. Inspect `kubernetes/_clusters/firefly/kustomization.yaml` and one `_base/` app (e.g., `_base/core/cloudflared/`)
+3. Inspect `kubernetes/clusters/firefly/kustomization.yaml` and one infrastructure component (e.g., `kubernetes/infrastructure/services/stack/cloudflared/`)
 4. Check `.pre-commit-config.yaml` to understand validation before commits
 5. Reference `.github/copilot-instructions.md` for detailed style/standards
 
@@ -330,7 +341,7 @@ Given the infrastructure-as-code nature of this project, treat the following as 
 - Hardcoded credentials or IP addresses that should use variables/inventory
 - Terraform resources missing required outputs or using deprecated syntax
 - Ansible tasks lacking `name:` fields or using non-idempotent shell commands without `creates:`/`changed_when:`
-- Kustomize `_base/` changes that unintentionally affect all clusters
+- Kustomize `kubernetes/infrastructure/` or `components/` changes that unintentionally affect any consuming cluster
 - Direct edits to auto-generated files (`backend.tf`, `provider.tf`)
 
 ### What to Ignore

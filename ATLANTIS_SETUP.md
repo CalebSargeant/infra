@@ -17,7 +17,7 @@ This PR sets up Terraform Atlantis on the firefly Kubernetes cluster for automat
 - **kustomization.yaml** - Kustomize configuration for base resources
 - **README.md** - Quick reference guide
 
-#### Cluster Configuration (`kubernetes/_clusters/firefly/automation/atlantis/`)
+#### Cluster Configuration (`kubernetes/clusters/firefly/automation/atlantis/`)
 - **kustomization.yaml** - Firefly-specific configuration with resource profiles
 
 #### Repository Configuration
@@ -87,7 +87,7 @@ resources:
 ### 3. Deploy to Cluster
 
 ```bash
-kubectl apply -k kubernetes/_clusters/firefly/automation/atlantis
+kubectl apply -k kubernetes/clusters/firefly/automation/atlantis
 ```
 
 ### 4. Configure GitHub Webhook
