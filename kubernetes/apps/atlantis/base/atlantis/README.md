@@ -57,7 +57,9 @@ The same vault/`ClusterSecretStore` is already wired (see `kubernetes/_base/core
 
 ## GCP service account (required for any terragrunt project with GCS state)
 
-All terragrunt projects in this repo use a GCS backend (`sargeant-prod-terraform-state`) and the google provider impersonates `deployer@magmamoose-terraform.iam.gserviceaccount.com`. Atlantis needs a service-account key to (a) read/write the state bucket and (b) mint impersonation tokens for the deployer SA. Without this, terragrunt fails at dependency resolution with `Backend initialization required` → cascading `Unknown variable: dependency` errors.
+All GCP terragrunt projects in this repo use a GCS backend (`sargeant-prod-terraform-state`) and the google provider impersonates `deployer@magmamoose-terraform.iam.gserviceaccount.com`. Atlantis needs a service-account key to (a) read/write the state bucket and (b) mint impersonation tokens for the deployer SA. Without this, terragrunt fails at dependency resolution with `Backend initialization required` → cascading `Unknown variable: dependency` errors.
+
+> **Note:** The legacy `gcp-prod-project` Atlantis project (defined in `atlantis.yaml`) uses a different state bucket (`terraform-state-firefly`) via its own Terragrunt include chain. Cloudflare-only leaves do not use the google provider at all and therefore do not need this GCP SA key. The `atlantis@magmamoose-terraform.iam.gserviceaccount.com` SA is only required for projects that use GCS state and/or the google provider.
 
 Atlantis runs as the dedicated **`atlantis@magmamoose-terraform.iam.gserviceaccount.com`** SA with least-privilege bindings:
 
