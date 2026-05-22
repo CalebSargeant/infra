@@ -317,8 +317,8 @@ resource "cloudflare_zero_trust_access_policy" "mikrotik_minder_pro_caleb" {
 # posture rules need a WARP-enrolled device Caleb doesn't have), and Zoey is
 # a companion dashboard Caleb will want from his phone too.
 #
-# The Slack interaction webhook (/api/v1/slack/*) is carved out by the
-# separate bypass app below — Slack's POSTs can't carry an Access cookie.
+# The Slack interaction webhook (/api/v1/slack/interaction) is carved out by
+# the separate bypass app below — Slack's POSTs can't carry an Access cookie.
 resource "cloudflare_zero_trust_access_application" "zoey" {
   account_id                = var.account_id
   name                      = "Zoey"
@@ -358,7 +358,7 @@ resource "cloudflare_zero_trust_access_application" "zoey_slack" {
   account_id                = var.account_id
   name                      = "Zoey — Slack webhook"
   type                      = "self_hosted"
-  domain                    = "zoey.sargeant.co/api/v1/slack"
+  domain                    = "zoey.sargeant.co/api/v1/slack/interaction"
   tags                      = ["Sargeant"]
   app_launcher_visible      = false
   auto_redirect_to_identity = false
