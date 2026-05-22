@@ -227,9 +227,10 @@ resource "cloudflare_zero_trust_access_policy" "app_launcher_magma" {
 # The comment-commander-pro dashboard (firefly cluster, behind the firefly
 # cloudflared tunnel — ingress in tunnels.tf, CNAME in dns-magmamoose/prod).
 # The dashboard has no in-app auth or paywall yet (MVP), so Access is the
-# only thing gating it: Caleb-only, with the same macOS device-posture
-# requirement used for Radarr/Overseerr. Tighten/loosen when real auth +
-# the paid tier land (see the app repo's ROADMAP.md).
+# only thing gating it: Caleb-only. No device-posture `require` — the posture
+# rules need a WARP-enrolled device and Caleb has none, so requiring it would
+# be a hard lockout. Tighten when real auth + the paid tier land (see the app
+# repo's ROADMAP.md).
 resource "cloudflare_zero_trust_access_application" "comment_commander_pro" {
   account_id                = var.account_id
   name                      = "Comment Commander Pro"
@@ -257,12 +258,5 @@ resource "cloudflare_zero_trust_access_policy" "comment_commander_pro_caleb" {
 
   include {
     group = [cloudflare_zero_trust_access_group.caleb.id]
-  }
-
-  require {
-    device_posture = [
-      cloudflare_zero_trust_device_posture_rule.mac_disk_encryption.id,
-      cloudflare_zero_trust_device_posture_rule.mac_os_version.id,
-    ]
   }
 }
