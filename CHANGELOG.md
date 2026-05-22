@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.33.1 (2026-05-22)
+
+### Bug Fixes
+
+- **firefly**: Point comment-commander Flux auth at the MagmaMoose App installation
+  ([#257](https://github.com/CalebSargeant/infra/pull/257),
+  [`a9a6693`](https://github.com/CalebSargeant/infra/commit/a9a6693a2c32ac0cd7a2eeab10bcdf9257843ca9))
+
+
 ## v1.33.0 (2026-05-22)
 
 ### Features
