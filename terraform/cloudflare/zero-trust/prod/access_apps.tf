@@ -308,3 +308,70 @@ resource "cloudflare_zero_trust_access_policy" "mikrotik_minder_pro_caleb" {
     ]
   }
 }
+
+# --- self_hosted: Zoey ------------------------------------------------------
+# Zoey — the project-intelligence dashboard (firefly cluster, behind the
+# firefly cloudflared tunnel — ingress in tunnels.tf). The app has no in-app
+# auth, so Access is the only thing gating the UI: Caleb-only. No
+# device-posture `require` — same reasoning as comment-commander-pro (the
+# posture rules need a WARP-enrolled device Caleb doesn't have), and Zoey is
+# a companion dashboard Caleb will want from his phone too.
+#
+# The Slack interaction webhook (/api/v1/slack/interaction) is carved out by
+# the separate bypass app below — Slack's POSTs can't carry an Access cookie.
+resource "cloudflare_zero_trust_access_application" "zoey" {
+  account_id                = var.account_id
+  name                      = "Zoey"
+  type                      = "self_hosted"
+  domain                    = "zoey.sargeant.co"
+  tags                      = ["Sargeant"]
+  app_launcher_visible      = true
+  auto_redirect_to_identity = false
+  session_duration          = "24h"
+
+  allowed_idps = [
+    cloudflare_zero_trust_access_identity_provider.google_workspace.id,
+    cloudflare_zero_trust_access_identity_provider.one_time_pin.id,
+    cloudflare_zero_trust_access_identity_provider.google.id,
+  ]
+}
+
+resource "cloudflare_zero_trust_access_policy" "zoey_caleb" {
+  account_id       = var.account_id
+  application_id   = cloudflare_zero_trust_access_application.zoey.id
+  name             = "Caleb"
+  decision         = "allow"
+  precedence       = 1
+  session_duration = "24h"
+
+  include {
+    group = [cloudflare_zero_trust_access_group.caleb.id]
+  }
+}
+
+# Bypass app for Zoey's Slack interaction webhook. Cloudflare Access matches
+# the most-specific path first, so POSTs to /api/v1/slack/interaction hit
+# this bypass app instead of the Caleb gate above. Slack can't authenticate
+# through Access; the endpoint verifies the Slack v0 HMAC signature itself
+# (SLACK_SIGNING_SECRET), so unauthenticated reachability is safe here.
+resource "cloudflare_zero_trust_access_application" "zoey_slack" {
+  account_id                = var.account_id
+  name                      = "Zoey — Slack webhook"
+  type                      = "self_hosted"
+  domain                    = "zoey.sargeant.co/api/v1/slack/interaction"
+  tags                      = ["Sargeant"]
+  app_launcher_visible      = false
+  auto_redirect_to_identity = false
+}
+
+resource "cloudflare_zero_trust_access_policy" "zoey_slack_bypass" {
+  account_id     = var.account_id
+  application_id = cloudflare_zero_trust_access_application.zoey_slack.id
+  name           = "Slack webhook bypass"
+  decision       = "bypass"
+  precedence     = 1
+
+  include {
+    everyone = true
+  }
+}
