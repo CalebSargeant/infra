@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.31.0 (2026-05-22)
+
+### Features
+
+- Register OpenViking with Flux on firefly ([#252](https://github.com/CalebSargeant/infra/pull/252),
+  [`f623940`](https://github.com/CalebSargeant/infra/commit/f623940b688313364068c83f099a555440a736a9))
+
+
 ## v1.30.1 (2026-05-22)
 
 ### Bug Fixes
