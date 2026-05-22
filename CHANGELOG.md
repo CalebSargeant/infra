@@ -2,6 +2,29 @@
 
 <!-- version list -->
 
+## v1.30.0 (2026-05-22)
+
+### Bug Fixes
+
+- **cloudflare**: Scope Slack webhook bypass to /interaction path
+  ([#250](https://github.com/CalebSargeant/infra/pull/250),
+  [`8b7abf5`](https://github.com/CalebSargeant/infra/commit/8b7abf510c91f9cef32812f18a36ca1797a34fe9))
+
+- **cloudflare**: Tighten zoey ingress path regex to avoid false matches
+  ([#250](https://github.com/CalebSargeant/infra/pull/250),
+  [`8b7abf5`](https://github.com/CalebSargeant/infra/commit/8b7abf510c91f9cef32812f18a36ca1797a34fe9))
+
+### Features
+
+- **ztna**: Expose Zoey via firefly tunnel + gate the UI with Access
+  ([#250](https://github.com/CalebSargeant/infra/pull/250),
+  [`8b7abf5`](https://github.com/CalebSargeant/infra/commit/8b7abf510c91f9cef32812f18a36ca1797a34fe9))
+
+- **ztna**: Expose Zoey via firefly tunnel + gate UI with Access
+  ([#250](https://github.com/CalebSargeant/infra/pull/250),
+  [`8b7abf5`](https://github.com/CalebSargeant/infra/commit/8b7abf510c91f9cef32812f18a36ca1797a34fe9))
+
+
 ## v1.29.1 (2026-05-22)
 
 ### Bug Fixes
