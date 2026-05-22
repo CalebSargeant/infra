@@ -2,6 +2,45 @@
 
 <!-- version list -->
 
+## v1.33.2 (2026-05-22)
+
+### Bug Fixes
+
+- **kustomization**: Correct comment about vpn-gateway removal
+  ([#261](https://github.com/CalebSargeant/infra/pull/261),
+  [`a2025bb`](https://github.com/CalebSargeant/infra/commit/a2025bb5e4a9fce6fd3b2ad60d3f73d1dcfabd72))
+
+- **structure**: Drop vpn-gateway from infrastructure-services
+  ([#261](https://github.com/CalebSargeant/infra/pull/261),
+  [`a2025bb`](https://github.com/CalebSargeant/infra/commit/a2025bb5e4a9fce6fd3b2ad60d3f73d1dcfabd72))
+
+### Chores
+
+- **deps**: Bump docker/setup-buildx-action from 4.0.0 to 4.1.0
+  ([#262](https://github.com/CalebSargeant/infra/pull/262),
+  [`e212392`](https://github.com/CalebSargeant/infra/commit/e212392911c4276adc6472f7fe38c8edc107fd3d))
+
+- **structure**: Delete dead legacy dirs for the 30 migrated apps
+  ([#259](https://github.com/CalebSargeant/infra/pull/259),
+  [`3710753`](https://github.com/CalebSargeant/infra/commit/3710753af0fb5e44f202c75a7b1534225be926ea))
+
+- **structure**: Delete dead legacy dirs for the 30 migrated apps
+  ([#258](https://github.com/CalebSargeant/infra/pull/258),
+  [`58c04e4`](https://github.com/CalebSargeant/infra/commit/58c04e4cfae4e2e9ecda4a87399b7dab4ff940ac))
+
+- **structure**: Migrate core+database to infrastructure/ tier (Phase C)
+  ([#260](https://github.com/CalebSargeant/infra/pull/260),
+  [`7b41adc`](https://github.com/CalebSargeant/infra/commit/7b41adc7fb6f286ab3e4abf8cab6dda871a728af))
+
+- **structure**: Phase B — relocate shared deps, archive orphans
+  ([#259](https://github.com/CalebSargeant/infra/pull/259),
+  [`3710753`](https://github.com/CalebSargeant/infra/commit/3710753af0fb5e44f202c75a7b1534225be926ea))
+
+- **structure**: Relocate shared deps, archive orphan bases
+  ([#259](https://github.com/CalebSargeant/infra/pull/259),
+  [`3710753`](https://github.com/CalebSargeant/infra/commit/3710753af0fb5e44f202c75a7b1534225be926ea))
+
+
 ## v1.33.1 (2026-05-22)
 
 ### Bug Fixes
