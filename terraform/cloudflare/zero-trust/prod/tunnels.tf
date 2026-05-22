@@ -88,7 +88,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
     # second. cloudflared evaluates ingress rules top-to-bottom.
     ingress_rule {
       hostname = "zoey.sargeant.co"
-      path     = "^/(api|mcp|health)"
+      path     = "^/(api|mcp|health)(/|$)"
       service  = "http://zoey-backend.zoey.svc.cluster.local:8000"
       origin_request {}
     }
