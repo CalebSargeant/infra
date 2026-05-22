@@ -5,6 +5,10 @@ resources:
   - minio
   - external-dns-cloudflare
   - external-dns-mikrotik
-  - vpn-gateway
+  # vpn-gateway removed: its privado-vpn-credentials ExternalSecret has no
+  # backing OCI Vault secret (SecretSyncedError) so the gluetun pod can't
+  # start — and with wait:true it stalled the whole services tier. It was
+  # never GitOps-deployed pre-migration anyway; manifests removed from repo.
+  # To bring it back: upload the privado creds to OCI Vault, restore the dir, re-add.
   - postgres
   - mariadb
