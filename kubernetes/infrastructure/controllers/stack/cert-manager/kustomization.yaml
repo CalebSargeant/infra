@@ -3,7 +3,7 @@ kind: Kustomization
 metadata:
   name: core
 resources:
-  - ../../../../_base/core/cert-manager
+  - ./base
 components:
   - ../../../../components/resource-profiles/t.nano
   - ../../../../components/node-selectors/pi

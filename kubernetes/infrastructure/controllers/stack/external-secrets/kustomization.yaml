@@ -5,7 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 resources:
-  - ../../../../_base/core/external-secrets
+  - ./base
   - oci-vault-secret-enc.yaml
   - secret-store.yaml
 patches:

@@ -1,0 +1,7 @@
+# Holder: emits the infrastructure-configs Flux Kustomization CR.
+# Kept separate from namespaces/ (the CR's path target) so the CR isn't
+# rendered as one of its own resources.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - flux-kustomization.yaml

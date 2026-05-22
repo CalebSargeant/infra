@@ -1,0 +1,10 @@
+# Infrastructure tier — rendered by the cluster-level `apps` Flux
+# Kustomization (kubernetes/clusters/firefly → ../../infrastructure).
+# Emits the three per-tier Flux Kustomization CRs; the actual manifests
+# under each <tier>/stack are applied by those CRs (path → <tier>/stack).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./configs
+  - ./controllers
+  - ./services

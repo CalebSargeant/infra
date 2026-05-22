@@ -1,0 +1,35 @@
+---
+# Operators / controllers: cert-manager, external-secrets,
+# 1password-connect, cloudnative-pg. Gates the app + services tiers —
+# every ExternalSecret-backed workload needs external-secrets +
+# 1password-connect healthy first.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infrastructure-controllers
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/sops: enabled
+spec:
+  interval: 10m
+  path: ./kubernetes/infrastructure/controllers/stack
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 5m
+  wait: true
+  dependsOn:
+    - name: infrastructure-configs
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-keys
+  # Carried over from the legacy `cloudnative-pg` Kustomization — the
+  # operator Deployment must be Ready before infrastructure-services
+  # (which contains the Postgres cluster) reconciles.
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: cloudnative-pg-controller-manager
+      namespace: cloudnative-pg
