@@ -42,6 +42,7 @@ k3s.yaml
 # ExternalSecret CRs only reference secrets in OCI Vault / 1Password — they
 # contain no secret material themselves, so they are safe to commit.
 !externalsecret.yaml
+!github-app-magmamoose-secret.yaml
 
 ansible/vars
 
