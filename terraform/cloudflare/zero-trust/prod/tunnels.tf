@@ -77,6 +77,27 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # Zoey — project-intelligence dashboard (firefly cluster). Public so
+    # Slack's interaction webhook can POST to /api/v1/slack/interaction;
+    # the UI is gated by the Zoey Cloudflare Access app (access_apps.tf),
+    # the /api/v1/slack/* path bypassed there. Pairs with the proxied
+    # CNAME external-dns publishes from the k8s Ingress
+    # (zoey repo: k8s/base/ingress.yaml → target=<firefly-tunnel>).
+    #
+    # Two rules: backend paths first (more specific), frontend catch-all
+    # second. cloudflared evaluates ingress rules top-to-bottom.
+    ingress_rule {
+      hostname = "zoey.sargeant.co"
+      path     = "^/(api|mcp|health)"
+      service  = "http://zoey-backend.zoey.svc.cluster.local:8000"
+      origin_request {}
+    }
+    ingress_rule {
+      hostname = "zoey.sargeant.co"
+      service  = "http://zoey-frontend.zoey.svc.cluster.local:3000"
+      origin_request {}
+    }
+
     # Cloudflared requires the last rule to be a catch-all with no hostname.
     ingress_rule {
       service = "http_status:404"
