@@ -12,6 +12,7 @@ resources:
   - buxfer-sync.yaml
   - deskbird-booking.yaml
   - comment-commander.yaml
+  - comment-commander-pro.yaml
   - notifications.yaml
   - zoey.yaml
 components:

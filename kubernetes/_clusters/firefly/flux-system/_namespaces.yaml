@@ -12,3 +12,10 @@ metadata:
   name: comment-commander
   labels:
     goldilocks.fairwinds.com/enabled: "true"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: comment-commander-pro
+  labels:
+    goldilocks.fairwinds.com/enabled: "true"
