@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.31.1 (2026-05-22)
+
+### Bug Fixes
+
+- **atlantis**: Repoint Terraform GCP auth at dedicated atlantis@ SA
+  ([#253](https://github.com/CalebSargeant/infra/pull/253),
+  [`be04d30`](https://github.com/CalebSargeant/infra/commit/be04d3008be6e370019871a29db7ced0e6544196))
+
+### Documentation
+
+- **atlantis**: Clarify GCP SA key scope and legacy state bucket
+  ([#253](https://github.com/CalebSargeant/infra/pull/253),
+  [`be04d30`](https://github.com/CalebSargeant/infra/commit/be04d3008be6e370019871a29db7ced0e6544196))
+
+
 ## v1.31.0 (2026-05-22)
 
 ### Features
