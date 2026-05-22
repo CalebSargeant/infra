@@ -354,7 +354,7 @@ resource "cloudflare_zero_trust_access_application" "zoey_slack" {
   account_id                = var.account_id
   name                      = "Zoey — Slack webhook"
   type                      = "self_hosted"
-  domain                    = "zoey.sargeant.co/api/v1/slack"
+  domain                    = "zoey.sargeant.co/api/v1/slack/"
   tags                      = ["Sargeant"]
   app_launcher_visible      = false
   auto_redirect_to_identity = false
