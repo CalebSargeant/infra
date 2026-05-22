@@ -21,6 +21,14 @@ spec:
   upgrade:
     remediation:
       retries: 3
+  # The agent's git deploy key comes from the mikrotik-minder-agent-git-deploy-key
+  # ExternalSecret and is injected as git.sshKey — the chart renders it into the
+  # git-ssh Secret it mounts. Keeps the private key out of this public repo.
+  valuesFrom:
+    - kind: Secret
+      name: mikrotik-minder-agent-git-deploy-key
+      valuesKey: sshKey
+      targetPath: git.sshKey
   values:
     image:
       # Chart's appVersion is the agent's __version__ (e.g. "0.0.1"), but the
@@ -45,6 +53,14 @@ spec:
         connect_timeout_seconds: 8
       git:
         repo: /var/lib/mikrotik-minder/configs
+        # Push every /export commit to the private config repo the Pro app's
+        # config browser reads. The SSH deploy key is mounted at ssh_key_path
+        # by the chart (see valuesFrom above).
+        remote:
+          url: git@github.com:CalebSargeant/mikrotik-configs.git
+          branch: main
+          ssh_key_path: /etc/mikrotik-minder/ssh/git_deploy
+          push: true
       backup:
         dir: /var/lib/mikrotik-minder/backups
         password_env: MTM_BACKUP_PASSWORD
