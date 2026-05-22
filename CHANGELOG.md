@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.29.1 (2026-05-22)
+
+### Bug Fixes
+
+- **ztna**: Drop device-posture require from comment-commander-pro Access policy
+  ([#249](https://github.com/CalebSargeant/infra/pull/249),
+  [`e99fb0f`](https://github.com/CalebSargeant/infra/commit/e99fb0fcd09b1e8571ee8b15c7947013112eda21))
+
+
 ## v1.29.0 (2026-05-22)
 
 ### Features
