@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.29.0 (2026-05-22)
+
+### Features
+
+- **ztna**: Gate Mikrotik Minder Pro behind Access
+  ([#248](https://github.com/CalebSargeant/infra/pull/248),
+  [`ea21e22`](https://github.com/CalebSargeant/infra/commit/ea21e222e0c0f444f14d0ef5eca92cb01a81a627))
+
+
 ## v1.28.0 (2026-05-22)
 
 ### Features
