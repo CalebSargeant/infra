@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.30.1 (2026-05-22)
+
+### Bug Fixes
+
+- **ztna**: Drop device-posture require from Mikrotik Minder Pro Access policy
+  ([#251](https://github.com/CalebSargeant/infra/pull/251),
+  [`50cf0f4`](https://github.com/CalebSargeant/infra/commit/50cf0f45feaffb992625edc3f0459ca39fdde25d))
+
+
 ## v1.30.0 (2026-05-22)
 
 ### Bug Fixes
