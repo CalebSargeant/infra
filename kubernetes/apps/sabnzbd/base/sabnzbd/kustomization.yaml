@@ -7,6 +7,6 @@ resources:
   - pvc.yaml
   - pv.yaml
 components:
-  - ../../../../_components/vpn-routed-proxy
-  - ../../../../_components/resource-profiles/c.micro
-  - ../../../../_components/node-selectors/mini
+  - ../../../../components/vpn-routed-proxy
+  - ../../../../components/resource-profiles/c.micro
+  - ../../../../components/node-selectors/mini

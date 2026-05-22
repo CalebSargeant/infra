@@ -8,5 +8,5 @@ resources:
   - pv.yaml
   - secret.enc.yaml
 components:
-  - ../../../../_components/resource-profiles/c.small
-  - ../../../../_components/node-selectors/pi
+  - ../../../../components/resource-profiles/c.small
+  - ../../../../components/node-selectors/pi

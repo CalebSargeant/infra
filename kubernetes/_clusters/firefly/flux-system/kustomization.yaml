@@ -17,7 +17,7 @@ resources:
   - notifications.yaml
   - zoey.yaml
 components:
-  - ../../../_components/node-selectors/pi
+  - ../../../components/node-selectors/pi
 # Note: Removed t.nano resource profile - flux controllers need more resources
 # source-controller needs ~300Mi, kustomize-controller needs ~250Mi
 # Using default flux resources from gotk-components.yaml
