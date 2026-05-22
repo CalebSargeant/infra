@@ -1,0 +1,25 @@
+---
+# Platform services: cloudflared, minio, external-dns (cloudflare +
+# mikrotik), vpn-gateway, and the Postgres / MariaDB instances.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infrastructure-services
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/sops: enabled
+spec:
+  interval: 10m
+  path: ./kubernetes/infrastructure/services/stack
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 5m
+  wait: true
+  dependsOn:
+    - name: infrastructure-controllers
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-keys

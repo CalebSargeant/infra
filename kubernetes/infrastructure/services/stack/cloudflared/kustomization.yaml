@@ -3,5 +3,5 @@ kind: Kustomization
 metadata:
   name: cloudflared
 resources:
-  - ../../../../_base/core/cloudflared
+  - ./base
 

@@ -19,7 +19,9 @@ spec:
     secretRef:
       name: sops-keys
   dependsOn:
-    - name: database
+    # Was `database` — re-pointed in Phase C; the legacy core/database
+    # Kustomizations are suspended below, superseded by infrastructure-*.
+    - name: infrastructure-services
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -41,8 +43,14 @@ spec:
     secretRef:
       name: sops-keys
   dependsOn:
-    - name: core
+    # Was `core` — re-pointed in Phase C (see note above).
+    - name: infrastructure-services
 ---
+# SUSPENDED in Phase C — superseded by the infrastructure-controllers /
+# infrastructure-services Kustomizations (kubernetes/infrastructure/).
+# Left in place (suspended, not deleted) for one reconcile cycle so the
+# new tier can be confirmed healthy. The follow-up cleanup PR deletes
+# this entry and the ./kubernetes/_clusters/firefly/core path.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -51,6 +59,7 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 spec:
+  suspend: true
   interval: 10m
   path: ./kubernetes/_clusters/firefly/core
   prune: true
@@ -67,12 +76,15 @@ spec:
   dependsOn:
     - name: flux-system
 ---
+# SUSPENDED in Phase C — superseded by infrastructure-controllers
+# (cloudnative-pg now lives in kubernetes/infrastructure/controllers/).
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: cloudnative-pg
   namespace: flux-system
 spec:
+  suspend: true
   interval: 10m
   path: ./kubernetes/_clusters/firefly/database/cloudnative-pg
   prune: true
@@ -89,6 +101,8 @@ spec:
       name: cloudnative-pg-controller-manager
       namespace: cloudnative-pg
 ---
+# SUSPENDED in Phase C — superseded by infrastructure-services
+# (postgres + mariadb now live in kubernetes/infrastructure/services/).
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -97,6 +111,7 @@ metadata:
   labels:
     app.kubernetes.io/sops: enabled
 spec:
+  suspend: true
   interval: 10m
   path: ./kubernetes/_clusters/firefly/database
   prune: true
@@ -132,7 +147,8 @@ spec:
     secretRef:
       name: sops-keys
   dependsOn:
-    - name: database
+    # Was `database` — re-pointed in Phase C.
+    - name: infrastructure-services
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -284,7 +300,8 @@ spec:
   timeout: 5m
   wait: true
   dependsOn:
-    - name: core
+    # Was `core` — re-pointed in Phase C.
+    - name: infrastructure-services
 ---
 # comment-commander-pro — web dashboard / observability frontend for
 # comment-commander. Secret (CC_TRIGGER_TOKEN) comes from OCI Vault via
@@ -305,7 +322,8 @@ spec:
   timeout: 5m
   wait: true
   dependsOn:
-    - name: core
+    # Was `core` — re-pointed in Phase C.
+    - name: infrastructure-services
 ---
 # Zoey — DB secret is mirrored from CNPG's `postgres-app` and the ghcr pull
 # secret is mirrored from flux-system, both via external-secrets' kubernetes
@@ -326,8 +344,10 @@ spec:
   timeout: 5m
   wait: true
   dependsOn:
-    - name: core
-    - name: database
+    # Was [core, database] — re-pointed in Phase C; infrastructure-services
+    # transitively depends on -controllers, so this still gates on the full
+    # infra tier (cert-manager, external-secrets, cloudnative-pg, postgres).
+    - name: infrastructure-services
 ---
 # OpenViking — context database backing Zoey's MCP server. Its manifests live
 # in the zoey repo under ./k8s-openviking (same GitRepository as `zoey`, just a
@@ -350,14 +370,14 @@ spec:
   timeout: 5m
   wait: true
   dependsOn:
-    - name: core
+    # Was `core` — re-pointed in Phase C.
+    - name: infrastructure-services
 ---
 # Phase 2: wraps the new infra-v2-style layout in kubernetes/clusters/firefly.
-# Its output is just the per-app Flux Kustomization CRs (currently only
-# prod-excalidraw, which is itself suspend: true). No app resources cross
-# this Kustomization — those are applied by each per-app Flux Kustomization.
-# Each per-app Kust must be unsuspended individually to actually take over
-# from the corresponding entry in the legacy _clusters/firefly/<cat>/ path.
+# Its output is the per-app Flux Kustomization CRs (apps/) plus, since Phase C,
+# the infrastructure-configs / -controllers / -services Kustomization CRs
+# (infrastructure/). No app/infra resources cross this Kustomization itself —
+# those are applied by each emitted per-app / per-tier Flux Kustomization.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
