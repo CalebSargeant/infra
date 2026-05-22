@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.33.0 (2026-05-22)
+
+### Features
+
+- **mikrotik-minder**: Push agent /export history to a private git remote
+  ([#256](https://github.com/CalebSargeant/infra/pull/256),
+  [`fbe5699`](https://github.com/CalebSargeant/infra/commit/fbe5699e44c2f2e5573d3c7b77a542428530b597))
+
+
 ## v1.32.0 (2026-05-22)
 
 ### Bug Fixes
