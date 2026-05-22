@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.27.0 (2026-05-22)
+
+### Bug Fixes
+
+- **flux**: Suspend comment-commander-pro GitRepository until GitHub App access is granted
+  ([#246](https://github.com/CalebSargeant/infra/pull/246),
+  [`10ece15`](https://github.com/CalebSargeant/infra/commit/10ece1579761be38b61d99a09953b4c279c0b0aa))
+
+### Features
+
+- **firefly**: Deploy comment-commander-pro
+  ([#246](https://github.com/CalebSargeant/infra/pull/246),
+  [`10ece15`](https://github.com/CalebSargeant/infra/commit/10ece1579761be38b61d99a09953b4c279c0b0aa))
+
+
 ## v1.26.2 (2026-05-21)
 
 ### Bug Fixes
