@@ -312,7 +312,7 @@ resource "cloudflare_zero_trust_access_policy" "mikrotik_minder_pro_caleb" {
 # posture rules need a WARP-enrolled device Caleb doesn't have), and Zoey is
 # a companion dashboard Caleb will want from his phone too.
 #
-# The Slack interaction webhook (/api/v1/slack/interaction) is carved out by
+# Zoey's Slack webhooks (everything under /api/v1/slack/) are carved out by
 # the separate bypass app below — Slack's POSTs can't carry an Access cookie.
 resource "cloudflare_zero_trust_access_application" "zoey" {
   account_id                = var.account_id
@@ -344,16 +344,17 @@ resource "cloudflare_zero_trust_access_policy" "zoey_caleb" {
   }
 }
 
-# Bypass app for Zoey's Slack interaction webhook. Cloudflare Access matches
-# the most-specific path first, so POSTs to /api/v1/slack/interaction hit
-# this bypass app instead of the Caleb gate above. Slack can't authenticate
-# through Access; the endpoint verifies the Slack v0 HMAC signature itself
+# Bypass app for Zoey's Slack webhooks. Cloudflare Access matches the
+# most-specific path first, so POSTs under /api/v1/slack/ — the interaction
+# webhook and the app_mention events listener — hit this bypass app instead
+# of the Caleb gate above. Slack can't authenticate through Access; every
+# /api/v1/slack/* endpoint verifies the Slack v0 HMAC signature itself
 # (SLACK_SIGNING_SECRET), so unauthenticated reachability is safe here.
 resource "cloudflare_zero_trust_access_application" "zoey_slack" {
   account_id                = var.account_id
   name                      = "Zoey — Slack webhook"
   type                      = "self_hosted"
-  domain                    = "zoey.sargeant.co/api/v1/slack/interaction"
+  domain                    = "zoey.sargeant.co/api/v1/slack"
   tags                      = ["Sargeant"]
   app_launcher_visible      = false
   auto_redirect_to_identity = false
