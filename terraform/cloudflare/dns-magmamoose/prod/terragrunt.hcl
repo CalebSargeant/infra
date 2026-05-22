@@ -78,5 +78,16 @@ inputs = {
       value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
       proxied = true
     },
+    # comment-commander-pro dashboard (firefly cluster, k8s service
+    # comment-commander-pro.comment-commander-pro.svc.cluster.local:8000).
+    # Pairs with the ingress_rule in zero-trust/prod/tunnels.tf and the
+    # self_hosted Access app in zero-trust/prod/access_apps.tf. Proxied so
+    # the orange-cloud terminates TLS and enforces Access at the edge.
+    {
+      name    = "comment-commander-pro.magmamoose.com"
+      type    = "CNAME"
+      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
+      proxied = true
+    },
   ]
 }

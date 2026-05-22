@@ -67,6 +67,16 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # comment-commander-pro dashboard (firefly cluster). Gated by the
+    # self_hosted Cloudflare Access app in access_apps.tf (Caleb only —
+    # the dashboard has no in-app auth/paywall yet). Pairs with the proxied
+    # CNAME in dns-magmamoose/prod/terragrunt.hcl.
+    ingress_rule {
+      hostname = "comment-commander-pro.magmamoose.com"
+      service  = "http://comment-commander-pro.comment-commander-pro.svc.cluster.local:8000"
+      origin_request {}
+    }
+
     # Cloudflared requires the last rule to be a catch-all with no hostname.
     ingress_rule {
       service = "http_status:404"

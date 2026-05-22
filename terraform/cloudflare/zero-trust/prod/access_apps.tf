@@ -222,3 +222,47 @@ resource "cloudflare_zero_trust_access_policy" "app_launcher_magma" {
     group = [cloudflare_zero_trust_access_group.magma_moose_domain.id]
   }
 }
+
+# --- self_hosted: Comment Commander Pro -------------------------------------
+# The comment-commander-pro dashboard (firefly cluster, behind the firefly
+# cloudflared tunnel — ingress in tunnels.tf, CNAME in dns-magmamoose/prod).
+# The dashboard has no in-app auth or paywall yet (MVP), so Access is the
+# only thing gating it: Caleb-only, with the same macOS device-posture
+# requirement used for Radarr/Overseerr. Tighten/loosen when real auth +
+# the paid tier land (see the app repo's ROADMAP.md).
+resource "cloudflare_zero_trust_access_application" "comment_commander_pro" {
+  account_id                = var.account_id
+  name                      = "Comment Commander Pro"
+  type                      = "self_hosted"
+  domain                    = "comment-commander-pro.magmamoose.com"
+  tags                      = ["Magma Moose"]
+  app_launcher_visible      = true
+  auto_redirect_to_identity = false
+  session_duration          = "24h"
+
+  allowed_idps = [
+    cloudflare_zero_trust_access_identity_provider.google_workspace.id,
+    cloudflare_zero_trust_access_identity_provider.one_time_pin.id,
+    cloudflare_zero_trust_access_identity_provider.google.id,
+  ]
+}
+
+resource "cloudflare_zero_trust_access_policy" "comment_commander_pro_caleb" {
+  account_id       = var.account_id
+  application_id   = cloudflare_zero_trust_access_application.comment_commander_pro.id
+  name             = "Caleb"
+  decision         = "allow"
+  precedence       = 1
+  session_duration = "24h"
+
+  include {
+    group = [cloudflare_zero_trust_access_group.caleb.id]
+  }
+
+  require {
+    device_posture = [
+      cloudflare_zero_trust_device_posture_rule.mac_disk_encryption.id,
+      cloudflare_zero_trust_device_posture_rule.mac_os_version.id,
+    ]
+  }
+}
