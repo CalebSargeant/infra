@@ -289,6 +289,20 @@ resource "cloudflare_zero_trust_access_application" "mikrotik_minder_pro" {
     cloudflare_zero_trust_access_identity_provider.one_time_pin.id,
     cloudflare_zero_trust_access_identity_provider.google.id,
   ]
+
+  # Pages serves the app on the production hostname AND on a unique
+  # <hash>.mikrotik-minder-pro.pages.dev URL per build (plus <branch>.… aliases).
+  # `domain` alone gates only the apex, so every deployment URL was reachable
+  # un-authed. The wildcard matches one subdomain level (not the apex), so both
+  # entries are required to gate the lot.
+  destinations {
+    type = "public"
+    uri  = "mikrotik-minder-pro.pages.dev"
+  }
+  destinations {
+    type = "public"
+    uri  = "*.mikrotik-minder-pro.pages.dev"
+  }
 }
 
 resource "cloudflare_zero_trust_access_policy" "mikrotik_minder_pro_caleb" {
