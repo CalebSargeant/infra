@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.28.0 (2026-05-22)
+
+### Features
+
+- **firefly**: Make comment-commander-pro reachable + resume source
+  ([#247](https://github.com/CalebSargeant/infra/pull/247),
+  [`31c8703`](https://github.com/CalebSargeant/infra/commit/31c8703105608eb13282c1379d9ca04f62eca771))
+
+
 ## v1.27.0 (2026-05-22)
 
 ### Bug Fixes
