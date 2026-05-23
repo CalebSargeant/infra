@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.33.4 (2026-05-23)
+
+### Bug Fixes
+
+- **resources**: Right-size atlantis + mariadb to free ff-pi1 capacity
+  ([#265](https://github.com/CalebSargeant/infra/pull/265),
+  [`26f2b9d`](https://github.com/CalebSargeant/infra/commit/26f2b9d65cfaf55f4eae91187ce4682d3797c12e))
+
+
 ## v1.33.3 (2026-05-23)
 
 ### Bug Fixes
