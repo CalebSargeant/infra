@@ -25,7 +25,7 @@ spec:
           # even with NET_ADMIN — the write fails with "Read-only file system"
           # and crashloops the init, which blocks the DaemonSet rollout. We swallow
           # the error so cloudflared still starts. The livenessProbe below catches
-          # any resulting UDP-buffer-induced hangs by restarting in <1 min.
+          # any resulting UDP-buffer-induced hangs by restarting in ~95s.
           command:
             - sh
             - -c
