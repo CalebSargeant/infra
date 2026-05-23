@@ -30,6 +30,7 @@ spec:
             - sh
             - -c
             - |
+              set -e
               echo 7500000 > /proc/sys/net/core/rmem_max 2>/dev/null \
                 || echo "[tune-udp-buffers] /proc/sys rmem_max not writable, skipping"
               echo 7500000 > /proc/sys/net/core/wmem_max 2>/dev/null \
