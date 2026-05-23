@@ -2,6 +2,31 @@
 
 <!-- version list -->
 
+## v1.33.6 (2026-05-23)
+
+### Bug Fixes
+
+- **cloudflared**: Correct livenessProbe detection time in comment
+  ([#268](https://github.com/CalebSargeant/infra/pull/268),
+  [`3e8d28e`](https://github.com/CalebSargeant/infra/commit/3e8d28e994aedaf1fc3921c31db8a3e460f71a8e))
+
+- **cloudflared**: Make UDP buffer init container best-effort
+  ([#268](https://github.com/CalebSargeant/infra/pull/268),
+  [`3e8d28e`](https://github.com/CalebSargeant/infra/commit/3e8d28e994aedaf1fc3921c31db8a3e460f71a8e))
+
+- **cloudflared**: Make UDP buffer init container best-effort (Pi unblock)
+  ([#268](https://github.com/CalebSargeant/infra/pull/268),
+  [`3e8d28e`](https://github.com/CalebSargeant/infra/commit/3e8d28e994aedaf1fc3921c31db8a3e460f71a8e))
+
+- **cloudflared**: Re-add set -e to init container script
+  ([#268](https://github.com/CalebSargeant/infra/pull/268),
+  [`3e8d28e`](https://github.com/CalebSargeant/infra/commit/3e8d28e994aedaf1fc3921c31db8a3e460f71a8e))
+
+- **cloudflared**: Use HTTP liveness probe on /ready instead of TCP socket
+  ([#268](https://github.com/CalebSargeant/infra/pull/268),
+  [`3e8d28e`](https://github.com/CalebSargeant/infra/commit/3e8d28e994aedaf1fc3921c31db8a3e460f71a8e))
+
+
 ## v1.33.5 (2026-05-23)
 
 ### Bug Fixes
