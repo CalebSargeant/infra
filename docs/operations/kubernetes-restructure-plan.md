@@ -1,22 +1,22 @@
 # Kubernetes restructure plan (firefly cluster)
 
-Status: **DRAFT — not yet executed.** Captures findings from the 2026-05-15 audit and proposes a phased migration to the [`infra-v2`](https://github.com/CalebSargeant/infra-v2) Flux layout.
+Status: **COMPLETED 2026-05-22/23.** Migration landed across PRs #258 (Phase A — dead dir cleanup), #259 (B — _components/_helm-releases relocated, orphans archived), #260 + #261 (C — core+database → infrastructure/, vpn-gateway hotfix), #263 (D — timemachine+headlamp → apps/), and Phase E (this PR — flux-system relocated, legacy trees deleted). The target layout below is now the actual layout.
 
 ---
 
 ## 1. Current state (after 2026-05-15 audit/cleanup)
 
 - `kubernetes/_base/<category>/<app>/` — 8 namespace-categories of shared bases
-- `kubernetes/_clusters/firefly/<category>/<app>/` — per-cluster overlays
+- `kubernetes/clusters/firefly/<category>/<app>/` — per-cluster overlays
 - `kubernetes/_components/{resource-profiles,node-selectors,gluetun-sidecar,wireguard-sidecar}/` — reusable patches
-- `kubernetes/_clusters/firefly/flux-system/` — Flux bootstrap + 18 `Kustomization` CRs in `kustomizations.yaml` with `dependsOn` chains
+- `kubernetes/clusters/firefly/flux-system/` — Flux bootstrap + 18 `Kustomization` CRs in `kustomizations.yaml` with `dependsOn` chains
 
 **Cleanup already done this session** (see `.old/` for archived content, gitignored):
 
 | Removed | Reason |
 | --- | --- |
 | `kubernetes/_clusters/franklin/` (tracked, 39 files) | franklinhouse cluster lives in `infra-v2` now |
-| `kubernetes/_clusters/firefly/miscellaneous/headlamp1/` (tracked) | Orphan duplicate; canonical files live in `headlamp/` |
+| `kubernetes/clusters/firefly/miscellaneous/headlamp1/` (tracked) | Orphan duplicate; canonical files live in `headlamp/` |
 | `kubernetes/.kusomization.workings.yaml` (tracked, typo) | Stale working draft for `mini` node |
 | `kubernetes/_base/miscellaneous/comfyui/`, `comfyui-api/`, `imagegen/` (untracked) | Never tracked; preserved in `.old/` for possible reactivation under new layout |
 | `kubernetes/infrastructure/` (untracked) | Abandoned migration attempt — see §3 for credential preservation |
@@ -56,7 +56,7 @@ kubernetes/
 
 **Why this layout:**
 
-- **App-first, env-second.** Easier to find one app's full story (base + each env) than hunting through `_base/category/app + _clusters/firefly/category/app`.
+- **App-first, env-second.** Easier to find one app's full story (base + each env) than hunting through `_base/category/app + clusters/firefly/category/app`.
 - **No leading-underscore folders.** Standard Flux convention; tools and contributors expect `apps/`, `clusters/`, `infrastructure/`.
 - **Per-app `flux-kustomization.yaml`** keeps Flux CRs co-located with the manifests they apply, instead of a single 200-line `kustomizations.yaml`.
 - **Mirrors `infra-v2`** so context-switching between the two repos is frictionless.
@@ -89,13 +89,13 @@ Currently no plaintext secrets are tracked **except `ansible/keys/chr.pem`** (co
 
 ### `misc` Kustomization — FIX APPLIED in this PR
 
-**Real root cause** (my earlier sync-conflict-file hypothesis was wrong — Flux only sees git-tracked files, the conflict file was untracked): `kubernetes/_clusters/firefly/miscellaneous/headlamp/tunnel-pr-acc-eurofiber-web.enc.yaml` was encrypted with `encrypted_regex: ^(.*)$` — i.e. EVERY field including `apiVersion`, `kind`, `metadata.name`, `metadata.namespace`. Flux's kustomize-controller `v1.7.2` needs the resource header in plaintext to identify what it's about to decrypt; with everything encrypted it can't determine resource identity and emits a misleading "decryption failed" error. The misleading bit: the resource ID in the error log shows `misc/ENC[...]` — `misc` is the namespace (resolved from `kustomization.yaml`'s `namespace: misc` default), `ENC[...]` is the encrypted `metadata.name`. Local `sops -d` works because it walks the tree without trying to identify the resource first.
+**Real root cause** (my earlier sync-conflict-file hypothesis was wrong — Flux only sees git-tracked files, the conflict file was untracked): `kubernetes/clusters/firefly/miscellaneous/headlamp/tunnel-pr-acc-eurofiber-web.enc.yaml` was encrypted with `encrypted_regex: ^(.*)$` — i.e. EVERY field including `apiVersion`, `kind`, `metadata.name`, `metadata.namespace`. Flux's kustomize-controller `v1.7.2` needs the resource header in plaintext to identify what it's about to decrypt; with everything encrypted it can't determine resource identity and emits a misleading "decryption failed" error. The misleading bit: the resource ID in the error log shows `misc/ENC[...]` — `misc` is the namespace (resolved from `kustomization.yaml`'s `namespace: misc` default), `ENC[...]` is the encrypted `metadata.name`. Local `sops -d` works because it walks the tree without trying to identify the resource first.
 
 **Why this file was encrypted whole**: it's a proprietary work-related tunnel — a Deployment that runs nginx + `kubectl port-forward` against the `pr-acc-eurofiber` work cluster, exposing Eurofiber / Samenleving / csam3 internal hostnames. The user wanted everything hidden from the public repo. The `^(.*)$` regex was the workaround, which broke Flux.
 
 **Action taken** (per user's direction: "Move all pr-acc-eurofiber + p1 + nonprod-aks files to a PRIVATE repo"):
 
-13 work-cluster files moved from `kubernetes/_clusters/firefly/miscellaneous/headlamp/` to `.old/work-private/kubernetes/_clusters/firefly/miscellaneous/headlamp/` (gitignored). `kustomization.yaml` updated to drop the references. Local `kustomize build kubernetes/_clusters/firefly/miscellaneous --load-restrictor=LoadRestrictionsNone --enable-helm` now exits 0 (1336 lines of output). All remaining `.enc.yaml` files in `headlamp/` decrypt cleanly with the cluster's AGE key.
+13 work-cluster files moved from `kubernetes/clusters/firefly/miscellaneous/headlamp/` to `.old/work-private/kubernetes/clusters/firefly/miscellaneous/headlamp/` (gitignored). `kustomization.yaml` updated to drop the references. Local `kustomize build kubernetes/clusters/firefly/miscellaneous --load-restrictor=LoadRestrictionsNone --enable-helm` now exits 0 (1336 lines of output). All remaining `.enc.yaml` files in `headlamp/` decrypt cleanly with the cluster's AGE key.
 
 Files moved (now in `.old/work-private/`):
 - `certificate-p1.yaml`
@@ -114,9 +114,9 @@ Files moved (now in `.old/work-private/`):
 
 **Follow-up (still in public repo, partial-cleanup):**
 
-1. `kubernetes/_clusters/firefly/miscellaneous/headlamp/ingressroute.yaml` still has Traefik route definitions for `/c/p1-prod-eks`, `/c/p1-staging-eks`, `/c/pr-nonprod-aks`, `/c/pr-acc-eurofiber` paths. These routes will fail at runtime now (their `headlamp-inject-token-*` middlewares are gone), but path/cluster names are still visible. Decide whether to (a) leave (cluster names alone aren't proprietary), or (b) parameterize/move.
-2. `kubernetes/_clusters/firefly/miscellaneous/headlamp/headlamp-kubeconfigs.enc.yaml` is a single Secret containing kubeconfigs for ALL clusters mixed (current-context: `p1-staging-eks`, contexts: `p1-prod-eks`, `p1-staging-eks`, `pr-nonprod-aks`, `franklinhouse`, `pr-acc-eurofiber`). Needs splitting into home-only + work-only Secrets, then re-encrypting the home half here.
-3. **Syncthing**: there was also an orphan sync-conflict copy of this file (untracked, harmless to Flux but cluttery). Add `*sync-conflict*` to `.stignore` for `~/repos/calebsargeant/infra/kubernetes/_clusters/firefly/miscellaneous/headlamp/` so it doesn't happen again.
+1. `kubernetes/clusters/firefly/miscellaneous/headlamp/ingressroute.yaml` still has Traefik route definitions for `/c/p1-prod-eks`, `/c/p1-staging-eks`, `/c/pr-nonprod-aks`, `/c/pr-acc-eurofiber` paths. These routes will fail at runtime now (their `headlamp-inject-token-*` middlewares are gone), but path/cluster names are still visible. Decide whether to (a) leave (cluster names alone aren't proprietary), or (b) parameterize/move.
+2. `kubernetes/clusters/firefly/miscellaneous/headlamp/headlamp-kubeconfigs.enc.yaml` is a single Secret containing kubeconfigs for ALL clusters mixed (current-context: `p1-staging-eks`, contexts: `p1-prod-eks`, `p1-staging-eks`, `pr-nonprod-aks`, `franklinhouse`, `pr-acc-eurofiber`). Needs splitting into home-only + work-only Secrets, then re-encrypting the home half here.
+3. **Syncthing**: there was also an orphan sync-conflict copy of this file (untracked, harmless to Flux but cluttery). Add `*sync-conflict*` to `.stignore` for `~/repos/calebsargeant/infra/kubernetes/clusters/firefly/miscellaneous/headlamp/` so it doesn't happen again.
 4. **Live cluster impact**: once you push, Flux's next reconcile of `misc` will SUCCEED and prune the existing `pr-acc-eurofiber-web-tunnel` Deployment/Service/Ingress from the cluster (since they're no longer in the kustomization output). Plan for re-deploying them from your private repo or 1Password before relying on work-cluster access via `headlamp.sargeant.co`.
 
 ### `core` Kustomization — NOT FIXED (needs live cluster access)
@@ -193,8 +193,8 @@ This lets us verify kustomize-build of each new app in isolation (`kustomize bui
 **For each app:**
 
 a. Copy `kubernetes/_base/<cat>/<app>/` → `kubernetes/apps-new/<app>/base/<app>/`.
-b. Copy `kubernetes/_clusters/firefly/<cat>/<app>/` (overlay) → `kubernetes/apps-new/<app>/prod/<app>/`.
-c. Write per-app `flux-kustomization.yaml` mirroring the entry in `kubernetes/_clusters/firefly/flux-system/kustomizations.yaml`.
+b. Copy `kubernetes/clusters/firefly/<cat>/<app>/` (overlay) → `kubernetes/apps-new/<app>/prod/<app>/`.
+c. Write per-app `flux-kustomization.yaml` mirroring the entry in `kubernetes/clusters/firefly/flux-system/kustomizations.yaml`.
 d. `kustomize build` test.
 e. Add the new Flux `Kustomization` CR pointing at the new path; **leave the old one in place** with `suspend: true` for one reconcile to confirm new one took over.
 f. Delete old paths + old Flux CR in a follow-up PR.
@@ -202,7 +202,7 @@ f. Delete old paths + old Flux CR in a follow-up PR.
 ### Phase 3 — Rename + delete old (1 session)
 
 - `mv kubernetes/apps-new kubernetes/apps` etc.
-- Delete `_base/`, `_clusters/firefly/`, `_components/` (or move to `.old/`).
+- Delete `_base/`, `clusters/firefly/`, `_components/` (or move to `.old/`).
 - Update CLAUDE.md / AGENTS.md to reflect new layout.
 
 ### Phase 4 — `infra-v2` enhancements (optional)
@@ -228,5 +228,5 @@ Resolved in this PR per direct user direction: maniforge removed (root + cluster
 
 Still open:
 
-1. **External-cluster Secret mixing.** `kubernetes/_clusters/firefly/miscellaneous/headlamp/headlamp-kubeconfigs.enc.yaml` is one Secret with kubeconfigs for ALL clusters mixed (home + work). Splitting it into a home-only Secret (tracked here) and a work-only Secret (private repo) is needed to fully meet the "no proprietary in public repo" rule.
+1. **External-cluster Secret mixing.** `kubernetes/clusters/firefly/miscellaneous/headlamp/headlamp-kubeconfigs.enc.yaml` is one Secret with kubeconfigs for ALL clusters mixed (home + work). Splitting it into a home-only Secret (tracked here) and a work-only Secret (private repo) is needed to fully meet the "no proprietary in public repo" rule.
 2. **Stale work-cluster references in `ingressroute.yaml`.** After this PR, `headlamp/ingressroute.yaml` still has Traefik route definitions for `/c/p1-prod-eks`, `/c/pr-acc-eurofiber`, etc. The middlewares they need (e.g. `headlamp-inject-token-pr-acc-eurofiber`) were moved out, so those routes will return errors at runtime. Decide whether to (a) leave (paths/cluster names alone aren't sensitive), or (b) trim.

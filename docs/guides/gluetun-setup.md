@@ -93,7 +93,7 @@ resources:
 From your cluster-specific directory:
 
 ```bash
-cd kubernetes/_clusters/firefly/media/<your-app>
+cd kubernetes/clusters/firefly/media/<your-app>
 kubectl apply -k .
 ```
 

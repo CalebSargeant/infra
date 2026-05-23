@@ -149,7 +149,7 @@ resources:
 Create a patch in your cluster overlay:
 
 ```yaml
-# kubernetes/_clusters/firefly/core/vpn-gateway/kustomization.yaml
+# kubernetes/clusters/firefly/core/vpn-gateway/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 

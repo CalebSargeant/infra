@@ -10,17 +10,22 @@ This is the Kubernetes configuration subdirectory of the monolithic infrastructu
 
 ```
 kubernetes/
-├── _base/              # Reusable base configurations organized by function
-│   ├── automation/     # Home automation apps (Home Assistant, Homebridge, n8n)
-│   ├── backup/         # Backup solutions (Timemachine)
+├── clusters/
+│   ├── firefly/       # Main single-node K3s cluster (Raspberry Pi 5)
+│   │   ├── flux-system/
+│   │   └── kustomization.yaml
+│   └── franklin/      # Secondary cluster configuration
+├── apps/              # Application configurations organized by app
+│   ├── media/         # Media stack (Plex, Radarr, Sonarr, etc.)
+│   │   └── base/
+│   │       └── media/
+│   ├── automation/    # Home automation apps (Home Assistant, Homebridge, n8n)
+│   ├── backup/        # Backup solutions (Timemachine)
 │   ├── core/          # Core cluster services (cert-manager, etc.)
 │   ├── database/      # Database workloads (PostgreSQL)
-│   ├── media/         # Media stack (Plex, Radarr, Sonarr, etc.)
 │   ├── miscellaneous/ # Other applications
 │   └── observability/ # Monitoring and logging
-├── _clusters/         # Cluster-specific overlays
-│   ├── firefly/       # Main single-node K3s cluster (Raspberry Pi 5)
-│   └── franklin/      # Secondary cluster configuration
+├── infrastructure/    # Infrastructure components
 ├── _components/       # Kustomize components for cross-cutting concerns
 │   ├── node-selectors/
 │   └── resource-profiles/  # AWS-style resource allocation profiles
@@ -33,8 +38,8 @@ kubernetes/
 
 The cluster uses Flux v2 for declarative GitOps-based deployments. Configurations are applied through a hierarchy:
 
-1. **Base configurations** (`_base/`): Generic, reusable workload definitions
-2. **Cluster overlays** (`_clusters/firefly/`): Cluster-specific customizations via Kustomize
+1. **Application bases** (`apps/<app>/base/<app>`): Generic, reusable workload definitions
+2. **Cluster overlays** (`clusters/firefly/`): Cluster-specific customizations via Kustomize
 3. **Flux sync**: Flux monitors this repository and applies changes automatically
 
 ### Kustomize Layering
@@ -60,20 +65,20 @@ See `_components/resource-profiles/README.md` for complete reference.
 
 ```bash
 # Validate Kustomize structure for a cluster
-kustomize build _clusters/firefly > /tmp/firefly-manifest.yaml
+kustomize build clusters/firefly > /tmp/firefly-manifest.yaml
 
 # Validate specific namespace/component
-kustomize build _clusters/firefly/media > /tmp/media-manifest.yaml
+kustomize build clusters/firefly > /tmp/media-manifest.yaml
 
 # Dry-run apply to verify what would be deployed
-kubectl apply -k _clusters/firefly --dry-run=client --output yaml
+kubectl apply -k clusters/firefly --dry-run=client --output yaml
 ```
 
 ### Deploy
 
 ```bash
 # Apply cluster configuration (if Flux is not auto-syncing)
-kubectl apply -k _clusters/firefly
+kubectl apply -k clusters/firefly
 
 # Force Flux reconciliation
 flux reconcile kustomization firefly-root --with-source
@@ -89,20 +94,20 @@ flux get kustomization
 flux logs --kustomization=firefly-media --all-namespaces
 
 # Inspect rendered manifests for a specific kustomization
-kustomize build _clusters/firefly/media
+kustomize build clusters/firefly
 ```
 
 ### Working with Bases and Overlays
 
 ```bash
 # Add new application base
-mkdir -p _base/myapp/{app,config}
+mkdir -p apps/myapp/base/myapp
 # Create kustomization.yaml with resources
 
 # Reference in cluster overlay
-# _clusters/firefly/kustomization.yaml
+# clusters/firefly/kustomization.yaml
 resources:
-  - ../../_base/myapp
+  - ../../apps/myapp/base/myapp
 ```
 
 ## Key Development Notes

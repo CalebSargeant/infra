@@ -4,7 +4,7 @@ resources:
   - pv.yaml
   - pvc.yaml
   - daemonset.yaml
-# Inlined from the former _clusters/firefly/backup/timemachine overlay.
+# Inlined from the former clusters/firefly/backup/timemachine overlay.
 components:
   - ../../../../components/resource-profiles/t.small
   - ../../../../components/node-selectors/mini

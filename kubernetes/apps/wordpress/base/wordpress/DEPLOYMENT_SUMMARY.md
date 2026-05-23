@@ -49,7 +49,7 @@ A Dockerfile and documentation are provided for using the existing PostgreSQL St
 
 The WordPress deployment has been added to:
 ```
-kubernetes/_clusters/firefly/miscellaneous/kustomization.yaml
+kubernetes/clusters/firefly/miscellaneous/kustomization.yaml
 ```
 
 ## How to Use
@@ -67,7 +67,7 @@ sops -e -i kubernetes/_base/miscellaneous/wordpress/secret.enc.yaml
 ### 2. Deploy to Cluster
 The deployment will be included when the firefly/miscellaneous kustomization is applied:
 ```bash
-kubectl apply -k kubernetes/_clusters/firefly/miscellaneous
+kubectl apply -k kubernetes/clusters/firefly/miscellaneous
 ```
 
 Or use Flux/GitOps if configured.

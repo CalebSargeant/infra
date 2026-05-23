@@ -49,7 +49,7 @@ You can override any value per cluster without file duplication:
 
 ```yaml
 # firefly cluster overlay - just specifies overrides
-_clusters/firefly/automation/homebridge/values.yaml
+clusters/firefly/automation/homebridge/values.yaml
   domain: sargeant.co
   image: homebridge/homebridge:beta-2025-10-03
   timezone: Europe/Amsterdam
@@ -111,7 +111,7 @@ existingSecret: homebridge-config  # Created by Kustomize/SOPS
 #### 4. **Cluster Overlay Duplication (Different Problem)**
 While Helm reduces `_base/` duplication, you still need cluster-specific overlays. You'll have:
 ```
-_clusters/firefly/automation/homebridge/
+kubernetes/apps/homebridge/
   ├── kustomization.yaml          (reference Helm chart + components)
   └── values-firefly.yaml          (cluster overrides)
 ```
@@ -141,7 +141,7 @@ Managing Helm chart versions, testing upgrades, maintaining `Chart.lock` files. 
 ### Architecture Pattern
 
 ```
-_base/automation/homebridge/          # Helm chart (NOT raw YAML)
+kubernetes/apps/homebridge/          # Helm chart (NOT raw YAML)
   ├── Chart.yaml
   ├── values.yaml                     # Defaults for all clusters
   ├── templates/
@@ -153,7 +153,7 @@ _base/automation/homebridge/          # Helm chart (NOT raw YAML)
   │   └── _helpers.tpl                # Reusable helper templates
   └── kustomization.yaml              # Treat chart as resource
 
-_clusters/firefly/automation/homebridge/
+clusters/firefly/automation/homebridge/
   ├── kustomization.yaml              # Use Helm release + components
   └── values-firefly.yaml             # Cluster-specific overrides
 
@@ -165,7 +165,7 @@ _components/node-selectors/           # Unchanged—patches apply to Helm output
 
 **Option A: Direct Helm Release (Recommended)**
 ```yaml
-# _clusters/firefly/automation/homebridge/kustomization.yaml
+# clusters/firefly/automation/homebridge/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -189,7 +189,7 @@ components:
 Let Flux manage the Helm release, Kustomize only adds components:
 
 ```yaml
-# _clusters/firefly/automation/homebridge/kustomization.yaml
+# clusters/firefly/automation/homebridge/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -202,7 +202,7 @@ components:
 ```
 
 ```yaml
-# _clusters/firefly/automation/homebridge/helmrelease.yaml
+# clusters/firefly/automation/homebridge/helmrelease.yaml
 apiVersion: helm.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -229,14 +229,14 @@ spec:
 ### Current State
 - 6 files in `_base/automation/homebridge/`
 - Hardcoded values scattered across YAML
-- Overlay at `_clusters/firefly/automation/homebridge/` just references base + adds components
+- Overlay at `clusters/firefly/automation/homebridge/` just references base + adds components
 
 ### New State (Helm-based)
 
 **Step 1: Create Helm Chart Structure**
 ```bash
-mkdir -p kubernetes/_base/automation/homebridge/templates
-cat > kubernetes/_base/automation/homebridge/Chart.yaml << 'EOF'
+mkdir -p kubernetes/apps/homebridge/templates
+cat > kubernetes/apps/homebridge/Chart.yaml << 'EOF'
 apiVersion: v2
 name: homebridge
 description: A Helm chart for Homebridge
@@ -245,7 +245,7 @@ version: 1.0.0
 appVersion: "2025-10-03"
 EOF
 
-cat > kubernetes/_base/automation/homebridge/values.yaml << 'EOF'
+cat > kubernetes/apps/homebridge/values.yaml << 'EOF'
 # Global values
 namespace: homebridge
 
@@ -380,7 +380,7 @@ app: {{ include "homebridge.fullname" . }}
 **Step 3: Update Kustomization Files**
 
 ```yaml
-# _base/automation/homebridge/kustomization.yaml
+# kubernetes/apps/homebridge/kustomization.yaml
 # (Just serves as a helm repo reference for local development)
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -396,7 +396,7 @@ helmCharts:
 **Step 4: Update Cluster Overlay**
 
 ```yaml
-# _clusters/firefly/automation/homebridge/kustomization.yaml
+# clusters/firefly/automation/homebridge/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -409,7 +409,7 @@ components:
 ```
 
 ```yaml
-# _clusters/firefly/automation/homebridge/helmrelease.yaml
+# clusters/firefly/automation/homebridge/helmrelease.yaml
 apiVersion: helm.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -437,9 +437,9 @@ spec:
 
 ### Phase 1: Pilot (Start with Homebridge)
 1. Create Helm chart as shown above
-2. Test with `helm template homebridge _base/automation/homebridge/`
+2. Test with `helm template homebridge kubernetes/apps/homebridge/`
 3. Verify it produces identical YAML to current state
-4. Update `_clusters/firefly/automation/homebridge/` to use Helm
+4. Update `clusters/firefly/automation/homebridge/` to use Helm
 5. Test with Flux: `flux create source git ... && flux create helmrelease ...`
 
 ### Phase 2: Low-Risk Apps
@@ -465,7 +465,7 @@ Once most apps are Helm-based, consider:
 ### ✅ DO
 1. **Start with Helm + Kustomize** (not Helm alone)—this preserves your component pattern
 2. **Keep SOPS for secrets**—don't try to manage secrets in Helm values
-3. **Store Helm charts in Git** (`_base/` dir) until you have 10+ charts
+3. **Store Helm charts in Git** (`kubernetes/apps/` dir) until you have 10+ charts
 4. **Use Kustomize HelmChart support** or Flux HelmRelease CRs for deployment
 5. **Document values.yaml extensively** with comments explaining each parameter
 6. **Version your charts** even if they're internal (in `Chart.yaml` → Git tags)
