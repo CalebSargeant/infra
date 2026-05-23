@@ -70,7 +70,8 @@ spec:
           # — QUIC connections registered to Cloudflare's edge but couldn't move data,
           # and nothing told kubelet to restart it.
           livenessProbe:
-            tcpSocket:
+            httpGet:
+              path: /ready
               port: 2000
             initialDelaySeconds: 20
             periodSeconds: 30
