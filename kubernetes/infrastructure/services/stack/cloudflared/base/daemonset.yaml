@@ -25,7 +25,8 @@ spec:
             - sh
             - -c
             - |
-              echo 7500000 > /proc/sys/net/core/rmem_max
+              set -e
+              echo 7500000 > /proc/sys/net/core/rmem_max &&
               echo 7500000 > /proc/sys/net/core/wmem_max
           securityContext:
             capabilities:
