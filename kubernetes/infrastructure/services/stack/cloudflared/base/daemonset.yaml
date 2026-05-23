@@ -29,7 +29,11 @@ spec:
               echo 7500000 > /proc/sys/net/core/wmem_max
           securityContext:
             capabilities:
+              drop: ["ALL"]
               add: ["NET_ADMIN"]
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
       containers:
         - name: cloudflared
           image: cloudflare/cloudflared:latest
