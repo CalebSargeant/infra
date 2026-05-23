@@ -2,6 +2,33 @@
 
 <!-- version list -->
 
+## v1.33.5 (2026-05-23)
+
+### Bug Fixes
+
+- **cloudflared**: Fail initContainer on partial sysctl write failure
+  ([#267](https://github.com/CalebSargeant/infra/pull/267),
+  [`7fed215`](https://github.com/CalebSargeant/infra/commit/7fed215677259f49f700e16ad464baaf727029e9))
+
+- **cloudflared**: Harden initContainer securityContext
+  ([#267](https://github.com/CalebSargeant/infra/pull/267),
+  [`7fed215`](https://github.com/CalebSargeant/infra/commit/7fed215677259f49f700e16ad464baaf727029e9))
+
+- **cloudflared**: Liveness probe + UDP buffer tuning to prevent silent hangs
+  ([#267](https://github.com/CalebSargeant/infra/pull/267),
+  [`7fed215`](https://github.com/CalebSargeant/infra/commit/7fed215677259f49f700e16ad464baaf727029e9))
+
+- **cloudflared**: Use tcpSocket liveness probe to avoid restart loops on network outage
+  ([#267](https://github.com/CalebSargeant/infra/pull/267),
+  [`7fed215`](https://github.com/CalebSargeant/infra/commit/7fed215677259f49f700e16ad464baaf727029e9))
+
+### Chores
+
+- **mikrotik-minder-agent**: Bump image to 1.4.0
+  ([#266](https://github.com/CalebSargeant/infra/pull/266),
+  [`abfc6db`](https://github.com/CalebSargeant/infra/commit/abfc6db4e2b2bf607de21dbc94df6c4784fd9f88))
+
+
 ## v1.33.4 (2026-05-23)
 
 ### Bug Fixes
