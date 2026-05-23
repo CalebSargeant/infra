@@ -2,6 +2,59 @@
 
 <!-- version list -->
 
+## v1.33.3 (2026-05-23)
+
+### Bug Fixes
+
+- **atlantis**: Update stale comment path for ClusterSecretStore reference
+  ([#264](https://github.com/CalebSargeant/infra/pull/264),
+  [`25571d4`](https://github.com/CalebSargeant/infra/commit/25571d43d6474a1928e1af58528de2d16576d6aa))
+
+- **atlantis**: Update stale path in comment to current external-secrets stack
+  ([#264](https://github.com/CalebSargeant/infra/pull/264),
+  [`25571d4`](https://github.com/CalebSargeant/infra/commit/25571d43d6474a1928e1af58528de2d16576d6aa))
+
+- **stack**: Correct legacy path in comment
+  ([#264](https://github.com/CalebSargeant/infra/pull/264),
+  [`25571d4`](https://github.com/CalebSargeant/infra/commit/25571d43d6474a1928e1af58528de2d16576d6aa))
+
+### Chores
+
+- **structure**: Migrate timemachine + headlamp to apps/ (Phase D)
+  ([#263](https://github.com/CalebSargeant/infra/pull/263),
+  [`dcc564b`](https://github.com/CalebSargeant/infra/commit/dcc564b16efead65be27465b4e4cab034ff8403b))
+
+- **structure**: Phase E — relocate flux-system, delete legacy trees
+  ([#264](https://github.com/CalebSargeant/infra/pull/264),
+  [`25571d4`](https://github.com/CalebSargeant/infra/commit/25571d43d6474a1928e1af58528de2d16576d6aa))
+
+### Documentation
+
+- **external-secrets**: Fix cluster configuration path in SUMMARY.md
+  ([#264](https://github.com/CalebSargeant/infra/pull/264),
+  [`25571d4`](https://github.com/CalebSargeant/infra/commit/25571d43d6474a1928e1af58528de2d16576d6aa))
+
+- **external-secrets**: Fix path to firefly kustomization.yaml
+  ([#264](https://github.com/CalebSargeant/infra/pull/264),
+  [`25571d4`](https://github.com/CalebSargeant/infra/commit/25571d43d6474a1928e1af58528de2d16576d6aa))
+
+- **external-secrets**: Update OCI Vault setup guide paths to current layout
+  ([#264](https://github.com/CalebSargeant/infra/pull/264),
+  [`25571d4`](https://github.com/CalebSargeant/infra/commit/25571d43d6474a1928e1af58528de2d16576d6aa))
+
+- **external-secrets**: Update SUMMARY.md paths to current layout
+  ([#264](https://github.com/CalebSargeant/infra/pull/264),
+  [`25571d4`](https://github.com/CalebSargeant/infra/commit/25571d43d6474a1928e1af58528de2d16576d6aa))
+
+- **helm-charts**: Update example structure to match current layout
+  ([#264](https://github.com/CalebSargeant/infra/pull/264),
+  [`25571d4`](https://github.com/CalebSargeant/infra/commit/25571d43d6474a1928e1af58528de2d16576d6aa))
+
+- **warp**: Update directory structure and commands to current paths
+  ([#264](https://github.com/CalebSargeant/infra/pull/264),
+  [`25571d4`](https://github.com/CalebSargeant/infra/commit/25571d43d6474a1928e1af58528de2d16576d6aa))
+
+
 ## v1.33.2 (2026-05-22)
 
 ### Bug Fixes
