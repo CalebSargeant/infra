@@ -7,5 +7,9 @@ metadata:
 resources:
   - ./base
 components:
-  - ../../../../components/resource-profiles/m.small
+  # m.small (1Gi req / 4Gi limit) was over-provisioned: live `kubectl top`
+  # shows MariaDB idling at ~90Mi. m.pico keeps the memory-biased profile
+  # (1:4 cpu:mem ratio, fine for a DB) but drops the reservation to
+  # 512Mi so the Pi isn't holding back 500Mi of nothing.
+  - ../../../../components/resource-profiles/m.pico
   - ../../../../components/node-selectors/pi

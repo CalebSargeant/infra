@@ -32,5 +32,11 @@ resources:
   # - secret-aws.enc.yaml
   # - secret-azure.enc.yaml
 components:
-  - ../../../../components/resource-profiles/c.medium
+  # c.medium (1Gi req / 4Gi limit) was massively over-provisioned for
+  # Atlantis: live `kubectl top` shows ~55Mi at idle on ff-pi1; even with
+  # `parallel_plan: true` across 12 terragrunt leaves the peak doesn't
+  # come close. c.small keeps the 2Gi limit headroom for plan spikes but
+  # drops the *reservation* to 512Mi so the Pi (memory-requests-bound)
+  # isn't holding back 500Mi of nothing.
+  - ../../../../components/resource-profiles/c.small
   - ../../../../components/node-selectors/pi
