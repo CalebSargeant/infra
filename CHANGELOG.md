@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.34.1 (2026-05-24)
+
+### Bug Fixes
+
+- **tunnel,dns**: Persist sargeant.co cc/cc-pro swap in terraform
+  ([#270](https://github.com/CalebSargeant/infra/pull/270),
+  [`28b4c86`](https://github.com/CalebSargeant/infra/commit/28b4c86dba2295db45936aa7a933edca68e6cf4a))
+
+
 ## v1.34.0 (2026-05-24)
 
 ### Features
