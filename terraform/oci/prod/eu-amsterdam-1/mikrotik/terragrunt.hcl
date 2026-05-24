@@ -41,7 +41,27 @@ generate "routeros_required" {
 # `{baseurl,username,password}`; we extract the password with jq.
 locals {
   routeros_password_secret_ocid     = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aaaizjuctq6do5iou2xo5yibpuiirdwwdjurwllubxlima" # vault-prod / mikrotik-credentials (JSON)
-  cloudflared_tunnel_token_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aa2awevyczjklffua7eugrlxbsz4xziug5x5jgpewsbwfa" # vault-prod / cloudflared-tunnel-token-firefly
+  # TODO(firefly-oci-split): swap this OCID to the firefly-oci tunnel secret
+  # once the bootstrap from terraform/cloudflare/zero-trust/prod is done.
+  # Keeping the original firefly OCID here for now so this terragrunt project
+  # stays parseable — run_cmd below interpolates the OCID at parse time, so
+  # a placeholder would break terragrunt plan / Atlantis autoplan everywhere
+  # this file is touched. As long as the cloudflared container on the OCI
+  # MikroTiks is held in stop+no-restart state (RouterOS hotfix applied
+  # 2026-05-24 — verify with `/container print` before reapplying), this
+  # OCID is harmless: an apply just re-stores the firefly token in state but
+  # doesn't actually start the container.
+  # Bootstrap order to complete the split:
+  #   1. apply cloudflare/zero-trust/prod  → firefly_oci tunnel created
+  #   2. cd terraform/cloudflare/zero-trust/prod && terragrunt output -raw firefly_oci_tunnel_token
+  #   3. printf %s "<token>" | base64 | oci vault secret create-base64 \
+  #        --secret-name cloudflared-tunnel-token-firefly-oci \
+  #        --vault-id <vault-prod ocid> --compartment-id <tenancy ocid> \
+  #        --secret-content-content file:///dev/stdin
+  #   4. Update this OCID in a follow-up commit, then re-apply this module —
+  #      the container is recreated with the firefly-oci token and starts
+  #      cleanly without re-joining the firefly tunnel.
+  cloudflared_tunnel_token_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aa2awevyczjklffua7eugrlxbsz4xziug5x5jgpewsbwfa" # vault-prod / cloudflared-tunnel-token-firefly  (TODO: swap to cloudflared-tunnel-token-firefly-oci)
   recon_blockers_secret_ocid        = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aa7mytuezgibzn4g36jxupsgy57zl4372uq47atgfra2ka" # vault-prod / infra-recon-blockers
 
   routeros_password = run_cmd(
