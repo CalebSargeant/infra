@@ -41,7 +41,20 @@ generate "routeros_required" {
 # `{baseurl,username,password}`; we extract the password with jq.
 locals {
   routeros_password_secret_ocid     = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aaaizjuctq6do5iou2xo5yibpuiirdwwdjurwllubxlima" # vault-prod / mikrotik-credentials (JSON)
-  cloudflared_tunnel_token_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aa2awevyczjklffua7eugrlxbsz4xziug5x5jgpewsbwfa" # vault-prod / cloudflared-tunnel-token-firefly
+  # Points at the firefly-OCI tunnel (NOT firefly). The home k3s cloudflared
+  # owns firefly; if the MikroTik containers reconnect with firefly's token
+  # they re-join the home tunnel and serve ~33% of its requests with 502s
+  # (no route to *.svc.cluster.local from OCI while the home VPN is down).
+  # See terraform/cloudflare/zero-trust/prod/tunnels.tf for the firefly_oci
+  # tunnel resource. Bootstrap order on first apply of the split:
+  #   1. apply cloudflare/zero-trust/prod  → firefly_oci tunnel created
+  #   2. cd terraform/cloudflare/zero-trust/prod && terragrunt output -raw firefly_oci_tunnel_token
+  #   3. printf %s "<token>" | base64 | oci vault secret create-base64 \
+  #        --secret-name cloudflared-tunnel-token-firefly-oci \
+  #        --vault-id <vault-prod ocid> --compartment-id <tenancy ocid> \
+  #        --secret-content-content file:///dev/stdin
+  #   4. Replace REPLACE_ME below with the new secret's OCID, then apply this module.
+  cloudflared_tunnel_token_secret_ocid = "REPLACE_ME_AFTER_CREATING_cloudflared-tunnel-token-firefly-oci_IN_OCI_VAULT" # vault-prod / cloudflared-tunnel-token-firefly-oci
   recon_blockers_secret_ocid        = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aa7mytuezgibzn4g36jxupsgy57zl4372uq47atgfra2ka" # vault-prod / infra-recon-blockers
 
   routeros_password = run_cmd(
