@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.34.0 (2026-05-24)
+
+### Features
+
+- **tunnel**: Split OCI MikroTik onto firefly-oci tunnel (off firefly)
+  ([#269](https://github.com/CalebSargeant/infra/pull/269),
+  [`2d61671`](https://github.com/CalebSargeant/infra/commit/2d61671ba003779932486333868f9ebbff64990b))
+
+
 ## v1.33.6 (2026-05-23)
 
 ### Bug Fixes
