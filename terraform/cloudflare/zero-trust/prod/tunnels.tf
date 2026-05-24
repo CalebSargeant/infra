@@ -143,6 +143,29 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # TEMPORARY sargeant.co mirrors of the two comment-commander hostnames,
+    # added while magmamoose.com is on Tucows clientHold (TLD delegation
+    # withheld → nothing under magmamoose.com resolves). See memory:
+    # project_magmamoose-clienthold-swap.md. Removal checklist when the
+    # hold lifts:
+    #   1. `whois magmamoose.com` no longer shows clientHold
+    #   2. delete these two ingress_rule blocks
+    #   3. delete matching CNAMEs in terraform/cloudflare/dns/prod/terragrunt.hcl
+    #   4. delete API-managed Access app "Comment Commander Pro (sargeant.co swap)"
+    #      (aud 3c5f1f326b45..., domain comment-commander-pro.sargeant.co)
+    # cc-pro is still gated by Access via the (API-managed) app above;
+    # comment-commander has no Access — same as the magmamoose flavour.
+    ingress_rule {
+      hostname = "comment-commander.sargeant.co"
+      service  = "http://comment-commander.comment-commander.svc.cluster.local:8000"
+      origin_request {}
+    }
+    ingress_rule {
+      hostname = "comment-commander-pro.sargeant.co"
+      service  = "http://comment-commander-pro.comment-commander-pro.svc.cluster.local:8000"
+      origin_request {}
+    }
+
     # Zoey — project-intelligence dashboard (firefly cluster). Public so
     # Slack's interaction webhook can POST to /api/v1/slack/interaction;
     # the UI is gated by the Zoey Cloudflare Access app (access_apps.tf),
