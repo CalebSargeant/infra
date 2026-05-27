@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.34.2 (2026-05-27)
+
+### Bug Fixes
+
+- **flux**: Point transferred repos at github-app-magmamoose
+  ([#273](https://github.com/CalebSargeant/infra/pull/273),
+  [`5c9041e`](https://github.com/CalebSargeant/infra/commit/5c9041e51160e4c3c73eb1984e3b4aad85ef72b2))
+
+- **flux**: Rotate buxfer-sync-github-app installationID after App reinstall
+  ([#273](https://github.com/CalebSargeant/infra/pull/273),
+  [`5c9041e`](https://github.com/CalebSargeant/infra/commit/5c9041e51160e4c3c73eb1984e3b4aad85ef72b2))
+
+
 ## v1.34.1 (2026-05-24)
 
 ### Bug Fixes
