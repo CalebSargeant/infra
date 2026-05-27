@@ -6,7 +6,7 @@ metadata:
   name: zoey-backend
   namespace: flux-system
 spec:
-  image: ghcr.io/calebsargeant/zoey-backend
+  image: ghcr.io/magmamoose/zoey-backend
   interval: 5m
   provider: generic
   secretRef:
@@ -34,7 +34,7 @@ metadata:
   name: zoey-frontend
   namespace: flux-system
 spec:
-  image: ghcr.io/calebsargeant/zoey-frontend
+  image: ghcr.io/magmamoose/zoey-frontend
   interval: 5m
   provider: generic
   secretRef:
