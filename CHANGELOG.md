@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.34.3 (2026-05-27)
+
+### Bug Fixes
+
+- **flux**: Point zoey ImageRepositories at ghcr.io/magmamoose/*
+  ([#275](https://github.com/CalebSargeant/infra/pull/275),
+  [`6d640f3`](https://github.com/CalebSargeant/infra/commit/6d640f31bf140f3fccd3152e6adf3ef676ebef20))
+
+
 ## v1.34.2 (2026-05-27)
 
 ### Bug Fixes
