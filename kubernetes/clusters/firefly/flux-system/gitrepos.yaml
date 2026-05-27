@@ -69,8 +69,10 @@ spec:
   ref:
     branch: main
   secretRef:
-    name: buxfer-sync-github-app
-  url: https://github.com/CalebSargeant/zoey
+    # Transferred from CalebSargeant → magmamoose org; uses the
+    # MagmaMoose-org App installation (see github-app-magmamoose-secret.yaml).
+    name: github-app-magmamoose
+  url: https://github.com/magmamoose/zoey
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
@@ -83,5 +85,7 @@ spec:
   ref:
     branch: main
   secretRef:
-    name: buxfer-sync-github-app
-  url: https://github.com/CalebSargeant/comment-commander-pro
+    # Transferred from CalebSargeant → magmamoose org; uses the
+    # MagmaMoose-org App installation (see github-app-magmamoose-secret.yaml).
+    name: github-app-magmamoose
+  url: https://github.com/magmamoose/comment-commander-pro
