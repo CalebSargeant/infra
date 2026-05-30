@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.34.4 (2026-05-30)
+
+### Bug Fixes
+
+- **mikrotik-minder**: Pin github.com host keys so the export push works under RO rootfs
+  ([#282](https://github.com/CalebSargeant/infra/pull/282),
+  [`4ddc238`](https://github.com/CalebSargeant/infra/commit/4ddc238ff6203b759a75cce42e8641aca0988103))
+
+### Chores
+
+- **mikrotik-minder**: Pin agent image to 1.5.1 (git-concurrency fix)
+  ([#279](https://github.com/CalebSargeant/infra/pull/279),
+  [`eb98a60`](https://github.com/CalebSargeant/infra/commit/eb98a607f8f3b32e5d6af369843669f851851e25))
+
+
 ## v1.34.3 (2026-05-27)
 
 ### Bug Fixes
