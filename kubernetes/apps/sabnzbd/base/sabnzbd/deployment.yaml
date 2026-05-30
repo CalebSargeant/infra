@@ -16,7 +16,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: sabnzbd
-          image: linuxserver/sabnzbd:4.5.4 # {"$imagepolicy": "flux-system:sabnzbd"}
+          image: linuxserver/sabnzbd:4.5.5 # {"$imagepolicy": "flux-system:sabnzbd"}
           ports:
             - containerPort: 8080
           env:
