@@ -16,3 +16,4 @@ resources:
   - github-app-secret.yaml
   - github-app-magmamoose-secret.yaml
   - notifications.yaml
+  - image-automation.yaml
