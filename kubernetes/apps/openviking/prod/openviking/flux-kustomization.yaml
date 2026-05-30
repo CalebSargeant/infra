@@ -1,0 +1,23 @@
+---
+# OpenViking -- context database backing Zoey's MCP server. Its manifests live
+# in the zoey repo under ./k8s-openviking (same GitRepository as `zoey`, just
+# a different path), kept as a separate Kustomization so the context DB
+# reconciles independently of the Zoey app. Secrets (OpenAI key, server root
+# API key) come from OCI Vault via ExternalSecret. No SOPS-encrypted resources.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: openviking
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./k8s-openviking
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: zoey
+    namespace: flux-system
+  timeout: 5m
+  wait: true
+  dependsOn:
+    - name: infrastructure-services

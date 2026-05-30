@@ -1,0 +1,21 @@
+---
+# comment-commander-pro -- web dashboard / observability frontend for
+# comment-commander. Secret (CC_TRIGGER_TOKEN) comes from OCI Vault via
+# ExternalSecret; reads comment-commander's in-cluster Service. No SOPS.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: comment-commander-pro
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./k8s/overlays/prod
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: comment-commander-pro
+    namespace: flux-system
+  timeout: 5m
+  wait: true
+  dependsOn:
+    - name: infrastructure-services
