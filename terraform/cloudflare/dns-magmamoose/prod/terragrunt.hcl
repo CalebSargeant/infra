@@ -100,5 +100,16 @@ inputs = {
       value   = "magmamoose.github.io"
       proxied = false
     },
+    # Dün Mir Pro UI — Cloudflare Pages custom domain (project mikrotik-minder-pro).
+    # Proxied (orange cloud) so Cloudflare serves the Pages cert AND the Zero-Trust
+    # Access app gating the licensed UI applies. The cloudflare_pages_domain
+    # attachment is already registered via the API; this CNAME is what activates
+    # the (currently "pending") custom domain.
+    {
+      name    = "dunmir.magmamoose.com"
+      type    = "CNAME"
+      value   = "mikrotik-minder-pro.pages.dev"
+      proxied = true
+    },
   ]
 }
