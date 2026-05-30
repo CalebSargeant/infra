@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.35.0 (2026-05-30)
+
+### Features
+
+- **cloudflare**: Gate dunmir.magmamoose.com in the Mikrotik Minder Pro Access app
+  ([#280](https://github.com/CalebSargeant/infra/pull/280),
+  [`ac2a9d3`](https://github.com/CalebSargeant/infra/commit/ac2a9d3d68f881f753042dedaa2793e4115cf827))
+
+
 ## v1.34.4 (2026-05-30)
 
 ### Bug Fixes
