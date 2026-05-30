@@ -34,9 +34,10 @@ spec:
       # Chart's appVersion is the agent's __version__ (e.g. "0.0.1"), but the
       # release-runner workflow re-tags the image with 1.X.Y on every release.
       # Pin a concrete release tag here so HelmRelease isn't tied to appVersion.
-      # 1.5.1 ships the daemon git-concurrency + restart-stampede fix
-      # (mikrotik-minder#27) — required before running more than a couple devices.
-      tag: "1.5.1"
+      # 1.5.2 adds the SSH read-timeout / router host-key (TOFU) / false-alert
+      # hardening (mikrotik-minder#28) on top of the git-concurrency + startup
+      # stagger fix from 1.5.1 (#27) — the full pre-rollout agent fix set.
+      tag: "1.5.2"
       pullPolicy: IfNotPresent
 
     config:
