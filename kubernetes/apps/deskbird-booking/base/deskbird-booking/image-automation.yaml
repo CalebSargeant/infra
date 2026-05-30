@@ -47,7 +47,7 @@ spec:
       messageTemplate: |-
         chore: update deskbird-booking image
         {{range .Changed.Changes}}{{print .OldValue}} -> {{println .NewValue}}{{end}}
-        
+
         [ci skip]
     push:
       branch: main

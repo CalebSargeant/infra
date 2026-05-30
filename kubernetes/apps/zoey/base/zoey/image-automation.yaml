@@ -55,7 +55,7 @@ spec:
     semver:
       range: '>=0.1.0'
 ---
-# Shared image update automation — Flux rewrites tags in k8s/overlays/prod/
+# Shared image update automation -- Flux rewrites tags in k8s/overlays/prod/
 # kustomization.yaml against the per-target `$imagepolicy` markers and pushes
 # the bump back to the zoey repo's main branch.
 apiVersion: image.toolkit.fluxcd.io/v1beta2

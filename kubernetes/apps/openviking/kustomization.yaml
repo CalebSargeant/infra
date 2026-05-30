@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# External-repo app with NO source of its own: OpenViking's manifests live in
+# the zoey repo under ./k8s-openviking, reconciled via the shared `zoey`
+# GitRepository. So this app contributes only a Flux Kustomization (prod/),
+# matching the in-tree ./prod-only convention.
+resources:
+  - ./prod
