@@ -114,6 +114,29 @@ spec:
   dependsOn:
     - name: infrastructure-services
 ---
+# diatreme-pro — Pro dashboard for Diatreme, at the apex diatreme.magmamoose.com.
+# Supersedes comment-commander-pro. PROCESS_TRIGGER_SECRET comes from OCI Vault
+# via ExternalSecret; talks to the Diatreme worker at api.diatreme.magmamoose.com
+# (a Cloudflare Worker, not in-cluster). DNS for the apex is published by
+# external-dns from this app's Ingress. No SOPS.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: diatreme-pro
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./k8s/overlays/prod
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: diatreme-pro
+    namespace: flux-system
+  timeout: 5m
+  wait: true
+  dependsOn:
+    - name: infrastructure-services
+---
 # Zoey — DB secret is mirrored from CNPG's `postgres-app` and the ghcr pull
 # secret is mirrored from flux-system, both via external-secrets' kubernetes
 # provider. No SOPS-encrypted resources in this overlay.

@@ -89,3 +89,19 @@ spec:
     # MagmaMoose-org App installation (see github-app-magmamoose-secret.yaml).
     name: github-app-magmamoose
   url: https://github.com/magmamoose/comment-commander-pro
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: diatreme-pro
+  namespace: flux-system
+spec:
+  interval: 10m
+  provider: github
+  ref:
+    branch: main
+  secretRef:
+    # magmamoose-org repo; uses the MagmaMoose-org App installation
+    # (see github-app-magmamoose-secret.yaml), same as comment-commander-pro.
+    name: github-app-magmamoose
+  url: https://github.com/magmamoose/diatreme-pro

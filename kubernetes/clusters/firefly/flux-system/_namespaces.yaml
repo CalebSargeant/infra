@@ -19,3 +19,10 @@ metadata:
   name: comment-commander-pro
   labels:
     goldilocks.fairwinds.com/enabled: "true"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: diatreme-pro
+  labels:
+    goldilocks.fairwinds.com/enabled: "true"

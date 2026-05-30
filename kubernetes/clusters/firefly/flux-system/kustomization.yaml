@@ -14,6 +14,7 @@ resources:
   - deskbird-booking.yaml
   - comment-commander.yaml
   - comment-commander-pro.yaml
+  - diatreme-pro.yaml
   - notifications.yaml
   - zoey.yaml
 components:
