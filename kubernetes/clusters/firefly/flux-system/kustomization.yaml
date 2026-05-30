@@ -16,6 +16,7 @@ resources:
   - comment-commander-pro.yaml
   - notifications.yaml
   - zoey.yaml
+  - media-image-automation.yaml
 components:
   - ../../../components/node-selectors/pi
 # Note: Removed t.nano resource profile - flux controllers need more resources

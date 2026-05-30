@@ -1,0 +1,327 @@
+---
+# Image update automation for the media namespace apps.
+#
+# Pattern mirrors flux-system/zoey.yaml: a per-image ImageRepository +
+# ImagePolicy (semver, current major held), plus one ImageUpdateAutomation
+# that rewrites the `$imagepolicy`-marked tags under ./kubernetes/apps and
+# pushes the bump to main. Markers live on each workload's `image:` line, e.g.
+#   image: linuxserver/sonarr:4.0.15 # {"$imagepolicy": "flux-system:sonarr"}
+#
+# LinuxServer images publish a clean 3-part bare tag (e.g. 4.0.17) alongside
+# noisier version-/-lsNNN/nightly/arch-prefixed variants; the ^x.y.z$ filter
+# selects the bare tag and ignores the rest. flaresolverr uses vX.Y.Z.
+#
+# Docker Hub repos are scanned anonymously. If rate-limiting ever appears in the
+# image-reflector-controller logs, add a Docker Hub PAT as a dockerconfigjson
+# secret and set `secretRef` on those ImageRepositories.
+
+# --- sonarr (linuxserver/sonarr) ---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: sonarr
+  namespace: flux-system
+spec:
+  image: linuxserver/sonarr
+  interval: 1h
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: sonarr
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: sonarr
+  filterTags:
+    pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+    extract: '$0'
+  policy:
+    semver:
+      range: '>=4.0.0 <5.0.0'
+---
+# --- radarr (linuxserver/radarr) — held on 5.x; 6.x requires a manual bump ---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: radarr
+  namespace: flux-system
+spec:
+  image: linuxserver/radarr
+  interval: 1h
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: radarr
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: radarr
+  filterTags:
+    pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+    extract: '$0'
+  policy:
+    semver:
+      range: '>=5.0.0 <6.0.0'
+---
+# --- sabnzbd (linuxserver/sabnzbd) ---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: sabnzbd
+  namespace: flux-system
+spec:
+  image: linuxserver/sabnzbd
+  interval: 1h
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: sabnzbd
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: sabnzbd
+  filterTags:
+    pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+    extract: '$0'
+  policy:
+    semver:
+      range: '>=4.0.0 <5.0.0'
+---
+# --- qbittorrent (linuxserver/qbittorrent) — bare tag only ---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: qbittorrent
+  namespace: flux-system
+spec:
+  image: linuxserver/qbittorrent
+  interval: 1h
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: qbittorrent
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: qbittorrent
+  filterTags:
+    pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+    extract: '$0'
+  policy:
+    semver:
+      range: '>=5.0.0 <6.0.0'
+---
+# --- jackett (linuxserver/jackett) — 0.x line ---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: jackett
+  namespace: flux-system
+spec:
+  image: linuxserver/jackett
+  interval: 1h
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: jackett
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: jackett
+  filterTags:
+    pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+    extract: '$0'
+  policy:
+    semver:
+      range: '>=0.0.0 <1.0.0'
+---
+# --- prowlarr (linuxserver/prowlarr) ---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: prowlarr
+  namespace: flux-system
+spec:
+  image: linuxserver/prowlarr
+  interval: 1h
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: prowlarr
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: prowlarr
+  filterTags:
+    pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+    extract: '$0'
+  policy:
+    semver:
+      range: '>=2.0.0 <3.0.0'
+---
+# --- bazarr (linuxserver/bazarr) ---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: bazarr
+  namespace: flux-system
+spec:
+  image: linuxserver/bazarr
+  interval: 1h
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: bazarr
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: bazarr
+  filterTags:
+    pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+    extract: '$0'
+  policy:
+    semver:
+      range: '>=1.0.0 <2.0.0'
+---
+# --- nzbhydra2 (linuxserver/nzbhydra2) ---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: nzbhydra2
+  namespace: flux-system
+spec:
+  image: linuxserver/nzbhydra2
+  interval: 1h
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: nzbhydra2
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: nzbhydra2
+  filterTags:
+    pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+    extract: '$0'
+  policy:
+    semver:
+      range: '>=8.0.0 <9.0.0'
+---
+# --- overseerr (sctx/overseerr) — bare semver only (excludes git-sha tags) ---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: overseerr
+  namespace: flux-system
+spec:
+  image: sctx/overseerr
+  interval: 1h
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: overseerr
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: overseerr
+  filterTags:
+    pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+    extract: '$0'
+  policy:
+    semver:
+      range: '>=1.0.0 <2.0.0'
+---
+# --- plex (lscr.io/linuxserver/plex) — public, anonymous scan ---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: plex
+  namespace: flux-system
+spec:
+  image: lscr.io/linuxserver/plex
+  interval: 1h
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: plex
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: plex
+  filterTags:
+    pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+    extract: '$0'
+  policy:
+    semver:
+      range: '>=1.0.0 <2.0.0'
+---
+# --- flaresolverr (ghcr.io/flaresolverr/flaresolverr) — vX.Y.Z tags ---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: flaresolverr
+  namespace: flux-system
+spec:
+  image: ghcr.io/flaresolverr/flaresolverr
+  interval: 1h
+  provider: generic
+  secretRef:
+    name: ghcr-pull-secret
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: flaresolverr
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: flaresolverr
+  filterTags:
+    pattern: '^v[0-9]+\.[0-9]+\.[0-9]+$'
+    extract: '$0'
+  policy:
+    semver:
+      range: '>=3.0.0 <4.0.0'
+---
+# Shared image update automation — Flux rewrites the `$imagepolicy`-marked tags
+# under ./kubernetes/apps against the policies above and pushes the bump back to
+# this infra repo's main branch. Requires the flux-system deploy key to have
+# write access (Settings -> Deploy keys -> "Allow write access").
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageUpdateAutomation
+metadata:
+  name: media
+  namespace: flux-system
+spec:
+  interval: 1h
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        email: actions@users.noreply.github.com
+        name: Flux Bot
+      messageTemplate: |-
+        chore(media): bump image tags
+        {{range .Changed.Changes}}{{print .OldValue}} -> {{println .NewValue}}{{end}}
+
+        [ci skip]
+    push:
+      branch: main
+  update:
+    path: "./kubernetes/apps"
+    strategy: Setters
