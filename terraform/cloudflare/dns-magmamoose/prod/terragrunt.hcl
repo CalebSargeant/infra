@@ -64,31 +64,9 @@ inputs = {
   zone_id = "f04a8d6c68daf6ba1430c5645ca70cb8"
 
   records = [
-    # Routes through the `firefly` cloudflared tunnel to in-cluster
-    # comment-commander (k8s service:
-    # comment-commander.comment-commander.svc.cluster.local:8000). Pairs
-    # with the ingress_rule in terraform/cloudflare/zero-trust/prod/tunnels.tf.
-    # Must be proxied — without it CF returns the cfargotunnel.com hostname
-    # directly to GitHub and webhook delivery fails. GitHub webhooks are
-    # HTTPS-only, which is fine: the proxied CNAME terminates TLS at
-    # Cloudflare's edge.
-    {
-      name    = "comment-commander.magmamoose.com"
-      type    = "CNAME"
-      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
-      proxied = true
-    },
-    # comment-commander-pro dashboard (firefly cluster, k8s service
-    # comment-commander-pro.comment-commander-pro.svc.cluster.local:8000).
-    # Pairs with the ingress_rule in zero-trust/prod/tunnels.tf and the
-    # self_hosted Access app in zero-trust/prod/access_apps.tf. Proxied so
-    # the orange-cloud terminates TLS and enforces Access at the edge.
-    {
-      name    = "comment-commander-pro.magmamoose.com"
-      type    = "CNAME"
-      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
-      proxied = true
-    },
+    # comment-commander / comment-commander-pro DNS is managed in the zero-trust
+    # layer (cloudflared tunnel + Access, zero-trust/prod), NOT here — having it
+    # in both places double-manages the record and breaks `terragrunt apply`.
     # Diatreme docs (MkDocs) on GitHub Pages for repo MagmaMoose/diatreme; the
     # custom domain is pinned by docs/CNAME in that repo. DNS-only (grey cloud)
     # on purpose — GitHub provisions the Let's Encrypt cert over ACME, which a
@@ -100,16 +78,9 @@ inputs = {
       value   = "magmamoose.github.io"
       proxied = false
     },
-    # Dün Mir Pro UI — Cloudflare Pages custom domain (project mikrotik-minder-pro).
-    # Proxied (orange cloud) so Cloudflare serves the Pages cert AND the Zero-Trust
-    # Access app gating the licensed UI applies. The cloudflare_pages_domain
-    # attachment is already registered via the API; this CNAME is what activates
-    # the (currently "pending") custom domain.
-    {
-      name    = "dunmir.magmamoose.com"
-      type    = "CNAME"
-      value   = "mikrotik-minder-pro.pages.dev"
-      proxied = true
-    },
+    # NOTE: dunmir.magmamoose.com (Dün Mir Pro UI) is a Cloudflare Pages custom
+    # domain — its DNS is created by the Pages "Custom domains" flow, NOT here.
+    # A hand-written proxied CNAME to *.pages.dev is rejected with error 1014
+    # ("CNAME Cross-User Banned") even within the same account. (Reverts #287.)
   ]
 }
