@@ -68,25 +68,17 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly_oci" {
   }
 }
 
-# Tunnel connector token — the value cloudflared reads from $TUNNEL_TOKEN.
-# Pulled via the API rather than constructed locally so we get whatever
-# encoding CF currently uses (base64-of-JSON today, but historically has
-# changed). Sensitive — written to terraform state, exposed via the output
-# below, never logged.
-data "cloudflare_zero_trust_tunnel_cloudflared_token" "firefly_oci" {
-  account_id = var.account_id
-  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.firefly_oci.id
-}
+# NOTE: the firefly_oci connector token is no longer surfaced via Terraform.
+# `cloudflare_zero_trust_tunnel_cloudflared_token` is a v5-only data source and
+# isn't in the pinned provider (~> 4.40 → 4.52.7), so it failed `apply` ("does
+# not support data source") even though it was unrelated to whatever was being
+# changed. The token was a one-time copy into OCI Vault
+# (cloudflared-tunnel-token-firefly-oci) and isn't needed at plan/apply time. To
+# re-fetch it, use the CF API or bump the provider to v5 (a wider migration).
 
 output "firefly_oci_tunnel_id" {
   description = "Tunnel ID for firefly-oci. Needed for the cfargotunnel CNAME if/when OCI-side hostnames are added."
   value       = cloudflare_zero_trust_tunnel_cloudflared.firefly_oci.id
-}
-
-output "firefly_oci_tunnel_token" {
-  description = "Connector token for firefly-oci. Copy into OCI Vault as `cloudflared-tunnel-token-firefly-oci`, then update terraform/oci/prod/eu-amsterdam-1/mikrotik/terragrunt.hcl with the resulting secret OCID. Fetch with: `terragrunt output -raw firefly_oci_tunnel_token`."
-  value       = data.cloudflare_zero_trust_tunnel_cloudflared_token.firefly_oci.token
-  sensitive   = true
 }
 
 # Ingress for the firefly tunnel. Mirrors the dashboard's current config:
