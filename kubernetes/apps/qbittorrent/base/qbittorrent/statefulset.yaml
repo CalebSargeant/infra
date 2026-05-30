@@ -17,7 +17,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: qbittorrent
-          image: linuxserver/qbittorrent:5.1.2 # {"$imagepolicy": "flux-system:qbittorrent"}
+          image: linuxserver/qbittorrent:5.2.1 # {"$imagepolicy": "flux-system:qbittorrent"}
           resources:
             requests:
               memory: "466Mi"
@@ -25,8 +25,8 @@ spec:
             limits:
               memory: "466Mi"
           ports:
-            - containerPort: 8080   # Web UI
-            - containerPort: 55555  # BitTorrent (TCP/UDP)
+            - containerPort: 8080 # Web UI
+            - containerPort: 55555 # BitTorrent (TCP/UDP)
           env:
             - name: PUID
               value: "1000"
