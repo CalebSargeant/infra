@@ -42,7 +42,9 @@ spec:
 
     config:
       server:
-        url: https://mikrotik-minder.sargeant.workers.dev
+        # Dün Mir control-plane API (custom domain on the same worker; the old
+        # *.workers.dev URL no longer serves). Same agent token / D1.
+        url: https://api.dunmir.magmamoose.com
         agent_token_env: MTM_AGENT_TOKEN
         timeout_seconds: 10
       defaults:
