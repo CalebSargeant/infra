@@ -89,5 +89,16 @@ inputs = {
       value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
       proxied = true
     },
+    # Diatreme docs (MkDocs) on GitHub Pages for repo MagmaMoose/diatreme; the
+    # custom domain is pinned by docs/CNAME in that repo. DNS-only (grey cloud)
+    # on purpose — GitHub provisions the Let's Encrypt cert over ACME, which a
+    # Cloudflare proxy would intercept and break. (Replaces the old
+    # semver.calebsargeant.com Pages domain.)
+    {
+      name    = "docs.diatreme.magmamoose.com"
+      type    = "CNAME"
+      value   = "magmamoose.github.io"
+      proxied = false
+    },
   ]
 }

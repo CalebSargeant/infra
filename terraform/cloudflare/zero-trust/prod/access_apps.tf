@@ -396,3 +396,48 @@ resource "cloudflare_zero_trust_access_policy" "zoey_slack_bypass" {
     everyone = true
   }
 }
+
+# --- self_hosted: Diatreme Pro ----------------------------------------------
+# The Diatreme Pro dashboard (firefly cluster, behind the firefly cloudflared
+# tunnel — ingress in tunnels.tf), served at the apex diatreme.magmamoose.com.
+# Supersedes Comment Commander Pro as comment-commander folds into Diatreme —
+# keep the cc-pro app until diatreme-pro is verified live, then prune both. The
+# dashboard has no in-app auth/paywall yet (MVP), so Access is the only thing
+# gating it: Caleb-only. No device-posture `require` — same reasoning as
+# comment-commander-pro / Zoey (the posture rules need a WARP-enrolled device
+# Caleb doesn't have, so requiring it is a hard lockout; he'll want it on mobile
+# too).
+#
+# Only the dashboard apex is gated. The Diatreme *worker* lives at
+# api.diatreme.magmamoose.com and is intentionally NOT behind Access — it's the
+# OSS engine API (token broker, /process, /dispatch, /sign, the GitHub webhook,
+# OAuth callback) and authenticates callers itself (bearer / HMAC / OIDC).
+resource "cloudflare_zero_trust_access_application" "diatreme_pro" {
+  account_id                = var.account_id
+  name                      = "Diatreme Pro"
+  type                      = "self_hosted"
+  domain                    = "diatreme.magmamoose.com"
+  tags                      = ["Magma Moose"]
+  app_launcher_visible      = true
+  auto_redirect_to_identity = false
+  session_duration          = "24h"
+
+  allowed_idps = [
+    cloudflare_zero_trust_access_identity_provider.google_workspace.id,
+    cloudflare_zero_trust_access_identity_provider.one_time_pin.id,
+    cloudflare_zero_trust_access_identity_provider.google.id,
+  ]
+}
+
+resource "cloudflare_zero_trust_access_policy" "diatreme_pro_caleb" {
+  account_id       = var.account_id
+  application_id   = cloudflare_zero_trust_access_application.diatreme_pro.id
+  name             = "Caleb"
+  decision         = "allow"
+  precedence       = 1
+  session_duration = "24h"
+
+  include {
+    group = [cloudflare_zero_trust_access_group.caleb.id]
+  }
+}

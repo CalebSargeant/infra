@@ -143,6 +143,21 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # Diatreme Pro dashboard (firefly cluster) — the apex diatreme.magmamoose.com.
+    # Supersedes comment-commander-pro as comment-commander folds into Diatreme;
+    # leave the cc-pro rule above until diatreme-pro is verified live, then prune.
+    # Gated by the self_hosted Access app in access_apps.tf (Caleb only). DNS is
+    # published by external-dns from the diatreme-pro k8s Ingress (not an explicit
+    # Terraform CNAME). NOTE: the Diatreme *worker* is a Cloudflare Worker at
+    # api.diatreme.magmamoose.com — served directly by CF, not tunneled here, and
+    # intentionally NOT Access-gated (it's the OSS engine API; it authenticates
+    # callers itself via bearer / HMAC / OIDC).
+    ingress_rule {
+      hostname = "diatreme.magmamoose.com"
+      service  = "http://diatreme-pro.diatreme-pro.svc.cluster.local:8000"
+      origin_request {}
+    }
+
     # TEMPORARY sargeant.co mirrors of the two comment-commander hostnames,
     # added while magmamoose.com is on Tucows clientHold (TLD delegation
     # withheld → nothing under magmamoose.com resolves). See memory:
