@@ -7,6 +7,8 @@ resources:
   - ./homebridge
   - ./mikrotik-minder
   - ./n8n
+  # magmamoose products (open-core dashboards; external-repo + image automation)
+  - ./diatreme-pro
   # backup
   - ./timemachine
   # miscellaneous (dashboard)
