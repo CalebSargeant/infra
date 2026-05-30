@@ -271,9 +271,12 @@ resource "cloudflare_zero_trust_access_policy" "comment_commander_pro_caleb" {
 # the posture rules need a WARP-enrolled device Caleb doesn't have, so requiring
 # it is a hard lockout (and the Pro UI is one he'll want from mobile too).
 #
-# A custom domain (mikrotik-minder-pro.magmamoose.com) is a possible follow-up;
-# it would need a cloudflare_pages_domain + a dns-magmamoose CNAME, after which
-# the `domain` below would point there instead.
+# Custom domain: dunmir.magmamoose.com (the product's new "Dün Mir" name). The
+# destination below gates it in Access now so it can never be served un-authed.
+# Still TODO to make it actually serve: attach it to the Pages project
+# (cloudflare_pages_domain / dashboard) and point DNS at the project — there is
+# currently a manual dunmir.magmamoose.com record in the zone that is NOT in
+# terraform/cloudflare/dns-magmamoose/prod (drift to reconcile).
 resource "cloudflare_zero_trust_access_application" "mikrotik_minder_pro" {
   account_id                = var.account_id
   name                      = "Mikrotik Minder Pro"
@@ -302,6 +305,14 @@ resource "cloudflare_zero_trust_access_application" "mikrotik_minder_pro" {
   destinations {
     type = "public"
     uri  = "*.mikrotik-minder-pro.pages.dev"
+  }
+
+  # Custom domain (Dün Mir). Inert until the Pages custom domain is attached;
+  # ensures the licensed UI is gated the moment dunmir.magmamoose.com resolves
+  # to the project.
+  destinations {
+    type = "public"
+    uri  = "dunmir.magmamoose.com"
   }
 }
 
