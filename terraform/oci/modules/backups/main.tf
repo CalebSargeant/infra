@@ -1,11 +1,3 @@
-terraform {
-  required_providers {
-    oci = {
-      source = "oracle/oci"
-    }
-  }
-}
-
 # Object Storage namespace (tenancy-global, e.g. axn3gwpaabzc)
 data "oci_objectstorage_namespace" "this" {
   compartment_id = var.tenancy_ocid
