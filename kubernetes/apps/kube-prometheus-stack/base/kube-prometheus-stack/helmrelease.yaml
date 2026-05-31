@@ -187,7 +187,47 @@ spec:
     # AlertManager configuration
     alertmanager:
       enabled: true
+      # Route critical alerts (incl. CNPG backup failures) to Slack #engineering-alerts.
+      # Uses the bot token mounted from the slack-bot-token secret (alertmanagerSpec.secrets)
+      # via credentials_file, posting through chat.postMessage to channel C0A9FT7355Z.
+      config:
+        global:
+          resolve_timeout: 5m
+        route:
+          receiver: "null"
+          group_by: ["namespace", "alertname"]
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 4h
+          routes:
+            - receiver: slack-critical
+              matchers:
+                - 'severity="critical"'
+              continue: true
+            - receiver: slack-critical
+              matchers:
+                - 'alertname=~"CNPGBackup.*"'
+        receivers:
+          - name: "null"
+          - name: slack-critical
+            slack_configs:
+              - api_url: https://slack.com/api/chat.postMessage
+                channel: "C0A9FT7355Z"
+                send_resolved: true
+                http_config:
+                  authorization:
+                    type: Bearer
+                    credentials_file: /etc/alertmanager/secrets/slack-bot-token/token
+                title: '{{ if eq .Status "firing" }}:red_circle:{{ else }}:white_check_mark:{{ end }} {{ .CommonLabels.alertname }}{{ with .CommonLabels.namespace }} ({{ . }}){{ end }}'
+                text: |-
+                  {{ range .Alerts }}*{{ .Annotations.summary }}*
+                  {{ .Annotations.description }}
+                  {{ end }}
       alertmanagerSpec:
+        # Slack bot token (from OCI Vault via ExternalSecret) mounted at
+        # /etc/alertmanager/secrets/slack-bot-token/token
+        secrets:
+          - slack-bot-token
         # Affinity to run on mini nodes only
         affinity:
           nodeAffinity:
