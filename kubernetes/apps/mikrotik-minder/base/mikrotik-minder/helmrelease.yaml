@@ -34,10 +34,10 @@ spec:
       # Chart's appVersion is the agent's __version__ (e.g. "0.0.1"), but the
       # release-runner workflow re-tags the image with 1.X.Y on every release.
       # Pin a concrete release tag here so HelmRelease isn't tied to appVersion.
-      # 1.5.2 adds the SSH read-timeout / router host-key (TOFU) / false-alert
-      # hardening (mikrotik-minder#28) on top of the git-concurrency + startup
-      # stagger fix from 1.5.1 (#27) — the full pre-rollout agent fix set.
-      tag: "1.5.2"
+      # 1.6.0 adds the inventory_sync probe (CHR / licence / /ip cloud) and an
+      # optional packet-loss ping (mikrotik-minder#30), on top of the 1.5.2
+      # SSH/TOFU/false-alert hardening (#28) and 1.5.1 concurrency fix (#27).
+      tag: "1.6.0"
       pullPolicy: IfNotPresent
 
     config:
@@ -56,6 +56,12 @@ spec:
         update_check_interval_seconds: 21600
         backup_interval_seconds: 86400
         connect_timeout_seconds: 8
+        # Packet-loss probe (feature #9): the router pings this each heartbeat;
+        # loss% + RTT then show on the Pro UI health trend. Public anchor — swap
+        # for the gateway, or remove these two lines to disable. (inventory_sync
+        # for CHR / licence / cloud is on by default in the agent; no key needed.)
+        ping_target: 1.1.1.1
+        ping_count: 5
       git:
         repo: /var/lib/mikrotik-minder/configs
         # Push every /export commit to the private config repo the Pro app's
