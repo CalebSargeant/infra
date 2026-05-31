@@ -7,6 +7,6 @@ resources:
   - pvc.yaml
   - pv.yaml
 components:
-  - ../../../../components/vpn-routed-proxy
+  - ../../../../components/gluetun-sidecar
   - ../../../../components/resource-profiles/c.micro
   - ../../../../components/node-selectors/mini
