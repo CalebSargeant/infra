@@ -1,0 +1,51 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: longhorn
+  namespace: longhorn-system
+spec:
+  interval: 1h
+  timeout: 15m
+  chart:
+    spec:
+      chart: longhorn
+      version: "1.11.*"
+      sourceRef:
+        kind: HelmRepository
+        name: longhorn
+        namespace: flux-system
+      interval: 1h
+  install:
+    createNamespace: false
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  values:
+    persistence:
+      # local-path stays the cluster default; opt in per-PVC with storageClassName: longhorn
+      defaultClass: false
+      defaultClassReplicaCount: 2
+      reclaimPolicy: Retain
+    defaultSettings:
+      # 2-node cluster: one replica per node for redundancy / fast failover
+      defaultReplicaCount: 2
+      defaultDataPath: /var/lib/longhorn
+      # keep a replica local to the pod's node for read perf
+      defaultDataLocality: best-effort
+      storageMinimalAvailablePercentage: 15
+      orphanResourceAutoDeletion: "instance"
+    # 2 nodes (one is an ARM control-plane Pi): single-replica CSI controllers so
+    # nothing stays Pending on pod anti-affinity.
+    csi:
+      attacherReplicaCount: 1
+      provisionerReplicaCount: 1
+      resizerReplicaCount: 1
+      snapshotterReplicaCount: 1
+    longhornUI:
+      replicas: 1
+    ingress:
+      enabled: false
