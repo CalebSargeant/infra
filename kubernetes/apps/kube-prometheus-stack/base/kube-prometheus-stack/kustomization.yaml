@@ -3,5 +3,6 @@ kind: Kustomization
 resources:
   - helmrelease.yaml
   - thanos-objstore-secret.enc.yaml
+  - slack-token-externalsecret.yaml
 components:
   - ../../../../components/node-selectors/mini
