@@ -141,6 +141,16 @@ projects:
       enabled: true
     apply_requirements: [approved, mergeable]
 
+  - name: oci-prod-eu-amsterdam-1-backups
+    dir: terraform/oci/prod/eu-amsterdam-1/backups
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
+      enabled: true
+    apply_requirements: [approved, mergeable]
+
   - name: oci-prod-eu-amsterdam-1-drg-peering
     dir: terraform/oci/prod/eu-amsterdam-1/drg-peering
     workspace: default
