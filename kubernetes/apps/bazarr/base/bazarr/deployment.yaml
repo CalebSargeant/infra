@@ -43,7 +43,7 @@ spec:
       volumes:
         - name: bazarr
           persistentVolumeClaim:
-            claimName: bazarr-config # /config on Longhorn (migrated from hostPath PVC 'bazarr')
+            claimName: bazarr
         - name: movies
           persistentVolumeClaim:
             claimName: movies

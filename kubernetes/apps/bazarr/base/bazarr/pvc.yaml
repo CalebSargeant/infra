@@ -10,18 +10,3 @@ spec:
     requests:
       storage: 5Gi
   storageClassName: bazarr
----
-# Config migrated off node-local hostPath onto Longhorn (replicated, snapshot/backup-able).
-# The old 'bazarr' PVC/PV above is retained (unused) for rollback.
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: bazarr-config
-  namespace: media
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-  storageClassName: longhorn
