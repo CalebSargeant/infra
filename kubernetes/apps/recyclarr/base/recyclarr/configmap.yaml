@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: recyclarr-config
+  namespace: media
+data:
+  # Quality-as-code for Sonarr via TRaSH Guides (https://recyclarr.dev).
+  # Pulls the WEB-1080p quality profile + matching custom formats and the
+  # "series" quality definitions (sensible 1080p sizes) and reconciles them
+  # into Sonarr on each CronJob run. The API key is injected from the
+  # recyclarr-secrets Secret as $SONARR_API_KEY.
+  recyclarr.yml: |
+    sonarr:
+      series:
+        base_url: http://sonarr.media.svc.cluster.local:8989
+        api_key: !env_var SONARR_API_KEY
+        replace_existing_custom_formats: true
+        delete_old_custom_formats: true
+        include:
+          # Reasonable 1080p episode sizes (min/preferred/max MB-per-minute)
+          - template: sonarr-quality-definition-series
+          # WEB-1080p quality profile (1080p preferred, 720p fallback off)
+          - template: sonarr-v4-quality-profile-web-1080p
+          # Custom formats + scores that drive the WEB-1080p profile
+          - template: sonarr-v4-custom-formats-web-1080p
