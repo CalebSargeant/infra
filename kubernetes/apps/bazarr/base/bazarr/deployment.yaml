@@ -31,22 +31,6 @@ spec:
               value: "1000" # Replace with your group ID
             - name: TZ
               value: "Europe/Amsterdam" # Replace with your timezone
-            # --- PostgreSQL (CNPG) backend ---
-            - name: POSTGRES_ENABLED
-              value: "true"
-            - name: POSTGRES_HOST
-              value: "postgres-rw.database.svc.cluster.local"
-            - name: POSTGRES_PORT
-              value: "5432"
-            - name: POSTGRES_DATABASE
-              value: "bazarr"
-            - name: POSTGRES_USERNAME
-              value: "neondb_owner"
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: bazarr-postgres
-                  key: POSTGRES_PASSWORD
           volumeMounts:
             - mountPath: /config
               name: bazarr

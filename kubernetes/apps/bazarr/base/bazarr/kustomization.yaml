@@ -6,7 +6,6 @@ resources:
   - ingress.yaml
   - pvc.yaml
   - pv.yaml
-  - secret.enc.yaml
 components:
   - ../../../../components/resource-profiles/c.pico
   - ../../../../components/node-selectors/mini
