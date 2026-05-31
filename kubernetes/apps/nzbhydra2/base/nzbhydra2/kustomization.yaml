@@ -4,6 +4,14 @@ resources:
   - deployment.yaml
   - ingress.yaml
 components:
-  - ../../../../components/gluetun-sidecar
+  - ../../../../components/wireguard-sidecar
   - ../../../../components/resource-profiles/c.micro
   - ../../../../components/node-selectors/mini
+patches:
+  - target:
+      kind: Deployment
+      name: nzbhydra2
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/volumes/0/secret/secretName
+        value: nzbhydra2-wireguard

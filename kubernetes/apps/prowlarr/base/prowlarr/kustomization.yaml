@@ -8,6 +8,14 @@ resources:
   - pv.yaml
   - configmap.yaml
 components:
-  - ../../../../components/gluetun-sidecar
+  - ../../../../components/wireguard-sidecar
   - ../../../../components/resource-profiles/c.pico
   - ../../../../components/node-selectors/mini
+patches:
+  - target:
+      kind: Deployment
+      name: prowlarr
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/volumes/0/secret/secretName
+        value: prowlarr-wireguard
