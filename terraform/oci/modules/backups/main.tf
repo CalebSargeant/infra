@@ -38,6 +38,7 @@ resource "oci_identity_user" "backup_writer" {
   compartment_id = var.tenancy_ocid # IAM users are tenancy-level
   name           = "backup-writer"
   description    = "Service user for CNPG/Plex backups to OCI Object Storage (S3 compat)"
+  email          = "backup-writer@magmamoose.com" # required by Identity Domains (IDCS); service acct, no mailbox
 }
 
 resource "oci_identity_user_group_membership" "backup_writer" {
