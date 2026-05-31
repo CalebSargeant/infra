@@ -7,14 +7,6 @@ resources:
   - pvc.yaml
   - pv.yaml
 components:
-  - ../../../../components/wireguard-sidecar
+  - ../../../../components/gluetun-sidecar
   - ../../../../components/resource-profiles/c.pico
   - ../../../../components/node-selectors/mini
-patches:
-  - target:
-      kind: Deployment
-      name: jackett
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/volumes/0/secret/secretName
-        value: jackett-wireguard
