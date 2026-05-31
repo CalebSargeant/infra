@@ -6,8 +6,7 @@ resources:
   - ingress.yaml
   - pvc.yaml
   - pv.yaml
-  - privado-credentials.enc.yaml
 components:
-  - ../../../../components/gluetun-sidecar
+  - ../../../../components/pod-gateway-client
   - ../../../../components/resource-profiles/c.micro
   - ../../../../components/node-selectors/mini
