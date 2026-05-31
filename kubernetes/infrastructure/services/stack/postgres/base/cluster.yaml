@@ -40,13 +40,15 @@ spec:
   backup:
     barmanObjectStore:
       destinationPath: s3://postgres-backups/
-      endpointURL: http://minio.core.svc.cluster.local:9000
+      # OCI Object Storage (S3-compat) — offsite, survives cluster loss (unlike in-cluster MinIO).
+      # Creds via ExternalSecret postgres-backup-oci (from OCI Vault backup-oci-s3-credentials).
+      endpointURL: https://axn3gwpaabzc.compat.objectstorage.eu-amsterdam-1.oraclecloud.com
       s3Credentials:
         accessKeyId:
-          name: postgres-backup-secret
+          name: postgres-backup-oci
           key: ACCESS_KEY_ID
         secretAccessKey:
-          name: postgres-backup-secret
+          name: postgres-backup-oci
           key: ACCESS_SECRET_KEY
       wal:
         compression: gzip
