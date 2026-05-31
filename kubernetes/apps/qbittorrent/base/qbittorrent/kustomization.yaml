@@ -6,15 +6,8 @@ resources:
   - ingress.yaml
   - pvc.yaml
   - pv.yaml
+  - privado-credentials.enc.yaml
 components:
-  - ../../../../components/wireguard-sidecar
+  - ../../../../components/gluetun-sidecar
   - ../../../../components/resource-profiles/c.micro
   - ../../../../components/node-selectors/mini
-patches:
-  - target:
-      kind: StatefulSet
-      name: qbittorrent
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/volumes/0/secret/secretName
-        value: qbittorrent-wireguard
