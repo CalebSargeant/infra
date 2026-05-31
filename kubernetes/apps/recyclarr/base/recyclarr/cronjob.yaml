@@ -4,7 +4,7 @@ metadata:
   name: recyclarr
   namespace: media
 spec:
-  schedule: "0 4 * * *" # daily 04:00 — reconcile Sonarr quality from TRaSH
+  schedule: "0 4 * * *" # daily 04:00 — reconcile Sonarr + Radarr quality from TRaSH
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
@@ -20,7 +20,8 @@ spec:
             type: mini
           containers:
             - name: recyclarr
-              image: ghcr.io/recyclarr/recyclarr:8.6.0
+              # Pinned to v7: v8 removed TRaSH `include: template:` support.
+              image: ghcr.io/recyclarr/recyclarr:7.5.2
               args: ["sync"]
               env:
                 - name: SONARR_API_KEY
@@ -28,7 +29,15 @@ spec:
                     secretKeyRef:
                       name: recyclarr-secrets
                       key: SONARR_API_KEY
+                - name: RADARR_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: recyclarr-secrets
+                      key: RADARR_API_KEY
               volumeMounts:
+                # writable data dir — recyclarr clones the TRaSH repos here
+                - name: data
+                  mountPath: /config
                 - name: config
                   mountPath: /config/recyclarr.yml
                   subPath: recyclarr.yml
@@ -37,8 +46,10 @@ spec:
                   cpu: 10m
                   memory: 64Mi
                 limits:
-                  memory: 192Mi
+                  memory: 256Mi
           volumes:
+            - name: data
+              emptyDir: {}
             - name: config
               configMap:
                 name: recyclarr-config
