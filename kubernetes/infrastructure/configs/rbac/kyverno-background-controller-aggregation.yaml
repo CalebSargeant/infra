@@ -13,4 +13,4 @@ metadata:
 rules:
   - apiGroups: ["rbac.authorization.k8s.io"]
     resources: ["rolebindings"]
-    verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
