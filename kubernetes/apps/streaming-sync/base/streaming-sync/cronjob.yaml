@@ -24,7 +24,7 @@ spec:
               command: ["python", "/app/sync.py"]
               env:
                 - name: DRY_RUN
-                  value: "true" # log-only; flip to "false" to ARM deletions/re-adds
+                  value: "false" # ARMED — deletes Netflix-NL titles + re-adds when they leave
                 - name: REGION
                   value: "NL"
                 - name: PROVIDERS
@@ -32,7 +32,7 @@ spec:
                 - name: KEEP_TAG
                   value: "keep" # tag a movie/series `keep` in Radarr/Sonarr to protect it
                 - name: MAX_REMOVE
-                  value: "50" # safety: skip all removals if a single run would delete > this
+                  value: "400" # runaway guard: abort all removals if a single run would delete > this (Netflix-NL set ~288)
                 - name: SLACK_CHANNEL
                   value: "C0B88KF2X32" # media-sync run summaries
                 - name: TMDB_API_KEY
