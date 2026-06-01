@@ -41,6 +41,16 @@ spec:
       pullPolicy: IfNotPresent
 
     config:
+      # Curve25519 vault keypair for the Pro sealed-credential feature. Generated
+      # on first run (0600) and persisted on the state PVC (mounted at
+      # /var/lib/mikrotik-minder) so it survives pod restarts — re-generating it
+      # would orphan every credential already sealed to the old public key. On
+      # startup the agent registers the PUBLIC half with the control plane so the
+      # Pro UI can seal router passwords to it in-browser.
+      # NOTE: registration requires the agent image with mikrotik-minder's
+      # unconditional-key-registration fix — bump image.tag to that release
+      # (> 1.5.2) for the key to actually register under config_source: local.
+      agent_key_path: /var/lib/mikrotik-minder/agent_key
       server:
         # Dün Mir control-plane API (custom domain on the same worker; the old
         # *.workers.dev URL no longer serves). Same agent token / D1.
