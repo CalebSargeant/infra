@@ -37,6 +37,6 @@ spec:
       replicas: 1
     reportsController:
       replicas: 1
-    # Disable PolicyReport cleanup — not needed for our use case.
+    # Disable PolicyReports cleanup — not needed for our use case.
     policyReportsCleanup:
       enabled: false
