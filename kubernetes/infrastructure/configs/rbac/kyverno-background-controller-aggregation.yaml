@@ -1,0 +1,16 @@
+---
+# Kyverno's background-controller installs with minimal RBAC and cannot
+# manage arbitrary resource kinds out of the box. The cluster-operator
+# generate policy creates/updates/deletes RoleBindings, so we add a
+# ClusterRole carrying the aggregation label that Kyverno's main
+# `kyverno:background-controller` ClusterRole selects on.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyverno:background-controller:rolebindings
+  labels:
+    rbac.kyverno.io/aggregate-to-background-controller: "true"
+rules:
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["rolebindings"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
