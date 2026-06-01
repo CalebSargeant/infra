@@ -28,7 +28,7 @@ spec:
                 - name: REGION
                   value: "NL"
                 - name: PROVIDERS
-                  value: "Netflix,Amazon Prime Video"
+                  value: "Netflix" # Prime's NL flatrate catalogue is too broad to treat as "delete it"; re-add "Amazon Prime Video" if wanted
                 - name: KEEP_TAG
                   value: "keep" # tag a movie/series `keep` in Radarr/Sonarr to protect it
                 - name: MAX_REMOVE
