@@ -26,6 +26,7 @@ resources:
   - ./recyclarr
   - ./sabnzbd
   - ./sonarr
+  - ./streaming-sync
   # miscellaneous
   - ./excalidraw
   - ./nextcloud
