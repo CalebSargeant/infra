@@ -3,9 +3,8 @@
 # my workstation uses this rather than the cluster-admin bootstrap
 # credential. Cluster-wide read is limited to inert resources
 # (namespaces, nodes, storage, CRDs, APIServices); namespaced access
-# (pods, secrets, Flux state, etc.) is granted only via the per-namespace
-# RoleBindings under bindings/, so a new namespace also needs its
-# binding added there.
+# (pods, secrets, Flux state, etc.) is granted via a Kyverno ClusterPolicy
+# generator that creates RoleBindings automatically for new namespaces.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
