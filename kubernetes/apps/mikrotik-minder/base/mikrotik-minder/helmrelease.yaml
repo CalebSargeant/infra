@@ -39,6 +39,14 @@ spec:
       tag: "1.15.0" # {"$imagepolicy": "flux-system:mikrotik-minder-agent:tag"}
       pullPolicy: IfNotPresent
     config:
+      # Pro vault. The agent persists a Curve25519 keypair (libsodium sealed-box)
+      # here: on startup it creates the key if absent and registers the PUBLIC
+      # key with the control plane. The Pro UI then seals device passwords to that
+      # key in the browser — the control plane only ever stores ciphertext, and
+      # the agent decrypts locally. MUST live on the PVC (the rest of the FS is
+      # read-only) so the key, and thus the registered public key, survive
+      # restarts. Unset = vault disabled (device creds fall back to env refs).
+      agent_key_path: /var/lib/mikrotik-minder/agent_key
       server:
         # Dün Mir control-plane API (custom domain on the same worker; the old
         # *.workers.dev URL no longer serves). Same agent token / D1.
