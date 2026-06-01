@@ -37,6 +37,6 @@ spec:
       replicas: 1
     reportsController:
       replicas: 1
-    # Disable Pod Security policies subchart — not needed for our use case.
+    # Disable PolicyReport cleanup — not needed for our use case.
     policyReportsCleanup:
       enabled: false
