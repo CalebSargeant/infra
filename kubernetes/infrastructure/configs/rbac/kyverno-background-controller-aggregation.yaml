@@ -4,6 +4,13 @@
 # generate policy creates/updates/deletes RoleBindings, so we add a
 # ClusterRole carrying the aggregation label that Kyverno's main
 # `kyverno:background-controller` ClusterRole selects on.
+#
+# The bind+escalate verbs on the built-in `admin` ClusterRole are
+# required because Kubernetes' Privilege Escalation Prevention blocks
+# the background-controller from creating a binding that references a
+# role with permissions the controller itself does not hold. These two
+# virtual verbs are the standard way to authorize a non-admin principal
+# to create bindings to a higher-privileged role.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -14,3 +21,7 @@ rules:
   - apiGroups: ["rbac.authorization.k8s.io"]
     resources: ["rolebindings"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterroles"]
+    resourceNames: ["admin"]
+    verbs: ["bind", "escalate"]
