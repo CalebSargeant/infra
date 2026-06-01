@@ -6,6 +6,7 @@ resources:
   - 1password-connect
   - cloudnative-pg
   - longhorn
+  - kyverno
 patches:
   # cert-manager node placement + resource-profile labels — carried over
   # verbatim from the legacy _clusters/firefly/core/kustomization.yaml
