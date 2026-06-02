@@ -261,73 +261,18 @@ resource "cloudflare_zero_trust_access_policy" "comment_commander_pro_caleb" {
   }
 }
 
-# --- self_hosted: Mikrotik Minder Pro ---------------------------------------
-# The licensed Mikrotik Minder operator UI — github.com/MagmaMoose/mikrotik-minder-pro.
-# Unlike comment-commander-pro, this is a Cloudflare Pages app, not a k8s
-# workload: there's no cloudflared tunnel and no DNS record to manage — Pages
-# already serves mikrotik-minder-pro.pages.dev on the CF edge. Access is the
-# only thing gating it (the app has no in-app auth yet — MVP). Caleb-only, no
-# device-posture `require` — same reasoning as comment-commander-pro and Zoey:
-# the posture rules need a WARP-enrolled device Caleb doesn't have, so requiring
-# it is a hard lockout (and the Pro UI is one he'll want from mobile too).
+# --- Dün Mir Pro — now gated by Stytch, NOT Cloudflare Access ----------------
+# The licensed operator UI (github.com/MagmaMoose/dunmir-pro) now authenticates
+# CUSTOMERS itself via Stytch B2B magic links: the app fail-closes to /login and
+# the worker validates the forwarded session JWT, scoping each operator to their
+# own tenant. The Cloudflare Access application that used to gate it has therefore
+# been removed — Access would double-gate and block self-serve customer sign-up
+# (only emails in the Caleb access group could get in). Removing it makes the
+# Pages URLs reachable, but the app is gated by Stytch at the edge of every route.
 #
-# Custom domain: dunmir.magmamoose.com (the product's new "Dün Mir" name). The
-# destination below gates it in Access now so it can never be served un-authed.
-# Still TODO to make it actually serve: attach it to the Pages project
-# (cloudflare_pages_domain / dashboard) and point DNS at the project — there is
-# currently a manual dunmir.magmamoose.com record in the zone that is NOT in
-# terraform/cloudflare/dns-magmamoose/prod (drift to reconcile).
-resource "cloudflare_zero_trust_access_application" "mikrotik_minder_pro" {
-  account_id                = var.account_id
-  name                      = "Mikrotik Minder Pro"
-  type                      = "self_hosted"
-  domain                    = "mikrotik-minder-pro.pages.dev"
-  tags                      = ["Magma Moose"]
-  app_launcher_visible      = true
-  auto_redirect_to_identity = false
-  session_duration          = "24h"
-
-  allowed_idps = [
-    cloudflare_zero_trust_access_identity_provider.google_workspace.id,
-    cloudflare_zero_trust_access_identity_provider.one_time_pin.id,
-    cloudflare_zero_trust_access_identity_provider.google.id,
-  ]
-
-  # Pages serves the app on the production hostname AND on a unique
-  # <hash>.mikrotik-minder-pro.pages.dev URL per build (plus <branch>.… aliases).
-  # `domain` alone gates only the apex, so every deployment URL was reachable
-  # un-authed. The wildcard matches one subdomain level (not the apex), so both
-  # entries are required to gate the lot.
-  destinations {
-    type = "public"
-    uri  = "mikrotik-minder-pro.pages.dev"
-  }
-  destinations {
-    type = "public"
-    uri  = "*.mikrotik-minder-pro.pages.dev"
-  }
-
-  # Custom domain (Dün Mir). Inert until the Pages custom domain is attached;
-  # ensures the licensed UI is gated the moment dunmir.magmamoose.com resolves
-  # to the project.
-  destinations {
-    type = "public"
-    uri  = "dunmir.magmamoose.com"
-  }
-}
-
-resource "cloudflare_zero_trust_access_policy" "mikrotik_minder_pro_caleb" {
-  account_id       = var.account_id
-  application_id   = cloudflare_zero_trust_access_application.mikrotik_minder_pro.id
-  name             = "Caleb"
-  decision         = "allow"
-  precedence       = 1
-  session_duration = "24h"
-
-  include {
-    group = [cloudflare_zero_trust_access_group.caleb.id]
-  }
-}
+# NOTE: applying this DESTROYS the Access app + its policy — dunmir.magmamoose.com
+# and *.mikrotik-minder-pro.pages.dev become Stytch-gated only. Confirmed Stytch
+# sign-in works before merging.
 
 # --- self_hosted: Zoey ------------------------------------------------------
 # Zoey — the project-intelligence dashboard (firefly cluster, behind the
