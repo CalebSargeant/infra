@@ -36,7 +36,7 @@ spec:
       # ../../prod/mikrotik-minder/image-automation.yaml — it rewrites the
       # $imagepolicy-marked value below and pushes to main. 1.6.0 added the
       # inventory_sync + packet-loss probes (mikrotik-minder#30).
-      tag: "1.19.2" # {"$imagepolicy": "flux-system:mikrotik-minder-agent:tag"}
+      tag: "1.19.3" # {"$imagepolicy": "flux-system:mikrotik-minder-agent:tag"}
       pullPolicy: IfNotPresent
     config:
       # Pro vault. The agent persists a Curve25519 keypair (libsodium sealed-box)
