@@ -271,7 +271,7 @@ resource "cloudflare_zero_trust_access_policy" "comment_commander_pro_caleb" {
 # Pages URLs reachable, but the app is gated by Stytch at the edge of every route.
 #
 # NOTE: applying this DESTROYS the Access app + its policy — dunmir.magmamoose.com
-# and *.mikrotik-minder-pro.pages.dev become Stytch-gated only. Confirmed Stytch
+# and *.mikrotik-minder-pro.pages.dev become Stytch-gated only. Confirm Stytch
 # sign-in works before merging.
 
 # --- self_hosted: Zoey ------------------------------------------------------
