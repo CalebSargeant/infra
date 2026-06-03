@@ -5,31 +5,30 @@ metadata:
   namespace: automation
 data:
   config.yaml: |
-    # LiteLLM proxy config. Keys come from env (the `litellm` Secret, populated
-    # by the OCI Vault ExternalSecret). Edit the model list freely; consumers
-    # request a `model_name` from this list.
+    # LiteLLM proxy for Diatreme Dispatch, configured for Claude Max-subscription
+    # pass-through: the agent sends its Claude OAuth token (Authorization header),
+    # which LiteLLM forwards upstream (forward_client_headers_to_llm_api) for
+    # flat-rate subscription billing — so the Claude entries need NO api_key. The
+    # gateway authenticates clients via the master key (x-litellm-api-key header).
+    #
+    # To put a model on per-token API billing instead, add
+    #   api_key: os.environ/ANTHROPIC_API_KEY   (or DEEPSEEK_API_KEY)
+    # to its entry and provide that key via the ExternalSecret + Deployment env.
     model_list:
       - model_name: claude-opus-4-8
         litellm_params:
           model: anthropic/claude-opus-4-8
-          api_key: os.environ/ANTHROPIC_API_KEY
       - model_name: claude-sonnet-4-6
         litellm_params:
           model: anthropic/claude-sonnet-4-6
-          api_key: os.environ/ANTHROPIC_API_KEY
       - model_name: claude-haiku-4-5
         litellm_params:
           model: anthropic/claude-haiku-4-5
-          api_key: os.environ/ANTHROPIC_API_KEY
-      - model_name: deepseek-chat
-        litellm_params:
-          model: deepseek/deepseek-chat
-          api_key: os.environ/DEEPSEEK_API_KEY
-      - model_name: deepseek-reasoner
-        litellm_params:
-          model: deepseek/deepseek-reasoner
-          api_key: os.environ/DEEPSEEK_API_KEY
     general_settings:
       master_key: os.environ/LITELLM_MASTER_KEY
+      # Forward the client's Authorization (the Claude OAuth token) to Anthropic.
+      forward_client_headers_to_llm_api: true
+      # Use a dedicated header for the proxy master key to avoid conflict with the Authorization header.
+      litellm_key_header_name: x-litellm-api-key
     litellm_settings:
       drop_params: true
