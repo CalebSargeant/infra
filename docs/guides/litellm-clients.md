@@ -6,6 +6,9 @@ usage tracking + the LiteLLM admin UI.
 
 - **In-cluster URL:** `http://litellm.automation.svc.cluster.local:4000`
 - **External URL (once the ingress lands):** `https://litellm.sargeant.co`
+
+> **Note:** Some tools (such as the Codex config.toml and OpenCode examples below) require the base URL to include `/v1`; others (the OpenAI SDK, the `OPENAI_BASE_URL` environment variable) omit it because the client appends `/v1` automatically. When in doubt, check the tool's documentation.
+
 - **Auth:**
   - The proxy's own admin key is sent via the `x-litellm-api-key` header.
   - Client virtual keys (created in the admin UI) are sent via `Authorization: Bearer <key>` (the OpenAI convention).
