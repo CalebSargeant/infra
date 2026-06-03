@@ -10,8 +10,8 @@ usage tracking + the LiteLLM admin UI.
 > **Note:** Some tools (such as the Codex config.toml and OpenCode examples below) require the base URL to include `/v1`; others (the OpenAI SDK, the `OPENAI_BASE_URL` environment variable) omit it because the client appends `/v1` automatically. When in doubt, check the tool's documentation.
 
 - **Auth:**
-  - The proxy's own admin key is sent via the `x-litellm-api-key` header.
-  - Client virtual keys (created in the admin UI) are sent via `Authorization: Bearer <key>` (the OpenAI convention).
+  - The proxy's admin key is sent via the `x-litellm-api-key` header — for client use, prefer a **virtual key** created in the admin UI.
+  - Client virtual keys are sent via `Authorization: Bearer <key>` (the OpenAI convention).
 - **Model names:** clients request a `model_name` from the proxy's `config.yaml`
   (`claude-opus-4-8`, `claude-sonnet-4-6`, `claude-haiku-4-5`, …).
 
@@ -22,7 +22,7 @@ There are two ways the proxy talks upstream:
 | Path | Who | Billing | How |
 |---|---|---|---|
 | **Subscription** | **Claude Code only** (incl. the diatreme dispatcher) | Flat-rate Max plan | Claude Code forwards its **OAuth** token in `Authorization`; LiteLLM forwards it upstream (`forward_client_headers_to_llm_api` and `forward_llm_provider_auth_headers`). Gateway is authed via the `x-litellm-api-key` header. |
-| **Per-token (API key)** | **Codex, OpenCode, OpenAI Agents SDK**, anything OpenAI-protocol | Per-token on a provider account | The client sends the LiteLLM key in `Authorization`; LiteLLM calls the provider with its own configured `api_key`. |
+| **Per-token (API key)** | **Codex, OpenCode, OpenAI Agents SDK**, anything OpenAI-protocol | Per-token on a provider account | The client sends the LiteLLM virtual key in `Authorization`; LiteLLM calls the provider with its own configured `api_key`. |
 
 The three tools below put a **key** in `Authorization`, so they **cannot use the
 Claude Max subscription** — that's exclusive to Claude Code's OAuth. To use them
@@ -52,7 +52,7 @@ through LiteLLM you must add at least one **API-key'd model** to the proxy, e.g.
 
 ```bash
 export OPENAI_BASE_URL="https://litellm.sargeant.co"   # or the in-cluster URL
-export OPENAI_API_KEY="<your-litellm-key>"
+export OPENAI_API_KEY="<your-litellm-virtual-key>"
 codex --model gpt-4o --full-auto
 ```
 
@@ -88,11 +88,13 @@ env_key = "OPENAI_API_KEY"      # Codex reads the key from this env var
 ```
 
 Then in OpenCode run `/connect`, pick provider **LiteLLM**, and paste your LiteLLM
-key. Model keys must match the proxy's `model_name` values exactly. If a reasoning
+virtual key. Model keys must match the proxy's `model_name` values exactly. If a reasoning
 model rejects params, add `additional_drop_params: ["reasoningSummary"]` to the
 proxy `litellm_settings`.
 
 ## OpenAI Agents SDK (Python)
+
+Use a LiteLLM virtual key (created in the admin UI) for client authentication.
 
 ```python
 import os
@@ -103,7 +105,7 @@ client = AsyncOpenAI(
     base_url=os.getenv("LITELLM_BASE_URL", "https://litellm.sargeant.co"),
     api_key="placeholder",  # dummy; real key goes in default_headers
     default_headers={
-        "x-litellm-api-key": os.environ["LITELLM_API_KEY"],   # your LiteLLM master key
+        "x-litellm-api-key": os.environ["LITELLM_API_KEY"],   # your LiteLLM virtual key
     },
 )
 set_tracing_disabled(True)
