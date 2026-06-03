@@ -5,6 +5,7 @@ resources:
   - ./atlantis
   - ./homeassistant
   - ./homebridge
+  - ./litellm
   - ./mikrotik-minder
   - ./n8n
   # magmamoose products (open-core dashboards; external-repo + image automation)
