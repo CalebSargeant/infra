@@ -114,6 +114,15 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # LiteLLM admin UI + gateway (firefly cluster). Gated by the self_hosted
+    # Cloudflare Access app in access_apps.tf (Caleb only). Pairs with the
+    # proxied CNAME in dns/prod/terragrunt.hcl.
+    ingress_rule {
+      hostname = "litellm.sargeant.co"
+      service  = "http://litellm.automation.svc.cluster.local:4000"
+      origin_request {}
+    }
+
     # GitHub PR-review webhooks → comment-commander (firefly cluster).
     # Pairs with the explicit proxied CNAME in
     # terraform/cloudflare/dns-magmamoose/prod/terragrunt.hcl
