@@ -28,8 +28,8 @@ data:
       master_key: os.environ/LITELLM_MASTER_KEY
       # Forward the client's Authorization (the Claude OAuth token) to Anthropic.
       forward_client_headers_to_llm_api: true
-      # Explicitly forward provider auth headers to allow the Authorization header through.
-      forward_provider_auth_headers: true
+      # Explicitly forward LLM provider auth headers to allow the Authorization header through.
+      forward_llm_provider_auth_headers: true
       # Use a dedicated header for the proxy master key to avoid conflict with the Authorization header.
       litellm_key_header_name: x-litellm-api-key
     litellm_settings:
