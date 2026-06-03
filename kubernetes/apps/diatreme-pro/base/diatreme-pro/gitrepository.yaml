@@ -14,6 +14,6 @@ spec:
   secretRef:
     # magmamoose-org repo; uses the MagmaMoose-org App installation (see
     # ../../../clusters/firefly/flux-system/github-app-magmamoose-secret.yaml),
-    # same as comment-commander-pro / zoey.
+    # same as zoey.
     name: github-app-magmamoose
   url: https://github.com/magmamoose/diatreme-pro
