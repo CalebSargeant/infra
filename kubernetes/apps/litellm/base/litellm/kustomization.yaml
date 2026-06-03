@@ -5,8 +5,3 @@ resources:
   - externalsecret.yaml
   - deployment.yaml
   - service.yaml
-# resources/* and nodeSelector are injected by these components (op: add), so
-# they are intentionally NOT declared on the Deployment below.
-components:
-  - ../../../../components/resource-profiles/c.small
-  - ../../../../components/node-selectors/pi
