@@ -49,8 +49,6 @@ resources:
   # each dir holds only the in-cluster Flux plumbing — source, image
   # automation, namespace, and the Flux Kustomization that pulls the workload)
   - ./buxfer-sync
-  - ./comment-commander
-  - ./comment-commander-pro
   - ./deskbird-booking
   - ./fortivpn-gateway
   - ./openviking
