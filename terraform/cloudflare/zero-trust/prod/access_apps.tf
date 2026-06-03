@@ -387,6 +387,37 @@ resource "cloudflare_zero_trust_access_policy" "diatreme_pro_caleb" {
   }
 }
 
+# --- self_hosted: Diatreme Dispatch API (bypass — bearer-gated) -------------
+# diatreme.magmamoose.com/api/dispatch is POSTed to by the Diatreme worker
+# (api.diatreme.magmamoose.com) when triage decides a Copilot comment is a
+# "fix" — it hands off to the diatreme-pro agent dispatcher. Most-specific path
+# first, so /api/dispatch hits this bypass app instead of the Caleb gate on the
+# apex dashboard above. The dispatcher authenticates the worker itself (Bearer
+# DISPATCH_AGENT_TOKEN) and 503s until configured, so unauthenticated
+# reachability is safe here — same reasoning as the Zoey Slack webhook bypass.
+# Browser users only ever load the dashboard apex, which stays Caleb-only.
+resource "cloudflare_zero_trust_access_application" "diatreme_dispatch" {
+  account_id                = var.account_id
+  name                      = "Diatreme Dispatch API"
+  type                      = "self_hosted"
+  domain                    = "diatreme.magmamoose.com/api/dispatch"
+  tags                      = ["Magma Moose"]
+  app_launcher_visible      = false
+  auto_redirect_to_identity = false
+}
+
+resource "cloudflare_zero_trust_access_policy" "diatreme_dispatch_bypass" {
+  account_id     = var.account_id
+  application_id = cloudflare_zero_trust_access_application.diatreme_dispatch.id
+  name           = "Worker bypass (bearer-gated)"
+  decision       = "bypass"
+  precedence     = 1
+
+  include {
+    everyone = true
+  }
+}
+
 # --- self_hosted: LiteLLM admin UI -----------------------------------------
 # The LLM gateway's admin UI (litellm.sargeant.co → firefly tunnel → litellm
 # in the automation ns). No in-app SSO, so Access gates it; Caleb only.
