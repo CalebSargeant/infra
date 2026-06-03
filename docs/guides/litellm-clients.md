@@ -98,7 +98,10 @@ from openai import AsyncOpenAI
 
 client = AsyncOpenAI(
     base_url=os.getenv("LITELLM_BASE_URL", "https://litellm.sargeant.co"),
-    api_key=os.environ["LITELLM_API_KEY"],   # your LiteLLM key, not a provider key
+    api_key="placeholder",  # dummy; real key goes in default_headers
+    default_headers={
+        "x-litellm-api-key": os.environ["LITELLM_API_KEY"],   # your LiteLLM master key
+    },
 )
 set_tracing_disabled(True)
 
