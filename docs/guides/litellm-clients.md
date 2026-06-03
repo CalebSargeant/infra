@@ -6,9 +6,9 @@ usage tracking + the LiteLLM admin UI.
 
 - **In-cluster URL:** `http://litellm.automation.svc.cluster.local:4000`
 - **External URL (once the ingress lands):** `https://litellm.sargeant.co`
-- **Auth:** every client presents the **LiteLLM key** (the master key, or a virtual
-  key minted in the UI). Tools that follow the OpenAI convention send it as
-  `Authorization: Bearer <key>` (i.e. as their `OPENAI_API_KEY`).
+- **Auth:**
+  - The proxy's own admin key is sent via the `x-litellm-api-key` header.
+  - Client virtual keys (created in the admin UI) are sent via `Authorization: Bearer <key>` (the OpenAI convention).
 - **Model names:** clients request a `model_name` from the proxy's `config.yaml`
   (`claude-opus-4-8`, `claude-sonnet-4-6`, `claude-haiku-4-5`, …).
 
