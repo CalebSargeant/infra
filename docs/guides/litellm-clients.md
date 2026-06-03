@@ -21,7 +21,7 @@ There are two ways the proxy talks upstream:
 
 | Path | Who | Billing | How |
 |---|---|---|---|
-| **Subscription** | **Claude Code only** (incl. the diatreme dispatcher) | Flat-rate Max plan | Claude Code forwards its **OAuth** token in `Authorization`; LiteLLM forwards it upstream (`forward_client_headers_to_llm_api`). Gateway is authed via the `x-litellm-api-key` header. |
+| **Subscription** | **Claude Code only** (incl. the diatreme dispatcher) | Flat-rate Max plan | Claude Code forwards its **OAuth** token in `Authorization`; LiteLLM forwards it upstream (`forward_client_headers_to_llm_api` and `forward_llm_provider_auth_headers`). Gateway is authed via the `x-litellm-api-key` header. |
 | **Per-token (API key)** | **Codex, OpenCode, OpenAI Agents SDK**, anything OpenAI-protocol | Per-token on a provider account | The client sends the LiteLLM key in `Authorization`; LiteLLM calls the provider with its own configured `api_key`. |
 
 The three tools below put a **key** in `Authorization`, so they **cannot use the
