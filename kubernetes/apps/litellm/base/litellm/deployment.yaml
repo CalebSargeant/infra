@@ -28,16 +28,9 @@ spec:
             - name: http
               containerPort: 4000
           env:
-            - name: ANTHROPIC_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: litellm
-                  key: anthropic-api-key
-            - name: DEEPSEEK_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: litellm
-                  key: deepseek-api-key
+            # Subscription pass-through needs only the gateway master key; the
+            # agent forwards its Claude OAuth token upstream. (For per-token API
+            # billing, add ANTHROPIC_API_KEY / DEEPSEEK_API_KEY from the Secret.)
             - name: LITELLM_MASTER_KEY
               valueFrom:
                 secretKeyRef:
