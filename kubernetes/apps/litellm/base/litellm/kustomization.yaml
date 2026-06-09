@@ -8,4 +8,4 @@ resources:
   - service.yaml
   - ingress.yaml
 components:
-  - ../../../../components/resource-profiles/c.pico
+  - ../../../../components/resource-profiles/m.nano
