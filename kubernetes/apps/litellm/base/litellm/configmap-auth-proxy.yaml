@@ -23,6 +23,19 @@ data:
         default upgrade;
         ''      close;
       }
+      # Prefer a client-supplied x-litellm-api-key; fall back to Authorization
+      # only when the key header is absent.  This handles two distinct callers:
+      #   1. OpenAI-protocol clients (Warp, Codex, OpenCode, the OpenAI SDK)
+      #      which can only send their key in `Authorization: ****** and
+      #      send no `x-litellm-api-key` → we copy Authorization across.
+      #   2. The LiteLLM admin UI, which reads `auth_header_name` from its login
+      #      JWT, learns that the key header is `x-litellm-api-key`, and then
+      #      sends every request with `x-litellm-api-key: ****** and NO
+      #      Authorization.  The old unconditional copy destroyed that key header.
+      map $http_x_litellm_api_key $litellm_api_key {
+        ""      $http_authorization;       # absent → fall back to Authorization
+        default $http_x_litellm_api_key;  # present → preserve it
+      }
       server {
         listen 8080;
         client_max_body_size 0;
@@ -37,9 +50,7 @@ data:
           proxy_set_header X-Forwarded-Proto $scheme;
           proxy_set_header Upgrade           $http_upgrade;
           proxy_set_header Connection        $connection_upgrade;
-          # The translation. Empty for requests without Authorization (e.g. the
-          # cookie/JWT-based admin UI), which is harmless on those routes.
-          proxy_set_header x-litellm-api-key $http_authorization;
+          proxy_set_header x-litellm-api-key $litellm_api_key;
         }
       }
     }
