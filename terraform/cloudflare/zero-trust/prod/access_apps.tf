@@ -417,36 +417,3 @@ resource "cloudflare_zero_trust_access_policy" "diatreme_dispatch_bypass" {
     everyone = true
   }
 }
-
-# --- self_hosted: LiteLLM admin UI -----------------------------------------
-# The LLM gateway's admin UI (litellm.sargeant.co → firefly tunnel → litellm
-# in the automation ns). No in-app SSO, so Access gates it; Caleb only.
-resource "cloudflare_zero_trust_access_application" "litellm" {
-  account_id                = var.account_id
-  name                      = "LiteLLM"
-  type                      = "self_hosted"
-  domain                    = "litellm.sargeant.co"
-  tags                      = ["Sargeant"]
-  app_launcher_visible      = true
-  auto_redirect_to_identity = false
-  session_duration          = "24h"
-
-  allowed_idps = [
-    cloudflare_zero_trust_access_identity_provider.google_workspace.id,
-    cloudflare_zero_trust_access_identity_provider.one_time_pin.id,
-    cloudflare_zero_trust_access_identity_provider.google.id,
-  ]
-}
-
-resource "cloudflare_zero_trust_access_policy" "litellm_caleb" {
-  account_id       = var.account_id
-  application_id   = cloudflare_zero_trust_access_application.litellm.id
-  name             = "Caleb"
-  decision         = "allow"
-  precedence       = 1
-  session_duration = "24h"
-
-  include {
-    group = [cloudflare_zero_trust_access_group.caleb.id]
-  }
-}

@@ -143,15 +143,6 @@ inputs = {
       proxied = true
     },
 
-    # LiteLLM admin UI — proxied so Cloudflare Access can gate it; routes
-    # through the firefly tunnel (ingress_rule in zero-trust/prod/tunnels.tf).
-    {
-      name    = "litellm.sargeant.co"
-      type    = "CNAME"
-      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
-      proxied = true
-    },
-
     # TEMPORARY — until Tucows lifts the clientHold on magmamoose.com.
     # See memory: project_magmamoose-clienthold-swap.md. Once the hold
     # is lifted (whois magmamoose.com no longer lists `clientHold`), drop
