@@ -100,7 +100,8 @@ capabilities.
 
 LiteLLM intentionally has no hard node selector. The Pi node can be too tight to
 schedule a replacement pod during rolling updates, and the ingress depends on the
-`auth-proxy` sidecar being present on `:8080`.
+`auth-proxy` sidecar being present on `:8080`. The app uses a memory-oriented
+resource profile because the LiteLLM process can sit around 1Gi at idle.
 
 ## How routing works
 
