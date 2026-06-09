@@ -175,6 +175,7 @@ LiteLLM (`kubernetes/apps/litellm`) intentionally separates Claude Code OAuth pa
 - The LAN/VPN ingress and service port `8080` go through the `auth-proxy` sidecar, which translates OpenAI-style `Authorization: Bearer <LiteLLM key>` into `x-litellm-api-key`.
 - Claude subscription-backed model entries should have no `litellm_params.api_key`, and should carry non-secret `model_info` metadata such as `auth_mode: claude-code-oauth-pass-through` and `billing_mode: claude-max-subscription` so the UI/API can show how the model is wired.
 - API-key-backed models are fine for plain OpenAI-compatible clients when they use the ingress or `:8080` proxy path.
+- Do not force LiteLLM onto `type=pi`; the Pi node can be too resource-constrained during rolling updates, and a stuck rollout leaves ingress targeting `:8080` while only the old `:4000` pod is ready.
 
 ## Integration Points & Dependencies
 

@@ -96,6 +96,12 @@ For local models, resource sizing matters more than LiteLLM config: the Ollama p
 needs enough CPU/memory, and tool/function calling depends on the model's actual
 capabilities.
 
+## Operational note
+
+LiteLLM intentionally has no hard node selector. The Pi node can be too tight to
+schedule a replacement pod during rolling updates, and the ingress depends on the
+`auth-proxy` sidecar being present on `:8080`.
+
 ## How routing works
 
 The client chooses the route by sending a `model` value. LiteLLM matches that value
