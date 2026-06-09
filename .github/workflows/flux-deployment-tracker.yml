@@ -10,7 +10,7 @@ jobs:
     permissions:
       deployments: write
       contents: read
-    
+
     steps:
       - name: Parse FluxCD Event
         id: parse
@@ -18,25 +18,25 @@ jobs:
           # Extract metadata from the webhook payload
           echo "Event received from FluxCD"
           echo "metadata=${{ toJson(github.event.client_payload) }}" >> $GITHUB_OUTPUT
-          
+
           # Extract resource name and namespace from the event
           RESOURCE_NAME="${{ github.event.client_payload.involvedObject.name }}"
           RESOURCE_KIND="${{ github.event.client_payload.involvedObject.kind }}"
           NAMESPACE="${{ github.event.client_payload.involvedObject.namespace }}"
           REVISION="${{ github.event.client_payload.metadata.revision }}"
-          
+
           echo "resource_name=${RESOURCE_NAME}" >> $GITHUB_OUTPUT
           echo "resource_kind=${RESOURCE_KIND}" >> $GITHUB_OUTPUT
           echo "namespace=${NAMESPACE}" >> $GITHUB_OUTPUT
           echo "revision=${REVISION}" >> $GITHUB_OUTPUT
-          
+
           # Create environment name based on cluster
           # Assumes cluster name is in the path or can be derived
           ENVIRONMENT="firefly"
           echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
 
       - name: Create Deployment
-        uses: chrnorm/deployment-action@v2
+        uses: chrnorm/deployment-action@500aa6a23c81ffa1acf71072aee3cfa2cc2e556a # v2.0.8
         id: deployment
         with:
           token: ${{ github.token }}
@@ -44,9 +44,9 @@ jobs:
           description: "FluxCD reconciliation: ${{ steps.parse.outputs.resource_kind }}/${{ steps.parse.outputs.resource_name }}"
           ref: ${{ github.event.client_payload.metadata.revision || github.sha }}
           auto-merge: false
-          
+
       - name: Update Deployment Status - Success
-        uses: chrnorm/deployment-status@v2
+        uses: chrnorm/deployment-status@6df8d036fd2fee9eb82936733953da1f8382b41e # v2.0.4
         with:
           token: ${{ github.token }}
           deployment-id: ${{ steps.deployment.outputs.deployment_id }}

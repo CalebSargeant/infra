@@ -48,9 +48,17 @@ locals {
   ))
 }
 
+terraform {
+  extra_arguments "cloudflare_token" {
+    commands = ["plan", "apply", "destroy", "import", "refresh", "validate"]
+    env_vars = {
+      CLOUDFLARE_API_TOKEN = local.cloudflare_api_token
+    }
+  }
+}
+
 inputs = {
   cloudflare_api_token        = local.cloudflare_api_token
   account_id                  = "6e26afa31c37dee1dc82ad2f214f9b3c"
-  sargeant_co_zone_id         = "e25f6d9e2d13d9c04988e459587101b5"
   cf_access_groups_membership = local.cf_access_groups_membership
 }

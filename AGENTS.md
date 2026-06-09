@@ -297,6 +297,7 @@ If you accidentally stage a secret, remove it with `git reset HEAD <file>` befor
 4. **Not running `--check`** before Ansible execution — can break system
 5. **Assuming git == deployed** — FluxCD reconciles on intervals; force with `flux reconcile`
 6. **Committing any plaintext secret to a public repo** — rotate immediately if it happens
+7. **Forgetting to use extra_arguments for provider API tokens under OpenTofu on Atlantis** — always export CLOUDFLARE_API_TOKEN as an environment variable in terragrunt.hcl and use an empty provider block (provider "cloudflare" {}) to ensure reliable provider authentication and prevent planning errors.
 
 ## Definition of Done
 

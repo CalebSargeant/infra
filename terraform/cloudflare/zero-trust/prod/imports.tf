@@ -116,3 +116,15 @@ import {
   to = cloudflare_zero_trust_device_posture_rule.mac_os_version
   id = "6e26afa31c37dee1dc82ad2f214f9b3c/2b86e1cd-a85e-4ffc-ad6b-04ebe22944dd"
 }
+
+# Default device profile settings (to enable LAN bypass)
+import {
+  to = cloudflare_zero_trust_device_profiles.default
+  id = "6e26afa31c37dee1dc82ad2f214f9b3c/default"
+}
+
+# Default device profile split tunnel exclusions (to remove RFC1918 ranges)
+import {
+  to = cloudflare_zero_trust_split_tunnel.default_exclude
+  id = "6e26afa31c37dee1dc82ad2f214f9b3c/default/exclude"
+}

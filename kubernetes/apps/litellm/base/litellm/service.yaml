@@ -7,9 +7,14 @@ spec:
   selector:
     app: litellm
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 4000
       targetPort: 4000
+    - name: proxy
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
   type: ClusterIP
 # In-cluster only. Consumers reach it at:
 #   http://litellm.automation.svc.cluster.local:4000
