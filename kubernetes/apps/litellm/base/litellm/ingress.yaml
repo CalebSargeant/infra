@@ -11,7 +11,8 @@ metadata:
     # can't reach a private IP. Same pattern as the media apps (e.g. nzbhydra2).
     cert-manager.io/cluster-issuer: letsencrypt-dns
     kubernetes.io/ingress.class: traefik
-    traefik.ingress.kubernetes.io/entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/service.serversscheme: http
 spec:
   ingressClassName: traefik
