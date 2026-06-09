@@ -68,7 +68,27 @@ spec:
               port: 4000
             initialDelaySeconds: 30
             periodSeconds: 30
+        - name: auth-proxy
+          image: nginx:1.27-alpine
+          ports:
+            - name: http-proxy
+              containerPort: 8080
+          volumeMounts:
+            - name: auth-proxy-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
       volumes:
         - name: config
           configMap:
             name: litellm-config
+        - name: auth-proxy-config
+          configMap:
+            name: litellm-auth-proxy

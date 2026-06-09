@@ -4,16 +4,43 @@ The LiteLLM proxy (`kubernetes/apps/litellm`) is an OpenAI-compatible gateway. A
 tool that speaks the OpenAI API can route through it: one endpoint, one key, unified
 usage tracking + the LiteLLM admin UI.
 
-- **In-cluster URL:** `http://litellm.automation.svc.cluster.local:4000`
-- **External URL (once the ingress lands):** `https://litellm.sargeant.co`
+- **In-cluster direct URL:** `http://litellm.automation.svc.cluster.local:4000`
+- **In-cluster API-key proxy URL:** `http://litellm.automation.svc.cluster.local:8080`
+- **LAN/VPN URL:** `https://litellm.sargeant.co`
 
 > **Note:** Some tools (such as the Codex config.toml and OpenCode examples below) require the base URL to include `/v1`; others (the OpenAI SDK, the `OPENAI_BASE_URL` environment variable) omit it because the client appends `/v1` automatically. When in doubt, check the tool's documentation.
 
 - **Auth:**
-  - The proxy's admin key is sent via the `x-litellm-api-key` header — for client use, prefer a **virtual key** created in the admin UI.
-  - Client virtual keys are sent via `Authorization: Bearer <key>` (the OpenAI convention).
+  - Direct `:4000` traffic reserves `Authorization` for Claude Code OAuth pass-through.
+  - Direct `:4000` LiteLLM gateway auth uses `x-litellm-api-key`; for client use, prefer a **virtual key** created in the admin UI.
+  - The LAN/VPN ingress and in-cluster `:8080` path go through the `auth-proxy` sidecar, which copies OpenAI-style `Authorization: Bearer <LiteLLM key>` into `x-litellm-api-key`.
 - **Model names:** clients request a `model_name` from the proxy's `config.yaml`
   (`claude-opus-4-8`, `claude-sonnet-4-6`, `claude-haiku-4-5`, …).
+
+## Seeing the Claude auth path in the UI
+
+Spend alone does **not** prove whether a request used an API key or Claude Code
+OAuth; LiteLLM can estimate/display spend for either path. The source of truth is
+the model config:
+
+- The Claude subscription models have **no** `litellm_params.api_key`.
+- `general_settings.forward_client_headers_to_llm_api: true` forwards the client's
+  Claude Code `Authorization` bearer token upstream.
+- `litellm_settings.forward_llm_provider_auth_headers: true` allows provider auth
+  headers to pass through rather than being treated only as proxy credentials.
+- `general_settings.litellm_key_header_name: x-litellm-api-key` keeps LiteLLM
+  gateway auth separate from the Claude OAuth bearer token.
+- Each Claude model has `model_info.auth_mode: claude-code-oauth-pass-through` and
+  `model_info.billing_mode: claude-max-subscription`; this metadata should show on
+  model detail views/API responses even though it is not secret material.
+
+If the UI does not expose the custom `model_info` fields directly, query the model
+metadata through the proxy API while authenticated with the master key:
+
+```bash
+curl https://litellm.sargeant.co/model/info \
+  -H "x-litellm-api-key: $LITELLM_MASTER_KEY"
+```
 
 ## ⚠️ Billing: subscription vs. per-token
 
@@ -22,7 +49,7 @@ There are two ways the proxy talks upstream:
 | Path | Who | Billing | How |
 |---|---|---|---|
 | **Subscription** | **Claude Code only** (incl. the diatreme dispatcher) | Flat-rate Max plan | Claude Code forwards its **OAuth** token in `Authorization`; LiteLLM forwards it upstream (`forward_client_headers_to_llm_api` and `forward_llm_provider_auth_headers`). Gateway is authed via the `x-litellm-api-key` header. |
-| **Per-token (API key)** | **Codex, OpenCode, OpenAI Agents SDK**, anything OpenAI-protocol | Per-token on a provider account | The client sends the LiteLLM virtual key in `Authorization`; LiteLLM calls the provider with its own configured `api_key`. |
+| **Per-token (API key)** | **Codex, OpenCode, OpenAI Agents SDK**, anything OpenAI-protocol | Per-token on a provider account | The client sends a LiteLLM virtual key in `Authorization` to the LAN/VPN or `:8080` proxy path; the proxy maps it to `x-litellm-api-key`; LiteLLM calls the provider with its configured `api_key`. |
 
 The three tools below put a **key** in `Authorization`, so they **cannot use the
 Claude Max subscription** — that's exclusive to Claude Code's OAuth. To use them
@@ -46,9 +73,55 @@ through LiteLLM you must add at least one **API-key'd model** to the proxy, e.g.
 
 …plus the matching `ExternalSecret` entry + `Deployment` env for each key.
 
+### Self-hosted Ollama
+
+LiteLLM can also route to a local/self-hosted Ollama server. Prefer the
+`ollama_chat/` provider prefix for chat models, and set `api_base` to the service
+that can reach Ollama from the LiteLLM pod.
+
+```yaml
+# kubernetes/apps/litellm/base/litellm/configmap.yaml  (model_list)
+  - model_name: qwen-coder-local
+    litellm_params:
+      model: ollama_chat/qwen2.5-coder:7b
+      api_base: http://ollama.automation.svc.cluster.local:11434
+    model_info:
+      mode: chat
+      auth_mode: none-local-network
+      billing_mode: self-hosted
+      supports_function_calling: true  # only set when the selected model actually supports tools
+```
+
+For local models, resource sizing matters more than LiteLLM config: the Ollama pod
+needs enough CPU/memory, and tool/function calling depends on the model's actual
+capabilities.
+
+## How routing works
+
+The client chooses the route by sending a `model` value. LiteLLM matches that value
+against `model_list[].model_name`, then calls the provider/model named in
+`litellm_params.model`.
+
+```text
+client model="claude-sonnet-4-6"
+  -> model_list entry model_name="claude-sonnet-4-6"
+  -> litellm_params.model="anthropic/claude-sonnet-4-6"
+```
+
+If multiple entries share the same `model_name`, they form a model group and the
+router can load-balance between them. `router_settings.routing_strategy` controls
+the picker (`simple-shuffle`, `least-busy`, `usage-based-routing`,
+`latency-based-routing`, etc.), and `model_group_alias` can map a friendly or
+legacy client name to a configured group. Fallbacks only happen when explicitly
+configured; LiteLLM does not infer "best model for this prompt" on its own.
+
 ---
 
 ## Codex CLI
+
+Codex CLI is an OpenAI-compatible client, so it is a good fit for API-key-backed
+models behind LiteLLM. Use the LAN/VPN URL or the in-cluster `:8080` proxy path
+so Codex can keep using normal `Authorization` bearer auth.
 
 ```bash
 export OPENAI_BASE_URL="https://litellm.sargeant.co"   # or the in-cluster URL
@@ -67,6 +140,9 @@ env_key = "OPENAI_API_KEY"      # Codex reads the key from this env var
 ```
 
 ## OpenCode
+
+OpenCode has the same auth caveat as Codex CLI: the model entries are fine, but
+the request path must use the LAN/VPN URL or the in-cluster `:8080` proxy path.
 
 `~/.config/opencode/opencode.json`:
 
@@ -103,10 +179,7 @@ from openai import AsyncOpenAI
 
 client = AsyncOpenAI(
     base_url=os.getenv("LITELLM_BASE_URL", "https://litellm.sargeant.co"),
-    api_key="placeholder",  # dummy; real key goes in default_headers
-    default_headers={
-        "x-litellm-api-key": os.environ["LITELLM_API_KEY"],   # your LiteLLM virtual key
-    },
+    api_key=os.environ["LITELLM_API_KEY"],  # your LiteLLM virtual key
 )
 set_tracing_disabled(True)
 

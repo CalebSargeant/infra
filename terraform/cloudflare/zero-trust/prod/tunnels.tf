@@ -114,15 +114,6 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
-    # LiteLLM admin UI + gateway (firefly cluster). Gated by the self_hosted
-    # Cloudflare Access app in access_apps.tf (Caleb only). Pairs with the
-    # proxied CNAME in dns/prod/terragrunt.hcl.
-    ingress_rule {
-      hostname = "litellm.sargeant.co"
-      service  = "http://litellm.automation.svc.cluster.local:4000"
-      origin_request {}
-    }
-
     # GitHub PR-review webhooks → comment-commander (firefly cluster).
     # Pairs with the explicit proxied CNAME in
     # terraform/cloudflare/dns-magmamoose/prod/terragrunt.hcl
@@ -208,4 +199,26 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       service = "http_status:404"
     }
   }
+}
+
+# Private RFC1918 routes directed to the firefly tunnel (k3s cluster).
+resource "cloudflare_zero_trust_tunnel_route" "rfc1918_10" {
+  account_id = var.account_id
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.firefly.id
+  network    = "10.0.0.0/8"
+  comment    = "Route 10.0.0.0/8 private network through firefly tunnel"
+}
+
+resource "cloudflare_zero_trust_tunnel_route" "rfc1918_172" {
+  account_id = var.account_id
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.firefly.id
+  network    = "172.16.0.0/12"
+  comment    = "Route 172.16.0.0/12 private network through firefly tunnel"
+}
+
+resource "cloudflare_zero_trust_tunnel_route" "rfc1918_192" {
+  account_id = var.account_id
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.firefly.id
+  network    = "192.168.0.0/16"
+  comment    = "Route 192.168.0.0/16 private network through firefly tunnel"
 }

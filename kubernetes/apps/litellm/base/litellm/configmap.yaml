@@ -18,12 +18,33 @@ data:
       - model_name: claude-opus-4-8
         litellm_params:
           model: anthropic/claude-opus-4-8
+        model_info:
+          mode: chat
+          base_model: anthropic/claude-opus-4-8
+          auth_mode: claude-code-oauth-pass-through
+          billing_mode: claude-max-subscription
+          credential_source: client_authorization_header
+          notes: "No Anthropic API key is configured; LiteLLM forwards the client's Claude Code OAuth bearer token upstream."
       - model_name: claude-sonnet-4-6
         litellm_params:
           model: anthropic/claude-sonnet-4-6
+        model_info:
+          mode: chat
+          base_model: anthropic/claude-sonnet-4-6
+          auth_mode: claude-code-oauth-pass-through
+          billing_mode: claude-max-subscription
+          credential_source: client_authorization_header
+          notes: "No Anthropic API key is configured; LiteLLM forwards the client's Claude Code OAuth bearer token upstream."
       - model_name: claude-haiku-4-5
         litellm_params:
           model: anthropic/claude-haiku-4-5
+        model_info:
+          mode: chat
+          base_model: anthropic/claude-haiku-4-5
+          auth_mode: claude-code-oauth-pass-through
+          billing_mode: claude-max-subscription
+          credential_source: client_authorization_header
+          notes: "No Anthropic API key is configured; LiteLLM forwards the client's Claude Code OAuth bearer token upstream."
     general_settings:
       master_key: os.environ/LITELLM_MASTER_KEY
       # Forward the client's Authorization (the Claude OAuth token) to Anthropic.
@@ -31,4 +52,6 @@ data:
       # Use a dedicated header for the proxy master key to avoid conflict with the Authorization header.
       litellm_key_header_name: x-litellm-api-key
     litellm_settings:
+      # Forward provider-specific auth headers such as Claude's OAuth bearer token.
+      forward_llm_provider_auth_headers: true
       drop_params: true

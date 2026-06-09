@@ -167,6 +167,15 @@ AWS-style naming mapped to Raspberry Pi constraints (requests → limits):
 
 Full table in `kubernetes/components/resource-profiles/kustomization.yaml` (5 families × 8 sizes: `p.*` 2:1 cpu/mem, `t.*` 1:1, `c.*` 1:2, `m.*` 1:4, `r.*` 1:8 — each from `pico` to `2xlarge`). Patch deployments by labelling them with `resource-profile=<name>` and applying the component.
 
+### LiteLLM Auth Metadata
+
+LiteLLM (`kubernetes/apps/litellm`) intentionally separates Claude Code OAuth pass-through from LiteLLM gateway authentication:
+- Direct `:4000` traffic reserves `Authorization` for the client's Claude Code OAuth bearer token.
+- Direct `:4000` LiteLLM gateway auth uses `x-litellm-api-key` via `general_settings.litellm_key_header_name`.
+- The LAN/VPN ingress and service port `8080` go through the `auth-proxy` sidecar, which translates OpenAI-style `Authorization: Bearer <LiteLLM key>` into `x-litellm-api-key`.
+- Claude subscription-backed model entries should have no `litellm_params.api_key`, and should carry non-secret `model_info` metadata such as `auth_mode: claude-code-oauth-pass-through` and `billing_mode: claude-max-subscription` so the UI/API can show how the model is wired.
+- API-key-backed models are fine for plain OpenAI-compatible clients when they use the ingress or `:8080` proxy path.
+
 ## Integration Points & Dependencies
 
 ### External Service Integrations
@@ -297,6 +306,7 @@ If you accidentally stage a secret, remove it with `git reset HEAD <file>` befor
 4. **Not running `--check`** before Ansible execution — can break system
 5. **Assuming git == deployed** — FluxCD reconciles on intervals; force with `flux reconcile`
 6. **Committing any plaintext secret to a public repo** — rotate immediately if it happens
+7. **Forgetting Atlantis/OpenTofu provider env vars** — for Cloudflare Terragrunt projects, export provider tokens with `extra_arguments` (e.g. `CLOUDFLARE_API_TOKEN`) and keep the provider block empty so Atlantis plans authenticate the same way local plans do
 
 ## Definition of Done
 
@@ -354,5 +364,3 @@ Given the infrastructure-as-code nature of this project, treat the following as 
 ---
 
 **Documentation**: Full guides at `docs/` (published to https://calebsargeant.github.io/infra/)
-
-
