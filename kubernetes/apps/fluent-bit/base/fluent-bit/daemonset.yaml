@@ -36,6 +36,19 @@ spec:
               memory: 100Mi
             limits:
               memory: 100Mi
+      # Run on every node EXCEPT the Raspberry Pi (ff-pi1): the fluent-bit image's
+      # jemalloc is built for 4KB pages and crashes on the Pi's 16KB-page arm64
+      # kernel ("<jemalloc>: Unsupported system page size"). Collecting ff-pi1 logs
+      # needs a different shipper (e.g. Grafana Alloy / Vector) — tracked as a follow-up.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: type
+                    operator: NotIn
+                    values:
+                      - pi
       tolerations:
         - effect: NoSchedule
           operator: Exists
