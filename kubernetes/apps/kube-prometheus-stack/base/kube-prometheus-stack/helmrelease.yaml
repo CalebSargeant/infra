@@ -69,14 +69,16 @@ spec:
                 requests:
                   storage: 50Gi
         
-        # Resource requests/limits
+        # Resource requests/limits — sized from the KRR report (Prometheus uses
+        # ~1.7Gi / ~150m here, was over-provisioned at 8Gi/2 cores). No CPU limit
+        # (KRR rec: cpu limit -> unset) to avoid CFS throttling on the 16-core
+        # ff-vm1 node; memory limit keeps headroom above observed usage.
         resources:
           requests:
-            cpu: 500m
-            memory: 4Gi
+            cpu: 250m
+            memory: 2Gi
           limits:
-            cpu: 2000m
-            memory: 8Gi
+            memory: 3Gi
         
         # Thanos sidecar configuration
         thanos:
@@ -85,11 +87,19 @@ spec:
           objectStorageConfig:
             name: thanos-objstore-config
             key: objstore.yml
+          resources:
+            requests:
+              cpu: 10m
+              memory: 100Mi
+            limits:
+              memory: 256Mi
         
-        # Service monitors
+        # Selectors — discover ServiceMonitors/PodMonitors/Rules/Probes across all
+        # namespaces without requiring a release label (lets the blackbox Probe work).
         serviceMonitorSelectorNilUsesHelmValues: false
         podMonitorSelectorNilUsesHelmValues: false
         ruleSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
         
       # Thanos service for sidecar
       thanosService:
@@ -104,30 +114,40 @@ spec:
     # Grafana configuration
     grafana:
       enabled: true
-      adminPassword: admin-change-me
+      # Admin credentials from OCI Vault via ExternalSecret grafana-admin-credentials.
+      admin:
+        existingSecret: grafana-admin-credentials
+        userKey: admin-user
+        passwordKey: admin-password
       
-      # Affinity to run on mini nodes only
+      # Pin Grafana to ff-pi1, where its existing local-path PV is node-affined.
+      # Pinning the pod here resolves the rollout deadlock (old pod held the RWO
+      # PV on ff-pi1 while the new pod was forced onto ff-vm1 and stayed Pending).
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: node-role.kubernetes.io/mini
-                operator: Exists
-      
+              - key: type
+                operator: In
+                values:
+                - pi
+      # Recreate so the old pod releases the RWO PVC before the new one starts.
+      deploymentStrategy:
+        type: Recreate
+
       # Persistence
       persistence:
         enabled: true
         size: 10Gi
       
-      # Resources
+      # Resources — no CPU limit (avoid CFS throttling); modest memory footprint.
       resources:
         requests:
-          cpu: 250m
-          memory: 512Mi
+          cpu: 100m
+          memory: 256Mi
         limits:
-          cpu: 1000m
-          memory: 2Gi
+          memory: 512Mi
       
       # Datasources
       additionalDataSources:
@@ -142,6 +162,7 @@ spec:
           type: loki
           url: http://loki-gateway
           access: proxy
+          isDefault: false
           jsonData:
             maxLines: 1000
       
@@ -173,16 +194,21 @@ spec:
               cpu: 10m
               memory: 124Mi
             limits:
-              memory: 124Mi
+              memory: 192Mi
         datasources:
           enabled: true
+          # Suppress the chart's built-in Prometheus datasource entirely (this knob
+          # gates its emission) so the additionalDataSources "Thanos" (isDefault: true)
+          # is the only datasource AND the sole org default. Two defaults crashloop
+          # Grafana: "Only one datasource per organization can be marked as default".
+          defaultDatasourceEnabled: false
           searchNamespace: ALL
           resources:
             requests:
               cpu: 10m
               memory: 121Mi
             limits:
-              memory: 121Mi
+              memory: 192Mi
 
     # AlertManager configuration
     alertmanager:

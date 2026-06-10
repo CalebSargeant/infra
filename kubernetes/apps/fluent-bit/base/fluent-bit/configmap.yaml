@@ -20,6 +20,9 @@ data:
     [INPUT]
         Name tail
         Path /var/log/containers/*.log
+        # Exclude Loki's and Fluent Bit's own logs to break the self-ingestion
+        # feedback loop that was OOM-killing Loki (a single ~2GB re-ingested stream).
+        Exclude_Path /var/log/containers/loki-*_observability_*.log,/var/log/containers/fluent-bit-*_observability_*.log
         multiline.parser docker, cri
         Tag kube.*
         Mem_Buf_Limit 5MB

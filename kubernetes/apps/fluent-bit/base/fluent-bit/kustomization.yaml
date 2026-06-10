@@ -5,20 +5,20 @@ resources:
   - configmap.yaml
   - daemonset.yaml
   - service.yaml
-components:
-  - ../../../../components/node-selectors/mini
+# No node-selector: Fluent Bit is a DaemonSet and must run on EVERY node. The
+# previous `mini` selector left ff-pi1 (control-plane) logs uncollected. The
+# DaemonSet's NoSchedule toleration lets it land on ff-pi1 (image is multi-arch).
 patches:
-  # Override fluent-bit resources (DaemonSet gets m.large by default from component)
+  # Fluent Bit resources — no CPU limit (avoid throttling); modest memory.
   - patch: |
       - op: replace
         path: /spec/template/spec/containers/0/resources
         value:
           requests:
-            cpu: 100m
+            cpu: 50m
             memory: 128Mi
           limits:
-            cpu: 500m
-            memory: 512Mi
+            memory: 256Mi
     target:
       kind: DaemonSet
       labelSelector: "app.kubernetes.io/name=fluent-bit"
