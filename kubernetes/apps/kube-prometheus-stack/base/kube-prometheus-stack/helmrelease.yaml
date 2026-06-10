@@ -128,8 +128,10 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: node-role.kubernetes.io/pi
-                operator: Exists
+              - key: type
+                operator: In
+                values:
+                - pi
       # Recreate so the old pod releases the RWO PVC before the new one starts.
       deploymentStrategy:
         type: Recreate
