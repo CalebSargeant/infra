@@ -4,6 +4,7 @@ metadata:
   name: ollama-lan
   namespace: automation
   labels:
+    app: ollama-lan
     kubernetes.io/service-name: ollama-lan
     endpointslice.kubernetes.io/managed-by: kustomize
 addressType: IPv4
