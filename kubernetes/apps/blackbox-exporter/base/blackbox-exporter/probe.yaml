@@ -9,7 +9,7 @@ spec:
   interval: 60s
   module: http_2xx
   prober:
-    url: blackbox-exporter.observability.svc.cluster.local:9115
+    url: http://blackbox-exporter.observability.svc.cluster.local:9115
   targets:
     staticConfig:
       # External-connectivity / uptime probes. Add internal endpoints as needed.
