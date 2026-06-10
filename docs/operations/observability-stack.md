@@ -231,32 +231,43 @@ throttling that fired false "at limit" alerts while ff-vm1 — 16 vCPU / 32 GiB 
 | Blackbox (P1) | enabled `--config.file`; added a `Probe` CR + `probeSelectorNilUsesHelmValues: false`; removed orphan PV/PVC. |
 | Sizing (P1) | Prometheus `8Gi`→`3Gi`, Thanos query/compactor/sidecar right-sized; CPU limits dropped across the stack. |
 
-**Required one-time rollout steps (after merge + Flux reconcile):**
+### Rollout outcome (completed)
 
-1. **Adopt the migrated secrets.** ExternalSecrets use `creationPolicy: Owner`, which will *not*
-   take over the pre-existing Flux/SOPS-owned secrets. Delete them once so External-Secrets
-   recreates them from OCI Vault:
-   ```bash
-   kubectl -n core delete secret minio-credentials
-   kubectl -n observability delete secret thanos-objstore-config
-   flux reconcile kustomization infrastructure-services
-   flux reconcile kustomization prod-kube-prometheus-stack
-   ```
-   (`grafana-admin-credentials` is a fresh secret — no action.)
-2. **Restart the Thanos consumers** so they pick up the corrected object-store credential:
-   ```bash
-   kubectl -n observability rollout restart statefulset/thanos-compactor statefulset/thanos-store
-   kubectl -n observability delete pod prometheus-prometheus-prometheus-0   # reloads the sidecar
-   ```
-3. **Verify green:** compactor logs no longer show `SignatureDoesNotMatch`; `mc du` of the
-   `thanos-metrics` bucket is non-zero; Grafana reaches `3/3`; `loki-0` is `1/1`; Thanos Query
-   `/api/v1/stores` lists both a `sidecar` and a `store`; `fluent-bit` DaemonSet shows DESIRED 2.
+The stack was rolled out to green live. The whole pipeline now works end to end: Prometheus
+scrapes → the Thanos sidecar **uploads TSDB blocks to MinIO** → Thanos Store serves them →
+Thanos Query unifies short + long-term → Grafana queries it; Fluent Bit → Loki → Grafana for
+logs; Prometheus → Alertmanager → Slack for alerts.
 
-**Deferred (follow-ups, not required for green):**
+A few things surfaced during rollout that needed follow-up fixes (PR #352):
 
-- **Loki config tuning** (retention 720h → 168h, ingester back-pressure, drop the dead
-  `filesystem` block) lives in the SOPS-encrypted `loki/configmap.enc.yaml` and needs the age
-  key to re-encrypt — out of band for this change.
+- **Thanos object-storage schema.** The sidecar kept logging `uploads will be disabled` even after
+  the credential fix: chart 68.2.2 needs `thanos.objectStorageConfig.existingSecret.{name,key}`,
+  not the flat `{name,key}` form (which it silently drops). Fixed in the HelmRelease.
+- **Loki.** 3Gi wasn't enough during catch-up; bumped to 4Gi and tuned the (SOPS-encrypted) config —
+  retention `720h → 168h`, ingester back-pressure (`chunk_idle_period 5m`, `max_chunk_age 1h`) and
+  ingestion rate limits — to bound memory. The 9-day crashloop backlog was wiped (junk) for a clean start.
+- **Fluent Bit can't run on the Pi.** With the `mini` selector removed it scheduled onto ff-pi1 and
+  crashed with `<jemalloc>: Unsupported system page size` — the Pi's arm64 kernel uses 16KB pages and
+  the image's jemalloc is built for 4KB. It's now pinned off `node-role.kubernetes.io/pi`.
+- **Kyverno (pre-existing, not part of this stack).** The `kyverno-admission-controller` was
+  crashlooping on a failing liveness probe; its fail-closed webhook 502'd intermittently and blocked
+  the kube-prometheus-stack helm upgrade. Mitigated by running 2 admission replicas; needs a proper
+  fix (probe tolerance / resources) in the Kyverno HelmRelease.
+
+**To make it durable** (the live state currently rides on imperative patches): merge PR #352, then
+```bash
+flux resume kustomization prod-loki prod-fluent-bit          # un-suspend (held during rollout)
+flux suspend helmrelease kube-prometheus-stack -n observability && \
+flux resume  helmrelease kube-prometheus-stack -n observability   # clear the failed/stalled upgrade
+```
+
+**Verify green:** `thanos-metrics` bucket non-empty (`ls /data/thanos-metrics` in `minio-0`); Thanos
+Query `/api/v1/stores` lists both a `sidecar` and a `store`; Grafana `3/3`; `loki-0` `1/1`.
+
+### Deferred (not required for green)
+
+- **ff-pi1 log collection** — the Pi can't run the fluent-bit image (16KB pages). Use a Go/Rust
+  shipper there instead (Grafana Alloy / Vector / Promtail).
 - **Grafana LAN exposure** via Traefik (the repo's IngressRoute + oauth2-proxy pattern) — its own
   focused change so auth isn't mis-configured. Until then, reach Grafana via `kubectl port-forward`.
 - **HA (2× replicas)** for Prometheus/Alertmanager/Loki — needs a second `mini`-labelled node or
