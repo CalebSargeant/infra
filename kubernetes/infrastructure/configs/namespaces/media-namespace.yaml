@@ -5,3 +5,5 @@ metadata:
   name: media
   labels:
     goldilocks.fairwinds.com/enabled: "true"
+    # pod-gateway webhook (in vpn-gateway ns) evaluates pods in this namespace
+    routed-gateway: "true"

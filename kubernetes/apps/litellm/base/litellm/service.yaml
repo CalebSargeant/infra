@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: litellm
+  namespace: automation
+spec:
+  selector:
+    app: litellm
+  ports:
+    - name: http
+      protocol: TCP
+      port: 4000
+      targetPort: 4000
+    - name: proxy
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+# In-cluster direct OAuth path:
+#   http://litellm.automation.svc.cluster.local:4000
+# In-cluster OpenAI-style Authorization -> x-litellm-api-key proxy path:
+#   http://litellm.automation.svc.cluster.local:8080

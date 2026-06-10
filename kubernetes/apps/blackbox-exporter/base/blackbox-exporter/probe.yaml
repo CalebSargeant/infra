@@ -1,0 +1,25 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: blackbox-http
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: blackbox-exporter
+spec:
+  interval: 60s
+  module: http_2xx
+  prober:
+    # prober.url must be host:port with NO scheme — the operator builds
+    # <scheme>://<url><path>; a leading http:// makes it reject the URL.
+    url: blackbox-exporter.observability.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      # External-connectivity / uptime probes. Add internal endpoints as needed.
+      static:
+        - https://sargeant.co
+        - https://www.google.com
+        - https://1.1.1.1
+      labels:
+        probe: external

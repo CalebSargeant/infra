@@ -58,35 +58,23 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly_oci" {
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.firefly_oci.id
 
   config {
-    warp_routing {
-      enabled = false
-    }
-
     ingress_rule {
       service = "http_status:404"
     }
   }
 }
 
-# Tunnel connector token — the value cloudflared reads from $TUNNEL_TOKEN.
-# Pulled via the API rather than constructed locally so we get whatever
-# encoding CF currently uses (base64-of-JSON today, but historically has
-# changed). Sensitive — written to terraform state, exposed via the output
-# below, never logged.
-data "cloudflare_zero_trust_tunnel_cloudflared_token" "firefly_oci" {
-  account_id = var.account_id
-  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.firefly_oci.id
-}
+# NOTE: the firefly_oci connector token is no longer surfaced via Terraform.
+# `cloudflare_zero_trust_tunnel_cloudflared_token` is a v5-only data source and
+# isn't in the pinned provider (~> 4.40 → 4.52.7), so it failed `apply` ("does
+# not support data source") even though it was unrelated to whatever was being
+# changed. The token was a one-time copy into OCI Vault
+# (cloudflared-tunnel-token-firefly-oci) and isn't needed at plan/apply time. To
+# re-fetch it, use the CF API or bump the provider to v5 (a wider migration).
 
 output "firefly_oci_tunnel_id" {
   description = "Tunnel ID for firefly-oci. Needed for the cfargotunnel CNAME if/when OCI-side hostnames are added."
   value       = cloudflare_zero_trust_tunnel_cloudflared.firefly_oci.id
-}
-
-output "firefly_oci_tunnel_token" {
-  description = "Connector token for firefly-oci. Copy into OCI Vault as `cloudflared-tunnel-token-firefly-oci`, then update terraform/oci/prod/eu-amsterdam-1/mikrotik/terragrunt.hcl with the resulting secret OCID. Fetch with: `terragrunt output -raw firefly_oci_tunnel_token`."
-  value       = data.cloudflare_zero_trust_tunnel_cloudflared_token.firefly_oci.token
-  sensitive   = true
 }
 
 # Ingress for the firefly tunnel. Mirrors the dashboard's current config:
@@ -122,6 +110,28 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # Public OpenAI-compatible LiteLLM endpoint for Warp custom inference.
+    # Keep the normal litellm.sargeant.co host LAN/VPN-only; Warp's backend
+    # rejects private RFC1918 resolutions, so this hostname enters through the
+    # Cloudflare edge and firefly tunnel instead. Only the minimal OpenAI API
+    # paths are routed; UI/admin/model-management paths fall through to 404.
+    ingress_rule {
+      hostname = "litellm-warp.sargeant.co"
+      path     = "^/v1/chat/completions/?$"
+      service  = "http://litellm.automation.svc.cluster.local:8080"
+      origin_request {}
+    }
+    ingress_rule {
+      hostname = "litellm-warp.sargeant.co"
+      path     = "^/v1/models/?$"
+      service  = "http://litellm.automation.svc.cluster.local:8080"
+      origin_request {}
+    }
+    ingress_rule {
+      hostname = "litellm-warp.sargeant.co"
+      service  = "http_status:404"
+    }
+
     # GitHub PR-review webhooks → comment-commander (firefly cluster).
     # Pairs with the explicit proxied CNAME in
     # terraform/cloudflare/dns-magmamoose/prod/terragrunt.hcl
@@ -140,6 +150,21 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
     ingress_rule {
       hostname = "comment-commander-pro.magmamoose.com"
       service  = "http://comment-commander-pro.comment-commander-pro.svc.cluster.local:8000"
+      origin_request {}
+    }
+
+    # Diatreme Pro dashboard (firefly cluster) — the apex diatreme.magmamoose.com.
+    # Supersedes comment-commander-pro as comment-commander folds into Diatreme;
+    # leave the cc-pro rule above until diatreme-pro is verified live, then prune.
+    # Gated by the self_hosted Access app in access_apps.tf (Caleb only). DNS is
+    # published by external-dns from the diatreme-pro k8s Ingress (not an explicit
+    # Terraform CNAME). NOTE: the Diatreme *worker* is a Cloudflare Worker at
+    # api.diatreme.magmamoose.com — served directly by CF, not tunneled here, and
+    # intentionally NOT Access-gated (it's the OSS engine API; it authenticates
+    # callers itself via bearer / HMAC / OIDC).
+    ingress_rule {
+      hostname = "diatreme.magmamoose.com"
+      service  = "http://diatreme-pro.diatreme-pro.svc.cluster.local:8000"
       origin_request {}
     }
 
@@ -192,4 +217,26 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       service = "http_status:404"
     }
   }
+}
+
+# Private RFC1918 routes directed to the firefly tunnel (k3s cluster).
+resource "cloudflare_zero_trust_tunnel_route" "rfc1918_10" {
+  account_id = var.account_id
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.firefly.id
+  network    = "10.0.0.0/8"
+  comment    = "Route 10.0.0.0/8 private network through firefly tunnel"
+}
+
+resource "cloudflare_zero_trust_tunnel_route" "rfc1918_172" {
+  account_id = var.account_id
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.firefly.id
+  network    = "172.16.0.0/12"
+  comment    = "Route 172.16.0.0/12 private network through firefly tunnel"
+}
+
+resource "cloudflare_zero_trust_tunnel_route" "rfc1918_192" {
+  account_id = var.account_id
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.firefly.id
+  network    = "192.168.0.0/16"
+  comment    = "Route 192.168.0.0/16 private network through firefly tunnel"
 }

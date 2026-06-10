@@ -1,0 +1,40 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cnpg-backups
+  namespace: database
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: cnpg-backups
+      rules:
+        # The most recent backup ATTEMPT failed after the last success.
+        # (This is the silent failure that went unnoticed for ~a month.)
+        - alert: CNPGBackupFailing
+          expr: max by (namespace) (cnpg_collector_last_failed_backup_timestamp) > max by (namespace) (cnpg_collector_last_available_backup_timestamp)
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: "CloudNativePG backup is failing ({{ $labels.namespace }})"
+            description: "The latest CNPG backup attempt failed after the last successful one. Check `kubectl -n {{ $labels.namespace }} get backup` and the barman object store."
+        # No successful backup in >25h (daily ScheduledBackup at 03:00).
+        - alert: CNPGBackupTooOld
+          expr: (time() - max by (namespace) (cnpg_collector_last_available_backup_timestamp)) > 90000
+          for: 30m
+          labels:
+            severity: critical
+          annotations:
+            summary: "CloudNativePG has no recent successful backup ({{ $labels.namespace }})"
+            description: "No successful CNPG backup in over 25h — last success was {{ $value | humanizeDuration }} ago."
+        # Safety net: if the metric is absent, backup monitoring itself is broken
+        # (not scraped, wrong metric name, or backups not configured).
+        - alert: CNPGBackupMetricMissing
+          expr: absent(cnpg_collector_last_available_backup_timestamp)
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "CNPG backup metric is missing"
+            description: "cnpg_collector_last_available_backup_timestamp is absent — CNPG backup monitoring may be broken."

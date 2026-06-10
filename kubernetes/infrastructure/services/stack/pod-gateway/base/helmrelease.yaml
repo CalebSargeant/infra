@@ -1,0 +1,75 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: pod-gateway
+  namespace: vpn-gateway
+spec:
+  interval: 1h
+  timeout: 10m
+  chart:
+    spec:
+      chart: pod-gateway
+      version: "7.1.*"
+      sourceRef:
+        kind: HelmRepository
+        name: angelnu
+        namespace: flux-system
+      interval: 1h
+  install:
+    createNamespace: false
+    # A VPN-connect failure must NEVER stall the services tier — the previous
+    # vpn-gateway did exactly that with wait:true.
+    disableWait: true
+    remediation:
+      retries: 3
+  upgrade:
+    disableWait: true
+    remediation:
+      retries: 3
+  values:
+    # Pods in `media` labeled `setGateway: "true"` get their default route
+    # injected through this gateway (one shared Privado tunnel for all of them).
+    routed_namespaces:
+      - media
+    DNS: 172.16.0.1
+    settings:
+      VPN_INTERFACE: tun0 # OpenVPN
+      VXLAN_ID: 42
+      VXLAN_IP_NETWORK: "172.16.0"
+      # Killswitch: drop client egress at the gateway if the VPN is down.
+      VPN_BLOCK_OTHER_TRAFFIC: true
+      VPN_TRAFFIC_PORT: 1194 # allow gluetun's Privado OpenVPN/UDP out through the killswitch
+      # Cluster pod/service CIDRs + LAN bypass the VPN (normal K8s routing).
+      NOT_ROUTED_TO_GATEWAY_CIDRS: "10.42.0.0/16 10.43.0.0/16 192.168.0.0/16"
+      VPN_LOCAL_CIDRS: "10.42.0.0/16 10.43.0.0/16 192.168.0.0/16"
+      DNS_LOCAL_CIDRS: "local"
+    webhook:
+      # Only pods explicitly labeled setGateway=true are routed (not all of media).
+      gatewayDefault: false
+      gatewayLabel: setGateway
+      namespaceSelector:
+        type: label
+        label: "routed-gateway"
+    controllers:
+      main:
+        containers:
+          gluetun:
+            enabled: true
+            env:
+              VPN_SERVICE_PROVIDER: privado
+              VPN_TYPE: openvpn
+              VPN_INTERFACE: tun0
+              SERVER_COUNTRIES: Netherlands
+              # gluetun's own firewall off — pod-gateway owns the killswitch.
+              FIREWALL: "off"
+              DOT: "off"
+              OPENVPN_USER:
+                valueFrom:
+                  secretKeyRef:
+                    name: privado-vpn-credentials
+                    key: username
+              OPENVPN_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: privado-vpn-credentials
+                    key: password

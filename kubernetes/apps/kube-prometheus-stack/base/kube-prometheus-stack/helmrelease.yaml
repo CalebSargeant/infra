@@ -69,27 +69,41 @@ spec:
                 requests:
                   storage: 50Gi
         
-        # Resource requests/limits
+        # Resource requests/limits — sized from the KRR report (Prometheus uses
+        # ~1.7Gi / ~150m here, was over-provisioned at 8Gi/2 cores). No CPU limit
+        # (KRR rec: cpu limit -> unset) to avoid CFS throttling on the 16-core
+        # ff-vm1 node; memory limit keeps headroom above observed usage.
         resources:
           requests:
-            cpu: 500m
-            memory: 4Gi
+            cpu: 250m
+            memory: 2Gi
           limits:
-            cpu: 2000m
-            memory: 8Gi
+            memory: 3Gi
         
         # Thanos sidecar configuration
         thanos:
           image: quay.io/thanos/thanos:v0.37.2
           version: v0.37.2
+          # Chart 68.2.2 expects the `existingSecret` form here; the flat name/key
+          # form is silently dropped by the chart, leaving the Prometheus CR with no
+          # objectStorageConfig and the sidecar logging "uploads will be disabled".
           objectStorageConfig:
-            name: thanos-objstore-config
-            key: objstore.yml
+            existingSecret:
+              name: thanos-objstore-config
+              key: objstore.yml
+          resources:
+            requests:
+              cpu: 10m
+              memory: 100Mi
+            limits:
+              memory: 256Mi
         
-        # Service monitors
+        # Selectors — discover ServiceMonitors/PodMonitors/Rules/Probes across all
+        # namespaces without requiring a release label (lets the blackbox Probe work).
         serviceMonitorSelectorNilUsesHelmValues: false
         podMonitorSelectorNilUsesHelmValues: false
         ruleSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
         
       # Thanos service for sidecar
       thanosService:
@@ -104,30 +118,40 @@ spec:
     # Grafana configuration
     grafana:
       enabled: true
-      adminPassword: admin-change-me
+      # Admin credentials from OCI Vault via ExternalSecret grafana-admin-credentials.
+      admin:
+        existingSecret: grafana-admin-credentials
+        userKey: admin-user
+        passwordKey: admin-password
       
-      # Affinity to run on mini nodes only
+      # Pin Grafana to ff-pi1, where its existing local-path PV is node-affined.
+      # Pinning the pod here resolves the rollout deadlock (old pod held the RWO
+      # PV on ff-pi1 while the new pod was forced onto ff-vm1 and stayed Pending).
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: node-role.kubernetes.io/mini
-                operator: Exists
-      
+              - key: type
+                operator: In
+                values:
+                - pi
+      # Recreate so the old pod releases the RWO PVC before the new one starts.
+      deploymentStrategy:
+        type: Recreate
+
       # Persistence
       persistence:
         enabled: true
         size: 10Gi
       
-      # Resources
+      # Resources — no CPU limit (avoid CFS throttling); modest memory footprint.
       resources:
         requests:
-          cpu: 250m
-          memory: 512Mi
+          cpu: 100m
+          memory: 256Mi
         limits:
-          cpu: 1000m
-          memory: 2Gi
+          memory: 512Mi
       
       # Datasources
       additionalDataSources:
@@ -142,6 +166,7 @@ spec:
           type: loki
           url: http://loki-gateway
           access: proxy
+          isDefault: false
           jsonData:
             maxLines: 1000
       
@@ -159,10 +184,23 @@ spec:
               options:
                 path: /var/lib/grafana/dashboards/default
       
-      # Ingress for Grafana
+      # Ingress for Grafana — LAN exposure via Traefik, same pattern as
+      # radarr.sargeant.co (cert-manager letsencrypt-dns, websecure).
       ingress:
-        enabled: false
-      
+        enabled: true
+        ingressClassName: traefik
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-dns
+          traefik.ingress.kubernetes.io/service.serversscheme: http
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - grafana.sargeant.co
+          - grafana.sargeant.local
+        tls:
+          - hosts:
+              - grafana.sargeant.co
+            secretName: grafana-tls
+
       # Sidecar for loading dashboards
       sidecar:
         dashboards:
@@ -173,21 +211,66 @@ spec:
               cpu: 10m
               memory: 124Mi
             limits:
-              memory: 124Mi
+              memory: 192Mi
         datasources:
           enabled: true
+          # Suppress the chart's built-in Prometheus datasource entirely (this knob
+          # gates its emission) so the additionalDataSources "Thanos" (isDefault: true)
+          # is the only datasource AND the sole org default. Two defaults crashloop
+          # Grafana: "Only one datasource per organization can be marked as default".
+          defaultDatasourceEnabled: false
           searchNamespace: ALL
           resources:
             requests:
               cpu: 10m
               memory: 121Mi
             limits:
-              memory: 121Mi
+              memory: 192Mi
 
     # AlertManager configuration
     alertmanager:
       enabled: true
+      # Route critical alerts (incl. CNPG backup failures) to Slack #engineering-alerts.
+      # Uses the bot token mounted from the slack-bot-token secret (alertmanagerSpec.secrets)
+      # via credentials_file, posting through chat.postMessage to channel C0A9FT7355Z.
+      config:
+        global:
+          resolve_timeout: 5m
+        route:
+          receiver: "null"
+          group_by: ["namespace", "alertname"]
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 4h
+          routes:
+            - receiver: slack-critical
+              matchers:
+                - 'severity="critical"'
+              continue: true
+            - receiver: slack-critical
+              matchers:
+                - 'alertname=~"CNPGBackup.*"'
+        receivers:
+          - name: "null"
+          - name: slack-critical
+            slack_configs:
+              - api_url: https://slack.com/api/chat.postMessage
+                channel: "C0A9FT7355Z"
+                send_resolved: true
+                http_config:
+                  authorization:
+                    type: Bearer
+                    credentials_file: /etc/alertmanager/secrets/slack-bot-token/token
+                title: '{{ if eq .Status "firing" }}:red_circle:{{ else }}:white_check_mark:{{ end }} {{ .CommonLabels.alertname }}{{ with .CommonLabels.namespace }} ({{ . }}){{ end }}'
+                text: |-
+                  {{ range .Alerts }}*{{ .Annotations.summary }}*
+                  {{ .Annotations.description }}
+                  {{ end }}
       alertmanagerSpec:
+        # Slack bot token (from OCI Vault via ExternalSecret) mounted at
+        # /etc/alertmanager/secrets/slack-bot-token/token
+        secrets:
+          - slack-bot-token
         # Affinity to run on mini nodes only
         affinity:
           nodeAffinity:

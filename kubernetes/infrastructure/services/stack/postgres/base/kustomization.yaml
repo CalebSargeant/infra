@@ -4,3 +4,5 @@ resources:
   - secret.enc.yaml
   - cluster.yaml
   - scheduled-backup.yaml
+  - prometheusrule.yaml
+  - externalsecret-oci-backup.yaml

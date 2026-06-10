@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: nzbhydra2
-        image: linuxserver/nzbhydra2:latest
+        image: linuxserver/nzbhydra2:8.8.3 # {"$imagepolicy": "flux-system:nzbhydra2"}
         imagePullPolicy: IfNotPresent
         resources:
           requests:

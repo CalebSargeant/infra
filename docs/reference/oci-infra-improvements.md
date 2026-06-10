@@ -12,7 +12,7 @@ on first boot and calls `oci secrets secret-bundle get --auth
 instance_principal` against an OCI Vault secret whose OCID is passed
 in as `k3s_token_secret_ocid`. Permission is granted by a dynamic
 group plus a narrow IAM policy in
-[iam.tf](../../terraform/oci/modules/server/iam.tf) that together
+[iam.tf](https://github.com/CalebSargeant/infra/blob/main/terraform/oci/modules/server/iam.tf) that together
 scope the read to the specific secret OCID.
 
 Both `k3s_url` and `k3s_token_secret_ocid` must be set together (agent
@@ -69,7 +69,7 @@ defence against accidental replacements from re-rendered heredoc whitespace.
 
 ## 3. HA: route OCI VCN egress via both MikroTiks, not just r1
 
-[terraform/oci/prod/eu-amsterdam-1/network/terragrunt.hcl](../../terraform/oci/prod/eu-amsterdam-1/network/terragrunt.hcl)'s
+[terraform/oci/prod/eu-amsterdam-1/network/terragrunt.hcl](https://github.com/CalebSargeant/infra/blob/main/terraform/oci/prod/eu-amsterdam-1/network/terragrunt.hcl)'s
 `internet_gateway_ip = "192.168.223.11"` hard-codes mikrotik-fd1 as the
 single next-hop for app+data subnets. If r1 fails, both subnets lose
 internet egress even though r2 exists, is configured identically for
@@ -99,7 +99,7 @@ latency before committing to the approach.
 
 The routeros provider currently talks plaintext binary API on 8728. The
 existing TODO in
-[mikrotik/terragrunt.hcl](../../terraform/oci/prod/eu-amsterdam-1/mikrotik/terragrunt.hcl)
+[mikrotik/terragrunt.hcl](https://github.com/CalebSargeant/infra/blob/main/terraform/oci/prod/eu-amsterdam-1/mikrotik/terragrunt.hcl)
 captures this. Once cert is sorted, switch to 8729 + TLS, then drop the
 `routeros_api_management_cidrs` ingress rule on the edge security list
 (currently the only thing preventing 8728 from being closed to the
@@ -114,7 +114,7 @@ IPs (free tier: 2 reserved IPs per tenancy at no cost), attached to the
 same primary private IPs. The cutover changes the public IP values once,
 after which the IPs survive instance recreate.
 
-DNS auto-follows via the [`cloudflare/dns/prod`](../../terraform/cloudflare/dns/prod/terragrunt.hcl)
+DNS auto-follows via the [`cloudflare/dns/prod`](https://github.com/CalebSargeant/infra/blob/main/terraform/cloudflare/dns/prod/terragrunt.hcl)
 terragrunt dependency on `oci/prod/eu-amsterdam-1/edge` (added in #218)
 — the same apply that creates the reserved IPs also rewrites the
 `oci1`/`oci2`/`oci.sargeant.co` A records.

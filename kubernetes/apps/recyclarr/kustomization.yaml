@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Intentionally only references env overlays (prod, …). ./base/recyclarr is the
+# app's manifest library — applied EXCLUSIVELY by the per-env Flux Kustomization
+# (see prod/recyclarr/flux-kustomization.yaml).
+resources:
+  - ./prod

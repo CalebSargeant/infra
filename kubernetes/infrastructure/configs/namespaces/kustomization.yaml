@@ -11,3 +11,8 @@ resources:
   - misc-namespace.yaml
   - observability-namespace.yaml
   - security-namespace.yaml
+  # shared ingress/networking tier (Traefik + app Ingresses) — relocated here
+  # from clusters/firefly/flux-system/_namespaces.yaml
+  - networking-namespace.yaml
+  # pod-gateway (shared Privado VPN gateway) lives here; media apps route through it
+  - vpn-gateway-namespace.yaml

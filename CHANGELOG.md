@@ -2,6 +2,52 @@
 
 <!-- version list -->
 
+## v1.35.0 (2026-05-30)
+
+### Features
+
+- **cloudflare**: Gate dunmir.magmamoose.com in the Mikrotik Minder Pro Access app
+  ([#280](https://github.com/CalebSargeant/infra/pull/280),
+  [`ac2a9d3`](https://github.com/CalebSargeant/infra/commit/ac2a9d3d68f881f753042dedaa2793e4115cf827))
+
+
+## v1.34.4 (2026-05-30)
+
+### Bug Fixes
+
+- **mikrotik-minder**: Pin github.com host keys so the export push works under RO rootfs
+  ([#282](https://github.com/CalebSargeant/infra/pull/282),
+  [`4ddc238`](https://github.com/CalebSargeant/infra/commit/4ddc238ff6203b759a75cce42e8641aca0988103))
+
+### Chores
+
+- **mikrotik-minder**: Pin agent image to 1.5.1 (git-concurrency fix)
+  ([#279](https://github.com/CalebSargeant/infra/pull/279),
+  [`eb98a60`](https://github.com/CalebSargeant/infra/commit/eb98a607f8f3b32e5d6af369843669f851851e25))
+
+
+## v1.34.3 (2026-05-27)
+
+### Bug Fixes
+
+- **flux**: Point zoey ImageRepositories at ghcr.io/magmamoose/*
+  ([#275](https://github.com/CalebSargeant/infra/pull/275),
+  [`6d640f3`](https://github.com/CalebSargeant/infra/commit/6d640f31bf140f3fccd3152e6adf3ef676ebef20))
+
+
+## v1.34.2 (2026-05-27)
+
+### Bug Fixes
+
+- **flux**: Point transferred repos at github-app-magmamoose
+  ([#273](https://github.com/CalebSargeant/infra/pull/273),
+  [`5c9041e`](https://github.com/CalebSargeant/infra/commit/5c9041e51160e4c3c73eb1984e3b4aad85ef72b2))
+
+- **flux**: Rotate buxfer-sync-github-app installationID after App reinstall
+  ([#273](https://github.com/CalebSargeant/infra/pull/273),
+  [`5c9041e`](https://github.com/CalebSargeant/infra/commit/5c9041e51160e4c3c73eb1984e3b4aad85ef72b2))
+
+
 ## v1.34.1 (2026-05-24)
 
 ### Bug Fixes

@@ -59,5 +59,9 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: downloads
-  hostPath:
-    path: /mnt/nvme/downloads
+  # K8s-native NFS (not a host bind-mount): if NFS is unavailable the download
+  # pods get FailedMount instead of ghost-filling the node root disk. Same NFS
+  # server/export as the media library, so downloads never touch /dev/sdb again.
+  nfs:
+    server: 192.168.19.5
+    path: /mnt/raid5/downloads

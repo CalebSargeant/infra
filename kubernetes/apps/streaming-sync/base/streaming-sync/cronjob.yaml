@@ -1,0 +1,71 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: streaming-sync
+  namespace: media
+spec:
+  schedule: "0 5 * * *" # daily 05:00 — reconcile library vs Netflix/Prime NL availability
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 1800
+      template:
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          nodeSelector:
+            type: mini
+          containers:
+            - name: streaming-sync
+              image: python:3.12-slim
+              command: ["python", "/app/sync.py"]
+              env:
+                - name: DRY_RUN
+                  value: "false" # ARMED — deletes Netflix-NL titles + re-adds when they leave
+                - name: REGION
+                  value: "NL"
+                - name: PROVIDERS
+                  value: "Netflix,Amazon Prime Video" # both NL subscriptions
+                - name: KEEP_TAG
+                  value: "keep" # tag a movie/series `keep` in Radarr/Sonarr to protect it
+                - name: MAX_REMOVE
+                  value: "400" # runaway guard: abort all removals if a single run would delete > this (Netflix-NL set ~288)
+                - name: SLACK_CHANNEL
+                  value: "C0B88KF2X32" # media-sync run summaries
+                - name: TMDB_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: streaming-sync-secrets
+                      key: TMDB_API_KEY
+                - name: RADARR_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: streaming-sync-secrets
+                      key: RADARR_API_KEY
+                - name: SONARR_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: streaming-sync-secrets
+                      key: SONARR_API_KEY
+                - name: SLACK_BOT_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: streaming-sync-secrets
+                      key: SLACK_BOT_TOKEN
+                      optional: true
+              volumeMounts:
+                - name: script
+                  mountPath: /app
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  memory: 256Mi
+          volumes:
+            - name: script
+              configMap:
+                name: streaming-sync-script

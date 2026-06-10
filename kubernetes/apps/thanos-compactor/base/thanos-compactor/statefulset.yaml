@@ -41,12 +41,13 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/thanos/compact
+          # KRR observed ~1.5Gi; give headroom for downsampling. No CPU limit.
           resources:
             requests:
-              cpu: 10m
-              memory: 1334Mi
+              cpu: 50m
+              memory: 1536Mi
             limits:
-              memory: 1334Mi
+              memory: 2Gi
           livenessProbe:
             httpGet:
               path: /-/healthy

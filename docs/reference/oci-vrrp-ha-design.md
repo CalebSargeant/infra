@@ -18,7 +18,7 @@ Resolves `oci-infra-improvements.md` #3.
 
 ## Problem
 
-[`terraform/oci/prod/eu-amsterdam-1/network/terragrunt.hcl`](../../terraform/oci/prod/eu-amsterdam-1/network/terragrunt.hcl)
+[`terraform/oci/prod/eu-amsterdam-1/network/terragrunt.hcl`](https://github.com/CalebSargeant/infra/blob/main/terraform/oci/prod/eu-amsterdam-1/network/terragrunt.hcl)
 hard-codes:
 
 ```hcl

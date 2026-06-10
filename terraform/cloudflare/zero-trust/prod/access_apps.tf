@@ -261,62 +261,18 @@ resource "cloudflare_zero_trust_access_policy" "comment_commander_pro_caleb" {
   }
 }
 
-# --- self_hosted: Mikrotik Minder Pro ---------------------------------------
-# The licensed Mikrotik Minder operator UI — github.com/MagmaMoose/mikrotik-minder-pro.
-# Unlike comment-commander-pro, this is a Cloudflare Pages app, not a k8s
-# workload: there's no cloudflared tunnel and no DNS record to manage — Pages
-# already serves mikrotik-minder-pro.pages.dev on the CF edge. Access is the
-# only thing gating it (the app has no in-app auth yet — MVP). Caleb-only, no
-# device-posture `require` — same reasoning as comment-commander-pro and Zoey:
-# the posture rules need a WARP-enrolled device Caleb doesn't have, so requiring
-# it is a hard lockout (and the Pro UI is one he'll want from mobile too).
+# --- Dün Mir Pro — now gated by Stytch, NOT Cloudflare Access ----------------
+# The licensed operator UI (github.com/MagmaMoose/dunmir-pro) now authenticates
+# CUSTOMERS itself via Stytch B2B magic links: the app fail-closes to /login and
+# the worker validates the forwarded session JWT, scoping each operator to their
+# own tenant. The Cloudflare Access application that used to gate it has therefore
+# been removed — Access would double-gate and block self-serve customer sign-up
+# (only emails in the Caleb access group could get in). Removing it makes the
+# Pages URLs reachable, but the app is gated by Stytch at the edge of every route.
 #
-# A custom domain (mikrotik-minder-pro.magmamoose.com) is a possible follow-up;
-# it would need a cloudflare_pages_domain + a dns-magmamoose CNAME, after which
-# the `domain` below would point there instead.
-resource "cloudflare_zero_trust_access_application" "mikrotik_minder_pro" {
-  account_id                = var.account_id
-  name                      = "Mikrotik Minder Pro"
-  type                      = "self_hosted"
-  domain                    = "mikrotik-minder-pro.pages.dev"
-  tags                      = ["Magma Moose"]
-  app_launcher_visible      = true
-  auto_redirect_to_identity = false
-  session_duration          = "24h"
-
-  allowed_idps = [
-    cloudflare_zero_trust_access_identity_provider.google_workspace.id,
-    cloudflare_zero_trust_access_identity_provider.one_time_pin.id,
-    cloudflare_zero_trust_access_identity_provider.google.id,
-  ]
-
-  # Pages serves the app on the production hostname AND on a unique
-  # <hash>.mikrotik-minder-pro.pages.dev URL per build (plus <branch>.… aliases).
-  # `domain` alone gates only the apex, so every deployment URL was reachable
-  # un-authed. The wildcard matches one subdomain level (not the apex), so both
-  # entries are required to gate the lot.
-  destinations {
-    type = "public"
-    uri  = "mikrotik-minder-pro.pages.dev"
-  }
-  destinations {
-    type = "public"
-    uri  = "*.mikrotik-minder-pro.pages.dev"
-  }
-}
-
-resource "cloudflare_zero_trust_access_policy" "mikrotik_minder_pro_caleb" {
-  account_id       = var.account_id
-  application_id   = cloudflare_zero_trust_access_application.mikrotik_minder_pro.id
-  name             = "Caleb"
-  decision         = "allow"
-  precedence       = 1
-  session_duration = "24h"
-
-  include {
-    group = [cloudflare_zero_trust_access_group.caleb.id]
-  }
-}
+# NOTE: applying this DESTROYS the Access app + its policy — dunmir.magmamoose.com
+# and *.mikrotik-minder-pro.pages.dev become Stytch-gated only. Confirm Stytch
+# sign-in works before merging.
 
 # --- self_hosted: Zoey ------------------------------------------------------
 # Zoey — the project-intelligence dashboard (firefly cluster, behind the
@@ -378,6 +334,82 @@ resource "cloudflare_zero_trust_access_policy" "zoey_slack_bypass" {
   account_id     = var.account_id
   application_id = cloudflare_zero_trust_access_application.zoey_slack.id
   name           = "Slack webhook bypass"
+  decision       = "bypass"
+  precedence     = 1
+
+  include {
+    everyone = true
+  }
+}
+
+# --- self_hosted: Diatreme Pro ----------------------------------------------
+# The Diatreme Pro dashboard (firefly cluster, behind the firefly cloudflared
+# tunnel — ingress in tunnels.tf), served at the apex diatreme.magmamoose.com.
+# Supersedes Comment Commander Pro as comment-commander folds into Diatreme —
+# keep the cc-pro app until diatreme-pro is verified live, then prune both. The
+# dashboard has no in-app auth/paywall yet (MVP), so Access is the only thing
+# gating it: Caleb-only. No device-posture `require` — same reasoning as
+# comment-commander-pro / Zoey (the posture rules need a WARP-enrolled device
+# Caleb doesn't have, so requiring it is a hard lockout; he'll want it on mobile
+# too).
+#
+# Only the dashboard apex is gated. The Diatreme *worker* lives at
+# api.diatreme.magmamoose.com and is intentionally NOT behind Access — it's the
+# OSS engine API (token broker, /process, /dispatch, /sign, the GitHub webhook,
+# OAuth callback) and authenticates callers itself (bearer / HMAC / OIDC).
+resource "cloudflare_zero_trust_access_application" "diatreme_pro" {
+  account_id                = var.account_id
+  name                      = "Diatreme Pro"
+  type                      = "self_hosted"
+  domain                    = "diatreme.magmamoose.com"
+  tags                      = ["Magma Moose"]
+  app_launcher_visible      = true
+  auto_redirect_to_identity = false
+  session_duration          = "24h"
+
+  allowed_idps = [
+    cloudflare_zero_trust_access_identity_provider.google_workspace.id,
+    cloudflare_zero_trust_access_identity_provider.one_time_pin.id,
+    cloudflare_zero_trust_access_identity_provider.google.id,
+  ]
+}
+
+resource "cloudflare_zero_trust_access_policy" "diatreme_pro_caleb" {
+  account_id       = var.account_id
+  application_id   = cloudflare_zero_trust_access_application.diatreme_pro.id
+  name             = "Caleb"
+  decision         = "allow"
+  precedence       = 1
+  session_duration = "24h"
+
+  include {
+    group = [cloudflare_zero_trust_access_group.caleb.id]
+  }
+}
+
+# --- self_hosted: Diatreme Dispatch API (bypass — bearer-gated) -------------
+# diatreme.magmamoose.com/api/dispatch is POSTed to by the Diatreme worker
+# (api.diatreme.magmamoose.com) when triage decides a Copilot comment is a
+# "fix" — it hands off to the diatreme-pro agent dispatcher. Most-specific path
+# first, so /api/dispatch hits this bypass app instead of the Caleb gate on the
+# apex dashboard above. The dispatcher authenticates the worker itself (Bearer
+# DISPATCH_AGENT_TOKEN) and 503s until configured, so unauthenticated
+# reachability is safe here — same reasoning as the Zoey Slack webhook bypass.
+# Browser users only ever load the dashboard apex, which stays Caleb-only.
+resource "cloudflare_zero_trust_access_application" "diatreme_dispatch" {
+  account_id                = var.account_id
+  name                      = "Diatreme Dispatch API"
+  type                      = "self_hosted"
+  domain                    = "diatreme.magmamoose.com/api/dispatch"
+  tags                      = ["Magma Moose"]
+  app_launcher_visible      = false
+  auto_redirect_to_identity = false
+}
+
+resource "cloudflare_zero_trust_access_policy" "diatreme_dispatch_bypass" {
+  account_id     = var.account_id
+  application_id = cloudflare_zero_trust_access_application.diatreme_dispatch.id
+  name           = "Worker bypass (bearer-gated)"
   decision       = "bypass"
   precedence     = 1
 

@@ -7,17 +7,19 @@ resources:
 components:
   - ../../../../components/node-selectors/mini
 patches:
-  # Reduce Loki resources to fit mini nodes
+  # Loki resources — KRR observed ~2.3Gi steady-state, but catch-up / WAL replay
+  # after an outage spikes higher, so the limit is 4Gi (request 2Gi). No CPU limit
+  # (avoids CFS throttling on the 16-core node). Ingester back-pressure + ingestion
+  # rate limits in the Loki config (configmap.enc.yaml) bound steady-state memory.
   - patch: |
       - op: replace
         path: /spec/template/spec/containers/0/resources
         value:
           requests:
-            cpu: 200m
-            memory: 512Mi
-          limits:
-            cpu: 1
+            cpu: 350m
             memory: 2Gi
+          limits:
+            memory: 4Gi
     target:
       kind: StatefulSet
       labelSelector: "app.kubernetes.io/name=loki"

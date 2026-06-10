@@ -1,0 +1,26 @@
+# Cluster-root orchestration — the meta `apps` Kustomization. Relocated here
+# from clusters/firefly/flux-system/kustomizations.yaml so flux-system/ stays
+# bootstrap-only. It is applied by the bootstrap `flux-system` Kustomization
+# (referenced from flux-system/kustomization.yaml as ../apps.yaml) and is
+# intentionally NOT listed in clusters/firefly/kustomization.yaml — that file
+# is this Kustomization's build target, so listing it would make it manage
+# itself.
+---
+# Meta Kustomization — builds kubernetes/clusters/firefly/, which renders the
+# per-app (apps/<app>/prod/<app>/flux-kustomization.yaml) and per-tier
+# (infrastructure/{configs,controllers,services}/flux-kustomization.yaml)
+# Flux Kustomization CRs. No app/tier resources cross this Kustomization
+# itself — those are applied by each emitted Flux Kustomization.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: apps
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./kubernetes/clusters/firefly
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 2m

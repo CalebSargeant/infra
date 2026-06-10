@@ -5,8 +5,11 @@ resources:
   - ./atlantis
   - ./homeassistant
   - ./homebridge
+  - ./litellm
   - ./mikrotik-minder
   - ./n8n
+  # magmamoose products (open-core dashboards; external-repo + image automation)
+  - ./diatreme-pro
   # backup
   - ./timemachine
   # miscellaneous (dashboard)
@@ -21,14 +24,17 @@ resources:
   - ./prowlarr
   - ./qbittorrent
   - ./radarr
+  - ./recyclarr
   - ./sabnzbd
   - ./sonarr
+  - ./streaming-sync
   # miscellaneous
   - ./excalidraw
   - ./nextcloud
   - ./syncthing
   - ./wordpress
   # observability
+  - ./alloy
   - ./blackbox-exporter
   - ./fluent-bit
   - ./krr
@@ -40,3 +46,11 @@ resources:
   # security
   - ./gatekeeper
   - ./kubescape
+  # external-repo apps (workload manifests live in their own GitHub repos;
+  # each dir holds only the in-cluster Flux plumbing — source, image
+  # automation, namespace, and the Flux Kustomization that pulls the workload)
+  - ./buxfer-sync
+  - ./deskbird-booking
+  - ./fortivpn-gateway
+  - ./openviking
+  - ./zoey

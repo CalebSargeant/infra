@@ -1,0 +1,170 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: streaming-sync-script
+  namespace: media
+data:
+  # Keeps Plex (via Radarr/Sonarr) as the COMPLEMENT of what's already streaming on
+  # the configured providers/region. On a provider -> unmonitor + delete files + tag
+  # `auto-streaming`. A title WE removed (tagged) that later LEAVES the providers ->
+  # re-monitor + untag + search (back into Plex). `keep`-tagged titles are never
+  # touched. TMDB uncertainty (request error / unmapped id) -> SKIP. DRY_RUN=true
+  # (default) changes nothing. Stdlib only — no pip install needed.
+  sync.py: |
+    #!/usr/bin/env python3
+    import json, os, urllib.request, urllib.parse, urllib.error
+
+    TMDB_KEY    = os.environ["TMDB_API_KEY"]
+    RADARR_URL  = os.environ.get("RADARR_URL", "http://radarr.media.svc.cluster.local:7878").rstrip("/")
+    SONARR_URL  = os.environ.get("SONARR_URL", "http://sonarr.media.svc.cluster.local:8989").rstrip("/")
+    RADARR_KEY  = os.environ["RADARR_API_KEY"]
+    SONARR_KEY  = os.environ["SONARR_API_KEY"]
+    REGION      = os.environ.get("REGION", "NL").upper()
+    PROVIDERS   = {p.strip().lower() for p in os.environ.get("PROVIDERS", "Netflix,Amazon Prime Video").split(",") if p.strip()}
+    DRY_RUN     = os.environ.get("DRY_RUN", "true").lower() != "false"
+    KEEP_TAG    = os.environ.get("KEEP_TAG", "keep").lower()
+    AUTO_TAG    = os.environ.get("AUTO_TAG", "auto-streaming").lower()
+    MAX_REMOVE  = int(os.environ.get("MAX_REMOVE", "50"))
+    SLACK_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
+    SLACK_CHAN  = os.environ.get("SLACK_CHANNEL", "")
+    TMDB        = "https://api.themoviedb.org/3"
+
+    def http(method, url, headers=None, params=None, body=None):
+        if params:
+            url += ("&" if "?" in url else "?") + urllib.parse.urlencode(params)
+        data = json.dumps(body).encode() if body is not None else None
+        req = urllib.request.Request(url, data=data, method=method)
+        req.add_header("Accept", "application/json")
+        if body is not None:
+            req.add_header("Content-Type", "application/json")
+        for k, v in (headers or {}).items():
+            req.add_header(k, v)
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                raw = r.read()
+                return json.loads(raw) if raw else None
+        except urllib.error.HTTPError as e:
+            if method == "GET":
+                raise
+            print("  ! %s %s -> HTTP %s %s" % (method, url.split("?")[0], e.code, e.read()[:160]))
+            return None
+
+    def arr(app, method, path, params=None, body=None):
+        base, key = (RADARR_URL, RADARR_KEY) if app == "radarr" else (SONARR_URL, SONARR_KEY)
+        return http(method, "%s/api/v3/%s" % (base, path), {"X-Api-Key": key}, params, body)
+
+    def tmdb_get(path, params=None):
+        p = {"api_key": TMDB_KEY}
+        p.update(params or {})
+        return http("GET", "%s%s" % (TMDB, path), params=p)
+
+    def series_tmdb_id(s):
+        if s.get("tmdbId"):
+            return s["tmdbId"]
+        for src, val in (("tvdb_id", s.get("tvdbId")), ("imdb_id", s.get("imdbId"))):
+            if not val:
+                continue
+            try:
+                res = tmdb_get("/find/%s" % val, {"external_source": src})
+            except Exception:
+                return None
+            tv = (res or {}).get("tv_results") or []
+            if tv:
+                return tv[0]["id"]
+        return None
+
+    def on_streaming(kind, tmdb_id):
+        # True/False when known; None when uncertain (request error / no id) -> SKIP
+        if not tmdb_id:
+            return None
+        try:
+            res = tmdb_get("/%s/%s/watch/providers" % (kind, tmdb_id))
+        except Exception as e:
+            print("  ? tmdb %s/%s failed: %s" % (kind, tmdb_id, e))
+            return None
+        region = (res or {}).get("results", {}).get(REGION)
+        if not region:
+            return False  # not offered on any service in this region
+        names = {p.get("provider_name", "").lower() for p in region.get("flatrate", [])}
+        return bool(names & PROVIDERS)
+
+    def ensure_tag(app, label):
+        for t in (arr(app, "GET", "tag") or []):
+            if t["label"].lower() == label:
+                return t["id"]
+        created = arr(app, "POST", "tag", body={"label": label})
+        return created["id"] if created else None
+
+    def delete_files(app, it):
+        ep, idk = ("moviefile", "movieId") if app == "radarr" else ("episodefile", "seriesId")
+        for f in (arr(app, "GET", ep, params={idk: it["id"]}) or []):
+            arr(app, "DELETE", "%s/%s" % (ep, f["id"]))
+
+    def search(app, item_id):
+        cmd = {"name": "MoviesSearch", "movieIds": [item_id]} if app == "radarr" \
+            else {"name": "SeriesSearch", "seriesId": item_id}
+        arr(app, "POST", "command", body=cmd)
+
+    def plan(app):
+        kind = "movie" if app == "radarr" else "tv"
+        res = "movie" if app == "radarr" else "series"
+        items = arr(app, "GET", res) or []
+        keep_id = ensure_tag(app, KEEP_TAG)
+        auto_id = ensure_tag(app, AUTO_TAG)
+        to_remove, to_readd, skipped = [], [], 0
+        for it in items:
+            tags = it.get("tags", [])
+            if keep_id in tags:
+                continue
+            tmdb_id = it.get("tmdbId") if app == "radarr" else series_tmdb_id(it)
+            streaming = on_streaming(kind, tmdb_id)
+            if streaming is None:
+                skipped += 1
+                continue
+            has_file = it.get("hasFile", False) or it.get("statistics", {}).get("sizeOnDisk", 0) > 0
+            if streaming:
+                if has_file or it.get("monitored"):
+                    to_remove.append(it)
+            elif auto_id in tags:
+                to_readd.append(it)
+        return res, auto_id, to_remove, to_readd, skipped
+
+    def main():
+        mode = "DRY-RUN" if DRY_RUN else "LIVE"
+        print("streaming-sync [%s] region=%s providers=%s" % (mode, REGION, sorted(PROVIDERS)))
+        lines = ["*streaming-sync* [%s] — %s / %s" % (mode, REGION, ", ".join(sorted(PROVIDERS)))]
+        for app in ("radarr", "sonarr"):
+            try:
+                res, auto_id, to_remove, to_readd, skipped = plan(app)
+            except Exception as e:
+                print("  !! %s failed: %s" % (app, e))
+                lines.append("• %s: ERROR %s" % (app, e))
+                continue
+            capped = len(to_remove) > MAX_REMOVE
+            vr = "would remove" if DRY_RUN else "removed"
+            va = "would re-add" if DRY_RUN else "re-added"
+            print("  %s: %s %d (on streaming), %s %d (left streaming), skipped %d%s"
+                  % (app, vr, len(to_remove), va, len(to_readd), skipped,
+                     "  [SAFETY CAP HIT — removals skipped]" if capped else ""))
+            for it in to_remove[:40]:
+                print("    - %s: %s" % (vr, it.get("title", "?")))
+            for it in to_readd[:40]:
+                print("    + %s: %s" % (va, it.get("title", "?")))
+            lines.append("• %s: %s *%d*, %s *%d* (skipped %d)%s"
+                         % (app, vr, len(to_remove), va, len(to_readd), skipped,
+                            "  ⚠️ CAP HIT, removals skipped" if capped else ""))
+            if not DRY_RUN and not capped:
+                for it in to_remove:
+                    delete_files(app, it)
+                    arr(app, "PUT", "%s/%s" % (res, it["id"]),
+                        body={**it, "monitored": False, "tags": sorted(set(it.get("tags", [])) | {auto_id})})
+                for it in to_readd:
+                    arr(app, "PUT", "%s/%s" % (res, it["id"]),
+                        body={**it, "monitored": True, "tags": sorted(set(it.get("tags", [])) - {auto_id})})
+                    search(app, it["id"])
+        if SLACK_TOKEN and SLACK_CHAN:
+            http("POST", "https://slack.com/api/chat.postMessage",
+                 {"Authorization": "Bearer %s" % SLACK_TOKEN}, body={"channel": SLACK_CHAN, "text": "\n".join(lines)})
+
+    if __name__ == "__main__":
+        main()

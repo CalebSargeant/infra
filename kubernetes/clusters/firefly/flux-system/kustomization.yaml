@@ -3,19 +3,14 @@ kind: Kustomization
 resources:
   - gotk-components.yaml
   - gotk-sync.yaml
-  - _namespaces.yaml
-  - gitrepos.yaml
-  - kustomizations.yaml
-  - helmrepositories.yaml
-  - ghcr-pull-secret.yaml
-  - github-app-secret.yaml
-  - github-app-magmamoose-secret.yaml
-  - buxfer-sync.yaml
-  - deskbird-booking.yaml
-  - comment-commander.yaml
-  - comment-commander-pro.yaml
-  - notifications.yaml
-  - zoey.yaml
+  # Cluster orchestration + shared Flux config now live OUTSIDE flux-system/
+  # (keeping this directory bootstrap-only: gotk-components + gotk-sync + this
+  # file). They are still applied by THIS bootstrap Kustomization via relative
+  # refs — the same out-of-tree pattern as the node-selectors component below —
+  # so nothing re-parents: the exact same objects, applied by the exact same
+  # Kustomization, just sourced from their new locations.
+  - ../apps.yaml                  # meta `apps` Kustomization (builds clusters/firefly/)
+  - ../../../infrastructure/flux  # HelmRepositories, registry/Git auth secrets, notifications
 components:
   - ../../../components/node-selectors/pi
 # Note: Removed t.nano resource profile - flux controllers need more resources

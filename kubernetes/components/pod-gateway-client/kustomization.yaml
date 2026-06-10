@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+# Opts a workload's pods into the shared pod-gateway VPN. The gateway-admision
+# webhook (in the vpn-gateway ns) sees this pod label and injects the routing
+# init+sidecar so the pod's egress goes through the single Privado tunnel.
+# includeSelectors:false — never touch the (immutable) Deployment/STS selector.
+labels:
+  - pairs:
+      setGateway: "true"
+    includeSelectors: false
+    includeTemplates: true

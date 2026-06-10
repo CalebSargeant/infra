@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: litellm
+  namespace: automation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: litellm
+  template:
+    metadata:
+      annotations:
+        checksum/config: ad96381009ad56fd3ceae000188ee13d7ba3b7cfefd4f2a8f4bec5b075a5e925
+        checksum/auth-proxy-config: 41cbc6f2467fb10b6873fe82106f058bffdf93826ecf2fa87ffb5b6a1c8b2e05
+      labels:
+        app: litellm
+    spec:
+      containers:
+        - name: litellm
+          image: ghcr.io/berriai/litellm:main-stable
+          imagePullPolicy: Always
+          args:
+            - "--config"
+            - "/etc/litellm/config.yaml"
+            - "--host"
+            - "0.0.0.0"
+            - "--port"
+            - "4000"
+          ports:
+            - name: http
+              containerPort: 4000
+          env:
+            # Subscription pass-through needs only the gateway master key; the
+            # agent forwards its Claude OAuth token upstream. (For per-token API
+            # billing, add ANTHROPIC_API_KEY / DEEPSEEK_API_KEY from the Secret.)
+            - name: LITELLM_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm
+                  key: master-key
+            # Admin UI (served at /ui) — needs Postgres + UI login creds.
+            - name: STORE_MODEL_IN_DB
+              value: "true"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: litellm
+                  key: database-url
+            - name: UI_USERNAME
+              value: "admin"
+            - name: UI_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: litellm
+                  key: ui-password
+            - name: OLLAMA_LAN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm
+                  key: ollama-lan-api-key
+          volumeMounts:
+            - name: config
+              mountPath: /etc/litellm
+              readOnly: true
+          # /health/liveliness is LiteLLM's unauthenticated liveness endpoint.
+          readinessProbe:
+            httpGet:
+              path: /health/liveliness
+              port: 4000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health/liveliness
+              port: 4000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+        - name: auth-proxy
+          image: nginx:1.27-alpine
+          ports:
+            - name: http-proxy
+              containerPort: 8080
+          volumeMounts:
+            - name: auth-proxy-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+      volumes:
+        - name: config
+          configMap:
+            name: litellm-config
+        - name: auth-proxy-config
+          configMap:
+            name: litellm-auth-proxy

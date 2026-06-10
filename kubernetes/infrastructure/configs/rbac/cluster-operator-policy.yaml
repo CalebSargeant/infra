@@ -1,0 +1,53 @@
+---
+# Generates a `cluster-operator` RoleBinding (binds the built-in `admin`
+# ClusterRole to Group=humans) in every Namespace that does not carry
+# the label `cluster-operator-binding: skip`. Replaces the previous
+# per-namespace RoleBinding files under bindings/.
+#
+# generateExisting + synchronize together mean:
+#   - existing matching namespaces are backfilled on policy creation
+#   - if someone deletes a generated RoleBinding, Kyverno recreates it
+#   - if a namespace later gains the skip label, the generated binding
+#     is removed
+#
+# A namespace opts out by setting the label at creation time (or via a
+# `kubectl label`). The label key is generic; humans is the only group
+# referenced anywhere in this repo's RBAC.
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: cluster-operator-rolebinding
+spec:
+  generateExisting: true
+  background: true
+  rules:
+    - name: generate
+      match:
+        any:
+          - resources:
+              kinds:
+                - Namespace
+      exclude:
+        any:
+          - resources:
+              selector:
+                matchLabels:
+                  cluster-operator-binding: skip
+      generate:
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: RoleBinding
+        name: cluster-operator
+        namespace: "{{request.object.metadata.name}}"
+        synchronize: true
+        data:
+          metadata:
+            labels:
+              app.kubernetes.io/managed-by: kyverno
+          roleRef:
+            apiGroup: rbac.authorization.k8s.io
+            kind: ClusterRole
+            name: admin
+          subjects:
+            - apiGroup: rbac.authorization.k8s.io
+              kind: Group
+              name: humans

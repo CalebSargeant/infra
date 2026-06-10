@@ -1,0 +1,43 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: litellm
+  namespace: automation
+  labels:
+    app: litellm
+  annotations:
+    # LAN-only host (litellm.sargeant.co → firefly.sargeant.co → Traefik LB on a
+    # private 192.168.x IP), so the cert must use the DNS-01 issuer — HTTP-01
+    # can't reach a private IP. Same pattern as the media apps (e.g. nzbhydra2).
+    cert-manager.io/cluster-issuer: letsencrypt-dns
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/service.serversscheme: http
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: litellm.sargeant.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: litellm
+                port:
+                  number: 8080
+    - host: litellm.sargeant.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: litellm
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - litellm.sargeant.co
+      secretName: litellm-tls

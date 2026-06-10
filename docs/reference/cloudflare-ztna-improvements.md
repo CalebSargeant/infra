@@ -206,22 +206,11 @@ resource "cloudflare_zero_trust_gateway_policy" "isolate_overseerr" {
 
 ## 11. WARP profile / device enrollment policy in terraform
 
-**Needs separate scoping.** The cloudflare/cloudflare provider v4 has
-`cloudflare_zero_trust_device_settings_policy` (named profiles) and
-`cloudflare_zero_trust_device_default_profile` (the org-wide default),
-plus `cloudflare_zero_trust_device_managed_networks` for split-tunnel
-network detection. Implementation outline:
+**Resolved default profile & split tunnels 2026-06-09.** We have successfully codified the default device profile (`cloudflare_zero_trust_device_profiles.default`) and split tunnel exclude rules (`cloudflare_zero_trust_split_tunnel.default_exclude`) under `terraform/cloudflare/zero-trust/prod/`. This includes directing RFC1918 traffic (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`) to the `firefly` tunnel, allowing private network routing while allowing local subnet bypass.
 
-1. Codify the default profile (auto-connect timeout, allowed-to-leave
-   behaviour, gateway DNS / gateway proxy enabled, etc.).
-2. Add a posture-restricted profile for Caleb-only that includes the
-   posture rules (FileVault + OS version) on top of the default.
-3. Reference the existing `magma_moose_domain` access group in the
-   enrolment policy so only `@magmamoose.com` emails can register.
-
-Risk: poorly-configured WARP profile can lock the operator out of the
-device. Do this in a controlled change window after confirming the
-current dashboard profile is captured in import block form.
+**Remaining scopes (future PRs):**
+- Add a posture-restricted profile for Caleb-only that includes the posture rules (FileVault + OS version) on top of the default.
+- Reference the existing `magma_moose_domain` access group in the enrolment policy so only `@magmamoose.com` emails can register.
 
 ## 12. Logpush for Access + Gateway events
 
