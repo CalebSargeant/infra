@@ -10,6 +10,9 @@ spec:
       app: litellm
   template:
     metadata:
+      annotations:
+        checksum/config: 4f7fc0d194a0f7f3c9fe0f6bd52d230d6c0cef00027abb62f84cf3f9e1a76449
+        checksum/auth-proxy-config: 41cbc6f2467fb10b6873fe82106f058bffdf93826ecf2fa87ffb5b6a1c8b2e05
       labels:
         app: litellm
     spec:

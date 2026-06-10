@@ -118,6 +118,11 @@ schedule a replacement pod during rolling updates, and the ingress depends on th
 `auth-proxy` sidecar being present on `:8080`. The app uses a memory-oriented
 resource profile because the LiteLLM process can sit around 1Gi at idle.
 
+LiteLLM reads its YAML config at process start, and the Nginx auth-proxy mounts
+its config with `subPath`. When either ConfigMap changes, update the pod-template
+`checksum/config` or `checksum/auth-proxy-config` annotation in the Deployment so
+Flux performs a normal rollout.
+
 ## How routing works
 
 The client chooses the route by sending a `model` value. LiteLLM matches that value
