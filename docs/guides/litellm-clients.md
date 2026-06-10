@@ -81,20 +81,29 @@ that can reach Ollama from the LiteLLM pod.
 
 ```yaml
 # kubernetes/apps/litellm/base/litellm/configmap.yaml  (model_list)
-  - model_name: qwen-coder-local
+  - model_name: qwen2.5-coder-7b-instruct-local
     litellm_params:
-      model: ollama_chat/qwen2.5-coder:7b
-      api_base: http://ollama.automation.svc.cluster.local:11434
+      model: ollama_chat/qwen2.5-coder:7b-instruct-q4_K_M
+      api_base: http://ollama-lan.automation.svc.cluster.local:11434
+      api_key: os.environ/OLLAMA_LAN_API_KEY
     model_info:
       mode: chat
-      auth_mode: none-local-network
+      auth_mode: bearer-token-to-ollama-lan
       billing_mode: self-hosted
       supports_function_calling: true  # only set when the selected model actually supports tools
 ```
 
-For local models, resource sizing matters more than LiteLLM config: the Ollama pod
-needs enough CPU/memory, and tool/function calling depends on the model's actual
-capabilities.
+The firefly deployment exposes the LAN Ollama server as
+`ollama-lan.automation.svc.cluster.local:11434` and
+`https://ollama.sargeant.co`. Store the upstream bearer token in OCI Vault as
+`litellm-ollama-lan-api-key`; the repo only references it through
+`ExternalSecret/automation/litellm`.
+
+For local models, resource sizing matters more than LiteLLM config: the Ollama
+host needs enough CPU/memory, and tool/function calling depends on the model's
+actual capabilities. LiteLLM recommends `ollama_chat/` for better chat
+responses, and its proxy config can mark a model with
+`supports_function_calling: true` for tool-capable Ollama models.
 
 ## Operational note
 
