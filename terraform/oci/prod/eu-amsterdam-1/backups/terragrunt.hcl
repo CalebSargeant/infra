@@ -18,7 +18,9 @@ inputs = {
   region           = local.region_vars.locals.region
   environment      = local.environment_vars.locals.environment
 
-  bucket_names = ["postgres-backups", "plex-backups"]
+  # minio-backups: offsite mirror of the in-cluster MinIO buckets (thanos-metrics,
+  # loki-chunks, loki-ruler) written daily by the minio-backup CronJob.
+  bucket_names = ["postgres-backups", "plex-backups", "minio-backups"]
 
   # vault-prod + key-vpn-prod (eu-amsterdam-1) — store + encrypt the S3 creds.
   vault_id    = "ocid1.vault.oc1.eu-amsterdam-1.fruyd6i7aagf4.abqw2ljrzcituk5pndpbgsvhtkgenvf2ae7xnlbctmskmcfj2gw6xsjhbgfq"

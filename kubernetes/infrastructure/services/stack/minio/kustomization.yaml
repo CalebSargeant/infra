@@ -5,3 +5,5 @@ resources:
   - service.yaml
   - externalsecret.yaml
   - setup-job.yaml
+  - externalsecret-backup-oci.yaml
+  - backup-cronjob.yaml

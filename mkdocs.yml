@@ -1,0 +1,87 @@
+site_name: Monolithic Deployments
+site_description: Infrastructure-as-code for the firefly k3s homelab and OCI estate.
+repo_url: https://github.com/CalebSargeant/infra
+repo_name: CalebSargeant/infra
+docs_dir: docs
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.instant
+    - content.code.copy
+    - toc.follow
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Prerequisites: getting-started/prerequisites.md
+      - Kubernetes Setup: getting-started/kubernetes-setup.md
+  - Guides:
+      - Deploying Applications: guides/deploying-applications.md
+      - 1Password Setup: guides/1password-setup.md
+      - Atlantis Setup: guides/atlantis-setup.md
+      - Gluetun Setup: guides/gluetun-setup.md
+      - LiteLLM Clients: guides/litellm-clients.md
+      - Warp Setup: guides/warp-setup.md
+      - Single-Hook Implementation: guides/single-hook-implementation.md
+  - Operations:
+      - Observability Stack: operations/observability-stack.md
+      - Auto Shutdown: operations/auto-shutdown.md
+      - Auto Update: operations/auto-update.md
+      - NFS Setup: operations/nfs-setup.md
+      - Kubernetes Restructure Plan: operations/kubernetes-restructure-plan.md
+  - Reference:
+      - Ansible: reference/ansible.md
+      - Resource Profiles: reference/resource-profiles.md
+      - Terraform (OCI): reference/terraform-oci.md
+      - Terraform Modules: reference/terraform-modules.md
+      - Terraform OCI VPN: reference/terraform-oci-vpn.md
+      - OCI Infra Improvements: reference/oci-infra-improvements.md
+      - OCI VRRP HA Design: reference/oci-vrrp-ha-design.md
+      - Cloudflare ZTNA Improvements: reference/cloudflare-ztna-improvements.md
+      - Helm Charts:
+          - Overview: reference/helm-charts.md
+          - Prometheus Stack: reference/helm-charts/prometheus-stack.md
+          - AdGuard: reference/helm-charts/adguard.md
+          - Bazarr: reference/helm-charts/bazarr.md
+          - Heimdall: reference/helm-charts/heimdall.md
+          - Homebridge: reference/helm-charts/homebridge.md
+          - Lidarr: reference/helm-charts/lidarr.md
+          - MariaDB: reference/helm-charts/mariadb.md
+          - Nextcloud: reference/helm-charts/nextcloud.md
+          - NZBGet: reference/helm-charts/nzbget.md
+          - Ombi: reference/helm-charts/ombi.md
+          - Postgres: reference/helm-charts/postgres.md
+          - Prowlarr: reference/helm-charts/prowlarr.md
+          - qBittorrent: reference/helm-charts/qbittorrent.md
+          - Radarr: reference/helm-charts/radarr.md
+          - RDesktop: reference/helm-charts/rdesktop.md
+          - Readarr: reference/helm-charts/readarr.md
+          - Sonarr: reference/helm-charts/sonarr.md
+          - Tautulli: reference/helm-charts/tautulli.md
+          - Wetty: reference/helm-charts/wetty.md
+  - About:
+      - Changelog: about/changelog.md

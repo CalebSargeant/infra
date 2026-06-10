@@ -34,6 +34,7 @@ resources:
   - ./syncthing
   - ./wordpress
   # observability
+  - ./alloy
   - ./blackbox-exporter
   - ./fluent-bit
   - ./krr
