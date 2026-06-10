@@ -31,17 +31,17 @@ spec:
     # The admission & cleanup controllers expose a fail-closed webhook server on :9443 that
     # is slow to bind while loading policies/CRDs — slower still on the memory-pressured Pi
     # node (ff-pi1 ~86% mem). The stock startup probe (timeoutSeconds 1, ~120s window) and
-    # liveness probe (timeoutSeconds 5, failureThreshold 2) SIGTERM the pod before it is
-    # healthy ("connection refused" on :9443 → exit 0), crashlooping it. With a single
-    # admission replica that flap 502s admission for the whole cluster (the webhook is
-    # fail-closed). Fix: run the admission controller HA (2 replicas → redundant webhook
-    # endpoints + an auto-generated PDB) and loosen the startup/liveness probes on both the
-    # admission and cleanup controllers so a slow start no longer kills them.
+    # liveness probe (timeoutSeconds 5, failureThreshold 2, per kyverno chart 3.8+) SIGTERM
+    # the pod before it is healthy ("connection refused" on :9443 → exit 0), crashlooping it.
+    # With a single admission replica that flap 502s admission for the whole cluster (the
+    # webhook is fail-closed). Fix: run the admission controller HA (2 replicas → redundant
+    # webhook endpoints + an auto-generated PDB) and loosen the startup/liveness probes on
+    # both the admission and cleanup controllers so a slow start no longer kills them.
     #
-    # background & reports controllers have no :9443 probes (chart default) and are not
-    # affected; keep them at one replica. Steady-state usage (admission ~63Mi vs 384Mi
+    # background & reports controllers have no :9443 probes (kyverno chart 3.8+ defaults) and
+    # are not affected; keep them at one replica. Steady-state usage (admission ~63Mi vs 384Mi
     # limit) shows the slow start is node-level, not pod-resource-driven, so resources are
-    # left at chart defaults.
+    # left at kyverno chart defaults (3.8+).
     admissionController:
       replicas: 2
       startupProbe:
@@ -52,7 +52,7 @@ spec:
         initialDelaySeconds: 5
         periodSeconds: 6
         timeoutSeconds: 5
-        failureThreshold: 60 # ~6 min to come up (chart default 20 ≈ 2 min)
+        failureThreshold: 60 # ~6 min to come up (kyverno 3.8+ chart default 20 ≈ 2 min)
       livenessProbe:
         httpGet:
           path: /health/liveness
@@ -60,8 +60,8 @@ spec:
           scheme: HTTPS
         initialDelaySeconds: 30
         periodSeconds: 30
-        timeoutSeconds: 10 # chart default 5
-        failureThreshold: 6 # ~3 min sustained failure before kill (chart default 2)
+        timeoutSeconds: 10 # kyverno 3.8+ chart default 5
+        failureThreshold: 6 # ~3 min sustained failure before kill (kyverno 3.8+ chart default 2)
         successThreshold: 1
       readinessProbe:
         httpGet:
@@ -70,7 +70,7 @@ spec:
           scheme: HTTPS
         initialDelaySeconds: 5
         periodSeconds: 10
-        timeoutSeconds: 10 # chart default 5
+        timeoutSeconds: 10 # kyverno 3.8+ chart default 5
         failureThreshold: 6
         successThreshold: 1
     backgroundController:
