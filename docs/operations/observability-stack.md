@@ -252,14 +252,30 @@ throttling that fired false "at limit" alerts while ff-vm1 — 16 vCPU / 32 GiB 
    `thanos-metrics` bucket is non-zero; Grafana reaches `3/3`; `loki-0` is `1/1`; Thanos Query
    `/api/v1/stores` lists both a `sidecar` and a `store`; `fluent-bit` DaemonSet shows DESIRED 2.
 
-**Deferred (follow-ups, not required for green):**
+**Completed in follow-up PRs:**
 
-- **Loki config tuning** (retention 720h → 168h, ingester back-pressure, drop the dead
-  `filesystem` block) lives in the SOPS-encrypted `loki/configmap.enc.yaml` and needs the age
-  key to re-encrypt — out of band for this change.
-- **Grafana LAN exposure** via Traefik (the repo's IngressRoute + oauth2-proxy pattern) — its own
-  focused change so auth isn't mis-configured. Until then, reach Grafana via `kubectl port-forward`.
+- **Loki config tuning** — retention 720h → 168h, ingester back-pressure, ingestion rate limits.
+- **ff-pi1 log collection** — **Grafana Alloy** DaemonSet on the Pi (`kubernetes/apps/alloy/`).
+  The fluent-bit image can't run on the Pi's 16KB-page arm64 kernel (jemalloc); Alloy is Go, so
+  it's page-size-agnostic. Ships to Loki with the same label schema (`cluster=firefly`,
+  `k8s_namespace_name/pod_name/container_name`), `job="alloy"` distinguishes it from fluent-bit.
+  Runs BestEffort because ff-pi1 is ≈100% committed by over-provisioned non-observability apps.
+- **Grafana LAN exposure** — `grafana.ingress.enabled` → `grafana.sargeant.co` via Traefik
+  (same pattern as `radarr.sargeant.co`: cert-manager `letsencrypt-dns`, websecure).
+- **MinIO off-cluster backup** — daily `minio-backup` CronJob `mc mirror`s `thanos-metrics` +
+  `loki-chunks` + `loki-ruler` to OCI Object Storage (`minio-backups` bucket; added to the
+  terraform `backups` module), creds via the `minio-backup-oci` ExternalSecret.
+
+**Recommendations / still deferred:**
+
+- **Longhorn for observability PVCs — recommend against (for now).** The big PVCs (Prometheus
+  50Gi, Loki 30Gi, Thanos) are reconstructable: Prometheus is short-term and offloaded to
+  Thanos/MinIO, Loki chunks live in MinIO, Thanos blocks live in MinIO — and MinIO is now backed
+  up off-cluster to OCI. Replicating those PVCs to the small ff-pi1 via Longhorn adds I/O load and
+  risk for little durability gain. Keep them on `local-path` (ff-vm1) + rely on the MinIO→OCI
+  backup as the durability layer. Reconsider only if ff-vm1 disk loss (losing in-flight, not-yet-
+  backed-up data) becomes a real concern.
 - **HA (2× replicas)** for Prometheus/Alertmanager/Loki — needs a second `mini`-labelled node or
   relaxed affinity (and a shared ring for Loki); single replicas are the accepted homelab posture.
-- **Durability:** move MinIO + observability PVCs off node-local `local-path`/hostPath onto
-  Longhorn, and add an off-cluster `mc mirror` backup of the buckets to OCI.
+- **ff-pi1 capacity** — the Pi is over-committed by over-provisioned non-observability apps;
+  right-sizing them per KRR would free room (and let Alloy take a proper memory reservation).

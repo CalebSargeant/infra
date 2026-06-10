@@ -184,10 +184,23 @@ spec:
               options:
                 path: /var/lib/grafana/dashboards/default
       
-      # Ingress for Grafana
+      # Ingress for Grafana — LAN exposure via Traefik, same pattern as
+      # radarr.sargeant.co (cert-manager letsencrypt-dns, websecure).
       ingress:
-        enabled: false
-      
+        enabled: true
+        ingressClassName: traefik
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-dns
+          traefik.ingress.kubernetes.io/service.serversscheme: http
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        hosts:
+          - grafana.sargeant.co
+          - grafana.sargeant.local
+        tls:
+          - hosts:
+              - grafana.sargeant.co
+            secretName: grafana-tls
+
       # Sidecar for loading dashboards
       sidecar:
         dashboards:
