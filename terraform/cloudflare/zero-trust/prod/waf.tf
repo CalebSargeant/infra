@@ -22,9 +22,10 @@
 #   1. TOKEN SCOPE. The zero-trust Cloudflare API token (OCI Vault secret
 #      `cloudflare-api-token-zero-trust`) currently has DNS:Edit + Zero
 #      Trust:Edit only. Managing a WAF ruleset needs "Zone WAF: Edit" on the
-#      sargeant.co zone. Add that permission to the token in the Cloudflare
-#      dashboard and re-stash the token in OCI Vault, or the apply fails with
-#      an authz error.
+#      sargeant.co zone — add that permission to the token in the Cloudflare
+#      dashboard, or the apply fails with "Authentication error (10000)".
+#      Editing a token's permissions keeps the same secret value, so the OCI
+#      Vault copy does NOT need re-stashing (only "Roll" rotates the secret).
 #   2. ENTRYPOINT OWNERSHIP. A zone has exactly ONE http_request_firewall_custom
 #      entrypoint ruleset. This resource takes ownership of it. If custom rules
 #      already exist in the dashboard for sargeant.co, the Atlantis plan will
