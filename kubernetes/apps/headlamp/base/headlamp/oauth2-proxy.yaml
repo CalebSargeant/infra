@@ -13,6 +13,9 @@ spec:
       labels:
         app: oauth2-proxy
     spec:
+      # Stateless app — schedule on a worker node, not the Pi (system role).
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
       containers:
       - name: oauth2-proxy
         image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0

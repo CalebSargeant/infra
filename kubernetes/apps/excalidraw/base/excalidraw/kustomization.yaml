@@ -6,3 +6,6 @@ resources:
   - service.yaml
   - middleware.yaml
   - ingress.yaml
+components:
+  # Stateless app — belongs on a worker node, not the Pi (system role).
+  - ../../../../components/node-selectors/worker
