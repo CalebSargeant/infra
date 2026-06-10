@@ -5,7 +5,6 @@ resources:
   - service.yaml
   - ingress.yaml
   - pvc.yaml
-  - pv.yaml
   - configmap.yaml
   - serviceaccount.yaml
   - externalsecret.yaml
@@ -36,4 +35,4 @@ components:
   # rather than via a resource-profile t-shirt component — see the rationale
   # comment there: ~55Mi idle, request trimmed to 256Mi, 2Gi limit kept for
   # terragrunt plan spikes, no CPU limit.
-  - ../../../../components/node-selectors/pi
+  - ../../../../components/node-selectors/worker
