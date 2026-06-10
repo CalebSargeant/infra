@@ -23,7 +23,7 @@ spec:
             type: mini # co-locate with MinIO (hostPath on ff-vm1)
           containers:
             - name: mc
-              image: minio/mc:latest
+              image: minio/mc:RELEASE.2025-08-13T08-35-41Z
               command: ["/bin/sh", "-c"]
               args:
                 - |
