@@ -96,9 +96,11 @@ that can reach Ollama from the LiteLLM pod.
 The firefly deployment exposes the LAN Ollama server as
 `ollama-lan.automation.svc.cluster.local:11434` and
 `https://ollama.sargeant.co` using a selectorless Service with matching
-Endpoints/EndpointSlice objects pointed at `192.168.19.69:11434`. Store the
-upstream bearer token in OCI Vault as `litellm-ollama-lan-api-key`; the repo
-only references it through `ExternalSecret/automation/litellm`.
+Endpoints pointed at `192.168.19.69:11434`. Kubernetes mirrors that Endpoints
+object into EndpointSlices, but Traefik needs the Endpoints backend to avoid
+`503 no available server`. Store the upstream bearer token in OCI Vault as
+`litellm-ollama-lan-api-key`; the repo only references it through
+`ExternalSecret/automation/litellm`.
 
 For local models, resource sizing matters more than LiteLLM config: the Ollama
 host needs enough CPU/memory, and tool/function calling depends on the model's
