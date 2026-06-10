@@ -21,9 +21,9 @@ spec:
               memory: "100Mi"
               cpu: "10m"
             limits:
-              memory: "100Mi"
-#          args:
-#            - "--config.file=/etc/blackbox-exporter/blackbox-exporter.yml"
+              memory: "128Mi"
+          args:
+            - "--config.file=/etc/blackbox-exporter/blackbox-exporter.yml"
           ports:
             - containerPort: 9115
           volumeMounts:

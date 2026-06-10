@@ -31,12 +31,14 @@ spec:
               containerPort: 10902
             - name: grpc
               containerPort: 10901
+          # Headroom for store-gateway fan-out once long-term data is served
+          # (req==limit==100Mi was too tight). No CPU limit.
           resources:
             requests:
-              cpu: 10m
-              memory: 100Mi
+              cpu: 50m
+              memory: 128Mi
             limits:
-              memory: 100Mi
+              memory: 512Mi
           livenessProbe:
             httpGet:
               path: /-/healthy
