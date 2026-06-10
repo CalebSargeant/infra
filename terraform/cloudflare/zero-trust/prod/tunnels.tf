@@ -58,10 +58,6 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly_oci" {
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.firefly_oci.id
 
   config {
-    warp_routing {
-      enabled = false
-    }
-
     ingress_rule {
       service = "http_status:404"
     }
@@ -112,6 +108,28 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       hostname = "atlantis.sargeant.co"
       service  = "http://atlantis.automation.svc.cluster.local:80"
       origin_request {}
+    }
+
+    # Public OpenAI-compatible LiteLLM endpoint for Warp custom inference.
+    # Keep the normal litellm.sargeant.co host LAN/VPN-only; Warp's backend
+    # rejects private RFC1918 resolutions, so this hostname enters through the
+    # Cloudflare edge and firefly tunnel instead. Only the minimal OpenAI API
+    # paths are routed; UI/admin/model-management paths fall through to 404.
+    ingress_rule {
+      hostname = "litellm-warp.sargeant.co"
+      path     = "^/v1/chat/completions/?$"
+      service  = "http://litellm.automation.svc.cluster.local:8080"
+      origin_request {}
+    }
+    ingress_rule {
+      hostname = "litellm-warp.sargeant.co"
+      path     = "^/v1/models/?$"
+      service  = "http://litellm.automation.svc.cluster.local:8080"
+      origin_request {}
+    }
+    ingress_rule {
+      hostname = "litellm-warp.sargeant.co"
+      service  = "http_status:404"
     }
 
     # GitHub PR-review webhooks → comment-commander (firefly cluster).

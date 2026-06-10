@@ -177,6 +177,8 @@ LiteLLM (`kubernetes/apps/litellm`) intentionally separates Claude Code OAuth pa
 - API-key-backed models are fine for plain OpenAI-compatible clients when they use the ingress or `:8080` proxy path.
 - Do not force LiteLLM onto `type=pi`; the Pi node can be too resource-constrained during rolling updates, and a stuck rollout leaves ingress targeting `:8080` while only the old `:4000` pod is ready. Keep LiteLLM on a memory-oriented profile (`m.nano` or larger); the process has been observed using about 1Gi at idle.
 - LiteLLM reads its YAML config at process start, and the Nginx auth-proxy mounts its config with `subPath`. When either LiteLLM ConfigMap changes, update the pod-template `checksum/config` or `checksum/auth-proxy-config` annotation in the Deployment so Flux rolls the pod and the UI/API reflects the new config.
+- Warp custom inference requests come from Warp's backend, so they cannot use the LAN-only `litellm.sargeant.co` hostname. Use `litellm-warp.sargeant.co`, a public Cloudflare Tunnel hostname that routes only `/v1/chat/completions` and `/v1/models` to `http://litellm.automation.svc.cluster.local:8080`; all other paths should remain `http_status:404`. Do not put Cloudflare Access in front unless Warp can send the required Access headers.
+- The old `litellm.sargeant.co` Cloudflare Access app/policy were intentionally removed from config when LiteLLM moved LAN-only, but the objects remained in Zero Trust state. Keep the `removed { destroy = false }` blocks in `terraform/cloudflare/zero-trust/prod/removed.tf` until Atlantis has applied them; otherwise any unrelated Zero Trust apply will try to destroy those stale resources.
 - The self-hosted Ollama provider is represented as `ollama-lan`: a selectorless Service plus an Endpoints object pointing at `192.168.19.69:11434`, with `ollama.sargeant.co` / `.local` ingress. Do not manage a manual EndpointSlice for it; Kubernetes mirrors the Endpoints object into EndpointSlices, and Traefik needs the Endpoints backend to avoid `503 no available server`. Its bearer token must live in OCI Vault as `litellm-ollama-lan-api-key`; never commit the value. The local `qwen2.5-coder:7b-instruct-q4_K_M` route is OpenAI-chat-compatible through LiteLLM, but keep `supports_function_calling: false` until live probes return structured OpenAI `tool_calls`; it has been observed returning tool-call-shaped JSON in message content instead.
 
 ## Integration Points & Dependencies
@@ -310,6 +312,7 @@ If you accidentally stage a secret, remove it with `git reset HEAD <file>` befor
 5. **Assuming git == deployed** — FluxCD reconciles on intervals; force with `flux reconcile`
 6. **Committing any plaintext secret to a public repo** — rotate immediately if it happens
 7. **Forgetting Atlantis/OpenTofu provider env vars** — for Cloudflare Terragrunt projects, export provider tokens with `extra_arguments` (e.g. `CLOUDFLARE_API_TOKEN`) and keep the provider block empty so Atlantis plans authenticate the same way local plans do
+8. **Pinning false Cloudflare Tunnel defaults** — the v4 Cloudflare provider omits falsey tunnel `warp_routing` blocks on readback, so setting `warp_routing { enabled = false }` can create a persistent no-op plan. Omit the block unless WARP routing is enabled.
 
 ## Definition of Done
 
