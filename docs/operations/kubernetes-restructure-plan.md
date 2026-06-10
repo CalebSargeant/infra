@@ -123,7 +123,7 @@ Files moved (now in `.old/work-private/`):
 
 **Symptom:** `timeout waiting for: [DaemonSet/core/cloudflared] status: 'InProgress'`. Pods show 543 / 1872 restarts over ~101 days.
 
-**Manifest review:** [kubernetes/_base/core/cloudflared/daemonset.yaml](https://github.com/CalebSargeant/infra/blob/main/kubernetes/_base/core/cloudflared/daemonset.yaml) is clean. Secret pattern is `TUNNEL_TOKEN` from `cloudflared-token`. Two concerns visible in manifest, neither confirmed as the cause:
+**Manifest review:** [kubernetes/infrastructure/services/stack/cloudflared/base/daemonset.yaml](https://github.com/CalebSargeant/infra/blob/main/kubernetes/infrastructure/services/stack/cloudflared/base/daemonset.yaml) is clean. Secret pattern is `TUNNEL_TOKEN` from `cloudflared-token`. Two concerns visible in manifest, neither confirmed as the cause:
 
 1. **`image: cloudflare/cloudflared:latest`** — `:latest` is bad practice but unlikely to be the trigger of a 101-day chronic crashloop (image is cached on nodes).
 2. **`limits.memory: 100Mi`** with no CPU limit — cloudflared with QUIC under any real load can spike well past 100Mi → OOMKill loop. Plausible cause for ~1872 restarts.
