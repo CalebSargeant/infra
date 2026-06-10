@@ -51,6 +51,11 @@ spec:
                 secretKeyRef:
                   name: litellm
                   key: ui-password
+            - name: OLLAMA_LAN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm
+                  key: ollama-lan-api-key
           volumeMounts:
             - name: config
               mountPath: /etc/litellm

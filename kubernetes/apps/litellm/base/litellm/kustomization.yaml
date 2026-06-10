@@ -7,5 +7,8 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingress.yaml
+  - ollama-lan-service.yaml
+  - ollama-lan-endpointslice.yaml
+  - ollama-lan-ingress.yaml
 components:
   - ../../../../components/resource-profiles/m.nano
