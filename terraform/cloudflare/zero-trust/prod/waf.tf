@@ -47,7 +47,7 @@ resource "cloudflare_ruleset" "sargeant_co_custom_firewall" {
 
   rules {
     ref         = "litellm_warp_skip_sbfm"
-    description = "Allow Warp server-side inference to litellm-warp.sargeant.co (skip Super Bot Fight Mode / AI-bot block)"
+    description = "Skip Super Bot Fight Mode for Warp server-side inference to litellm-warp.sargeant.co (bypasses AI-bot block only)"
     expression  = "(http.host eq \"litellm-warp.sargeant.co\")"
     action      = "skip"
 
