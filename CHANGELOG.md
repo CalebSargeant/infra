@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.38.0 (2026-06-10)
+
+### Features
+
+- **atlantis**: Migrate to Longhorn storage on the worker node (Phase 2)
+  ([#360](https://github.com/CalebSargeant/infra/pull/360),
+  [`98db5b5`](https://github.com/CalebSargeant/infra/commit/98db5b5f3b922ea3e56148e7b8db66c615b1ba00))
+
+
 ## v1.37.1 (2026-06-10)
 
 ### Bug Fixes
