@@ -72,32 +72,6 @@ data:
           - -c
           - |
             set -e
-            echo "Building OpenCost plugin from source..."
-            cd /tmp
-            apk add --no-cache git npm
-            git clone --depth 1 https://github.com/filipevrevez/headlamp-plugins.git
-            cd headlamp-plugins/opencost
-            npm install
-            npm run build
-            npx headlamp-plugin extract . /build/plugins/opencost
-            chown -R 100:101 /build
-            echo "OpenCost plugin built successfully"
-        image: node:20-alpine
-        imagePullPolicy: IfNotPresent
-        name: headlamp-plugin-opencost
-        securityContext:
-          runAsNonRoot: false
-          privileged: false
-          runAsUser: 0
-          runAsGroup: 0
-        volumeMounts:
-          - mountPath: /build/plugins
-            name: headlamp-plugins
-      - command:
-          - /bin/sh
-          - -c
-          - |
-            set -e
             echo "Building cert-manager plugin from source..."
             cd /tmp
             apk add --no-cache git npm

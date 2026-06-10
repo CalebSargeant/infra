@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.37.0 (2026-06-10)
+
+### Chores
+
+- **headlamp**: Remove dead OpenCost plugin build step
+  ([#359](https://github.com/CalebSargeant/infra/pull/359),
+  [`78ef89a`](https://github.com/CalebSargeant/infra/commit/78ef89a1c3a6ec2c265b48ecec74d27fdca4c1bc))
+
+### Features
+
+- **cluster**: System/worker node roles + relieve ff-pi1 memory pressure (Phase 1)
+  ([#358](https://github.com/CalebSargeant/infra/pull/358),
+  [`e306574`](https://github.com/CalebSargeant/infra/commit/e3065743ab7576b8155eaa0ae16e343073b90711))
+
+
 ## v1.36.0 (2026-06-10)
 
 ### Bug Fixes

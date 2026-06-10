@@ -17,11 +17,14 @@ spec:
         - name: nextcloud
           image: linuxserver/nextcloud:version-31.0.1
           resources:
+            # KRR: nextcloud's working set is ~123Mi; 759Mi was a ~6x over-reservation
+            # that dominated ff-pi1's memory-request pressure. 256Mi keeps comfortable
+            # headroom over real usage. CPU request only, no CPU limit (avoid CFS throttling).
             requests:
-              memory: "759Mi"
+              memory: "256Mi"
               cpu: "10m"
             limits:
-              memory: "759Mi"
+              memory: "256Mi"
           ports:
             - containerPort: 80
           env:

@@ -300,6 +300,10 @@ spec:
     
     # Prometheus Operator
     prometheusOperator:
+      # Stateless observability controller — schedule on a worker, not the Pi
+      # (the node-selectors/mini kustomize component can't reach Helm-rendered pods).
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
       resources:
         requests:
           cpu: 10m
@@ -333,6 +337,9 @@ spec:
     
     # Kube State Metrics resources
     kube-state-metrics:
+      # Stateless observability component — schedule on a worker, not the Pi.
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
       resources:
         requests:
           cpu: 10m

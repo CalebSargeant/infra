@@ -32,6 +32,9 @@ spec:
       labels:
         app: auth-redirect
     spec:
+      # Stateless app — schedule on a worker node, not the Pi (system role).
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
       containers:
       - name: nginx
         image: nginx:alpine
