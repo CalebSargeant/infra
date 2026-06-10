@@ -6,7 +6,7 @@
     "kubernetes/clusters/firefly/flux-system/ — gotk-sync bootstrap pointing at this repo",
     "terraform/root.hcl — Terragrunt inheritance root, version pins, GCS backend",
     "atlantis.yaml — defines one Atlantis project per Terragrunt leaf",
-    "ansible/hosts.yml — inventory for all playbook targets",
+    "ansible/hosts.yaml — inventory for all playbook targets",
     "AGENTS.md — full architecture/conventions guide (READ FIRST for deep context)"
   ],
   "modules": {
@@ -77,7 +77,7 @@
         "pivpn-*": "PiVPN setup"
       },
       "roles": "ansible/roles/ — 35+ idempotent roles (k3s-fluxcd-bootstrap, k3s-sops-age-secret, mikrotik-dns, postgres-config, etc.)",
-      "inventory": "ansible/hosts.yml",
+      "inventory": "ansible/hosts.yaml",
       "vars": "ansible/vars/ (gitignored — contains secrets)"
     },
     "dockerfiles": {
@@ -96,7 +96,7 @@
   },
   "callgraph_highlights": [
     {"caller": "kubernetes/clusters/firefly/kustomization.yaml", "calls": ["kubernetes/apps/*", "kubernetes/infrastructure/*"], "note": "Flux root — owns the full reconciled state"},
-    {"caller": "apps/<app>/prod/<app>/flux-kustomization.yaml", "calls": ["apps/<app>/base/<app>/"], "note": "Each app's Flux Kustomization CR points its path: at base manifests"},
+    {"caller": "kubernetes/apps/<app>/prod/<app>/flux-kustomization.yaml", "calls": ["kubernetes/apps/<app>/base/<app>/"], "note": "Each app's Flux Kustomization CR points its path: at base manifests"},
     {"caller": "terraform/<leaf>/terragrunt.hcl", "calls": ["terraform/root.hcl (via find_in_parent_folders)", "terraform/<provider>/modules/<name>"], "note": "Terragrunt leaves source modules + inherit root config; backend.tf and provider.tf are auto-generated"},
     {"caller": "ExternalSecret CRs", "calls": ["OCI Vault", "1Password Connect"], "note": "Preferred runtime secret path; SOPS is fallback only"},
     {"caller": "Atlantis (cluster)", "calls": ["atlantis.yaml projects → terragrunt plan/apply"], "note": "Each LEAF terragrunt module = 1 Atlantis project; shared inputs (root.hcl, region.hcl, modules/) do NOT autoplan — comment 'atlantis plan -p <project>' manually"}

@@ -73,5 +73,8 @@ notneeded/
 # macOS metadata
 .DS_Store
 
-# Claude Code working tree
-.claude/
+# Claude Code working tree — only ephemeral state is gitignored; shared docs are tracked
+.claude/sessions/
+.claude/decisions/
+.claude/worktrees/
+.claude/last_output.txt
