@@ -28,7 +28,7 @@ spec:
               args:
                 - |
                   set -eu
-                  mc alias set src "http://minio:9000" admin "$MINIO_ROOT_PASSWORD"
+                  mc alias set src "http://minio:9000" backup "$MINIO_BACKUP_PASSWORD"
                   mc alias set oci "$OCI_ENDPOINT" "$OCI_ACCESS_KEY" "$OCI_SECRET_KEY"
                   # Additive mirror (no --remove): the OCI copy keeps historical
                   # Thanos/Loki blocks even after the source compacts/expires them.
@@ -38,11 +38,11 @@ spec:
                   done
                   echo "minio backup complete"
               env:
-                - name: MINIO_ROOT_PASSWORD
+                - name: MINIO_BACKUP_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: minio-credentials
-                      key: root-password
+                      key: backup-password
                 - name: OCI_ACCESS_KEY
                   valueFrom:
                     secretKeyRef:
