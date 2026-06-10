@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.37.1 (2026-06-10)
+
+### Bug Fixes
+
+- Address copilot review feedback on PROJECT_INDEX.json and CLAUDE.md
+  ([#271](https://github.com/CalebSargeant/infra/pull/271),
+  [`0f20b5c`](https://github.com/CalebSargeant/infra/commit/0f20b5cd5849998e06ad8450cf288692546c87a1))
+
+### Chores
+
+- **claude**: Add context optimization scaffold
+  ([#271](https://github.com/CalebSargeant/infra/pull/271),
+  [`0f20b5c`](https://github.com/CalebSargeant/infra/commit/0f20b5cd5849998e06ad8450cf288692546c87a1))
+
+
 ## v1.37.0 (2026-06-10)
 
 ### Chores
