@@ -258,8 +258,8 @@ throttling that fired false "at limit" alerts while ff-vm1 — 16 vCPU / 32 GiB 
 - **ff-pi1 log collection** — **Grafana Alloy** DaemonSet on the Pi (`kubernetes/apps/alloy/`).
   The fluent-bit image can't run on the Pi's 16KB-page arm64 kernel (jemalloc); Alloy is Go, so
   it's page-size-agnostic. Ships to Loki with the same label schema (`cluster=firefly`,
-  `k8s_namespace_name/pod_name/container_name`), `job="alloy"` distinguishes it from fluent-bit.
-  Runs BestEffort because ff-pi1 is ≈100% committed by over-provisioned non-observability apps.
+  `k8s_namespace_name`, `k8s_pod_name`, `k8s_container_name`), `job="alloy"` distinguishes it from fluent-bit.
+  Runs Burstable QoS (CPU request + memory limit, with memory request set to 0 to avoid reserving memory on ff-pi1).
 - **Grafana LAN exposure** — `grafana.ingress.enabled` → `grafana.sargeant.co` via Traefik
   (same pattern as `radarr.sargeant.co`: cert-manager `letsencrypt-dns`, websecure).
 - **MinIO off-cluster backup** — daily `minio-backup` CronJob `mc mirror`s `thanos-metrics` +
