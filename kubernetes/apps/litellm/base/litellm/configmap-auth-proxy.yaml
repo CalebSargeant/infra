@@ -26,8 +26,8 @@ data:
       # Prefer a client-supplied x-litellm-api-key; fall back to Authorization
       # only when the key header is absent.  This handles two distinct callers:
       #   1. OpenAI-protocol clients (Warp, Codex, OpenCode, the OpenAI SDK)
-      #      which can only send their key in `Authorization: ******` and
-      #      send no `x-litellm-api-key` → we copy Authorization across.
+      #      which send their key as `Authorization: Bearer <key>` and send no
+      #      `x-litellm-api-key` → we copy Authorization across.
       #   2. The LiteLLM admin UI, which reads `auth_header_name` from its login
       #      JWT, learns that the key header is `x-litellm-api-key`, and then
       #      sends every request with `x-litellm-api-key: <key>` and NO
