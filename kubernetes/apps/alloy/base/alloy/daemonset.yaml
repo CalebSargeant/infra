@@ -53,7 +53,7 @@ spec:
           resources:
             # ff-pi1 is over-committed (≈100% memory requests, dominated by
             # over-provisioned non-observability apps), so Alloy uses a zero memory
-            # request (BestEffort scheduling) with a hard limit. Right-sizing the
+            # request with a hard limit (Burstable QoS). Right-sizing the
             # Pi's apps per KRR would free room for a proper reservation.
             requests:
               cpu: 20m
