@@ -8,6 +8,7 @@ resources:
   - service.yaml
   - ingress.yaml
   - ollama-lan-service.yaml
+  - ollama-lan-endpoints.yaml
   - ollama-lan-endpointslice.yaml
   - ollama-lan-ingress.yaml
 components:

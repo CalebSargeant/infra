@@ -176,7 +176,7 @@ LiteLLM (`kubernetes/apps/litellm`) intentionally separates Claude Code OAuth pa
 - Claude subscription-backed model entries should have no `litellm_params.api_key`, and should carry non-secret `model_info` metadata such as `auth_mode: claude-code-oauth-pass-through` and `billing_mode: claude-max-subscription` so the UI/API can show how the model is wired.
 - API-key-backed models are fine for plain OpenAI-compatible clients when they use the ingress or `:8080` proxy path.
 - Do not force LiteLLM onto `type=pi`; the Pi node can be too resource-constrained during rolling updates, and a stuck rollout leaves ingress targeting `:8080` while only the old `:4000` pod is ready. Keep LiteLLM on a memory-oriented profile (`m.nano` or larger); the process has been observed using about 1Gi at idle.
-- The self-hosted Ollama provider is represented as `ollama-lan`: a selectorless Service + EndpointSlice pointing at `192.168.19.69:11434`, with `ollama.sargeant.co` / `.local` ingress. Its bearer token must live in OCI Vault as `litellm-ollama-lan-api-key`; never commit the value.
+- The self-hosted Ollama provider is represented as `ollama-lan`: a selectorless Service plus matching Endpoints/EndpointSlice pointing at `192.168.19.69:11434`, with `ollama.sargeant.co` / `.local` ingress. Keep both Endpoints forms unless Traefik is confirmed to consume EndpointSlice-only backends. Its bearer token must live in OCI Vault as `litellm-ollama-lan-api-key`; never commit the value.
 
 ## Integration Points & Dependencies
 

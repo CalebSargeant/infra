@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: ollama-lan
+  namespace: automation
+  labels:
+    app: ollama-lan
+subsets:
+  - addresses:
+      - ip: 192.168.19.69
+    ports:
+      - name: http
+        protocol: TCP
+        port: 11434
