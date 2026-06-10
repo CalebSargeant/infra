@@ -84,9 +84,13 @@ spec:
         thanos:
           image: quay.io/thanos/thanos:v0.37.2
           version: v0.37.2
+          # Chart 68.2.2 expects the `existingSecret` form here; the flat name/key
+          # form is silently dropped by the chart, leaving the Prometheus CR with no
+          # objectStorageConfig and the sidecar logging "uploads will be disabled".
           objectStorageConfig:
-            name: thanos-objstore-config
-            key: objstore.yml
+            existingSecret:
+              name: thanos-objstore-config
+              key: objstore.yml
           resources:
             requests:
               cpu: 10m

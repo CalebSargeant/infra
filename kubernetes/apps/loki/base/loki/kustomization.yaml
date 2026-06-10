@@ -7,11 +7,10 @@ resources:
 components:
   - ../../../../components/node-selectors/mini
 patches:
-  # Loki resources — KRR observed ~2.3Gi working set and it was OOM-killed at the
-  # old 2Gi limit. Bump to 3Gi limit / 2Gi request and drop the CPU limit (avoids
-  # CFS throttling on the 16-core node). (The remaining OOM driver — chunks unable
-  # to flush while MinIO was OOM-flapping, plus the Fluent Bit self-ingestion loop —
-  # is fixed by the MinIO memory bump and the Fluent Bit Exclude_Path.)
+  # Loki resources — KRR observed ~2.3Gi steady-state, but catch-up / WAL replay
+  # after an outage spikes higher, so the limit is 4Gi (request 2Gi). No CPU limit
+  # (avoids CFS throttling on the 16-core node). Ingester back-pressure + ingestion
+  # rate limits in the Loki config (configmap.enc.yaml) bound steady-state memory.
   - patch: |
       - op: replace
         path: /spec/template/spec/containers/0/resources
@@ -20,7 +19,7 @@ patches:
             cpu: 350m
             memory: 2Gi
           limits:
-            memory: 3Gi
+            memory: 4Gi
     target:
       kind: StatefulSet
       labelSelector: "app.kubernetes.io/name=loki"
