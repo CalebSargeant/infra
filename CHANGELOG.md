@@ -2,6 +2,546 @@
 
 <!-- version list -->
 
+## v1.36.0 (2026-06-10)
+
+### Bug Fixes
+
+- For pull request finding ([#344](https://github.com/CalebSargeant/infra/pull/344),
+  [`dff2964`](https://github.com/CalebSargeant/infra/commit/dff2964e966abb01183ec929142a4910bc5646d0))
+
+- Pin minio/mc to stable release tag in backup cronjob
+  ([#355](https://github.com/CalebSargeant/infra/pull/355),
+  [`24ee9c4`](https://github.com/CalebSargeant/infra/commit/24ee9c476e71b6def8f6839deb3de9b903d2480c))
+
+- Pin qwen3:4b quantized tag to q4_K_M for deterministic VRAM/behavio
+  ([#356](https://github.com/CalebSargeant/infra/pull/356),
+  [`c73c1c0`](https://github.com/CalebSargeant/infra/commit/c73c1c021f926ec0a22091b3dae54ca5e798c1c8))
+
+- Remove commented lines and unused components
+  ([#332](https://github.com/CalebSargeant/infra/pull/332),
+  [`4a13269`](https://github.com/CalebSargeant/infra/commit/4a13269e2290198c80f07e5a45caf17f32eb36e3))
+
+- **alerting**: Add slack externalsecret.yaml (gitignore dropped prior filename)
+  ([#306](https://github.com/CalebSargeant/infra/pull/306),
+  [`31ede53`](https://github.com/CalebSargeant/infra/commit/31ede53f101fa161885e710e26c7c4d8d0a70ecd))
+
+- **alloy**: Correct QoS class comment from BestEffort to Burstable
+  ([#355](https://github.com/CalebSargeant/infra/pull/355),
+  [`24ee9c4`](https://github.com/CalebSargeant/infra/commit/24ee9c476e71b6def8f6839deb3de9b903d2480c))
+
+- **blackbox-exporter**: Add http scheme to prober URL
+  ([#351](https://github.com/CalebSargeant/infra/pull/351),
+  [`4b16f53`](https://github.com/CalebSargeant/infra/commit/4b16f531eb7da0ca88aa5ff66c12dc88e83b36d1))
+
+- **cloudflare**: Correct note from past-tense to imperative in access_apps.tf
+  ([#329](https://github.com/CalebSargeant/infra/pull/329),
+  [`42b904a`](https://github.com/CalebSargeant/infra/commit/42b904af24218ba4f09043a02d4ff19e89e3595e))
+
+- **cloudflare**: Update WAF rule description to accurately reflect 'skip
+  ([#353](https://github.com/CalebSargeant/infra/pull/353),
+  [`3d4856c`](https://github.com/CalebSargeant/infra/commit/3d4856c145e94b9589a0f4d3b724f58414675b8f))
+
+- **dns-magmamoose**: Drop comment-commander* (zero-trust-managed) and dunmir (Pages-flow)
+  ([#291](https://github.com/CalebSargeant/infra/pull/291),
+  [`d1d0679`](https://github.com/CalebSargeant/infra/commit/d1d0679674b9433f22ecf8fce637adb292ebb394))
+
+- **docs**: Use compatible-release constraint for mkdocs-material
+  ([#355](https://github.com/CalebSargeant/infra/pull/355),
+  [`24ee9c4`](https://github.com/CalebSargeant/infra/commit/24ee9c476e71b6def8f6839deb3de9b903d2480c))
+
+- **fluent-bit**: Use correct node label for Pi exclusion affinity
+  ([#352](https://github.com/CalebSargeant/infra/pull/352),
+  [`5188667`](https://github.com/CalebSargeant/infra/commit/51886676c13f4ffb5be51be42b84d1fd0d4e7544))
+
+- **kube-prometheus-stack**: Use `type: pi` node affinity label for Grafa
+  ([#351](https://github.com/CalebSargeant/infra/pull/351),
+  [`4b16f53`](https://github.com/CalebSargeant/infra/commit/4b16f531eb7da0ca88aa5ff66c12dc88e83b36d1))
+
+- **kyverno**: HA admission controller + loosen :9443 probes to stop crashloop
+  ([#354](https://github.com/CalebSargeant/infra/pull/354),
+  [`08d7cd0`](https://github.com/CalebSargeant/infra/commit/08d7cd01b815a4e41f75c276c7973c3a634ea788))
+
+- **litellm**: Add ollama lan endpoints ([#346](https://github.com/CalebSargeant/infra/pull/346),
+  [`085b325`](https://github.com/CalebSargeant/infra/commit/085b325a1e8e6a959fd049bc3bb3b978a7970093))
+
+- **litellm**: Allow rollout off pi node ([#342](https://github.com/CalebSargeant/infra/pull/342),
+  [`468f958`](https://github.com/CalebSargeant/infra/commit/468f95880de3eb0d4830f39fac52590ec9b65228))
+
+- **litellm**: Correct qwen tool metadata ([#348](https://github.com/CalebSargeant/infra/pull/348),
+  [`0f19d60`](https://github.com/CalebSargeant/infra/commit/0f19d6035bbd8db63e48812c8fb75f17cd0dc6f0))
+
+- **litellm**: Correct qwen3 ollama tag to qwen3:4b
+  ([#357](https://github.com/CalebSargeant/infra/pull/357),
+  [`4126cd6`](https://github.com/CalebSargeant/infra/commit/4126cd68621e197de84cc37637ea69982c667914))
+
+- **litellm**: Fix comment backtick formatting in nginx auth-proxy config
+  ([#344](https://github.com/CalebSargeant/infra/pull/344),
+  [`dff2964`](https://github.com/CalebSargeant/infra/commit/dff2964e966abb01183ec929142a4910bc5646d0))
+
+- **litellm**: Increase proxy memory profile
+  ([#343](https://github.com/CalebSargeant/infra/pull/343),
+  [`c3f0c14`](https://github.com/CalebSargeant/infra/commit/c3f0c1418047d06f4944da19b6857446876bc352))
+
+- **litellm**: Nginx auth-proxy overwrites x-litellm-api-key when UI uses custom header
+  ([#344](https://github.com/CalebSargeant/infra/pull/344),
+  [`dff2964`](https://github.com/CalebSargeant/infra/commit/dff2964e966abb01183ec929142a4910bc5646d0))
+
+- **litellm**: Preserve client x-litellm-api-key in nginx auth-proxy map
+  ([#344](https://github.com/CalebSargeant/infra/pull/344),
+  [`dff2964`](https://github.com/CalebSargeant/infra/commit/dff2964e966abb01183ec929142a4910bc5646d0))
+
+- **litellm**: Rely on ollama endpoints source
+  ([#347](https://github.com/CalebSargeant/infra/pull/347),
+  [`c8888e0`](https://github.com/CalebSargeant/infra/commit/c8888e02e9b4bafb5a2d22954279e07fa559c13c))
+
+- **litellm**: Roll pods on config changes
+  ([`4f03577`](https://github.com/CalebSargeant/infra/commit/4f03577116e4a572bafa536537b7b680220df158))
+
+- **litellm**: Set imagePullPolicy to Always for mutable tag
+  ([#331](https://github.com/CalebSargeant/infra/pull/331),
+  [`8ab1773`](https://github.com/CalebSargeant/infra/commit/8ab1773ab0aa7c2a46a0549d1243212b26b2d0e3))
+
+- **litellm**: Use router-scoped Traefik annotations instead of deprecate
+  ([#340](https://github.com/CalebSargeant/infra/pull/340),
+  [`32242af`](https://github.com/CalebSargeant/infra/commit/32242afd9cd9be455dfb6a25a96beac6164cc2dc))
+
+- **mikrotik-minder**: Point agent at api.dunmir.magmamoose.com (old workers.dev URL is dead)
+  ([#286](https://github.com/CalebSargeant/infra/pull/286),
+  [`78fd420`](https://github.com/CalebSargeant/infra/commit/78fd420acbc71b7d7c3c7dda4700de005aec85a7))
+
+- **minio**: Replace root credentials in backup CronJob with a dedicated
+  ([#355](https://github.com/CalebSargeant/infra/pull/355),
+  [`24ee9c4`](https://github.com/CalebSargeant/infra/commit/24ee9c476e71b6def8f6839deb3de9b903d2480c))
+
+- **observability**: Post-merge corrections — Thanos objstore schema, Loki tuning, Pi fluent-bit,
+  blackbox probe ([#352](https://github.com/CalebSargeant/infra/pull/352),
+  [`5188667`](https://github.com/CalebSargeant/infra/commit/51886676c13f4ffb5be51be42b84d1fd0d4e7544))
+
+- **oci/backups**: Drop duplicate required_providers (fixes Atlantis plan)
+  ([#302](https://github.com/CalebSargeant/infra/pull/302),
+  [`3bdb6e8`](https://github.com/CalebSargeant/infra/commit/3bdb6e8f0241a08ff6066ee7c8bc7147223fec9c))
+
+- **oci/backups**: Drop module required_providers block
+  ([#305](https://github.com/CalebSargeant/infra/pull/305),
+  [`b1256b4`](https://github.com/CalebSargeant/infra/commit/b1256b498454986ef68e611e666951e590b7f122))
+
+- **oci/backups**: Drop module required_providers block
+  ([#304](https://github.com/CalebSargeant/infra/pull/304),
+  [`5b4a54f`](https://github.com/CalebSargeant/infra/commit/5b4a54f0b83f31543a3045bdb2512a3fb34b7277))
+
+- **oci/backups**: Drop module required_providers block
+  ([#303](https://github.com/CalebSargeant/infra/pull/303),
+  [`1ac6d1d`](https://github.com/CalebSargeant/infra/commit/1ac6d1db9d963d35b89ba5e26d4b1c6db870bcd6))
+
+- **oci/backups**: Drop module required_providers block
+  ([#302](https://github.com/CalebSargeant/infra/pull/302),
+  [`3bdb6e8`](https://github.com/CalebSargeant/infra/commit/3bdb6e8f0241a08ff6066ee7c8bc7147223fec9c))
+
+- **oci/backups**: Set email on backup-writer user (required by Identity Domains)
+  ([#305](https://github.com/CalebSargeant/infra/pull/305),
+  [`b1256b4`](https://github.com/CalebSargeant/infra/commit/b1256b498454986ef68e611e666951e590b7f122))
+
+- **oci/backups**: Set email on backup-writer user (required by Identity Domains)
+  ([#304](https://github.com/CalebSargeant/infra/pull/304),
+  [`5b4a54f`](https://github.com/CalebSargeant/infra/commit/5b4a54f0b83f31543a3045bdb2512a3fb34b7277))
+
+- **oci/backups**: Set email on backup-writer user (required by Identity Domains)
+  ([#303](https://github.com/CalebSargeant/infra/pull/303),
+  [`1ac6d1d`](https://github.com/CalebSargeant/infra/commit/1ac6d1db9d963d35b89ba5e26d4b1c6db870bcd6))
+
+- **oci/backups**: Set service email on backup-writer (IDCS requires it)
+  ([#303](https://github.com/CalebSargeant/infra/pull/303),
+  [`1ac6d1d`](https://github.com/CalebSargeant/infra/commit/1ac6d1db9d963d35b89ba5e26d4b1c6db870bcd6))
+
+- **rbac**: Grant Kyverno background-controller RoleBinding perms
+  ([#320](https://github.com/CalebSargeant/infra/pull/320),
+  [`442a392`](https://github.com/CalebSargeant/infra/commit/442a392b4479596d0659a4419df6cbc2a3d22bc6))
+
+- **rbac**: Grant Kyverno bind+escalate on admin ClusterRole
+  ([#321](https://github.com/CalebSargeant/infra/pull/321),
+  [`6f4bf7b`](https://github.com/CalebSargeant/infra/commit/6f4bf7ba2784bd304507fb657dc952dc72d0e2b4))
+
+- **recyclarr**: Pin to v7 + add Radarr 4K (SQP-1 2160p)
+  ([#297](https://github.com/CalebSargeant/infra/pull/297),
+  [`1d9a4ac`](https://github.com/CalebSargeant/infra/commit/1d9a4ac961d8b416a6f0904a2a3b1d4b8c300056))
+
+- **sonarr**: Cap 1080p episodes at ~3GB via API quality definitions
+  ([#322](https://github.com/CalebSargeant/infra/pull/322),
+  [`891991d`](https://github.com/CalebSargeant/infra/commit/891991da0259d63e0eefd9772fd75145f9dadbcc))
+
+- **storage**: Move downloads PV off node root disk to K8s-native NFS
+  ([#308](https://github.com/CalebSargeant/infra/pull/308),
+  [`5c499c9`](https://github.com/CalebSargeant/infra/commit/5c499c9a545274ae652cd569aab0a3ca6c571e17))
+
+- **streaming-sync**: Netflix-only provider (Prime NL flatrate too broad)
+  ([#324](https://github.com/CalebSargeant/infra/pull/324),
+  [`aac6a1a`](https://github.com/CalebSargeant/infra/commit/aac6a1a4fb42df7283937edac9f97e5a773c028a))
+
+- **tunnel**: Drop v5-only firefly_oci tunnel-token data source + output
+  ([#285](https://github.com/CalebSargeant/infra/pull/285),
+  [`251aa6b`](https://github.com/CalebSargeant/infra/commit/251aa6b1cbec421b45443317593cf34b3243e837))
+
+### Chores
+
+- Onboard Chargate security + lint scanning
+  ([#337](https://github.com/CalebSargeant/infra/pull/337),
+  [`48bb1e0`](https://github.com/CalebSargeant/infra/commit/48bb1e0656cfa7e5a84f8dd7542397a3af9d17a4))
+
+- **deps**: Bump docker/setup-qemu-action from 4.0.0 to 4.1.0
+  ([#277](https://github.com/CalebSargeant/infra/pull/277),
+  [`3f6f550`](https://github.com/CalebSargeant/infra/commit/3f6f5509458bc17e0b14dd9ab470c70f3608b8ee))
+
+- **deps**: Bump magmamoose/release-runner from 1.14.1 to 1.26.0
+  ([#281](https://github.com/CalebSargeant/infra/pull/281),
+  [`b9c55ce`](https://github.com/CalebSargeant/infra/commit/b9c55ce20e38e536ea768231223a41dfdb87045e))
+
+- **deps**: Bump magmamoose/release-runner from 1.26.0 to 1.30.0
+  ([#339](https://github.com/CalebSargeant/infra/pull/339),
+  [`32b8e31`](https://github.com/CalebSargeant/infra/commit/32b8e31566797cabc532a74b88bca150e7ebe23d))
+
+- **flux**: Retire comment-commander + comment-commander-pro
+  ([#335](https://github.com/CalebSargeant/infra/pull/335),
+  [`86107b9`](https://github.com/CalebSargeant/infra/commit/86107b93b26747e9d66b1e05717c968543d2d8eb))
+
+- **media**: Bump image tags
+  ([`363a106`](https://github.com/CalebSargeant/infra/commit/363a1066c4206e36f2449c6cdb7c4dca9dfc5da8))
+
+- **media**: Bump image tags
+  ([`bd4c2c3`](https://github.com/CalebSargeant/infra/commit/bd4c2c3702e4bbd6fa415c84ca803277f05d04a5))
+
+- **media**: Bump image tags
+  ([`6df1c1d`](https://github.com/CalebSargeant/infra/commit/6df1c1dffe3b57c736fed9a845c6b7b5443a86c0))
+
+- **media**: Bump image tags
+  ([`5865788`](https://github.com/CalebSargeant/infra/commit/586578838369d2affc89ffe6731e366c68f7b7d1))
+
+- **media**: Bump image tags
+  ([`80e4012`](https://github.com/CalebSargeant/infra/commit/80e4012261e6f655573dfb52a7fb2b96b14811ae))
+
+- **media**: Bump image tags
+  ([`b5c2bb5`](https://github.com/CalebSargeant/infra/commit/b5c2bb57d4a63fe1270252ad6c45dc4053b4babd))
+
+- **media**: Bump image tags
+  ([`2db02e8`](https://github.com/CalebSargeant/infra/commit/2db02e8a3419799166c5faa9086fc3e4912f559e))
+
+- **media**: Bump image tags
+  ([`f223126`](https://github.com/CalebSargeant/infra/commit/f223126d3bd45268a80cd0bdb4dac254163b394c))
+
+- **media**: Bump image tags
+  ([`d4c9d6e`](https://github.com/CalebSargeant/infra/commit/d4c9d6e7e3947956566572162237f3e0de7e8ab5))
+
+- **media**: Bump image tags
+  ([`6f761ab`](https://github.com/CalebSargeant/infra/commit/6f761ab6ef316e6252bc040d34191844c778eb66))
+
+- **media**: Bump image tags
+  ([`a3af305`](https://github.com/CalebSargeant/infra/commit/a3af305de62fd1fa426dc64e83a2d42e77d33516))
+
+- **media**: Bump image tags
+  ([`48079da`](https://github.com/CalebSargeant/infra/commit/48079daa0c3b5507cc4f6687e7d4cf9c07aac1de))
+
+- **media**: Bump image tags
+  ([`8233984`](https://github.com/CalebSargeant/infra/commit/82339846d8a7b0313b283e33e850d0028302e74f))
+
+- **media**: Bump image tags
+  ([`f9f2b60`](https://github.com/CalebSargeant/infra/commit/f9f2b6084574579bce1d6aaf5bed31b3bc81ee53))
+
+- **media**: Bump image tags
+  ([`faa145f`](https://github.com/CalebSargeant/infra/commit/faa145f508f4e970d6b7c7dc415d75dcc6c0ba0a))
+
+- **media**: Bump image tags
+  ([`6bfd5f1`](https://github.com/CalebSargeant/infra/commit/6bfd5f1c48284c02ad1f791131960fb0932114f1))
+
+- **media**: Bump image tags
+  ([`2b4a225`](https://github.com/CalebSargeant/infra/commit/2b4a225b57914c926edc3624a5e063aaf0c3c22e))
+
+- **media**: Bump image tags
+  ([`d507247`](https://github.com/CalebSargeant/infra/commit/d507247a904ecc36011d27dfc110706521a1b270))
+
+- **media**: Bump image tags
+  ([`39db900`](https://github.com/CalebSargeant/infra/commit/39db900ace771c337029b709185bc8bf43a03ca6))
+
+- **media**: Bump image tags
+  ([`0ca75b2`](https://github.com/CalebSargeant/infra/commit/0ca75b2d05a863992da8a579a4c942c56a8f0dc0))
+
+- **media**: Bump image tags
+  ([`9571bb0`](https://github.com/CalebSargeant/infra/commit/9571bb02272d4a1523a306a55b3d5a5b066dae2f))
+
+- **media**: Bump image tags
+  ([`c633c5e`](https://github.com/CalebSargeant/infra/commit/c633c5ef029038a8ef0f8294baaf61fda71bc86b))
+
+- **media**: Bump image tags
+  ([`3e726dd`](https://github.com/CalebSargeant/infra/commit/3e726dd0c764971c78362127e5f0799cc3d8839a))
+
+- **media**: Bump image tags
+  ([`4b9db6e`](https://github.com/CalebSargeant/infra/commit/4b9db6e6f110c144f3fcb2c29732394f8564edeb))
+
+- **media**: Bump image tags
+  ([`dc2c556`](https://github.com/CalebSargeant/infra/commit/dc2c556ef98ee1162872786209cff160b4330d75))
+
+- **media**: Bump image tags
+  ([`7a0832e`](https://github.com/CalebSargeant/infra/commit/7a0832e223b2b684d743b43b748dd1a9778e22b8))
+
+- **media**: Bump image tags
+  ([`824bde7`](https://github.com/CalebSargeant/infra/commit/824bde7697ded071c556f756a0c2e57330656342))
+
+- **media**: Bump image tags
+  ([`131e91b`](https://github.com/CalebSargeant/infra/commit/131e91bc07194c43e44bd50bf1e9447359f3fe3a))
+
+- **media**: Bump image tags
+  ([`8d4159f`](https://github.com/CalebSargeant/infra/commit/8d4159f4c4fb3d6433fce2192c72215e8b5b91b6))
+
+- **mikrotik-minder**: Pin agent image to 1.5.2 (SSH/host-key/false-alert hardening)
+  ([#283](https://github.com/CalebSargeant/infra/pull/283),
+  [`d3ec46b`](https://github.com/CalebSargeant/infra/commit/d3ec46b6a572d102fab3593650cf647ae6a9e61b))
+
+### Documentation
+
+- Fix Alloy label schema and QoS classification
+  ([#355](https://github.com/CalebSargeant/infra/pull/355),
+  [`24ee9c4`](https://github.com/CalebSargeant/infra/commit/24ee9c476e71b6def8f6839deb3de9b903d2480c))
+
+- **kyverno**: Qualify chart default comments with version (3.8+)
+  ([#354](https://github.com/CalebSargeant/infra/pull/354),
+  [`08d7cd0`](https://github.com/CalebSargeant/infra/commit/08d7cd01b815a4e41f75c276c7973c3a634ea788))
+
+- **observability**: Rewrite to current-state; scaffold mkdocs + pass strict build
+  ([#355](https://github.com/CalebSargeant/infra/pull/355),
+  [`24ee9c4`](https://github.com/CalebSargeant/infra/commit/24ee9c476e71b6def8f6839deb3de9b903d2480c))
+
+- **operations**: Fix stale cloudflared DaemonSet link to current path
+  ([#355](https://github.com/CalebSargeant/infra/pull/355),
+  [`24ee9c4`](https://github.com/CalebSargeant/infra/commit/24ee9c476e71b6def8f6839deb3de9b903d2480c))
+
+### Features
+
+- **access**: Bypass app for diatreme.magmamoose.com/api/dispatch
+  ([#336](https://github.com/CalebSargeant/infra/pull/336),
+  [`c4656e3`](https://github.com/CalebSargeant/infra/commit/c4656e39c9be0b85fb0174f32b87ca8f30255f68))
+
+- **alerting**: Critical + CNPG backup alerts to Slack
+  ([#305](https://github.com/CalebSargeant/infra/pull/305),
+  [`b1256b4`](https://github.com/CalebSargeant/infra/commit/b1256b498454986ef68e611e666951e590b7f122))
+
+- **alerting**: Route critical + CNPG backup alerts to Slack
+  ([#305](https://github.com/CalebSargeant/infra/pull/305),
+  [`b1256b4`](https://github.com/CalebSargeant/infra/commit/b1256b498454986ef68e611e666951e590b7f122))
+
+- **apps**: Add ghcr pull-secret RBAC for diatreme-pro
+  ([#295](https://github.com/CalebSargeant/infra/pull/295),
+  [`611ef81`](https://github.com/CalebSargeant/infra/commit/611ef81f534a2125822afa35f0ded4f75d041b15))
+
+- **apps**: Fold diatreme-pro into apps/ (publishes diatreme.magmamoose.com DNS)
+  ([#292](https://github.com/CalebSargeant/infra/pull/292),
+  [`7296f68`](https://github.com/CalebSargeant/infra/commit/7296f680df3f52902747cadcd01d6b1d6ec20953))
+
+- **apps**: Register ghcr-reader-rbac in diatreme-pro base
+  ([#295](https://github.com/CalebSargeant/infra/pull/295),
+  [`611ef81`](https://github.com/CalebSargeant/infra/commit/611ef81f534a2125822afa35f0ded4f75d041b15))
+
+- **bazarr**: Move /config to Longhorn (replicated storage)
+  ([#311](https://github.com/CalebSargeant/infra/pull/311),
+  [`669dc99`](https://github.com/CalebSargeant/infra/commit/669dc99e9963605765fa71e5015cc659e48c4acf))
+
+- **bazarr**: Use CNPG Postgres backend ([#300](https://github.com/CalebSargeant/infra/pull/300),
+  [`bd7e0bc`](https://github.com/CalebSargeant/infra/commit/bd7e0bc4da463ea469e81c5fc10a303416320ba5))
+
+- **cloudflare**: Diatreme Pro dashboard Access + docs DNS
+  ([#284](https://github.com/CalebSargeant/infra/pull/284),
+  [`4283315`](https://github.com/CalebSargeant/infra/commit/4283315456f6c3f0b519e29aa7928a66bdb220ee))
+
+- **cloudflare**: DNS for dunmir.magmamoose.com (Pro UI Pages custom domain)
+  ([#287](https://github.com/CalebSargeant/infra/pull/287),
+  [`66dd2f1`](https://github.com/CalebSargeant/infra/commit/66dd2f1f99a67ec2b6676cd6e198ec0571f06688))
+
+- **cloudflare**: Gate Diatreme Pro dashboard at diatreme.magmamoose.com
+  ([#284](https://github.com/CalebSargeant/infra/pull/284),
+  [`4283315`](https://github.com/CalebSargeant/infra/commit/4283315456f6c3f0b519e29aa7928a66bdb220ee))
+
+- **cloudflare**: Skip Super Bot Fight Mode for litellm-warp hostname
+  ([#353](https://github.com/CalebSargeant/infra/pull/353),
+  [`3d4856c`](https://github.com/CalebSargeant/infra/commit/3d4856c145e94b9589a0f4d3b724f58414675b8f))
+
+- **cnpg**: Back up to OCI Object Storage (offsite)
+  ([#304](https://github.com/CalebSargeant/infra/pull/304),
+  [`5b4a54f`](https://github.com/CalebSargeant/infra/commit/5b4a54f0b83f31543a3045bdb2512a3fb34b7277))
+
+- **cnpg**: Back up to OCI Object Storage instead of in-cluster MinIO
+  ([#305](https://github.com/CalebSargeant/infra/pull/305),
+  [`b1256b4`](https://github.com/CalebSargeant/infra/commit/b1256b498454986ef68e611e666951e590b7f122))
+
+- **cnpg**: Back up to OCI Object Storage instead of in-cluster MinIO
+  ([#304](https://github.com/CalebSargeant/infra/pull/304),
+  [`5b4a54f`](https://github.com/CalebSargeant/infra/commit/5b4a54f0b83f31543a3045bdb2512a3fb34b7277))
+
+- **dns**: Docs.diatreme.magmamoose.com → GitHub Pages (diatreme docs)
+  ([#284](https://github.com/CalebSargeant/infra/pull/284),
+  [`4283315`](https://github.com/CalebSargeant/infra/commit/4283315456f6c3f0b519e29aa7928a66bdb220ee))
+
+- **dunmir**: Remove Cloudflare Access — Stytch gates the Pro UI
+  ([#329](https://github.com/CalebSargeant/infra/pull/329),
+  [`42b904a`](https://github.com/CalebSargeant/infra/commit/42b904af24218ba4f09043a02d4ff19e89e3595e))
+
+- **dunmir**: Remove Cloudflare Access — Stytch now gates the Pro UI
+  ([#329](https://github.com/CalebSargeant/infra/pull/329),
+  [`42b904a`](https://github.com/CalebSargeant/infra/commit/42b904af24218ba4f09043a02d4ff19e89e3595e))
+
+- **litellm**: Add auth proxy and visible oauth metadata
+  ([#341](https://github.com/CalebSargeant/infra/pull/341),
+  [`04a986e`](https://github.com/CalebSargeant/infra/commit/04a986e06e466f1438b285aabd14bd080753d42f))
+
+- **litellm**: Add ollama lan provider ([#345](https://github.com/CalebSargeant/infra/pull/345),
+  [`f1af6e8`](https://github.com/CalebSargeant/infra/commit/f1af6e845e05314435252dbe566e9f0c716bfb70))
+
+- **litellm**: Add qwen3-4b agent model with tool-calling
+  ([#356](https://github.com/CalebSargeant/infra/pull/356),
+  [`c73c1c0`](https://github.com/CalebSargeant/infra/commit/c73c1c021f926ec0a22091b3dae54ca5e798c1c8))
+
+- **litellm**: Add qwen3-4b agent model with tool-calling enabled
+  ([#356](https://github.com/CalebSargeant/infra/pull/356),
+  [`c73c1c0`](https://github.com/CalebSargeant/infra/commit/c73c1c021f926ec0a22091b3dae54ca5e798c1c8))
+
+- **litellm**: Admin UI via Cloudflare Access + Postgres
+  ([#334](https://github.com/CalebSargeant/infra/pull/334),
+  [`544d81c`](https://github.com/CalebSargeant/infra/commit/544d81c37e60898bbf61cecfac356a631c432a63))
+
+- **litellm**: Deploy LiteLLM proxy on Firefly (automation ns)
+  ([#331](https://github.com/CalebSargeant/infra/pull/331),
+  [`8ab1773`](https://github.com/CalebSargeant/infra/commit/8ab1773ab0aa7c2a46a0549d1243212b26b2d0e3))
+
+- **litellm**: Expose Warp inference endpoint
+  ([`7b8d1a4`](https://github.com/CalebSargeant/infra/commit/7b8d1a4eb773d8b72c63ad97ae41acbbedf112c6))
+
+- **litellm**: LAN Traefik ingress + drop unapplied public Access path
+  ([#340](https://github.com/CalebSargeant/infra/pull/340),
+  [`32242af`](https://github.com/CalebSargeant/infra/commit/32242afd9cd9be455dfb6a25a96beac6164cc2dc))
+
+- **litellm**: LAN Traefik ingress; drop unapplied public Access path
+  ([#340](https://github.com/CalebSargeant/infra/pull/340),
+  [`32242af`](https://github.com/CalebSargeant/infra/commit/32242afd9cd9be455dfb6a25a96beac6164cc2dc))
+
+- **longhorn**: Deploy Longhorn for replicated/resilient block storage
+  ([#310](https://github.com/CalebSargeant/infra/pull/310),
+  [`87d6eee`](https://github.com/CalebSargeant/infra/commit/87d6eeeb3ead45fac84c4c1d0fb06610c67ccccf))
+
+- **media**: All 5 apps via pod-gateway (one Privado tunnel)
+  ([#318](https://github.com/CalebSargeant/infra/pull/318),
+  [`51f0987`](https://github.com/CalebSargeant/infra/commit/51f09874a9172116386bff25439cd6d842e67025))
+
+- **media**: Auto-update image tags via Flux ImageUpdateAutomation
+  ([#289](https://github.com/CalebSargeant/infra/pull/289),
+  [`a594672`](https://github.com/CalebSargeant/infra/commit/a594672992c2422912f261f0dbae7991493e77db))
+
+- **media**: Jackett via pod-gateway (test client)
+  ([#317](https://github.com/CalebSargeant/infra/pull/317),
+  [`419d90e`](https://github.com/CalebSargeant/infra/commit/419d90e969142ddad854e48f0c8de2baecf46fc4))
+
+- **media**: Kill-switched gluetun VPN for jackett/nzbhydra2/prowlarr/sabnzbd
+  ([#314](https://github.com/CalebSargeant/infra/pull/314),
+  [`4442366`](https://github.com/CalebSargeant/infra/commit/444236609363485d47faf574d7efd387f6c6667a))
+
+- **media**: Route jackett through pod-gateway (VPN client test)
+  ([#318](https://github.com/CalebSargeant/infra/pull/318),
+  [`51f0987`](https://github.com/CalebSargeant/infra/commit/51f09874a9172116386bff25439cd6d842e67025))
+
+- **media**: Route jackett through pod-gateway (VPN client test)
+  ([#317](https://github.com/CalebSargeant/infra/pull/317),
+  [`419d90e`](https://github.com/CalebSargeant/infra/commit/419d90e969142ddad854e48f0c8de2baecf46fc4))
+
+- **media**: Route jackett/nzbhydra2/prowlarr/sabnzbd through kill-switched gluetun (Privado)
+  ([#314](https://github.com/CalebSargeant/infra/pull/314),
+  [`4442366`](https://github.com/CalebSargeant/infra/commit/444236609363485d47faf574d7efd387f6c6667a))
+
+- **media**: Route qbittorrent/prowlarr/nzbhydra2/sabnzbd through pod-gateway
+  ([#318](https://github.com/CalebSargeant/infra/pull/318),
+  [`51f0987`](https://github.com/CalebSargeant/infra/commit/51f09874a9172116386bff25439cd6d842e67025))
+
+- **media**: Streaming-sync — auto-prune titles already on Netflix/Prime NL
+  ([#323](https://github.com/CalebSargeant/infra/pull/323),
+  [`5deb8c3`](https://github.com/CalebSargeant/infra/commit/5deb8c3e63d90227192a1f5ac02ef18a2ddee120))
+
+- **mikrotik-minder**: Auto-bump agent image via Flux ImageUpdateAutomation
+  ([#309](https://github.com/CalebSargeant/infra/pull/309),
+  [`f80d512`](https://github.com/CalebSargeant/infra/commit/f80d5126e09e6793ff055fcdf485f2315a1ff012))
+
+- **mikrotik-minder**: Roll agent to 1.6.0 (inventory + packet-loss probes)
+  ([#307](https://github.com/CalebSargeant/infra/pull/307),
+  [`e1a3b45`](https://github.com/CalebSargeant/infra/commit/e1a3b45b1ce9dca3c9ea25c7602766039c6f686f))
+
+- **mikrotik-minder**: Set agent_key_path to enable the Pro vault
+  ([#327](https://github.com/CalebSargeant/infra/pull/327),
+  [`9ba2e57`](https://github.com/CalebSargeant/infra/commit/9ba2e57dee12941e339d5d18570979125858aef7))
+
+- **monitoring**: Alert on CNPG backup failure/staleness
+  ([#299](https://github.com/CalebSargeant/infra/pull/299),
+  [`aee80d9`](https://github.com/CalebSargeant/infra/commit/aee80d9a3fe2ac2066ac7c824ca9dc18589ffc76))
+
+- **observability**: Ff-pi1 logs (Alloy), Grafana ingress, MinIO->OCI backup
+  ([#355](https://github.com/CalebSargeant/infra/pull/355),
+  [`24ee9c4`](https://github.com/CalebSargeant/infra/commit/24ee9c476e71b6def8f6839deb3de9b903d2480c))
+
+- **observability**: Get firefly stack green — OCI ExternalSecrets, KRR sizing, Thanos/Loki/Grafana
+  fixes ([#351](https://github.com/CalebSargeant/infra/pull/351),
+  [`4b16f53`](https://github.com/CalebSargeant/infra/commit/4b16f531eb7da0ca88aa5ff66c12dc88e83b36d1))
+
+- **qbittorrent**: VPN via kill-switched gluetun (Privado OpenVPN) instead of wireguard
+  ([#314](https://github.com/CalebSargeant/infra/pull/314),
+  [`4442366`](https://github.com/CalebSargeant/infra/commit/444236609363485d47faf574d7efd387f6c6667a))
+
+- **qbittorrent**: VPN via kill-switched gluetun (Privado OpenVPN) instead of wireguard
+  ([#313](https://github.com/CalebSargeant/infra/pull/313),
+  [`baf61c2`](https://github.com/CalebSargeant/infra/commit/baf61c2560ae12c4ed134023492c619fb63c13bd))
+
+- **rbac**: Scope daily kubectl access via humans group + Kyverno
+  ([#319](https://github.com/CalebSargeant/infra/pull/319),
+  [`c61116b`](https://github.com/CalebSargeant/infra/commit/c61116b88cd38b453ade2e47412ee67b18d00b3a))
+
+- **recyclarr**: Config-as-code 1080p quality for Sonarr via TRaSH
+  ([#296](https://github.com/CalebSargeant/infra/pull/296),
+  [`5023ecc`](https://github.com/CalebSargeant/infra/commit/5023ecc33d68ab7d5de9d4c501e7bdf09aa9907c))
+
+- **streaming-sync**: Add Amazon Prime Video to providers
+  ([#326](https://github.com/CalebSargeant/infra/pull/326),
+  [`e6f2bf0`](https://github.com/CalebSargeant/infra/commit/e6f2bf0d94707a4d254afda59406256d11fa47ba))
+
+- **streaming-sync**: Arm Netflix-NL pruning (DRY_RUN=false, cap 400)
+  ([#325](https://github.com/CalebSargeant/infra/pull/325),
+  [`1aa23f5`](https://github.com/CalebSargeant/infra/commit/1aa23f5bb2fd0a817889e0f2e16345845b4ef22b))
+
+- **vpn**: Deploy pod-gateway — shared Privado VPN gateway for media apps
+  ([#318](https://github.com/CalebSargeant/infra/pull/318),
+  [`51f0987`](https://github.com/CalebSargeant/infra/commit/51f09874a9172116386bff25439cd6d842e67025))
+
+- **vpn**: Deploy pod-gateway — shared Privado VPN gateway for media apps
+  ([#317](https://github.com/CalebSargeant/infra/pull/317),
+  [`419d90e`](https://github.com/CalebSargeant/infra/commit/419d90e969142ddad854e48f0c8de2baecf46fc4))
+
+- **vpn**: Deploy pod-gateway — shared Privado VPN gateway for media apps
+  ([#316](https://github.com/CalebSargeant/infra/pull/316),
+  [`95026c6`](https://github.com/CalebSargeant/infra/commit/95026c6f55851e19a24ccf0ca3e11959b0c8a631))
+
+### Refactoring
+
+- **flux**: Fold external-repo apps from flux-system into apps/<app>/
+  ([#290](https://github.com/CalebSargeant/infra/pull/290),
+  [`f805ebb`](https://github.com/CalebSargeant/infra/commit/f805ebb6c94a2f9f6ab5e2408097657c70c7b4d3))
+
+- **flux**: Strip flux-system to bootstrap-only; relocate shared config
+  ([#293](https://github.com/CalebSargeant/infra/pull/293),
+  [`724a409`](https://github.com/CalebSargeant/infra/commit/724a4099b34d4be0a3aef3d99bcbdde8fe937fa9))
+
+- **litellm**: Claude Max-subscription pass-through (follow-up to #331)
+  ([#333](https://github.com/CalebSargeant/infra/pull/333),
+  [`b50eaa8`](https://github.com/CalebSargeant/infra/commit/b50eaa89ba79705d4b3895110d0501f032c7f7a7))
+
+- **media**: Colocate image automation in each app's prod/ folder
+  ([#289](https://github.com/CalebSargeant/infra/pull/289),
+  [`a594672`](https://github.com/CalebSargeant/infra/commit/a594672992c2422912f261f0dbae7991493e77db))
+
+- **media**: Consolidate image automation into infrastructure/flux
+  ([#294](https://github.com/CalebSargeant/infra/pull/294),
+  [`047ffae`](https://github.com/CalebSargeant/infra/commit/047ffaeb91424fd1ea6cb5c20f5ea330b29fd09b))
+
+
 ## v1.35.0 (2026-05-30)
 
 ### Features
