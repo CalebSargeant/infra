@@ -90,7 +90,7 @@ that can reach Ollama from the LiteLLM pod.
       mode: chat
       auth_mode: bearer-token-to-ollama-lan
       billing_mode: self-hosted
-      supports_function_calling: true  # only set when the selected model actually supports tools
+      supports_function_calling: false
 ```
 
 The firefly deployment exposes the LAN Ollama server as
@@ -106,7 +106,10 @@ For local models, resource sizing matters more than LiteLLM config: the Ollama
 host needs enough CPU/memory, and tool/function calling depends on the model's
 actual capabilities. LiteLLM recommends `ollama_chat/` for better chat
 responses, and its proxy config can mark a model with
-`supports_function_calling: true` for tool-capable Ollama models.
+`supports_function_calling: true` for tool-capable Ollama models. Keep the local
+`qwen2.5-coder:7b-instruct-q4_K_M` entry marked false unless live probes return
+structured OpenAI `tool_calls`; it currently emits tool-call-shaped JSON in the
+assistant message content instead.
 
 ## Operational note
 
