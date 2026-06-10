@@ -143,6 +143,17 @@ inputs = {
       proxied = true
     },
 
+    # Public Warp custom inference endpoint for LiteLLM. Pairs with the
+    # path-scoped ingress rules in zero-trust/prod/tunnels.tf and must stay
+    # proxied so Warp sees a public Cloudflare edge address, not the LAN
+    # Traefik address used by litellm.sargeant.co.
+    {
+      name    = "litellm-warp.sargeant.co"
+      type    = "CNAME"
+      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
+      proxied = true
+    },
+
     # TEMPORARY — until Tucows lifts the clientHold on magmamoose.com.
     # See memory: project_magmamoose-clienthold-swap.md. Once the hold
     # is lifted (whois magmamoose.com no longer lists `clientHold`), drop

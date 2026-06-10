@@ -7,6 +7,7 @@ usage tracking + the LiteLLM admin UI.
 - **In-cluster direct URL:** `http://litellm.automation.svc.cluster.local:4000`
 - **In-cluster API-key proxy URL:** `http://litellm.automation.svc.cluster.local:8080`
 - **LAN/VPN URL:** `https://litellm.sargeant.co`
+- **Public Warp endpoint:** `https://litellm-warp.sargeant.co/v1`
 
 > **Note:** Some tools (such as the Codex config.toml and OpenCode examples below) require the base URL to include `/v1`; others (the OpenAI SDK, the `OPENAI_BASE_URL` environment variable) omit it because the client appends `/v1` automatically. When in doubt, check the tool's documentation.
 
@@ -16,6 +17,26 @@ usage tracking + the LiteLLM admin UI.
   - The LAN/VPN ingress and in-cluster `:8080` path go through the `auth-proxy` sidecar, which copies OpenAI-style `Authorization: Bearer <LiteLLM key>` into `x-litellm-api-key`.
 - **Model names:** clients request a `model_name` from the proxy's `config.yaml`
   (`claude-opus-4-8`, `claude-sonnet-4-6`, `claude-haiku-4-5`, …).
+
+## Warp custom inference
+
+Warp's custom inference requests are made by Warp's backend, so the endpoint must
+resolve to a public address. Do not point Warp at the LAN-only
+`litellm.sargeant.co` host, because it resolves to the private Traefik address.
+Use the Cloudflare Tunnel hostname instead:
+
+```text
+Base URL: https://litellm-warp.sargeant.co/v1
+Model: qwen2.5-coder-7b-instruct-local
+Equivalent model: gpt-4o-mini
+Auth: Authorization: Bearer <dedicated LiteLLM virtual key>
+```
+
+The `litellm-warp.sargeant.co` tunnel rules only route `/v1/chat/completions`
+and `/v1/models` to LiteLLM's `:8080` auth-proxy path. UI, key management,
+health, and generic model-management paths fall through to `http_status:404` at
+`cloudflared`. Create a dedicated LiteLLM virtual key for Warp and scope it to
+the local qwen model.
 
 ## Seeing the Claude auth path in the UI
 
