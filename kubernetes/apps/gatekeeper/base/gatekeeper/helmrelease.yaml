@@ -25,22 +25,23 @@ spec:
     audit:
       replicas: 1
       resources:
+        # KRR ~146Mi working set. No CPU limit (avoid CFS throttling).
         requests:
           cpu: 50m
-          memory: 128Mi
+          memory: 150Mi
         limits:
-          cpu: 200m
-          memory: 512Mi
+          memory: 150Mi
 
     controllerManager:
       replicas: 1
       resources:
+        # KRR ~198Mi working set; trimmed from 256Mi. 256Mi limit kept as
+        # admission burst headroom. No CPU limit (avoid CFS throttling).
         requests:
           cpu: 100m
-          memory: 256Mi
+          memory: 200Mi
         limits:
-          cpu: 500m
-          memory: 1Gi
+          memory: 256Mi
 
     # Enable violations logging
     auditInterval: 60
@@ -59,9 +60,10 @@ spec:
     webhook:
       replicas: 1
       resources:
+        # Admission path; 200Mi request with 256Mi burst headroom.
+        # No CPU limit (avoid CFS throttling).
         requests:
-          cpu: 50m
-          memory: 128Mi
+          cpu: 100m
+          memory: 200Mi
         limits:
-          cpu: 200m
-          memory: 512Mi
+          memory: 256Mi

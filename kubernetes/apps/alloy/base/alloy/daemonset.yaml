@@ -51,13 +51,13 @@ spec:
             - name: data
               mountPath: /var/lib/alloy/data
           resources:
-            # ff-pi1 is over-committed (≈100% memory requests, dominated by
-            # over-provisioned non-observability apps), so Alloy uses a zero memory
-            # request with a hard limit (Burstable QoS). Right-sizing the
-            # Pi's apps per KRR would free room for a proper reservation.
+            # ff-pi1 headroom was reclaimed by right-sizing its apps per KRR and
+            # moving non-system workloads to the worker, so Alloy now carries a
+            # real memory reservation (Burstable QoS, request < limit) instead of
+            # the BestEffort `memory: "0"` it needed to schedule under pressure.
             requests:
               cpu: 20m
-              memory: "0"
+              memory: 128Mi
             limits:
               memory: 192Mi
           livenessProbe:

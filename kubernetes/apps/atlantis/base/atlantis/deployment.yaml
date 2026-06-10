@@ -80,12 +80,14 @@ spec:
           # line to `:v<rev>`.
           image: ghcr.io/calebsargeant/atlantis-firefly:latest
           resources:
+            # ~55Mi idle; KRR ~228Mi. Request trimmed to 256Mi to free ff-pi1
+            # memory-request pressure; 2Gi limit retained as burst headroom for
+            # `parallel_plan` terragrunt spikes. No CPU limit (avoid CFS throttling).
             requests:
-              memory: "512Mi"
+              memory: "256Mi"
               cpu: "100m"
             limits:
               memory: "2Gi"
-              cpu: "1000m"
           env:
             # k8s secret mounts default to root-owned with group-readable
             # mode (we set 0440 below); oci CLI prints a noisy warning on

@@ -32,12 +32,13 @@ spec:
         nodeSelector:
           type: pi
         resources:
+          # KRR ~100Mi working set; trimmed from 256Mi to relieve ff-pi1
+          # memory-request pressure. No CPU limit (avoid CFS throttling).
           requests:
-            cpu: 100m
-            memory: 256Mi
+            cpu: 50m
+            memory: 128Mi
           limits:
-            cpu: 500m
-            memory: 512Mi
+            memory: 128Mi
         
         # HTTP port configuration
         httpPort: 8080
@@ -49,12 +50,13 @@ spec:
         nodeSelector:
           type: pi
         resources:
+          # KRR ~100Mi working set; trimmed from 256Mi to relieve ff-pi1
+          # memory-request pressure. No CPU limit (avoid CFS throttling).
           requests:
-            cpu: 100m
-            memory: 256Mi
+            cpu: 50m
+            memory: 128Mi
           limits:
-            cpu: 500m
-            memory: 512Mi
+            memory: 128Mi
         
         # HTTP port configuration
         httpPort: 8081
