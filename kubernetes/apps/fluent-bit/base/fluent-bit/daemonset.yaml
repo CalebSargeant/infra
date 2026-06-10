@@ -45,8 +45,10 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
               - matchExpressions:
-                  - key: node-role.kubernetes.io/pi
-                    operator: DoesNotExist
+                  - key: type
+                    operator: NotIn
+                    values:
+                      - pi
       tolerations:
         - effect: NoSchedule
           operator: Exists
