@@ -57,9 +57,9 @@ data:
           auth_mode: bearer-token-to-ollama-lan
           billing_mode: self-hosted
           credential_source: oci-vault:litellm-ollama-lan-api-key
-          supports_function_calling: true
+          supports_function_calling: false
           supports_parallel_function_calling: false
-          notes: "Self-hosted Ollama qwen2.5-coder model. LiteLLM exposes it through the OpenAI-compatible chat/completions API for clients such as Warp."
+          notes: "Self-hosted Ollama qwen2.5-coder model. LiteLLM exposes it through the OpenAI-compatible chat/completions API for clients such as Warp. Live probes show tool-call-shaped JSON in message content, not structured OpenAI tool_calls."
     general_settings:
       master_key: os.environ/LITELLM_MASTER_KEY
       # Forward the client's Authorization (the Claude OAuth token) to Anthropic.
