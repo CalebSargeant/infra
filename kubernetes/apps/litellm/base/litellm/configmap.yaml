@@ -60,6 +60,28 @@ data:
           supports_function_calling: false
           supports_parallel_function_calling: false
           notes: "Self-hosted Ollama qwen2.5-coder model. LiteLLM exposes it through the OpenAI-compatible chat/completions API for clients such as Warp. Live probes show tool-call-shaped JSON in message content, not structured OpenAI tool_calls."
+      # Agent-capable local model for Warp Agent Mode. Qwen3 emits native
+      # structured tool_calls via Ollama's tools template, so unlike
+      # qwen2.5-coder it can drive Warp's tool loop. qwen3:4b at q4 (~2.5GB)
+      # fits the GTX 1060 6GB with headroom for the KV cache that Warp's large
+      # agent prompts need. supports_function_calling MUST be true here, or
+      # LiteLLM (with the global drop_params) strips the `tools` param and the
+      # model never receives them.
+      - model_name: qwen3-4b
+        litellm_params:
+          model: ollama_chat/qwen3:4b-q4_K_M
+          api_base: http://ollama-lan.automation.svc.cluster.local:11434
+          api_key: os.environ/OLLAMA_LAN_API_KEY
+          keep_alive: 30m
+        model_info:
+          mode: chat
+          base_model: ollama_chat/qwen3:4b-q4_K_M
+          auth_mode: bearer-token-to-ollama-lan
+          billing_mode: self-hosted
+          credential_source: oci-vault:litellm-ollama-lan-api-key
+          supports_function_calling: true
+          supports_parallel_function_calling: false
+          notes: "Self-hosted Ollama qwen3:4b-q4_K_M. Tool-calling enabled for Warp Agent Mode (native tool_calls via Ollama's tools template). Sized for GTX 1060 6GB at q4."
     general_settings:
       master_key: os.environ/LITELLM_MASTER_KEY
       # Forward the client's Authorization (the Claude OAuth token) to Anthropic.
