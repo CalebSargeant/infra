@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-tuning
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: node-tuning
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: node-tuning
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: node-tuning
+    spec:
+      # Durably raises the kernel's per-user inotify limits on each node. The
+      # 128 default for fs.inotify.max_user_instances starves watch-heavy
+      # controllers — gatekeeper's cert-rotation fsnotify crashed with
+      # "too many open files: unable to create client cert watcher" on ff-vm1.
+      #
+      # The init container writes the sysctls via the node's (host) user
+      # namespace — pods share the host's initial user namespace, so a
+      # privileged write to /proc/sys/fs/inotify/* takes effect node-wide, the
+      # same mechanism Elasticsearch's vm.max_map_count init containers use.
+      # The pause container holds the pod Running so kubelet re-runs the init
+      # container on every (re)start — including after a reboot, which is what
+      # makes the live `sysctl -w` durable.
+      #
+      # Targets worker nodes (ff-vm1, planned ff-vm2/ff-oci1/ff-oci2) plus the
+      # system node ff-pi1 (flux/kyverno/cert-manager/longhorn are watch-heavy).
+      automountServiceAccountToken: false
+      priorityClassName: system-node-critical
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            # nodeSelectorTerms are OR'd: worker OR system role.
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/worker
+                    operator: Exists
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/system
+                    operator: Exists
+      tolerations:
+        # Run regardless of taints (e.g. control-plane on ff-pi1).
+        - effect: NoSchedule
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
+      initContainers:
+        - name: sysctl
+          image: busybox:1.37.0
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              # instances=8192: the fix for the cert-watcher crash.
+              # watches=1048576: matches the nodes' current (higher) live value
+              #   so a reboot can't regress it below what's running today.
+              echo 8192    > /proc/sys/fs/inotify/max_user_instances
+              echo 1048576 > /proc/sys/fs/inotify/max_user_watches
+              i=$(cat /proc/sys/fs/inotify/max_user_instances)
+              w=$(cat /proc/sys/fs/inotify/max_user_watches)
+              echo "node-tuning applied: instances=$i watches=$w"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 32Mi
+      containers:
+        - name: pause
+          image: registry.k8s.io/pause:3.10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 32Mi

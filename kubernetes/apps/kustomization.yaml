@@ -43,6 +43,8 @@ resources:
   - ./thanos-compactor
   - ./thanos-query
   - ./thanos-store
+  # platform (node-level tuning)
+  - ./node-tuning
   # security
   - ./gatekeeper
   - ./kubescape
