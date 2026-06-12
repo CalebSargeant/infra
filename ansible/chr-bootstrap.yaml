@@ -16,30 +16,30 @@
             expect <<EOF
             # Set timeout to handle delays
             set timeout 20
-        
+
             # Start the SSH session
             spawn ssh -i {{ ansible_ssh_private_key_file }} {{ ansible_ssh_user }}@{{ ansible_host }} -o StrictHostKeyChecking=no
-        
+
             # Wait for the license prompt and respond "n"
             expect "Do you want to see the software license?*"
             send "n\r"
-        
+
             # Wait for the password prompt and send new password
             expect "new password>"
             send "123\r"
-        
+
             # Confirm the new password
             expect "repeat new password>"
             send "123\r"
-            
+
             # Change system identity
             expect "] >"
             send "/system identity set name={{ inventory_hostname }}\r"
-        
+
             # Exit the router
             expect "] >"
             send "/quit\r"
-        
+
             # Wait for the prompt to complete
             expect closed.
             EOF

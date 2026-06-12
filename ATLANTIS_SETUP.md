@@ -35,7 +35,7 @@ This PR sets up Terraform Atlantis on the firefly Kubernetes cluster for automat
 
 ✅ **Terragrunt Support**: Custom workflow that auto-detects Terragrunt vs Terraform
 ✅ **Multi-Cloud**: Supports AWS, Azure, GCP, OCI, and Cloudflare
-✅ **Security**: 
+✅ **Security**:
   - SOPS encryption for secrets
   - Webhook secret validation
   - Repository allowlist

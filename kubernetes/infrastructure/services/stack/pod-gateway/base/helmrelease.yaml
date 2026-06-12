@@ -51,6 +51,10 @@ spec:
         type: label
         label: "routed-gateway"
     controllers:
+      webhook:
+        pod:
+          nodeSelector:
+            kubernetes.io/arch: amd64
       main:
         containers:
           gluetun:
