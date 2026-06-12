@@ -27,4 +27,8 @@ rules:
     verbs: ["bind", "escalate"]
   - apiGroups: [""]
     resources: ["secrets"]
+    # Required for ClusterPolicy/sync-ghcr-pull-secret: the background-controller
+    # must read the source secret (flux-system/ghcr-pull-secret) and create/keep
+    # in sync copies in labelled namespaces. Kyverno clone rules cannot work with
+    # a narrower RBAC scope — this is the minimum the aggregation model allows.
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
