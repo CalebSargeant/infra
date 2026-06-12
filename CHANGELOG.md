@@ -2,6 +2,29 @@
 
 <!-- version list -->
 
+## v1.38.1 (2026-06-12)
+
+### Bug Fixes
+
+- **cluster**: Pod-gateway webhook arch + ghcr pull secret sync
+  ([#362](https://github.com/CalebSargeant/infra/pull/362),
+  [`25c98ce`](https://github.com/CalebSargeant/infra/commit/25c98ce89a98a61c3422f0723b08240ebb4283b0))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`c3c7b18`](https://github.com/CalebSargeant/infra/commit/c3c7b18f5bac29bf6517a7e7a1d7b501eab4823c))
+
+- **media**: Bump image tags
+  ([`9f70f41`](https://github.com/CalebSargeant/infra/commit/9f70f416087121a56092c06bf56699d797ec0bc0))
+
+### Documentation
+
+- **rbac**: Add comment explaining cluster-wide Secrets grant on background-controller
+  ([#362](https://github.com/CalebSargeant/infra/pull/362),
+  [`25c98ce`](https://github.com/CalebSargeant/infra/commit/25c98ce89a98a61c3422f0723b08240ebb4283b0))
+
+
 ## v1.38.0 (2026-06-10)
 
 ### Features
