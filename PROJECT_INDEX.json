@@ -13,36 +13,84 @@
     "terraform-cloudflare": {
       "path": "terraform/cloudflare/",
       "purpose": "DNS records (sargeant.co, magmamoose) and Zero Trust tunnels/applications",
-      "leaves": ["dns/prod", "dns-magmamoose/prod", "zero-trust/prod"],
-      "shared_modules": ["modules/cloudflare-dns"],
-      "depends_on": ["terraform-root"]
+      "leaves": [
+        "dns/prod",
+        "dns-magmamoose/prod",
+        "zero-trust/prod"
+      ],
+      "shared_modules": [
+        "modules/cloudflare-dns"
+      ],
+      "depends_on": [
+        "terraform-root"
+      ]
     },
     "terraform-gcp": {
       "path": "terraform/gcp/",
       "purpose": "GCP project setup (state bucket, IAM); state lives in GCS magmamoose-terraform project",
-      "leaves": ["prod/europe-west4/project"],
-      "depends_on": ["terraform-root"]
+      "leaves": [
+        "prod/europe-west4/project"
+      ],
+      "depends_on": [
+        "terraform-root"
+      ]
     },
     "terraform-oci": {
       "path": "terraform/oci/",
       "purpose": "OCI tenancy infra (network, edge, server, mikrotik, vpn, database, drg-peering, policy) + tenancy-root IAM",
-      "leaves": ["iam-policy", "prod/eu-amsterdam-1/{network,edge,server,mikrotik,vpn,database,drg-peering,policy}"],
-      "shared_modules": ["modules/{network,edge,server,mikrotik,vpn,database,drg-peering,policy,iam-policy}"],
-      "depends_on": ["terraform-root"],
+      "leaves": [
+        "iam-policy",
+        "prod/eu-amsterdam-1/{network,edge,server,mikrotik,vpn,database,drg-peering,policy}"
+      ],
+      "shared_modules": [
+        "modules/{network,edge,server,mikrotik,vpn,database,drg-peering,policy,iam-policy}"
+      ],
+      "depends_on": [
+        "terraform-root"
+      ],
       "notes": "OCI Vault publicly accessible (KMS endpoints are public-internet + OCI-auth, not VPN-gated)"
     },
     "kubernetes-apps": {
       "path": "kubernetes/apps/",
       "purpose": "Per-app manifests. Each app has base/<app>/ (kustomize manifests) + prod/<app>/ (Flux Kustomization CR)",
       "apps": [
-        "atlantis", "bazarr", "blackbox-exporter", "excalidraw", "flaresolverr", "fluent-bit",
-        "gatekeeper", "headlamp", "homeassistant", "homebridge", "jackett", "krr",
-        "kube-prometheus-stack", "kubescape", "loki", "mikrotik-minder", "n8n", "nextcloud",
-        "nzbhydra2", "overseerr", "plex", "prowlarr", "qbittorrent", "radarr", "sabnzbd",
-        "sonarr", "syncthing", "thanos-compactor", "thanos-query", "thanos-store",
-        "timemachine", "wordpress"
+        "atlantis",
+        "bazarr",
+        "blackbox-exporter",
+        "excalidraw",
+        "flaresolverr",
+        "fluent-bit",
+        "gatekeeper",
+        "headlamp",
+        "homeassistant",
+        "homebridge",
+        "jackett",
+        "krr",
+        "kube-prometheus-stack",
+        "kubescape",
+        "loki",
+        "mikrotik-minder",
+        "n8n",
+        "nextcloud",
+        "nzbhydra2",
+        "overseerr",
+        "plex",
+        "prowlarr",
+        "qbittorrent",
+        "radarr",
+        "sabnzbd",
+        "sonarr",
+        "syncthing",
+        "thanos-compactor",
+        "thanos-query",
+        "thanos-store",
+        "timemachine",
+        "wordpress"
       ],
-      "depends_on": ["kubernetes-components", "kubernetes-infrastructure"]
+      "depends_on": [
+        "kubernetes-components",
+        "kubernetes-infrastructure"
+      ]
     },
     "kubernetes-infrastructure": {
       "path": "kubernetes/infrastructure/",
@@ -52,18 +100,32 @@
         "controllers": "infrastructure-controllers — cert-manager, external-secrets, 1password-connect, cloudnative-pg (dependsOn configs)",
         "services": "infrastructure-services — cloudflared, minio, external-dns×2, postgres, mariadb (dependsOn controllers)"
       },
-      "depends_on": ["kubernetes-components"]
+      "depends_on": [
+        "kubernetes-components"
+      ]
     },
     "kubernetes-components": {
       "path": "kubernetes/components/",
       "purpose": "Reusable kustomize Components (label-targeted patches)",
-      "components": ["node-selectors", "resource-profiles", "gluetun-sidecar", "wireguard-sidecar", "vpn-routed-proxy", "helm-releases", "helm-release-standards", "ingress-standards"],
+      "components": [
+        "node-selectors",
+        "resource-profiles",
+        "gluetun-sidecar",
+        "wireguard-sidecar",
+        "vpn-routed-proxy",
+        "helm-releases",
+        "helm-release-standards",
+        "ingress-standards"
+      ],
       "notes": "resource-profiles map AWS-style names (t.small, c.medium, m.large) to Pi-constrained requests/limits"
     },
     "kubernetes-clusters": {
       "path": "kubernetes/clusters/firefly/",
       "purpose": "Flux bootstrap entry for the firefly cluster — root kustomization.yaml pulls in ../../apps + ../../infrastructure",
-      "depends_on": ["kubernetes-apps", "kubernetes-infrastructure"]
+      "depends_on": [
+        "kubernetes-apps",
+        "kubernetes-infrastructure"
+      ]
     },
     "ansible": {
       "path": "ansible/",
@@ -83,7 +145,12 @@
     "dockerfiles": {
       "path": "dockerfiles/",
       "purpose": "Custom container images built from this repo",
-      "images": ["atlantis-firefly", "n8n", "openfortivpn", "wordpress-postgres"]
+      "images": [
+        "atlantis-firefly",
+        "n8n",
+        "openfortivpn",
+        "wordpress-postgres"
+      ]
     },
     "scripts": {
       "path": "scripts/",
@@ -95,11 +162,44 @@
     }
   },
   "callgraph_highlights": [
-    {"caller": "kubernetes/clusters/firefly/kustomization.yaml", "calls": ["kubernetes/apps/*", "kubernetes/infrastructure/*"], "note": "Flux root — owns the full reconciled state"},
-    {"caller": "kubernetes/apps/<app>/prod/<app>/flux-kustomization.yaml", "calls": ["kubernetes/apps/<app>/base/<app>/"], "note": "Each app's Flux Kustomization CR points its path: at base manifests"},
-    {"caller": "terraform/<leaf>/terragrunt.hcl", "calls": ["terraform/root.hcl (via find_in_parent_folders)", "terraform/<provider>/modules/<name>"], "note": "Terragrunt leaves source modules + inherit root config; backend.tf and provider.tf are auto-generated"},
-    {"caller": "ExternalSecret CRs", "calls": ["OCI Vault", "1Password Connect"], "note": "Preferred runtime secret path; SOPS is fallback only"},
-    {"caller": "Atlantis (cluster)", "calls": ["atlantis.yaml projects → terragrunt plan/apply"], "note": "Each LEAF terragrunt module = 1 Atlantis project; shared inputs (root.hcl, region.hcl, modules/) do NOT autoplan — comment 'atlantis plan -p <project>' manually"}
+    {
+      "caller": "kubernetes/clusters/firefly/kustomization.yaml",
+      "calls": [
+        "kubernetes/apps/*",
+        "kubernetes/infrastructure/*"
+      ],
+      "note": "Flux root — owns the full reconciled state"
+    },
+    {
+      "caller": "kubernetes/apps/<app>/prod/<app>/flux-kustomization.yaml",
+      "calls": [
+        "kubernetes/apps/<app>/base/<app>/"
+      ],
+      "note": "Each app's Flux Kustomization CR points its path: at base manifests"
+    },
+    {
+      "caller": "terraform/<leaf>/terragrunt.hcl",
+      "calls": [
+        "terraform/root.hcl (via find_in_parent_folders)",
+        "terraform/<provider>/modules/<name>"
+      ],
+      "note": "Terragrunt leaves source modules + inherit root config; backend.tf and provider.tf are auto-generated"
+    },
+    {
+      "caller": "ExternalSecret CRs",
+      "calls": [
+        "OCI Vault",
+        "1Password Connect"
+      ],
+      "note": "Preferred runtime secret path; SOPS is fallback only"
+    },
+    {
+      "caller": "Atlantis (cluster)",
+      "calls": [
+        "atlantis.yaml projects → terragrunt plan/apply"
+      ],
+      "note": "Each LEAF terragrunt module = 1 Atlantis project; shared inputs (root.hcl, region.hcl, modules/) do NOT autoplan — comment 'atlantis plan -p <project>' manually"
+    }
   ],
   "hotspots": [
     "kubernetes/apps/<app>/base/<app>/ — most app changes",
