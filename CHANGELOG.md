@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.43.0 (2026-06-13)
+
+### Features
+
+- **grafana**: Migrate off ff-pi1 to worker on Longhorn
+  ([#371](https://github.com/CalebSargeant/infra/pull/371),
+  [`37c5611`](https://github.com/CalebSargeant/infra/commit/37c561107d93e1e31357d25ca2e15324efe5418a))
+
+
 ## v1.42.1 (2026-06-13)
 
 ### Bug Fixes
