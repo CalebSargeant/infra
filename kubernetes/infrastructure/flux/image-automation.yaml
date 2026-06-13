@@ -311,6 +311,31 @@ spec:
     semver:
       range: '>=3.0.0 <4.0.0'
 ---
+# --- n8n (n8nio/n8n) ---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: n8n
+  namespace: flux-system
+spec:
+  image: n8nio/n8n
+  interval: 1h
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: n8n
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: n8n
+  filterTags:
+    pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+    extract: '$0'
+  policy:
+    semver:
+      range: '>=2.0.0 <3.0.0'
+---
 # Single image-update automation for the whole media stack. Scans ./kubernetes/apps
 # for `$imagepolicy` markers (only the 11 media workloads carry them — the
 # self-managed apps' markers live in their own repos) and pushes tag bumps to
