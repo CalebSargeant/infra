@@ -9,4 +9,8 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: n8n
+  # Longhorn (replicated, node-independent) so n8n runs on the worker instead of
+  # being pinned to ff-pi1's local disk. /home/node/.n8n holds only reproducible
+  # state — workflows/credentials live in Postgres and the encryption key comes
+  # from the env secret — so this starts fresh; no data migration needed.
+  storageClassName: longhorn
