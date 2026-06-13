@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.42.1 (2026-06-13)
+
+### Bug Fixes
+
+- **n8n**: FsGroup + disable service links for Longhorn volume
+  ([#369](https://github.com/CalebSargeant/infra/pull/369),
+  [`6823582`](https://github.com/CalebSargeant/infra/commit/6823582563fafc5fe6cbc841cbee9916708e5e24))
+
+- **openclaw**: Pin to ff-pi1 and drop hostPath subPath mounts
+  ([#370](https://github.com/CalebSargeant/infra/pull/370),
+  [`b714686`](https://github.com/CalebSargeant/infra/commit/b71468603ef21ca1ffd299f5db8b7a732387f333))
+
+
 ## v1.42.0 (2026-06-13)
 
 ### Features
