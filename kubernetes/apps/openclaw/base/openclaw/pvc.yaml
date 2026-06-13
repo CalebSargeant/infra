@@ -10,3 +10,16 @@ spec:
     requests:
       storage: 5Gi
   storageClassName: openclaw
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: openclaw-auth
+  namespace: automation
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: openclaw-auth

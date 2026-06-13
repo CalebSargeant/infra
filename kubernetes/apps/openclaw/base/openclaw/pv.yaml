@@ -12,3 +12,18 @@ spec:
   storageClassName: openclaw
   hostPath:
     path: /mnt/nvme/openclaw
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: openclaw-auth
+  namespace: automation
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: openclaw-auth
+  hostPath:
+    path: /mnt/nvme/openclaw-auth

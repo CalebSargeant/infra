@@ -36,7 +36,6 @@ spec:
               readOnly: true
             - name: state
               mountPath: /home/node/.openclaw
-              subPath: openclaw
           resources:
             requests:
               cpu: 10m
@@ -116,14 +115,13 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 30
           volumeMounts:
-            # State + config + workspace (openclaw.json lives here, writable).
+            # State + config + workspace (openclaw.json + identity live here, writable).
             - name: state
               mountPath: /home/node/.openclaw
-              subPath: openclaw
-            # Auth-profile encryption keys — persist so secrets survive restarts.
-            - name: state
+            # Auth-profile secret dir — empty today, but OpenClaw may store
+            # channel-auth encryption material here; persist so it survives restarts.
+            - name: auth
               mountPath: /home/node/.config/openclaw
-              subPath: config-openclaw
       volumes:
         - name: seed
           configMap:
@@ -131,3 +129,6 @@ spec:
         - name: state
           persistentVolumeClaim:
             claimName: openclaw
+        - name: auth
+          persistentVolumeClaim:
+            claimName: openclaw-auth
