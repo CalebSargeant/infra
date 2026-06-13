@@ -20,6 +20,14 @@ spec:
       labels:
         app: n8n
     spec:
+      # fsGroup 1000 (node) makes the dynamic Longhorn volume writable by n8n's
+      # non-root user — a fresh PV mounts root:root, unlike the old chowned
+      # hostPath, so without this n8n CrashLoops on EACCES writing /home/node/.n8n.
+      securityContext:
+        fsGroup: 1000
+      # n8n misparses the k8s-injected N8N_PORT=tcp://<svc-ip>:5678 service-link
+      # env var; disable the Docker-style service links (n8n addresses by DNS).
+      enableServiceLinks: false
       containers:
         - name: n8n
           image: n8nio/n8n:2.26.3 # {"$imagepolicy": "flux-system:n8n"}
