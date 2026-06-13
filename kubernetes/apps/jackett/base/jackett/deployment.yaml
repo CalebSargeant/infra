@@ -17,11 +17,12 @@ spec:
         - name: jackett
           image: linuxserver/jackett:0.24.2057 # {"$imagepolicy": "flux-system:jackett"}
           resources:
+            # right-sized: observed ~93Mi; request leaves scheduling headroom, generous limit avoids OOM
             requests:
-              memory: "208Mi"
+              memory: "192Mi"
               cpu: "10m"
             limits:
-              memory: "208Mi"
+              memory: "320Mi"
           ports:
             - containerPort: 9117 # jackett web interface
           env:

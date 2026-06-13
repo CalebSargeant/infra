@@ -8,5 +8,6 @@ resources:
   - pvc.yaml
   - pv.yaml
 components:
-  - ../../../../components/resource-profiles/c.nano
+  # resources set explicitly inline in deployment.yaml (right-sized from live usage);
+  # c.nano resource-profile removed — it op:add-overrode the inline block.
   - ../../../../components/node-selectors/mini

@@ -40,14 +40,15 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/thanos/store
-          # No CPU limit (avoid throttling); request covers index-cache (512MB) +
-          # chunk-pool (512MB) ≈ 1Gi plus Go runtime/mmap/RPC overhead.
+          # No CPU limit (avoid throttling). Right-sized: observed ~34Mi RSS, so
+          # request 512Mi (frees scheduling headroom) with a generous 1Gi limit
+          # to never OOM (limits don't affect scheduling).
           resources:
             requests:
               cpu: 100m
-              memory: 1536Mi
+              memory: 512Mi
             limits:
-              memory: 2Gi
+              memory: 1Gi
           livenessProbe:
             httpGet:
               path: /-/healthy

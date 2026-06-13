@@ -8,5 +8,6 @@ resources:
   - pv.yaml
 components:
   - ../../../../components/pod-gateway-client
-  - ../../../../components/resource-profiles/c.pico
+  # resources set explicitly inline in deployment.yaml (right-sized from live usage);
+  # c.pico resource-profile removed — it op:add-overrode the inline block.
   - ../../../../components/node-selectors/mini

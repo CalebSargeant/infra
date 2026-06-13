@@ -7,5 +7,4 @@ resources:
   - pvc.yaml
   - pv.yaml
 components:
-  - ../../../../components/resource-profiles/t.medium
   - ../../../../components/node-selectors/mini

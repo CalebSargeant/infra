@@ -31,11 +31,12 @@ spec:
               name: overseerr-config
           resources:
             requests:
-              memory: "344Mi"
+              # Right-sized: observed ~218Mi memory usage; request frees scheduling headroom, limit kept generous to avoid OOM
+              memory: "288Mi"
               cpu: "10m"
               ephemeral-storage: "1Gi"
             limits:
-              memory: "344Mi"
+              memory: "512Mi"
               ephemeral-storage: "2Gi"
       volumes:
         - name: overseerr-config

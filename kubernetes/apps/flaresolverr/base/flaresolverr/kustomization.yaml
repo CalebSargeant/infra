@@ -5,5 +5,6 @@ resources:
   - service.yaml
   - ingress.yaml
 components:
-  - ../../../../components/resource-profiles/c.micro
+  # resources set explicitly inline in deployment.yaml (right-sized from live usage);
+  # c.micro resource-profile removed — it op:add-overrode the inline block.
   - ../../../../components/node-selectors/mini
