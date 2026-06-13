@@ -124,26 +124,28 @@ spec:
         userKey: admin-user
         passwordKey: admin-password
       
-      # Pin Grafana to ff-pi1, where its existing local-path PV is node-affined.
-      # Pinning the pod here resolves the rollout deadlock (old pod held the RWO
-      # PV on ff-pi1 while the new pod was forced onto ff-vm1 and stayed Pending).
+      # Run Grafana on the worker, alongside the rest of observability
+      # (prometheus/loki/thanos/alertmanager). Migrated off ff-pi1's local-path
+      # PV to Longhorn (below), so it's no longer pinned to the system node.
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: type
-                operator: In
-                values:
-                - pi
+              - key: node-role.kubernetes.io/worker
+                operator: Exists
       # Recreate so the old pod releases the RWO PVC before the new one starts.
       deploymentStrategy:
         type: Recreate
 
-      # Persistence
+      # Persistence — Longhorn (replicated, node-independent) so Grafana runs on
+      # the worker. Dashboards (29 cm) + datasources (2 cm) are sidecar-provisioned
+      # and admin is from OCI Vault, so only grafana.db (users/annotations/API keys)
+      # is node-local; migrated by restoring the db after the storageClass cutover.
       persistence:
         enabled: true
         size: 10Gi
+        storageClassName: longhorn
       
       # Resources — no CPU limit (avoid CFS throttling); modest memory footprint.
       resources:
