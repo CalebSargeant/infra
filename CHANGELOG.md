@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.40.0 (2026-06-13)
+
+### Features
+
+- **cluster**: Durable inotify sysctls via node-tuning DaemonSet
+  ([#361](https://github.com/CalebSargeant/infra/pull/361),
+  [`3e8edcc`](https://github.com/CalebSargeant/infra/commit/3e8edcc2a543b611e1750656ef3e9bea11a9c833))
+
+
 ## v1.39.0 (2026-06-13)
 
 ### Chores
