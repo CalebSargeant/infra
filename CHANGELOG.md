@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v1.39.0 (2026-06-13)
+
+### Chores
+
+- **media**: Bump image tags
+  ([`51633b7`](https://github.com/CalebSargeant/infra/commit/51633b77f6944b36cec375be62de2ece44c1b6d3))
+
+### Features
+
+- **n8n**: Switch to upstream image + add image automation
+  ([#363](https://github.com/CalebSargeant/infra/pull/363),
+  [`6937c61`](https://github.com/CalebSargeant/infra/commit/6937c61ddc140a7b52b4ecb43ceb09b19476d61e))
+
+
 ## v1.38.1 (2026-06-12)
 
 ### Bug Fixes
