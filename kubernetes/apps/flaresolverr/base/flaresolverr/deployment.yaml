@@ -32,11 +32,12 @@ spec:
             - name: CAPTCHA_SOLVER
               value: "none"
           resources:
+            # Right-sized: observed ~321Mi; request gives scheduling headroom, limit stays generous to avoid OOM
             requests:
-              memory: "466Mi"
+              memory: "384Mi"
               cpu: "10m"
             limits:
-              memory: "466Mi"
+              memory: "512Mi"
           readinessProbe:
             httpGet:
               path: /

@@ -8,5 +8,4 @@ resources:
   - pv.yaml
 components:
   - ../../../../components/pod-gateway-client
-  - ../../../../components/resource-profiles/c.micro
   - ../../../../components/node-selectors/mini

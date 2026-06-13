@@ -8,5 +8,4 @@ resources:
   - pv.yaml
   - configmap.yaml
 components:
-  - ../../../../components/resource-profiles/c.micro
   - ../../../../components/node-selectors/mini

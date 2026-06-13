@@ -33,11 +33,14 @@ spec:
               name: downloads
           resources:
             requests:
-              memory: "569Mi"
-              cpu: "10m"
+              # right-sized: observed ~118Mi usage; 256Mi frees scheduling headroom
+              memory: "256Mi"
+              cpu: "200m"
               ephemeral-storage: "1Gi"
             limits:
-              memory: "569Mi"
+              # generous on purpose so we never OOM; limits don't affect scheduling
+              memory: "512Mi"
+              cpu: "750m"
               ephemeral-storage: "4Gi"
       volumes:
         - name: sabnzbd-config

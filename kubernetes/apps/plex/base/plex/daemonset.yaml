@@ -19,10 +19,12 @@ spec:
           image: lscr.io/linuxserver/plex:1.43.2 # {"$imagepolicy": "flux-system:plex"}
           resources:
             requests:
-              memory: "1855Mi"
+              # Right-sized from observed ~266Mi usage; 448Mi gives scheduling headroom.
+              memory: "448Mi"
               cpu: "20m"
             limits:
-              memory: "1855Mi"
+              # Generous limit so transcoding spikes never OOM (limits don't affect scheduling).
+              memory: "1Gi"
           ports:
             - containerPort: 32400 # Plex web interface
 #            - containerPort: 1900  # Plex DLNA server

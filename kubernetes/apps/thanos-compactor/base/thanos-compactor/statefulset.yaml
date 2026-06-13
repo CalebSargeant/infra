@@ -41,11 +41,13 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/thanos/compact
-          # KRR observed ~1.5Gi; give headroom for downsampling. No CPU limit.
+          # Right-sized: observed ~25Mi steady-state; request freed for scheduling
+          # headroom. Compaction is memory-bursty, so keep a generous 2Gi limit
+          # (limits don't affect scheduling) to avoid OOM. No CPU limit.
           resources:
             requests:
               cpu: 50m
-              memory: 1536Mi
+              memory: 768Mi
             limits:
               memory: 2Gi
           livenessProbe:
