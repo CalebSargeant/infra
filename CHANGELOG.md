@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.40.2 (2026-06-13)
+
+### Bug Fixes
+
+- **mariadb**: Explicit inline sizing to relieve ff-pi1 memory pressure
+  ([#365](https://github.com/CalebSargeant/infra/pull/365),
+  [`96c999d`](https://github.com/CalebSargeant/infra/commit/96c999d931df0be63ae95ed32b8ac7163ae1d2f7))
+
+
 ## v1.40.1 (2026-06-13)
 
 ### Bug Fixes
