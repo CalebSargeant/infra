@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.40.3 (2026-06-13)
+
+### Performance Improvements
+
+- **observability,media**: Right-size ff-vm1 reservations for Pi evacuation
+  ([#366](https://github.com/CalebSargeant/infra/pull/366),
+  [`4266a83`](https://github.com/CalebSargeant/infra/commit/4266a8351b17ed86700c1ca015fda7c02aab719b))
+
+
 ## v1.40.2 (2026-06-13)
 
 ### Bug Fixes
