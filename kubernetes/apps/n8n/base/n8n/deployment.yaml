@@ -5,6 +5,13 @@ metadata:
   namespace: automation
 spec:
   replicas: 1
+  # Single replica on a ReadWriteOnce hostPath volume, pinned to the Pi
+  # (nodeSelector type:pi). RollingUpdate would surge a second pod before
+  # killing the old one, but the Pi can't fit two n8n pods (320Mi each) →
+  # new pod stuck Pending, old pod never terminates, image bumps never roll
+  # out. Recreate terminates the old pod first, freeing memory for the new.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: n8n
