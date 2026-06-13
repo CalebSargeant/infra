@@ -7,9 +7,8 @@ metadata:
 resources:
   - ./base
 components:
-  # m.small (1Gi req / 4Gi limit) was over-provisioned: live `kubectl top`
-  # shows MariaDB idling at ~90Mi. m.pico keeps the memory-biased profile
-  # (1:4 cpu:mem ratio, fine for a DB) but drops the reservation to
-  # 512Mi so the Pi isn't holding back 500Mi of nothing.
-  - ../../../../components/resource-profiles/m.pico
+  # Resources are set explicitly inline in base/statefulset.yaml (192Mi req /
+  # 512Mi limit, sized from live `kubectl top` ~82Mi) per repo convention —
+  # the m.pico resource-profile over-reserved 512Mi req / 1Gi limit on ff-pi1
+  # and added a CPU limit. Dropped in favour of inline sizing.
   - ../../../../components/node-selectors/pi
