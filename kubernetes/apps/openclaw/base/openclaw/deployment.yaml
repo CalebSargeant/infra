@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openclaw
+  namespace: automation
+spec:
+  replicas: 1
+  # Single stateful instance on an RWO hostPath volume — never run two at once.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: openclaw
+  template:
+    metadata:
+      labels:
+        app: openclaw
+    spec:
+      initContainers:
+        # Seed openclaw.json into the writable state dir on first boot only.
+        # `test -f || cp` never clobbers a file OpenClaw has since written to
+        # (channels/auth profiles). Same image as the app, so it runs as the
+        # `node` user (uid 1000) and the seeded file is owned correctly.
+        - name: seed-config
+          image: ghcr.io/openclaw/openclaw:2026.6.6
+          command:
+            - sh
+            - -c
+            - 'test -f "$OPENCLAW_CONFIG_PATH" || cp /seed/openclaw.json "$OPENCLAW_CONFIG_PATH"'
+          env:
+            - name: OPENCLAW_CONFIG_PATH
+              value: /home/node/.openclaw/openclaw.json
+          volumeMounts:
+            - name: seed
+              mountPath: /seed
+              readOnly: true
+            - name: state
+              mountPath: /home/node/.openclaw
+              subPath: openclaw
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+      containers:
+        - name: openclaw
+          image: ghcr.io/openclaw/openclaw:2026.6.6
+          # `gateway` (foreground) is the container's main process. --bind lan
+          # serves on the pod IP so the Service/kubelet probes can reach it;
+          # --auth token requires OPENCLAW_GATEWAY_TOKEN on Control-UI connect.
+          command:
+            - node
+            - dist/index.js
+            - gateway
+            - --bind
+            - lan
+            - --auth
+            - token
+            - --port
+            - "18789"
+          ports:
+            - name: http
+              containerPort: 18789
+          env:
+            - name: HOME
+              value: /home/node
+            - name: OPENCLAW_HOME
+              value: /home/node
+            - name: OPENCLAW_STATE_DIR
+              value: /home/node/.openclaw
+            - name: OPENCLAW_CONFIG_DIR
+              value: /home/node/.openclaw
+            - name: OPENCLAW_CONFIG_PATH
+              value: /home/node/.openclaw/openclaw.json
+            - name: OPENCLAW_WORKSPACE_DIR
+              value: /home/node/.openclaw/workspace
+            # No mDNS in k8s.
+            - name: OPENCLAW_DISABLE_BONJOUR
+              value: "1"
+            # Traefik terminates TLS and proxies plaintext ws:// from a private
+            # IP to the pod; allow that (auth is still enforced via the token).
+            - name: OPENCLAW_ALLOW_INSECURE_PRIVATE_WS
+              value: "1"
+            - name: TZ
+              value: Europe/Amsterdam
+            - name: OPENCLAW_GATEWAY_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw
+                  key: gateway-token
+            # Substituted into ${LITELLM_API_KEY} in openclaw.json.
+            - name: LITELLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw
+                  key: litellm-api-key
+          resources:
+            # Node assistant. Inline sizing, no CPU limit (CFS-throttle false
+            # alarms); revisit from KRR once it has run a while.
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 768Mi
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 18789
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 18789
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          volumeMounts:
+            # State + config + workspace (openclaw.json lives here, writable).
+            - name: state
+              mountPath: /home/node/.openclaw
+              subPath: openclaw
+            # Auth-profile encryption keys — persist so secrets survive restarts.
+            - name: state
+              mountPath: /home/node/.config/openclaw
+              subPath: config-openclaw
+      volumes:
+        - name: seed
+          configMap:
+            name: openclaw-config
+        - name: state
+          persistentVolumeClaim:
+            claimName: openclaw

@@ -8,6 +8,7 @@ resources:
   - ./litellm
   - ./mikrotik-minder
   - ./n8n
+  - ./openclaw
   # magmamoose products (open-core dashboards; external-repo + image automation)
   - ./diatreme-pro
   # backup

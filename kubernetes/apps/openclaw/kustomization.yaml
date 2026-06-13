@@ -1,0 +1,6 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Only references env overlays. ./base/openclaw is the manifest library, applied
+# exclusively by the per-env Flux Kustomization (prod/openclaw/flux-kustomization.yaml).
+resources:
+  - ./prod

@@ -11,7 +11,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: ad96381009ad56fd3ceae000188ee13d7ba3b7cfefd4f2a8f4bec5b075a5e925
+        checksum/config: b26f0d84ce7afa4d8d93338c19f06b786b45fa6fa36bc1cdcdf009165c9a1188
         checksum/auth-proxy-config: 41cbc6f2467fb10b6873fe82106f058bffdf93826ecf2fa87ffb5b6a1c8b2e05
       labels:
         app: litellm
@@ -31,14 +31,19 @@ spec:
             - name: http
               containerPort: 4000
           env:
-            # Subscription pass-through needs only the gateway master key; the
-            # agent forwards its Claude OAuth token upstream. (For per-token API
-            # billing, add ANTHROPIC_API_KEY / DEEPSEEK_API_KEY from the Secret.)
+            # Gateway master key (clients authenticate via x-litellm-api-key).
             - name: LITELLM_MASTER_KEY
               valueFrom:
                 secretKeyRef:
                   name: litellm
                   key: master-key
+            # Per-token Anthropic API billing for the Claude models (the OAuth
+            # Max-subscription pass-through has been removed).
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm
+                  key: anthropic-api-key
             # Admin UI (served at /ui) — needs Postgres + UI login creds.
             - name: STORE_MODEL_IN_DB
               value: "true"
