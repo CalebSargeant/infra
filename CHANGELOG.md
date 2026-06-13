@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.41.0 (2026-06-13)
+
+### Features
+
+- **openclaw**: Self-hosted OpenClaw assistant + LiteLLM API billing
+  ([#368](https://github.com/CalebSargeant/infra/pull/368),
+  [`eeab55b`](https://github.com/CalebSargeant/infra/commit/eeab55b641c95ae347e79db5b97e5f93156590af))
+
+
 ## v1.40.3 (2026-06-13)
 
 ### Performance Improvements
