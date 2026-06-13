@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v1.40.1 (2026-06-13)
+
+### Bug Fixes
+
+- **n8n**: Recreate strategy to unblock image-automation rollouts
+  ([#364](https://github.com/CalebSargeant/infra/pull/364),
+  [`ef20b32`](https://github.com/CalebSargeant/infra/commit/ef20b327a164e4829ac5318a5e57cfecc43a603e))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`0bec0af`](https://github.com/CalebSargeant/infra/commit/0bec0af2ded94f1065b847f85ee2aaa05e99ab6e))
+
+
 ## v1.40.0 (2026-06-13)
 
 ### Features
