@@ -18,11 +18,17 @@ spec:
         - name: mariadb
           image: mariadb:11.2
           resources:
+            # m.pico resource-profile reserved 512Mi req / 1Gi limit (plus a 250m
+            # CPU limit) but MariaDB idles ~82Mi on ff-pi1 (WordPress is the only
+            # consumer and is itself tiny). Explicit inline sizing per repo
+            # convention: 192Mi request frees ~320Mi of the Pi's memory-request
+            # pressure, while a 512Mi limit keeps generous burst room for the DB.
+            # CPU request only — no CPU limit (avoids false CFS-throttle alerts).
             requests:
-              memory: "113Mi"
-              cpu: "10m"
+              memory: "192Mi"
+              cpu: "50m"
             limits:
-              memory: "113Mi"
+              memory: "512Mi"
           ports:
             - containerPort: 3306
               name: mysql
