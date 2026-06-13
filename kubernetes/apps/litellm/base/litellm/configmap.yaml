@@ -5,46 +5,47 @@ metadata:
   namespace: automation
 data:
   config.yaml: |
-    # LiteLLM proxy for Diatreme Dispatch, configured for Claude Max-subscription
-    # pass-through: the agent sends its Claude OAuth token (Authorization header),
-    # which LiteLLM forwards upstream (forward_client_headers_to_llm_api) for
-    # flat-rate subscription billing — so the Claude entries need NO api_key. The
-    # gateway authenticates clients via the master key (x-litellm-api-key header).
-    #
-    # To put a model on per-token API billing instead, add
-    #   api_key: os.environ/ANTHROPIC_API_KEY   (or DEEPSEEK_API_KEY)
-    # to its entry and provide that key via the ExternalSecret + Deployment env.
+    # LiteLLM proxy. Claude models use per-token Anthropic API billing via
+    # ANTHROPIC_API_KEY (OCI Vault -> ExternalSecret -> Deployment env). The
+    # earlier Claude Max-subscription OAuth pass-through has been removed
+    # (no forward_*_headers; the Claude entries now carry an api_key). The
+    # gateway still authenticates clients via the master key in the
+    # x-litellm-api-key header (the nginx auth-proxy maps OpenAI-style
+    # `Authorization: Bearer` onto it for OpenAI-protocol clients).
     model_list:
       - model_name: claude-opus-4-8
         litellm_params:
           model: anthropic/claude-opus-4-8
+          api_key: os.environ/ANTHROPIC_API_KEY
         model_info:
           mode: chat
           base_model: anthropic/claude-opus-4-8
-          auth_mode: claude-code-oauth-pass-through
-          billing_mode: claude-max-subscription
-          credential_source: client_authorization_header
-          notes: "No Anthropic API key is configured; LiteLLM forwards the client's Claude Code OAuth bearer token upstream."
+          auth_mode: anthropic-api-key
+          billing_mode: anthropic-api
+          credential_source: oci-vault:litellm-anthropic-api-key
+          notes: "Per-token Anthropic API billing via ANTHROPIC_API_KEY. OAuth subscription pass-through removed."
       - model_name: claude-sonnet-4-6
         litellm_params:
           model: anthropic/claude-sonnet-4-6
+          api_key: os.environ/ANTHROPIC_API_KEY
         model_info:
           mode: chat
           base_model: anthropic/claude-sonnet-4-6
-          auth_mode: claude-code-oauth-pass-through
-          billing_mode: claude-max-subscription
-          credential_source: client_authorization_header
-          notes: "No Anthropic API key is configured; LiteLLM forwards the client's Claude Code OAuth bearer token upstream."
+          auth_mode: anthropic-api-key
+          billing_mode: anthropic-api
+          credential_source: oci-vault:litellm-anthropic-api-key
+          notes: "Per-token Anthropic API billing via ANTHROPIC_API_KEY. OAuth subscription pass-through removed."
       - model_name: claude-haiku-4-5
         litellm_params:
           model: anthropic/claude-haiku-4-5
+          api_key: os.environ/ANTHROPIC_API_KEY
         model_info:
           mode: chat
           base_model: anthropic/claude-haiku-4-5
-          auth_mode: claude-code-oauth-pass-through
-          billing_mode: claude-max-subscription
-          credential_source: client_authorization_header
-          notes: "No Anthropic API key is configured; LiteLLM forwards the client's Claude Code OAuth bearer token upstream."
+          auth_mode: anthropic-api-key
+          billing_mode: anthropic-api
+          credential_source: oci-vault:litellm-anthropic-api-key
+          notes: "Per-token Anthropic API billing via ANTHROPIC_API_KEY. OAuth subscription pass-through removed."
       - model_name: qwen2.5-coder-7b-instruct-local
         litellm_params:
           model: ollama_chat/qwen2.5-coder:7b-instruct-q4_K_M
@@ -84,11 +85,9 @@ data:
           notes: "Self-hosted Ollama qwen3:4b-q4_K_M. Tool-calling enabled for Warp Agent Mode (native tool_calls via Ollama's tools template). Sized for GTX 1060 6GB at q4."
     general_settings:
       master_key: os.environ/LITELLM_MASTER_KEY
-      # Forward the client's Authorization (the Claude OAuth token) to Anthropic.
-      forward_client_headers_to_llm_api: true
-      # Use a dedicated header for the proxy master key to avoid conflict with the Authorization header.
+      # Dedicated header for the proxy master key. The nginx auth-proxy maps
+      # OpenAI-style `Authorization: Bearer` onto this header for OpenAI-protocol
+      # clients (Warp, Codex, OpenClaw, the OpenAI SDK).
       litellm_key_header_name: x-litellm-api-key
     litellm_settings:
-      # Forward provider-specific auth headers such as Claude's OAuth bearer token.
-      forward_llm_provider_auth_headers: true
       drop_params: true

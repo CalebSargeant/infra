@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openclaw-config
+  namespace: automation
+data:
+  # Seed config for the OpenClaw Gateway. An initContainer copies this into the
+  # writable state dir (/home/node/.openclaw/openclaw.json) on FIRST boot only —
+  # OpenClaw treats that file as live config (channels/auth profiles are written
+  # there at runtime), so we never clobber it. To change this base config later,
+  # edit the live file (UI or `kubectl exec`) or delete it and restart to re-seed.
+  #
+  #   - gateway.mode=local + controlUi.allowedOrigins are REQUIRED for a
+  #     non-loopback bind (the Gateway rejects Control-UI origins not listed).
+  #     openclaw.sargeant.co is the LAN-only ingress host.
+  #   - The litellm provider points at the in-cluster LiteLLM nginx auth-proxy
+  #     (:8080 maps Authorization: Bearer -> x-litellm-api-key). ${LITELLM_API_KEY}
+  #     is substituted from the Deployment env (OCI Vault: litellm-master-key).
+  #   - claude-sonnet-4-6 is now per-token Anthropic API billing inside LiteLLM.
+  openclaw.json: |
+    {
+      "gateway": {
+        "mode": "local",
+        "controlUi": {
+          "allowedOrigins": [
+            "https://openclaw.sargeant.co",
+            "https://openclaw.sargeant.local",
+            "http://localhost:18789",
+            "http://127.0.0.1:18789"
+          ]
+        }
+      },
+      "models": {
+        "providers": {
+          "litellm": {
+            "baseUrl": "http://litellm.automation.svc.cluster.local:8080",
+            "apiKey": "${LITELLM_API_KEY}",
+            "api": "openai-completions",
+            "models": [
+              {
+                "id": "claude-sonnet-4-6",
+                "name": "Claude Sonnet 4.6 (LiteLLM)",
+                "reasoning": true,
+                "input": ["text", "image"],
+                "contextWindow": 200000,
+                "maxTokens": 64000
+              }
+            ]
+          }
+        }
+      },
+      "agents": {
+        "defaults": {
+          "model": { "primary": "litellm/claude-sonnet-4-6" }
+        }
+      }
+    }
