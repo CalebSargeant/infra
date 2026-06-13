@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.42.0 (2026-06-13)
+
+### Features
+
+- **n8n**: Migrate off ff-pi1 to worker on Longhorn
+  ([#367](https://github.com/CalebSargeant/infra/pull/367),
+  [`9920f49`](https://github.com/CalebSargeant/infra/commit/9920f49aab3ce8dd3515b7531bb024ae6a66f01e))
+
+
 ## v1.41.0 (2026-06-13)
 
 ### Features
