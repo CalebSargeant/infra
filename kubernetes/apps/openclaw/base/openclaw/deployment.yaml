@@ -16,7 +16,7 @@ spec:
       annotations:
         # Rolls the pod (→ re-seed) whenever the git-managed openclaw.json changes.
         # sha256 of kubernetes/apps/openclaw/base/openclaw/configmap.yaml.
-        checksum/config: d4f887af17dd0f7b78fecf4cc05fcff50fe14149ecdf82001e13ad7663de1d7c
+        checksum/config: 2586438c2b09056e1365e403fddb6594bbbaf48f15c5e3a4343992344c8185a9
       labels:
         app: openclaw
     spec:
@@ -122,6 +122,17 @@ spec:
                 secretKeyRef:
                   name: openclaw
                   key: browserless-token
+            # Slack Socket Mode tokens (referenced by channels.slack SecretRefs).
+            - name: SLACK_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw
+                  key: slack-bot-token
+            - name: SLACK_APP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw
+                  key: slack-app-token
           resources:
             # Node assistant. Inline sizing, no CPU limit (CFS-throttle false
             # alarms); revisit from KRR once it has run a while.
