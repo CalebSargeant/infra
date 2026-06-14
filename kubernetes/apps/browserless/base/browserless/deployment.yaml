@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: browserless
+  namespace: automation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: browserless
+  template:
+    metadata:
+      labels:
+        app: browserless
+    spec:
+      containers:
+        - name: browserless
+          # Shared headless-Chromium service (CDP/WebSocket) for any in-cluster or
+          # LAN Playwright/Puppeteer client (OpenClaw, n8n, ...). Multi-arch image;
+          # pinned to ff-vm1 (type=mini, amd64) via the node-selector component.
+          image: ghcr.io/browserless/chromium:v2.52.1
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: browserless
+                  key: token
+            # Bound memory: cap concurrent + queued sessions and per-session time.
+            - name: CONCURRENT
+              value: "3"
+            - name: QUEUED
+              value: "6"
+            - name: TIMEOUT
+              value: "120000"
+            - name: TZ
+              value: Europe/Amsterdam
+          resources:
+            # Chromium is memory-hungry; no CPU limit (CFS-throttle false alarms).
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              memory: 1536Mi
+          readinessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          volumeMounts:
+            # Chromium needs a real /dev/shm — the default 64Mi tmpfs crashes tabs.
+            - name: dshm
+              mountPath: /dev/shm
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 256Mi

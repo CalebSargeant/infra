@@ -1,0 +1,43 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: browserless
+  namespace: automation
+  labels:
+    app: browserless
+  annotations:
+    # LAN-only (browserless.sargeant.co -> Traefik LB on a private IP), so the
+    # cert uses the DNS-01 issuer. Lets LAN Playwright clients use the shared
+    # browser too; auth is still the ?token=. Not on the public Cloudflare tunnel.
+    cert-manager.io/cluster-issuer: letsencrypt-dns
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/service.serversscheme: http
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: browserless.sargeant.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: browserless
+                port:
+                  number: 3000
+    - host: browserless.sargeant.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: browserless
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+        - browserless.sargeant.co
+      secretName: browserless-tls
