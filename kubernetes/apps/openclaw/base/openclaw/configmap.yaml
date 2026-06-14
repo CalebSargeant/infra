@@ -21,6 +21,9 @@ data:
   #   - Models (Claude/OpenAI/DeepSeek) are all per-token API billing inside LiteLLM;
   #     ids must match LiteLLM model_name. primary=claude-sonnet-4-6 with OpenAI/
   #     DeepSeek fallbacks; switch at runtime in chat with `/model`.
+  #   - tools.web.search: keyless DuckDuckGo web search. cron: scheduled routines
+  #     (create with `openclaw cron create ...`). Memory (memory-core SQLite) is on
+  #     by default; OPENAI_API_KEY (Deployment env) upgrades it to semantic search.
   openclaw.json: |
     {
       "gateway": {
@@ -94,5 +97,9 @@ data:
             "fallbacks": ["litellm/gpt-5.5", "litellm/deepseek-v4-pro"]
           }
         }
-      }
+      },
+      "tools": {
+        "web": { "search": { "enabled": true, "provider": "duckduckgo" } }
+      },
+      "cron": { "enabled": true }
     }

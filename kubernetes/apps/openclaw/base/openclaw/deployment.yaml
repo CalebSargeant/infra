@@ -16,7 +16,7 @@ spec:
       annotations:
         # Rolls the pod (→ re-seed) whenever the git-managed openclaw.json changes.
         # sha256 of kubernetes/apps/openclaw/base/openclaw/configmap.yaml.
-        checksum/config: f518f8754b336a3b5fc247ed56c597fe4272301d82601abf916f438347ad4452
+        checksum/config: ed0f7d1da868acdabcf735740278d7dc2e53be88695e633c9c62b852b3f957ca
       labels:
         app: openclaw
     spec:
@@ -98,6 +98,12 @@ spec:
                 secretKeyRef:
                   name: openclaw
                   key: litellm-api-key
+            # Enables semantic memory embeddings (and OpenAI STT when voice is added).
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw
+                  key: openai-api-key
           resources:
             # Node assistant. Inline sizing, no CPU limit (CFS-throttle false
             # alarms); revisit from KRR once it has run a while.
