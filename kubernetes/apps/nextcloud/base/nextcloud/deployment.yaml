@@ -5,6 +5,11 @@ metadata:
   namespace: nextcloud
 spec:
   replicas: 1
+  # Single replica on a ReadWriteOnce config volume — Recreate so the old pod
+  # releases the PVC before the new one starts (RollingUpdate would surge a second
+  # pod that can't attach the RWO volume and stay Pending).
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: nextcloud

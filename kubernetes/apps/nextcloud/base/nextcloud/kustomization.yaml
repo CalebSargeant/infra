@@ -7,3 +7,7 @@ resources:
   - pvc.yaml
   - pv.yaml
   - namespace.yaml
+components:
+  # Migrated off ff-pi1: /config (was Pi-local hostPath) now Longhorn, /data now a
+  # proper NFS PV, pinned to the worker node instead of the Pi (system node).
+  - ../../../../components/node-selectors/worker
