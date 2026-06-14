@@ -2,6 +2,28 @@
 
 <!-- version list -->
 
+## v1.46.0 (2026-06-14)
+
+### Chores
+
+- **media**: Bump image tags
+  ([`714d550`](https://github.com/CalebSargeant/infra/commit/714d550ee4465608c3a813215ad1db4ee73196fa))
+
+### Features
+
+- **mariadb**: Migrate off ff-pi1 to worker on Longhorn
+  ([#376](https://github.com/CalebSargeant/infra/pull/376),
+  [`dcd4a27`](https://github.com/CalebSargeant/infra/commit/dcd4a275b7e351e621044f413f11e54f07e85dbc))
+
+- **openclaw**: Migrate off ff-pi1 to worker on Longhorn
+  ([#375](https://github.com/CalebSargeant/infra/pull/375),
+  [`a966e84`](https://github.com/CalebSargeant/infra/commit/a966e849e1e3882aede330c04c8ccd4da0ba7971))
+
+- **wordpress**: Migrate off ff-pi1 to worker on Longhorn
+  ([#377](https://github.com/CalebSargeant/infra/pull/377),
+  [`8d20d7e`](https://github.com/CalebSargeant/infra/commit/8d20d7ec29db9ef788f6fc663c66db78bae7795a))
+
+
 ## v1.45.0 (2026-06-14)
 
 ### Features
