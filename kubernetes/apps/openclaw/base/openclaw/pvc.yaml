@@ -9,7 +9,10 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: openclaw
+  # Longhorn (replicated, node-independent) so openclaw runs on the worker
+  # instead of being pinned to ff-pi1's local /mnt/nvme/openclaw. State+config+
+  # identity (~1.4M, incl. the sqlite db) is migrated before cutover.
+  storageClassName: longhorn
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -22,4 +25,5 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: openclaw-auth
+  # Longhorn — auth-profile dir is empty today, starts fresh on the worker.
+  storageClassName: longhorn

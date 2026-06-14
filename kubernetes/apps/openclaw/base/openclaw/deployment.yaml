@@ -16,6 +16,11 @@ spec:
       labels:
         app: openclaw
     spec:
+      # fsGroup 1000 (node) makes the dynamic Longhorn volumes writable by the
+      # non-root openclaw process — a fresh PV mounts root:root, unlike the old
+      # pre-chowned hostPath.
+      securityContext:
+        fsGroup: 1000
       initContainers:
         # Seed openclaw.json into the writable state dir on first boot only.
         # `test -f || cp` never clobbers a file OpenClaw has since written to
