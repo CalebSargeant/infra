@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: browserless
+  namespace: automation
+spec:
+  selector:
+    app: browserless
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
+# In-cluster CDP endpoint for Playwright/Puppeteer clients:
+#   ws://browserless.automation.svc.cluster.local:3000?token=<TOKEN>
+#   (Playwright: chromium.connectOverCDP)

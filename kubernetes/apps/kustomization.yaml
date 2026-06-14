@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   # automation
   - ./atlantis
+  - ./browserless
   - ./homeassistant
   - ./homebridge
   - ./litellm
