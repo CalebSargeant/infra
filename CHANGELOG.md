@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.47.0 (2026-06-14)
+
+### Features
+
+- **homeassistant**: Migrate off ff-pi1 to worker on Longhorn
+  ([#379](https://github.com/CalebSargeant/infra/pull/379),
+  [`b973f59`](https://github.com/CalebSargeant/infra/commit/b973f598d018383f538db6581b222b01b85628c4))
+
+- **homebridge**: Migrate off ff-pi1 to worker on Longhorn
+  ([#380](https://github.com/CalebSargeant/infra/pull/380),
+  [`676fcb7`](https://github.com/CalebSargeant/infra/commit/676fcb742809014479c9ad57365f341cf0caba2d))
+
+
 ## v1.46.1 (2026-06-14)
 
 ### Bug Fixes
