@@ -13,20 +13,24 @@ spec:
       app: openclaw
   template:
     metadata:
+      annotations:
+        # Rolls the pod (→ re-seed) whenever the git-managed openclaw.json changes.
+        # sha256 of kubernetes/apps/openclaw/base/openclaw/configmap.yaml.
+        checksum/config: f518f8754b336a3b5fc247ed56c597fe4272301d82601abf916f438347ad4452
       labels:
         app: openclaw
     spec:
       initContainers:
-        # Seed openclaw.json into the writable state dir on first boot only.
-        # `test -f || cp` never clobbers a file OpenClaw has since written to
-        # (channels/auth profiles). Same image as the app, so it runs as the
-        # `node` user (uid 1000) and the seeded file is owned correctly.
+        # OVERWRITE openclaw.json from the ConfigMap on every boot — this file is
+        # git-managed (OpenClaw never writes it at runtime; identity/state live in
+        # sibling dirs). Same image as the app, so it runs as the `node` user
+        # (uid 1000) and the seeded file is owned correctly.
         - name: seed-config
           image: ghcr.io/openclaw/openclaw:2026.6.6
           command:
             - sh
             - -c
-            - 'test -f "$OPENCLAW_CONFIG_PATH" || cp /seed/openclaw.json "$OPENCLAW_CONFIG_PATH"'
+            - 'cp -f /seed/openclaw.json "$OPENCLAW_CONFIG_PATH"'
           env:
             - name: OPENCLAW_CONFIG_PATH
               value: /home/node/.openclaw/openclaw.json

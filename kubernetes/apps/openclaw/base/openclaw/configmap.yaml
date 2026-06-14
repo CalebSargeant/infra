@@ -4,11 +4,13 @@ metadata:
   name: openclaw-config
   namespace: automation
 data:
-  # Seed config for the OpenClaw Gateway. An initContainer copies this into the
-  # writable state dir (/home/node/.openclaw/openclaw.json) on FIRST boot only —
-  # OpenClaw treats that file as live config (channels/auth profiles are written
-  # there at runtime), so we never clobber it. To change this base config later,
-  # edit the live file (UI or `kubectl exec`) or delete it and restart to re-seed.
+  # GIT-MANAGED config for the OpenClaw Gateway (source of truth). An initContainer
+  # OVERWRITES /home/node/.openclaw/openclaw.json from this ConfigMap on every pod
+  # start, and the Deployment's checksum/config annotation rolls the pod whenever
+  # this file changes — so edits here apply on the next Flux reconcile. Safe because
+  # OpenClaw never writes openclaw.json at runtime (it persists identity/state/auth
+  # in sibling dirs + an openclaw.json.last-good backup). Do NOT hand-edit the live
+  # file — it won't survive a restart; change it here.
   #
   #   - gateway.mode=local + controlUi.allowedOrigins are REQUIRED for a
   #     non-loopback bind (the Gateway rejects Control-UI origins not listed).
@@ -16,7 +18,9 @@ data:
   #   - The litellm provider points at the in-cluster LiteLLM nginx auth-proxy
   #     (:8080 maps Authorization: Bearer -> x-litellm-api-key). ${LITELLM_API_KEY}
   #     is substituted from the Deployment env (OCI Vault: litellm-master-key).
-  #   - claude-sonnet-4-6 is now per-token Anthropic API billing inside LiteLLM.
+  #   - Models (Claude/OpenAI/DeepSeek) are all per-token API billing inside LiteLLM;
+  #     ids must match LiteLLM model_name. primary=claude-sonnet-4-6 with OpenAI/
+  #     DeepSeek fallbacks; switch at runtime in chat with `/model`.
   openclaw.json: |
     {
       "gateway": {
@@ -44,6 +48,40 @@ data:
                 "input": ["text", "image"],
                 "contextWindow": 200000,
                 "maxTokens": 64000
+              },
+              {
+                "id": "gpt-5.5",
+                "name": "GPT-5.5 (OpenAI)",
+                "reasoning": true,
+                "input": ["text", "image"],
+                "contextWindow": 400000,
+                "maxTokens": 32000
+              },
+              {
+                "id": "gpt-5.4-mini",
+                "name": "GPT-5.4 mini (OpenAI)",
+                "reasoning": true,
+                "input": ["text", "image"],
+                "contextWindow": 400000,
+                "maxTokens": 32000
+              },
+              {
+                "id": "deepseek-v4-pro",
+                "name": "DeepSeek V4 Pro",
+                "reasoning": true,
+                "input": ["text"],
+                "contextWindow": 128000,
+                "maxTokens": 8000,
+                "compat": { "requiresReasoningContentOnAssistantMessages": true }
+              },
+              {
+                "id": "deepseek-v4-flash",
+                "name": "DeepSeek V4 Flash",
+                "reasoning": true,
+                "input": ["text"],
+                "contextWindow": 128000,
+                "maxTokens": 8000,
+                "compat": { "requiresReasoningContentOnAssistantMessages": true }
               }
             ]
           }
@@ -51,7 +89,10 @@ data:
       },
       "agents": {
         "defaults": {
-          "model": { "primary": "litellm/claude-sonnet-4-6" }
+          "model": {
+            "primary": "litellm/claude-sonnet-4-6",
+            "fallbacks": ["litellm/gpt-5.5", "litellm/deepseek-v4-pro"]
+          }
         }
       }
     }
