@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.45.0 (2026-06-14)
+
+### Features
+
+- **nextcloud**: Migrate off ff-pi1 to worker
+  ([#373](https://github.com/CalebSargeant/infra/pull/373),
+  [`087d6d3`](https://github.com/CalebSargeant/infra/commit/087d6d3fe0f1ebd3fb9f71673574da19c317ae9f))
+
+
 ## v1.44.0 (2026-06-14)
 
 ### Features
