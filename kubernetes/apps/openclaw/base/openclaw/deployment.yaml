@@ -16,7 +16,7 @@ spec:
       annotations:
         # Rolls the pod (→ re-seed) whenever the git-managed openclaw.json changes.
         # sha256 of kubernetes/apps/openclaw/base/openclaw/configmap.yaml.
-        checksum/config: 50a210b8134361d092a30e2f26304c5a8d36b859efda86c781e4e6cd322f365b
+        checksum/config: d4f887af17dd0f7b78fecf4cc05fcff50fe14149ecdf82001e13ad7663de1d7c
       labels:
         app: openclaw
     spec:
@@ -116,6 +116,12 @@ spec:
                 secretKeyRef:
                   name: openclaw
                   key: ha-mcp-token
+            # Browserless token (substituted into ${BROWSERLESS_TOKEN} in browser cdpUrl).
+            - name: BROWSERLESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw
+                  key: browserless-token
           resources:
             # Node assistant. Inline sizing, no CPU limit (CFS-throttle false
             # alarms); revisit from KRR once it has run a while.
