@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.48.0 (2026-06-14)
+
+### Features
+
+- **nextcloud**: Make admin DB role password durable via OCI Vault + CNPG
+  ([#383](https://github.com/CalebSargeant/infra/pull/383),
+  [`c7960ca`](https://github.com/CalebSargeant/infra/commit/c7960ca0ee077199057d72bdf2e3b2e2351c7a8a))
+
+### Refactoring
+
+- **homeassistant**: Move recorder db_url to ExternalSecret (OCI Vault)
+  ([#382](https://github.com/CalebSargeant/infra/pull/382),
+  [`f0fbc81`](https://github.com/CalebSargeant/infra/commit/f0fbc81f43fbd3cec834c1d6166c1226544c924f))
+
+
 ## v1.47.1 (2026-06-14)
 
 ### Bug Fixes
