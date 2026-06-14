@@ -4,6 +4,7 @@ resources:
   - daemonset.yaml
   - service.yaml
   - configmap.yaml
+  - externalsecret.yaml
   - ingress.yaml
   - middleware.yaml
   - pvc.yaml

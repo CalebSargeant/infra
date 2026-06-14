@@ -1,22 +1,36 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-    name: homeassistant-config
-    namespace: automation
+  name: homeassistant-config
+  namespace: automation
 data:
-    configuration.yaml: ENC[AES256_GCM,data:JP9VR0ErNNLjeyrU9oZPgSlxRzFpJKrqtjFHo7tOBaS8EQXPsyUJMe95+Kl0DAIe1foM8FlPL7lxwH2uGJhZBUEAp84p7lErCEah2zosGLL8oLLd+CyULSjHF/lSvJ61RrtDXPQcXJce0eWSrJDXZH6Iz/+yVEzinv3heEdeor/hO9hW/Gk4PyxfzP+I+clUUGVCnxpED0RNW85Z7x3kkc/Venm1gi2x2NIlVCnH5h8N07smrxw4JmyfoXyB0xdS0eyLVs3bLZvkQawujOs8H5ktZykyd03zF4hOlEpxzbel4t7Y7A9RWRoJNK5Ku9x3bLSAJTAvc0JtWlJ2lIpSFI2x3X/UnbI6rgpyetnpw7Zstb7ieMEzD8nejJcwAHfy2p+cm4OonG2YtleMJcWEBdocB1e1lkP4rYnSvhqVbUMyUBqSJ7Popoi4ARic6nUToMTlUw3va8lwhR9p94wMg9yXDLbArZQrUNnQA4R2r3y6ZqygAJ3lP/rWZfFROQxafDoKYsF+b0KJ1VNOpjGrNoGe1SyscjhKEVpRZH4M6F7VznSrRvGyYFgtsA9648P5xlfVTv9pOEV3JotaORxS7dQFC4U1K+KDmgLyBcYFULZ+KkQwOhQi/qA6ea+wXzgI+wd6lri273esWiLppISocBPo1ujA9/nsWKVn9Ee8V9LoPwCx4n4+AObgtrR1O+205l7Sy7LMB/Z0ssD3PVYpQZYAtMY98MiWfDzBXKDSI/e2jT5Bbg3nL7Zj4IQ0B1T48U43VNfbNtaB3PbJ/5X6ZAB6R568h13sE4RmOXVMjWO5ZtPbdOe45kendgZZb6+SgHhUzuxPwQjs1wRNYqNf6gMG0h3Fv/AmGkKsT+56ZrYWwrkCD5ptilGJyhEpgETmcPC2HRFgjeiHTzc1jW6EWLjI+/rrN08S1uhggCuuxosRx4rrOuP+k5oEZfw=,iv:PKBeHDx3gifJZPoECFbdV+LsjCd7b6Bxn/eu+qVIPwI=,tag:htreBq3QyYbZpUSi12jZtw==,type:str]
-sops:
-    age:
-        - enc: |
-            -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAxdm5tNWpITXk3WFhvZ1N4
-            NUZ1S1NnaFFoWWVDV2FkamRhVWgrK1RlOGp3CkE2MVFCU0U2TDVPc2tFaGY1dGhx
-            aFZlUmIwNXZ0anFTenU0aWlXQVVKeU0KLS0tIHRWQ0NiRFM5YThKdnJaSStkQUdr
-            YnhCNy8wcldtUjB0RGMvMXBpODMwV2MKHUXOp+gCBiKFzkcCXsfImItne3H6FYh+
-            69jNZaxYlHLkXhpIlZcostHBCDsbsvJtV3lMB670YAQoNzBhgg80mA==
-            -----END AGE ENCRYPTED FILE-----
-          recipient: age1yj3wdeleng98w9rv46yh40ettc78r9k4r4wgnx7ja5zxmyt8qe7snjg0a0
-    encrypted_regex: ^(data|stringData)$
-    lastmodified: "2026-06-14T09:46:55Z"
-    mac: ENC[AES256_GCM,data:iJ9iHz6uB6vVQQeJ8REjH348izW6oMU82HvXGoZElmdKLn9V8l7xM8JoIq+wlIL4WAiL7x118rbOX6/WLhhPYS50nwfpzZCnTJaJgZYnPNcBsPkbGwrL3nz20yZfoLHBCnbBnmF36UWXWXZ4KnbfuO+36Cb+RhztX+2gV8ksRa0=,iv:t3aZD9kOg8hwluxsgcAkelXQdJalsYWi7XVzAoY6pOo=,tag:eQGQBlqD0S3BAZXgKnLccg==,type:str]
-    version: 3.13.1
+  # No secrets here — the recorder db_url is injected at runtime from the
+  # RECORDER_DB_URL env var (Secret homeassistant-recorder <- ExternalSecret
+  # <- OCI Vault `homeassistant-recorder-db-url`). So this ConfigMap is plain
+  # (no SOPS) on purpose; see externalsecret.yaml + daemonset.yaml.
+  configuration.yaml: |
+    # Loads default set of integrations. Do not remove.
+    default_config:
+
+    # HTTP Configuration for reverse proxy support
+    http:
+      use_x_forwarded_for: true
+      trusted_proxies:
+        - 10.42.0.0/16      # Pod CIDR range
+        - 10.43.0.0/16      # Service CIDR range
+        - 192.168.19.0/24   # Host network range
+        - 127.0.0.1
+        - ::1
+
+    # Load frontend themes from the themes folder
+    frontend:
+      themes: !include_dir_merge_named themes
+
+    automation: !include automations.yaml
+    script: !include scripts.yaml
+    scene: !include scenes.yaml
+
+    # Database configuration - PostgreSQL (shared in-cluster CNPG).
+    # db_url comes from the RECORDER_DB_URL env var (see comment above).
+    recorder:
+      db_url: !env_var RECORDER_DB_URL
