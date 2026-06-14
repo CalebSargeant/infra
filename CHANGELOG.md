@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.47.1 (2026-06-14)
+
+### Bug Fixes
+
+- **homeassistant**: Repoint recorder to local CNPG, drop dead Neon DB
+  ([#381](https://github.com/CalebSargeant/infra/pull/381),
+  [`2c52084`](https://github.com/CalebSargeant/infra/commit/2c5208438074ab926f71cd796b9eda005251cb24))
+
+
 ## v1.47.0 (2026-06-14)
 
 ### Features
