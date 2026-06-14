@@ -81,6 +81,11 @@ spec:
             # No mDNS in k8s.
             - name: OPENCLAW_DISABLE_BONJOUR
               value: "1"
+            # Pre-install/load non-core channel plugins at boot (clobber-proof —
+            # the git-managed openclaw.json overwrite would otherwise drop a
+            # runtime `plugins install`). Slack is a separate ClawHub plugin.
+            - name: OPENCLAW_EXTENSIONS
+              value: "clawhub:@openclaw/slack"
             # Traefik terminates TLS and proxies plaintext ws:// from a private
             # IP to the pod; allow that (auth is still enforced via the token).
             - name: OPENCLAW_ALLOW_INSECURE_PRIVATE_WS
