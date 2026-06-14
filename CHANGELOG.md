@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.53.1 (2026-06-14)
+
+### Bug Fixes
+
+- **openclaw**: Load Slack channel plugin at boot via OPENCLAW_EXTENSIONS
+  ([#392](https://github.com/CalebSargeant/infra/pull/392),
+  [`3b77678`](https://github.com/CalebSargeant/infra/commit/3b776781f8b8e53962f0501222e3a695e03aee97))
+
+
 ## v1.53.0 (2026-06-14)
 
 ### Features
