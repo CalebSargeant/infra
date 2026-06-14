@@ -117,6 +117,13 @@ data:
           "botToken": { "source": "env", "provider": "default", "id": "TELEGRAM_BOT_TOKEN" },
           "dmPolicy": "allowlist",
           "allowFrom": ["8489671466"]
+        },
+        "slack": {
+          "enabled": true,
+          "mode": "socket",
+          "botToken": { "source": "env", "provider": "default", "id": "SLACK_BOT_TOKEN" },
+          "appToken": { "source": "env", "provider": "default", "id": "SLACK_APP_TOKEN" },
+          "dmPolicy": "pairing"
         }
       },
       "mcp": {
@@ -129,7 +136,7 @@ data:
         }
       },
       "messages": {
-        "tts": { "auto": "always", "provider": "microsoft" }
+        "tts": { "auto": "off", "provider": "microsoft" }
       },
       "browser": {
         "enabled": true,
