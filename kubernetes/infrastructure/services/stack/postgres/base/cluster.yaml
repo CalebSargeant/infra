@@ -6,7 +6,7 @@ metadata:
   namespace: database
 spec:
   instances: 3
-  
+
   postgresql:
     parameters:
       max_connections: "200"
@@ -22,39 +22,47 @@ spec:
       huge_pages: "off"
       min_wal_size: "1GB"
       max_wal_size: "4GB"
-  
+
   storage:
     size: 10Gi
     storageClass: local-path
-  
+
   bootstrap:
     initdb:
       database: app
       owner: app
       secret:
         name: postgres-app-user
-  
+
   monitoring:
     enablePodMonitor: true
 
   managed:
-    # Only the roles declared here are reconciled by CNPG; every other role
-    # (postgres, app, litellm, ...) is left untouched. Declaring a role keeps its
-    # password in sync with its passwordSecret so it can't silently drift from what
-    # the apps store — a neondb_owner drift took n8n/sonarr/radarr/etc. offline.
-    # Attributes mirror the live roles exactly, so the first reconcile is a no-op.
+    # CNPG reconciles ONLY the roles declared here; every other role (postgres, app,
+    # litellm, excalidraw, ...) is left untouched.
+    #
+    # IMPORTANT: a managed role's attributes are reconciled to EXACTLY what's declared
+    # — any attribute omitted is reset to the CNPG default (e.g. createdb/createrole →
+    # false). So `neondb_owner` below lists its full attribute set verbatim to avoid
+    # stripping privileges.
     roles:
-      # Superuser used exclusively by nextcloud; password from OCI Vault.
+      # `admin` — superuser used exclusively by nextcloud; password sourced from the
+      # basic-auth secret nextcloud-db-admin (ExternalSecret → OCI Vault
+      # nextcloud-db-admin-password) rather than set by hand on the primary.
       - name: admin
         ensure: present
         login: true
         superuser: true
         passwordSecret:
           name: nextcloud-db-admin
-      # Shared app-owner role (n8n, the *arr apps, homeassistant, excalidraw, ...).
-      # Password from the SOPS secret postgres-neondb-owner-credentials (move to an
-      # OCI Vault ExternalSecret later for parity with admin). createdb/createrole/
-      # replication/bypassrls match the live role — omitting them would strip them.
+      # `neondb_owner` — shared LOGIN role for n8n, homeassistant, sonarr, radarr,
+      # prowlarr (a Neon-migration leftover). On 2026-06-14 its password drifted from
+      # the apps' stored copies and every app failed auth on restart. Declaring it here
+      # makes CNPG enforce the password from the neondb-owner secret (ExternalSecret →
+      # OCI Vault neondb-owner-password), so manual drift is auto-reverted. Replaces the
+      # interim SOPS secret postgres-neondb-owner-credentials (#385) with an OCI Vault
+      # source, for parity with admin. Attributes mirror the live Neon owner (createdb,
+      # createrole, replication, bypassrls) so none are stripped.
       - name: neondb_owner
         ensure: present
         login: true
@@ -66,7 +74,7 @@ spec:
         bypassrls: true
         connectionLimit: -1
         passwordSecret:
-          name: postgres-neondb-owner-credentials
+          name: neondb-owner
 
   backup:
     barmanObjectStore:

@@ -7,5 +7,6 @@ resources:
   - pvc.yaml
   - pv.yaml
   - configmap.yaml
+  - externalsecret.yaml
 components:
   - ../../../../components/node-selectors/mini
