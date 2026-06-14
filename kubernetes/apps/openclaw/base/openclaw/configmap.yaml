@@ -28,6 +28,9 @@ data:
   #     env SecretRef (TELEGRAM_BOT_TOKEN). messages.tts (keyless Microsoft) + STT
   #     (tools.media.audio, OpenAI) = voice notes. mcp.servers.home-assistant: HA's
   #     MCP server (read+control Assist-exposed entities); bearer via ${HA_MCP_TOKEN}.
+  #   - browser: attaches (attachOnly) to the shared in-cluster Browserless over CDP
+  #     (ws + ${BROWSERLESS_TOKEN}); dangerouslyAllowPrivateNetwork is required to
+  #     reach the private endpoint (and lets it browse LAN services). No local Chromium.
   openclaw.json: |
     {
       "gateway": {
@@ -103,6 +106,7 @@ data:
         }
       },
       "tools": {
+        "alsoAllow": ["browser"],
         "web": { "search": { "enabled": true, "provider": "duckduckgo" } },
         "media": { "audio": { "enabled": true, "models": [{ "provider": "openai", "model": "gpt-4o-mini-transcribe" }] } }
       },
@@ -126,5 +130,18 @@ data:
       },
       "messages": {
         "tts": { "auto": "always", "provider": "microsoft" }
+      },
+      "browser": {
+        "enabled": true,
+        "headless": true,
+        "defaultProfile": "shared",
+        "ssrfPolicy": { "dangerouslyAllowPrivateNetwork": true },
+        "profiles": {
+          "shared": {
+            "cdpUrl": "ws://browserless.automation.svc.cluster.local:3000?token=${BROWSERLESS_TOKEN}",
+            "attachOnly": true,
+            "color": "#3478F6"
+          }
+        }
       }
     }
