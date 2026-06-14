@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.46.1 (2026-06-14)
+
+### Bug Fixes
+
+- **wordpress**: Raise memory 100Mi -> 128Mi req / 512Mi limit
+  ([#378](https://github.com/CalebSargeant/infra/pull/378),
+  [`e1704db`](https://github.com/CalebSargeant/infra/commit/e1704db05e48521b6ca1d7f5ee1363cbdf6ffe53))
+
+
 ## v1.46.0 (2026-06-14)
 
 ### Chores
