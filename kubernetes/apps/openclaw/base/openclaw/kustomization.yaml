@@ -3,12 +3,11 @@ kind: Kustomization
 resources:
   - configmap.yaml
   - externalsecret.yaml
-  - pv.yaml
   - pvc.yaml
   - deployment.yaml
   - service.yaml
   - ingress.yaml
 components:
-  # hostPath state lives on /mnt/nvme (ff-pi1), so pin the pod to the Pi —
-  # same as n8n. Adds nodeSelector {type: pi}.
-  - ../../../../components/node-selectors/pi
+  # Migrated off ff-pi1: static hostPath pv.yaml dropped, pvc.yaml now Longhorn,
+  # pinned to the worker node (k3s agent) instead of the Pi (system node).
+  - ../../../../components/node-selectors/worker
