@@ -21,6 +21,13 @@ data:
   #   - Models (Claude/OpenAI/DeepSeek) are all per-token API billing inside LiteLLM;
   #     ids must match LiteLLM model_name. primary=claude-sonnet-4-6 with OpenAI/
   #     DeepSeek fallbacks; switch at runtime in chat with `/model`.
+  #   - tools.web.search: keyless DuckDuckGo web search. cron: scheduled routines
+  #     (create with `openclaw cron create ...`). Memory (memory-core SQLite) is on
+  #     by default; OPENAI_API_KEY (Deployment env) upgrades it to semantic search.
+  #   - channels.telegram: @NievahBot, allowlisted to the owner's TG id; token via
+  #     env SecretRef (TELEGRAM_BOT_TOKEN). messages.tts (keyless Microsoft) + STT
+  #     (tools.media.audio, OpenAI) = voice notes. mcp.servers.home-assistant: HA's
+  #     MCP server (read+control Assist-exposed entities); bearer via ${HA_MCP_TOKEN}.
   openclaw.json: |
     {
       "gateway": {
@@ -94,5 +101,30 @@ data:
             "fallbacks": ["litellm/gpt-5.5", "litellm/deepseek-v4-pro"]
           }
         }
+      },
+      "tools": {
+        "web": { "search": { "enabled": true, "provider": "duckduckgo" } },
+        "media": { "audio": { "enabled": true, "models": [{ "provider": "openai", "model": "gpt-4o-mini-transcribe" }] } }
+      },
+      "cron": { "enabled": true },
+      "channels": {
+        "telegram": {
+          "enabled": true,
+          "botToken": { "source": "env", "provider": "default", "id": "TELEGRAM_BOT_TOKEN" },
+          "dmPolicy": "allowlist",
+          "allowFrom": ["8489671466"]
+        }
+      },
+      "mcp": {
+        "servers": {
+          "home-assistant": {
+            "url": "http://homeassistant.automation.svc.cluster.local:8123/api/mcp",
+            "transport": "streamable-http",
+            "headers": { "Authorization": "Bearer ${HA_MCP_TOKEN}" }
+          }
+        }
+      },
+      "messages": {
+        "tts": { "auto": "always", "provider": "microsoft" }
       }
     }
