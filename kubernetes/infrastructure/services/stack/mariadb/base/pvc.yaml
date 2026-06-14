@@ -9,4 +9,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: mariadb
+  # Longhorn (replicated, node-independent) so MariaDB runs on the worker
+  # instead of being pinned to ff-pi1's local /mnt/nvme/mariadb. The ~189M
+  # datadir is copied over (mariadb scaled to 0) before cutover.
+  storageClassName: longhorn
