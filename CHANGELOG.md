@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.52.0 (2026-06-14)
+
+### Features
+
+- **openclaw**: Browser tool via shared Browserless (remote CDP)
+  ([#390](https://github.com/CalebSargeant/infra/pull/390),
+  [`5446655`](https://github.com/CalebSargeant/infra/commit/5446655ce7e2094e9b80b1d1511d1e5ed3e924c8))
+
+
 ## v1.51.0 (2026-06-14)
 
 ### Features
