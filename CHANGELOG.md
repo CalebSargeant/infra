@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.44.0 (2026-06-14)
+
+### Features
+
+- **syncthing**: Migrate off ff-pi1 to worker on Longhorn
+  ([#372](https://github.com/CalebSargeant/infra/pull/372),
+  [`7ec288e`](https://github.com/CalebSargeant/infra/commit/7ec288e5b78efc2d40ae6998bd2cd82508ceffa8))
+
+
 ## v1.43.0 (2026-06-13)
 
 ### Features
