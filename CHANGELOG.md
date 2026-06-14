@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.50.2 (2026-06-14)
+
+### Bug Fixes
+
+- **openclaw**: Land web/memory/cron + Telegram/HA/voice on main
+  ([#388](https://github.com/CalebSargeant/infra/pull/388),
+  [`e9872b3`](https://github.com/CalebSargeant/infra/commit/e9872b32d3e6a24817e61902988c67e62af8b23f))
+
+
 ## v1.50.1 (2026-06-14)
 
 ### Bug Fixes
