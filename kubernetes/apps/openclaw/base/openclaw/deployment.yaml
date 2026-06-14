@@ -16,15 +16,10 @@ spec:
       annotations:
         # Rolls the pod (→ re-seed) whenever the git-managed openclaw.json changes.
         # sha256 of kubernetes/apps/openclaw/base/openclaw/configmap.yaml.
-        checksum/config: f518f8754b336a3b5fc247ed56c597fe4272301d82601abf916f438347ad4452
+        checksum/config: 50a210b8134361d092a30e2f26304c5a8d36b859efda86c781e4e6cd322f365b
       labels:
         app: openclaw
     spec:
-      # fsGroup 1000 (node) makes the dynamic Longhorn volumes writable by the
-      # non-root openclaw process — a fresh PV mounts root:root, unlike the old
-      # pre-chowned hostPath.
-      securityContext:
-        fsGroup: 1000
       initContainers:
         # OVERWRITE openclaw.json from the ConfigMap on every boot — this file is
         # git-managed (OpenClaw never writes it at runtime; identity/state live in
@@ -103,6 +98,24 @@ spec:
                 secretKeyRef:
                   name: openclaw
                   key: litellm-api-key
+            # Enables semantic memory embeddings + OpenAI voice-note transcription (STT).
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw
+                  key: openai-api-key
+            # Telegram bot token (referenced by channels.telegram.botToken SecretRef).
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw
+                  key: telegram-bot-token
+            # HA MCP bearer (substituted into ${HA_MCP_TOKEN} in mcp.servers headers).
+            - name: HA_MCP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw
+                  key: ha-mcp-token
           resources:
             # Node assistant. Inline sizing, no CPU limit (CFS-throttle false
             # alarms); revisit from KRR once it has run a while.
