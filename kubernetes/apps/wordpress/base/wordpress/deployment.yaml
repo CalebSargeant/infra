@@ -5,6 +5,11 @@ metadata:
   namespace: wordpress
 spec:
   replicas: 1
+  # Single replica on a ReadWriteOnce volume — Recreate so the old pod releases
+  # the PVC before the new one starts (RollingUpdate would surge a second pod
+  # that can't attach the RWO volume and stay Pending).
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: wordpress
@@ -13,6 +18,11 @@ spec:
       labels:
         app: wordpress
     spec:
+      # fsGroup 33 (www-data) makes the dynamic Longhorn volume writable by the
+      # apache/WordPress process — a fresh PV mounts root:root, unlike the old
+      # pre-chowned hostPath (uploads/.maintenance would otherwise fail to write).
+      securityContext:
+        fsGroup: 33
       containers:
         - name: wordpress
           image: wordpress:6.7-apache

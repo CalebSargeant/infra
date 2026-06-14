@@ -8,5 +8,9 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
-  storageClassName: wordpress-data
+      # Right-sized from 10Gi (live usage ~80M). Expand online later if needed.
+      storage: 5Gi
+  # Longhorn (replicated, node-independent) so WordPress runs on the worker
+  # instead of being pinned to ff-pi1's local /mnt/nvme/wordpress. The ~80M of
+  # /var/www/html is migrated before cutover; the external MariaDB DB is unchanged.
+  storageClassName: longhorn
