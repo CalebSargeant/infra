@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.50.0 (2026-06-14)
+
+### Features
+
+- **cnpg**: Manage neondb_owner role password (prevent drift)
+  ([#385](https://github.com/CalebSargeant/infra/pull/385),
+  [`68d9f40`](https://github.com/CalebSargeant/infra/commit/68d9f407fd59adf2616ef23ddabde88bc307965d))
+
+
 ## v1.49.0 (2026-06-14)
 
 ### Features
