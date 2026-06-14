@@ -61,8 +61,12 @@ spec:
             - name: DB_POSTGRESDB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: n8n
-                  key: postgres-password
+                  # Single source of truth: ExternalSecret n8n-db ← OCI Vault
+                  # neondb-owner-password (the same value CNPG enforces on the
+                  # neondb_owner role). The SOPS `n8n` secret's postgres-password
+                  # key is now unused — kept only until it can be scrubbed.
+                  name: n8n-db
+                  key: password
             - name: N8N_BASIC_AUTH_ACTIVE
               value: "true"
             - name: N8N_BASIC_AUTH_USER

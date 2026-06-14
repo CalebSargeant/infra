@@ -32,6 +32,15 @@ spec:
               value: "1000" # Replace with your group ID
             - name: TZ
               value: "Europe/Amsterdam" # Replace with your timezone
+            # neondb_owner DB password from the single source of truth (ExternalSecret
+            # sonarr-db ← OCI Vault neondb-owner-password, also enforced on the role by
+            # CNPG). This env overrides <PostgresPassword> in config.xml, so the password
+            # lives in exactly one place and can't drift.
+            - name: SONARR__POSTGRES__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sonarr-db
+                  key: password
           volumeMounts:
             - mountPath: /config
               name: sonarr
