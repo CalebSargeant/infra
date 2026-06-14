@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.50.1 (2026-06-14)
+
+### Bug Fixes
+
+- **database**: Make neondb_owner password a single source of truth
+  ([#386](https://github.com/CalebSargeant/infra/pull/386),
+  [`d896d25`](https://github.com/CalebSargeant/infra/commit/d896d25020cfd48cdc2b75927b6b4504b2440dce))
+
+
 ## v1.50.0 (2026-06-14)
 
 ### Features
