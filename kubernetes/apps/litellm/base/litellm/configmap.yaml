@@ -83,6 +83,46 @@ data:
           supports_function_calling: true
           supports_parallel_function_calling: false
           notes: "Self-hosted Ollama qwen3:4b-q4_K_M. Tool-calling enabled for Warp Agent Mode (native tool_calls via Ollama's tools template). Sized for GTX 1060 6GB at q4."
+      # --- OpenAI (per-token API billing via OPENAI_API_KEY) ---
+      - model_name: gpt-5.5
+        litellm_params:
+          model: openai/gpt-5.5
+          api_key: os.environ/OPENAI_API_KEY
+        model_info:
+          mode: chat
+          base_model: openai/gpt-5.5
+          billing_mode: openai-api
+          credential_source: oci-vault:openai-api-key
+      - model_name: gpt-5.4-mini
+        litellm_params:
+          model: openai/gpt-5.4-mini
+          api_key: os.environ/OPENAI_API_KEY
+        model_info:
+          mode: chat
+          base_model: openai/gpt-5.4-mini
+          billing_mode: openai-api
+          credential_source: oci-vault:openai-api-key
+      # --- DeepSeek (per-token API billing via DEEPSEEK_API_KEY) ---
+      - model_name: deepseek-v4-pro
+        litellm_params:
+          model: deepseek/deepseek-v4-pro
+          api_key: os.environ/DEEPSEEK_API_KEY
+          api_base: https://api.deepseek.com
+        model_info:
+          mode: chat
+          base_model: deepseek/deepseek-v4-pro
+          billing_mode: deepseek-api
+          credential_source: oci-vault:litellm-deepseek-api-key
+      - model_name: deepseek-v4-flash
+        litellm_params:
+          model: deepseek/deepseek-v4-flash
+          api_key: os.environ/DEEPSEEK_API_KEY
+          api_base: https://api.deepseek.com
+        model_info:
+          mode: chat
+          base_model: deepseek/deepseek-v4-flash
+          billing_mode: deepseek-api
+          credential_source: oci-vault:litellm-deepseek-api-key
     general_settings:
       master_key: os.environ/LITELLM_MASTER_KEY
       # Dedicated header for the proxy master key. The nginx auth-proxy maps

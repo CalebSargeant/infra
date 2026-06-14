@@ -11,7 +11,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: b26f0d84ce7afa4d8d93338c19f06b786b45fa6fa36bc1cdcdf009165c9a1188
+        checksum/config: 7f697bc74b2dbbc279870c6efab0fc1ed04a831c200bb6008502933d9ad7afa7
         checksum/auth-proxy-config: 41cbc6f2467fb10b6873fe82106f058bffdf93826ecf2fa87ffb5b6a1c8b2e05
       labels:
         app: litellm
@@ -44,6 +44,17 @@ spec:
                 secretKeyRef:
                   name: litellm
                   key: anthropic-api-key
+            # OpenAI + DeepSeek per-token API billing.
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm
+                  key: openai-api-key
+            - name: DEEPSEEK_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm
+                  key: deepseek-api-key
             # Admin UI (served at /ui) — needs Postgres + UI login creds.
             - name: STORE_MODEL_IN_DB
               value: "true"
