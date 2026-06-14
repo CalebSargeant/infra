@@ -36,7 +36,21 @@ spec:
   
   monitoring:
     enablePodMonitor: true
-  
+
+  managed:
+    # Only the `admin` role is declared here, so CNPG reconciles ONLY it and leaves
+    # every other role (postgres, app, neondb_owner, litellm, ...) untouched.
+    # `admin` is a superuser used exclusively by nextcloud; its password is sourced
+    # from the basic-auth secret nextcloud-db-admin (ExternalSecret → OCI Vault
+    # nextcloud-db-admin-password) rather than being set by hand on the primary.
+    roles:
+      - name: admin
+        ensure: present
+        login: true
+        superuser: true
+        passwordSecret:
+          name: nextcloud-db-admin
+
   backup:
     barmanObjectStore:
       destinationPath: s3://postgres-backups/

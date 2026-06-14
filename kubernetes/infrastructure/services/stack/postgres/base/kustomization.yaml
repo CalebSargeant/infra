@@ -6,3 +6,4 @@ resources:
   - scheduled-backup.yaml
   - prometheusrule.yaml
   - externalsecret-oci-backup.yaml
+  - externalsecret-nextcloud-admin.yaml
