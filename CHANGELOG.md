@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.49.0 (2026-06-14)
+
+### Features
+
+- **openclaw**: Add OpenAI + DeepSeek models via LiteLLM
+  ([#374](https://github.com/CalebSargeant/infra/pull/374),
+  [`b9ba7b8`](https://github.com/CalebSargeant/infra/commit/b9ba7b8ba0e4671827bfc89c1fbf8b1c0ceac31a))
+
+
 ## v1.48.0 (2026-06-14)
 
 ### Features
