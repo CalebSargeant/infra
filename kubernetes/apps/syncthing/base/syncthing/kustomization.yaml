@@ -5,5 +5,8 @@ resources:
   - service.yaml
   - ingress.yaml
   - pvc.yaml
-  - pv.yaml
   - namespace.yaml
+components:
+  # Migrated off ff-pi1: static hostPath pv.yaml dropped, pvc.yaml now Longhorn,
+  # pinned to the worker node (k3s agent) instead of the Pi (system node).
+  - ../../../../components/node-selectors/worker
