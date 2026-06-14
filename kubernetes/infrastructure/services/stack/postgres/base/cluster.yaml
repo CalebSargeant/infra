@@ -38,18 +38,35 @@ spec:
     enablePodMonitor: true
 
   managed:
-    # Only the `admin` role is declared here, so CNPG reconciles ONLY it and leaves
-    # every other role (postgres, app, neondb_owner, litellm, ...) untouched.
-    # `admin` is a superuser used exclusively by nextcloud; its password is sourced
-    # from the basic-auth secret nextcloud-db-admin (ExternalSecret → OCI Vault
-    # nextcloud-db-admin-password) rather than being set by hand on the primary.
+    # Only the roles declared here are reconciled by CNPG; every other role
+    # (postgres, app, litellm, ...) is left untouched. Declaring a role keeps its
+    # password in sync with its passwordSecret so it can't silently drift from what
+    # the apps store — a neondb_owner drift took n8n/sonarr/radarr/etc. offline.
+    # Attributes mirror the live roles exactly, so the first reconcile is a no-op.
     roles:
+      # Superuser used exclusively by nextcloud; password from OCI Vault.
       - name: admin
         ensure: present
         login: true
         superuser: true
         passwordSecret:
           name: nextcloud-db-admin
+      # Shared app-owner role (n8n, the *arr apps, homeassistant, excalidraw, ...).
+      # Password from the SOPS secret postgres-neondb-owner-credentials (move to an
+      # OCI Vault ExternalSecret later for parity with admin). createdb/createrole/
+      # replication/bypassrls match the live role — omitting them would strip them.
+      - name: neondb_owner
+        ensure: present
+        login: true
+        superuser: false
+        createdb: true
+        createrole: true
+        inherit: true
+        replication: true
+        bypassrls: true
+        connectionLimit: -1
+        passwordSecret:
+          name: postgres-neondb-owner-credentials
 
   backup:
     barmanObjectStore:
