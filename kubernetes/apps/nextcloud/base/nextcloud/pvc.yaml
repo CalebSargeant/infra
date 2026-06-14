@@ -10,6 +10,7 @@ spec:
   resources:
     requests:
       storage: 100Ti
+  # Binds the static NFS PV below (user data on 192.168.19.5:/mnt/raid5/nextcloud).
   storageClassName: nextcloud-data
 ---
 apiVersion: v1
@@ -23,4 +24,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: nextcloud-config
+  # Longhorn (replicated, node-independent) so nextcloud runs on the worker
+  # instead of being pinned to ff-pi1's local /mnt/nvme/nextcloud. The ~561M of
+  # /config (incl. config.php instanceid/secret/db creds) is migrated before cutover.
+  storageClassName: longhorn
