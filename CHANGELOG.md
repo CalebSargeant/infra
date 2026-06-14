@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.53.0 (2026-06-14)
+
+### Features
+
+- **openclaw**: Slack (Socket Mode) + voice on-demand
+  ([#391](https://github.com/CalebSargeant/infra/pull/391),
+  [`c20a09d`](https://github.com/CalebSargeant/infra/commit/c20a09de4247cc82bacbbadf7f866aa345b690cb))
+
+
 ## v1.52.0 (2026-06-14)
 
 ### Features
