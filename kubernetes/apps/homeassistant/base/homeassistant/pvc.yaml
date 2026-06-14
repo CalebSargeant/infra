@@ -8,5 +8,10 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
-  storageClassName: homeassistant
+      # Right-sized from 10Gi (live /config ~680K). Expand online if the
+      # recorder DB grows.
+      storage: 5Gi
+  # Longhorn (replicated, node-independent) so Home Assistant runs on the worker
+  # instead of being pinned to ff-pi1's local /mnt/nvme/homeassistant-config.
+  # /config (incl. .storage device/HomeKit state) is migrated before cutover.
+  storageClassName: longhorn

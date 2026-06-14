@@ -14,6 +14,10 @@ spec:
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet # Adjust DNS policy when using host networking
+      # fsGroup 1000 makes the dynamic Longhorn volume writable by HA's internal
+      # (non-root) process — a fresh PV mounts root:root, unlike the old hostPath.
+      securityContext:
+        fsGroup: 1000
       containers:
         - name: homeassistant
           image: ghcr.io/home-assistant/home-assistant:stable
