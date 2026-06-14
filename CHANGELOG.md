@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.51.0 (2026-06-14)
+
+### Features
+
+- **browserless**: Cluster-wide headless Chromium service
+  ([#389](https://github.com/CalebSargeant/infra/pull/389),
+  [`3f620a9`](https://github.com/CalebSargeant/infra/commit/3f620a99b9abc5fe26847a538f9d0c05e3b5abe2))
+
+
 ## v1.50.2 (2026-06-14)
 
 ### Bug Fixes
