@@ -9,5 +9,11 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 100Gi
-  storageClassName: syncthing-data
+      # Right-sized from 100Gi: live usage is ~92K (config + one small Sync
+      # folder). 100Gi on Longhorn would reserve 200Gi (replica 2) and fail to
+      # schedule. Expand online later if a large sync folder is added.
+      storage: 10Gi
+  # Longhorn (replicated, node-independent) so syncthing runs on the worker
+  # instead of being pinned to ff-pi1's local disk. Data (device identity +
+  # folder config) migrated from the old hostPath before cutover.
+  storageClassName: longhorn

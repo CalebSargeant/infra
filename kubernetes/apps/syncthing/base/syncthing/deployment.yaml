@@ -5,6 +5,11 @@ metadata:
   namespace: syncthing
 spec:
   replicas: 1
+  # Single replica on a ReadWriteOnce Longhorn volume — Recreate so the old pod
+  # releases the PVC before the new one starts (RollingUpdate would surge a
+  # second pod that can't attach the RWO volume and stay Pending).
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: syncthing
@@ -14,6 +19,11 @@ spec:
         app: syncthing
     spec:
       automountServiceAccountToken: false
+      # fsGroup 1000 (PGID) makes the dynamic Longhorn volume writable by the
+      # non-root syncthing process — a fresh PV mounts root:root, unlike the old
+      # pre-chowned hostPath.
+      securityContext:
+        fsGroup: 1000
       containers:
         - name: syncthing
           image: syncthing/syncthing:1.28.1
