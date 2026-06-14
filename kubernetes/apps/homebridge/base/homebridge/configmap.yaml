@@ -39,7 +39,9 @@ data:
     persistence:
       config:
         enabled: true
-        type: hostPath
-        hostPath: /mnt/nvme/homebridge-config
+        # Migrated off ff-pi1's local hostPath to a Longhorn PVC (homebridge-config,
+        # see pvc.yaml) so the pod can run on the worker. HomeKit persist/ pairing
+        # state is copied into it before cutover.
+        existingClaim: homebridge-config
         globalMounts:
           - path: /homebridge

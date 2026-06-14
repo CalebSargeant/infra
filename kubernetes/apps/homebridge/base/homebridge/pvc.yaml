@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: homebridge-config
+  namespace: automation
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      # ~230M of real config + HomeKit persist/ state (the stale 2.2G core dump
+      # is deleted before the data migration). Expand online if needed.
+      storage: 2Gi
+  # Longhorn (replicated, node-independent) so Homebridge runs on the worker
+  # instead of being pinned to ff-pi1's local /mnt/nvme/homebridge-config.
+  storageClassName: longhorn
