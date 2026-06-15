@@ -175,6 +175,47 @@ inputs = {
       value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
       proxied = true
     },
+
+    # ── AppSec / dev tooling on firefly (#394) ───────────────────────────────
+    # Each pairs with a tunnel ingress_rule in
+    # terraform/cloudflare/zero-trust/prod/tunnels.tf. Must be proxied so
+    # Cloudflare routes via the `firefly` tunnel (a grey-cloud CNAME would hand
+    # the cfargotunnel.com target straight back to the client). Without these
+    # the hosts don't resolve and — for safe-settings — GitHub can't deliver
+    # webhooks to /api/github/webhooks (same reason the atlantis record above
+    # must be proxied).
+    {
+      name    = "safe-settings.sargeant.co"
+      type    = "CNAME"
+      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
+      proxied = true
+    },
+    {
+      name    = "defectdojo.sargeant.co"
+      type    = "CNAME"
+      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
+      proxied = true
+    },
+    {
+      name    = "dependency-track.sargeant.co"
+      type    = "CNAME"
+      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
+      proxied = true
+    },
+    # The DT frontend SPA calls the API host directly from the browser, so the
+    # apiserver needs its own public hostname (frontend.apiBaseUrl points here).
+    {
+      name    = "dependency-track-api.sargeant.co"
+      type    = "CNAME"
+      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
+      proxied = true
+    },
+    {
+      name    = "pr-dashboard.sargeant.co"
+      type    = "CNAME"
+      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
+      proxied = true
+    },
   ]
 
   # These four records already exist in the dashboard (someone re-created
