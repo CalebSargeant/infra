@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: valkey
+  namespace: database
+spec:
+  serviceName: valkey
+  replicas: 1
+  selector:
+    matchLabels:
+      app: valkey
+  template:
+    metadata:
+      labels:
+        app: valkey
+    spec:
+      # The valkey image runs as the non-root `valkey` user (uid/gid 999) from
+      # the start (it can't chown a fresh Longhorn PV itself), so fsGroup makes
+      # /data group-writable — without it valkey CrashLoops on EACCES.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: valkey
+          # Shared in-cluster cache / Celery broker (Redis-compatible). Internal
+          # ClusterIP only (headless svc, database ns) — no auth, matching how the
+          # shared CNPG/MariaDB tiers are reachable in-cluster.
+          image: valkey/valkey:8.1-alpine
+          args:
+            # AOF persistence so queued Celery tasks survive a restart; never
+            # evict (a broker dropping keys = lost tasks).
+            - "--appendonly"
+            - "yes"
+            - "--maxmemory"
+            - "200mb"
+            - "--maxmemory-policy"
+            - "noeviction"
+          ports:
+            - name: valkey
+              containerPort: 6379
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          readinessProbe:
+            exec:
+              command: ["valkey-cli", "ping"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["valkey-cli", "ping"]
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: valkey-data
+              mountPath: /data
+      volumes:
+        - name: valkey-data
+          persistentVolumeClaim:
+            claimName: valkey

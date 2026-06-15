@@ -6,6 +6,7 @@ resources:
   - ./browserless
   - ./homeassistant
   - ./homebridge
+  - ./git-pull-request-dashboard
   - ./litellm
   - ./mikrotik-minder
   - ./n8n
@@ -48,8 +49,11 @@ resources:
   # platform (node-level tuning)
   - ./node-tuning
   # security
+  - ./defectdojo
+  - ./dependency-track
   - ./gatekeeper
   - ./kubescape
+  - ./safe-settings
   # external-repo apps (workload manifests live in their own GitHub repos;
   # each dir holds only the in-cluster Flux plumbing — source, image
   # automation, namespace, and the Flux Kustomization that pulls the workload)

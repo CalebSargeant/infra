@@ -1,0 +1,18 @@
+---
+# Declarative database on the SHARED CNPG cluster (COMMON_MISTAKES #3: do NOT
+# create a new Cluster). DefectDojo's initializer does NOT create the DB — it
+# must exist before first reconcile. Owned by the shared `neondb_owner` role
+# (createdb), whose password is enforced by CNPG from OCI Vault
+# neondb-owner-password and surfaced to DefectDojo via externalsecret-db.yaml.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: defectdojo
+  namespace: database
+spec:
+  cluster:
+    name: postgres
+  name: defectdojo
+  owner: neondb_owner
+  # Keep the database if this CR is ever pruned/deleted.
+  databaseReclaimPolicy: retain

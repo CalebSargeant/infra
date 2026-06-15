@@ -141,3 +141,25 @@ metadata:
 spec:
   interval: 1h
   url: https://kyverno.github.io/kyverno
+---
+# DefectDojo ships its chart from the `helm-charts` branch of the app repo (a
+# classic HTTP index, NOT an OCI registry). Its valkey/postgresql SUBCHARTS are
+# OCI deps that Flux source-controller resolves at build time; postgresql is
+# disabled (we use the shared CNPG), valkey stays for the Celery broker.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: defectdojo
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/helm-charts
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: dependency-track
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://dependencytrack.github.io/helm-charts
