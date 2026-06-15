@@ -1,0 +1,88 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: dependency-track
+  namespace: security
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: dependency-track
+      version: "1.1.0" # appVersion 4.14.2
+      sourceRef:
+        kind: HelmRepository
+        name: dependency-track
+        namespace: flux-system
+      interval: 10m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    common:
+      # Externally-managed signing key (ExternalSecret → OCI Vault); key `secret.key`.
+      secretKey:
+        createSecret: false
+        existingSecretName: dependency-track-secret-key
+
+    apiServer:
+      # StatefulSet (default, because of the /data PVC) — pin to worker (ff-vm1).
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      # Vuln-data mirror (NVD/OSV/GHSA) + Lucene indexes — several GB; persist or
+      # it re-downloads the full NVD feed on every restart.
+      persistentVolume:
+        enabled: true
+        size: 10Gi
+        className: longhorn
+      resources:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+        limits:
+          memory: 3Gi
+      extraEnv:
+        # Cap the JVM heap explicitly — default auto-sizes to 90% of the limit
+        # and would OOM. MUST include the leading dash (a classic DT crashloop).
+        - name: EXTRA_JAVA_OPTIONS
+          value: "-Xmx2048m"
+        # External shared CloudNativePG (DT has no bundled DB to disable).
+        - name: ALPINE_DATABASE_MODE
+          value: "external"
+        - name: ALPINE_DATABASE_DRIVER
+          value: "org.postgresql.Driver"
+        - name: ALPINE_DATABASE_URL
+          value: "jdbc:postgresql://postgres-rw.database.svc.cluster.local:5432/dependencytrack"
+        - name: ALPINE_DATABASE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: dependency-track-db
+              key: username
+        - name: ALPINE_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dependency-track-db
+              key: password
+        # Trim the connection pool on the shared CNPG.
+        - name: ALPINE_DATABASE_POOL_MAX_SIZE
+          value: "10"
+
+    frontend:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      # Browser-reachable URL of the apiserver (baked into the SPA config.json).
+      # Served by the second Ingress rule in ingress.yaml.
+      apiBaseUrl: "https://dependency-track-api.sargeant.co"
+      resources:
+        requests:
+          cpu: 100m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
+
+    # The chart's built-in ingress only fronts the frontend; we supply both the
+    # frontend and apiserver Ingresses ourselves (ingress.yaml).
+    ingress:
+      enabled: false

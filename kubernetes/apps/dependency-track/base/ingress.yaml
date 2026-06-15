@@ -1,0 +1,83 @@
+---
+# UI (Vue SPA, nginx). The browser then calls the apiserver directly at the
+# apiBaseUrl host below — hence a second, separate Ingress for the API.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dependency-track-frontend
+  namespace: security
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-dns
+    traefik.ingress.kubernetes.io/service.serversscheme: http
+    traefik.ingress.kubernetes.io/entrypoints: websecure
+  labels:
+    app: dependency-track
+    app.kubernetes.io/component: frontend
+spec:
+  rules:
+    - host: dependency-track.sargeant.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dependency-track-frontend
+                port:
+                  number: 8080
+    - host: dependency-track.sargeant.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dependency-track-frontend
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - dependency-track.sargeant.co
+      secretName: dependency-track-tls
+---
+# REST API + health endpoints. frontend.apiBaseUrl points here.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dependency-track-api
+  namespace: security
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-dns
+    traefik.ingress.kubernetes.io/service.serversscheme: http
+    traefik.ingress.kubernetes.io/entrypoints: websecure
+  labels:
+    app: dependency-track
+    app.kubernetes.io/component: apiserver
+spec:
+  rules:
+    - host: dependency-track-api.sargeant.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dependency-track-api-server
+                port:
+                  number: 8080
+    - host: dependency-track-api.sargeant.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dependency-track-api-server
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - dependency-track-api.sargeant.co
+      secretName: dependency-track-api-tls

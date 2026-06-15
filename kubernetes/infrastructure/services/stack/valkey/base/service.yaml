@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: valkey
+  namespace: database
+spec:
+  selector:
+    app: valkey
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+  # Headless — governs the StatefulSet; clients resolve
+  # valkey.database.svc.cluster.local to the single pod.
+  clusterIP: None

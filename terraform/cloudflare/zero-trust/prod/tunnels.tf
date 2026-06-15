@@ -212,6 +212,46 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # ── AppSec / dev tooling (firefly cluster) ───────────────────────────────
+    # safe-settings GitHub App webhook — MUST be publicly reachable so GitHub's
+    # delivery IPs can POST to /api/github/webhooks. No Access gate (GitHub can't
+    # authenticate through Access); the webhook secret authenticates payloads.
+    ingress_rule {
+      hostname = "safe-settings.sargeant.co"
+      service  = "http://safe-settings.security.svc.cluster.local:3000"
+      origin_request {}
+    }
+
+    # DefectDojo UI (vuln management). Has its own login; consider adding a
+    # Cloudflare Access app (access_apps.tf) if you want an extra gate.
+    ingress_rule {
+      hostname = "defectdojo.sargeant.co"
+      service  = "http://defectdojo-django.security.svc.cluster.local:80"
+      origin_request {}
+    }
+
+    # Dependency-Track frontend (UI) + apiserver (the SPA calls the API host
+    # directly from the browser, so both must be reachable; frontend.apiBaseUrl
+    # points at dependency-track-api.sargeant.co). Both have their own login.
+    ingress_rule {
+      hostname = "dependency-track.sargeant.co"
+      service  = "http://dependency-track-frontend.security.svc.cluster.local:8080"
+      origin_request {}
+    }
+    ingress_rule {
+      hostname = "dependency-track-api.sargeant.co"
+      service  = "http://dependency-track-api-server.security.svc.cluster.local:8080"
+      origin_request {}
+    }
+
+    # git-pull-request-dashboard — static SPA; the GitHub PAT is entered
+    # client-side (no server-side secret to protect).
+    ingress_rule {
+      hostname = "pr-dashboard.sargeant.co"
+      service  = "http://git-pull-request-dashboard.automation.svc.cluster.local:80"
+      origin_request {}
+    }
+
     # Cloudflared requires the last rule to be a catch-all with no hostname.
     ingress_rule {
       service = "http_status:404"

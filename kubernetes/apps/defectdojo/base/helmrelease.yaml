@@ -1,0 +1,149 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: defectdojo
+  namespace: security
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: defectdojo
+      version: "1.9.29" # appVersion 2.58.4
+      sourceRef:
+        kind: HelmRepository
+        name: defectdojo
+        namespace: flux-system
+      interval: 10m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    # ── Site / hosting ──────────────────────────────────────────────────────
+    host: defectdojo.sargeant.co
+    siteUrl: "https://defectdojo.sargeant.co"
+    # 3 components pull the same large django image — avoid re-pulls.
+    imagePullPolicy: IfNotPresent
+
+    # ── External database: shared CloudNativePG (no bundled postgres) ─────────
+    postgresql:
+      enabled: false
+      auth:
+        database: defectdojo
+        username: neondb_owner
+        existingSecret: defectdojo-postgresql-specific
+        secretKeys:
+          userPasswordKey: postgresql-password
+    # Top-level key consumed by the chart's postgresql.hostname helper when the
+    # bundled subchart is disabled (DD_DATABASE_HOST). Port stays 5432.
+    postgresServer: postgres-rw.database.svc.cluster.local
+
+    # ── Celery broker: SHARED in-cluster Valkey ──────────────────────────────
+    # Use the consolidated broker tier (infrastructure/services/stack/valkey,
+    # database ns) instead of a bundled per-app Valkey — same rationale as the
+    # shared CNPG postgres. Authless internal ClusterIP; DefectDojo builds the
+    # broker URL redis://<redisServer>:<redisPort> from these top-level keys.
+    valkey:
+      enabled: false
+    redisServer: valkey.database.svc.cluster.local
+    redisScheme: redis
+    redisPort: 6379
+    # App + DB secrets are externally managed (ExternalSecret → OCI Vault).
+    createSecret: false
+    createPostgresqlSecret: false
+
+    # ── Workload pinning + tuned-down resources (worker = ff-vm1) ─────────────
+    django:
+      replicas: 1
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      # We manage ingress ourselves (ingress.yaml: both .co + .local hosts).
+      ingress:
+        enabled: false
+      mediaPersistentVolume:
+        enabled: true
+        type: pvc
+        persistentVolumeClaim:
+          create: true
+          size: 5Gi
+          accessModes:
+            - ReadWriteOnce
+          storageClassName: longhorn
+      uwsgi:
+        autoscaling:
+          enabled: false
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 750m
+            memory: 512Mi
+      nginx:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 128Mi
+      extraEnv:
+        # Cap uWSGI workers/threads to bound memory on a shared node.
+        - name: DD_UWSGI_NUM_PROCESSES
+          value: "2"
+        - name: DD_UWSGI_NUM_THREADS
+          value: "2"
+        # Accept the internal host too (chart derives ALLOWED_HOSTS from `host`).
+        - name: DD_ALLOWED_HOSTS
+          value: "defectdojo.sargeant.co,defectdojo.sargeant.local,localhost"
+        - name: DD_CSRF_TRUSTED_ORIGINS
+          value: "https://defectdojo.sargeant.co,https://defectdojo.sargeant.local"
+
+    celery:
+      worker:
+        replicas: 1
+        nodeSelector:
+          node-role.kubernetes.io/worker: ""
+        autoscaling:
+          enabled: false
+        resources:
+          requests:
+            cpu: 100m
+            memory: 192Mi
+          limits:
+            cpu: 500m
+            memory: 384Mi
+      beat:
+        # Singleton scheduler — never scale >1 (duplicates scheduled jobs).
+        replicas: 1
+        nodeSelector:
+          node-role.kubernetes.io/worker: ""
+        resources:
+          requests:
+            cpu: 50m
+            memory: 96Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+
+    initializer:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+
+    # ── Shed extras not needed on firefly ─────────────────────────────────────
+    monitoring:
+      prometheus:
+        enabled: false
+    networkPolicy:
+      enabled: false
+    cloudsql:
+      enabled: false
