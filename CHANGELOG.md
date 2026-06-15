@@ -2,6 +2,23 @@
 
 <!-- version list -->
 
+## v1.54.0 (2026-06-15)
+
+### Chores
+
+- **media**: Bump image tags
+  ([`739e1cf`](https://github.com/CalebSargeant/infra/commit/739e1cf6097baba1ece1d57bf3a19cfe4e5eb3a3))
+
+- **media**: Bump image tags
+  ([`6db67c9`](https://github.com/CalebSargeant/infra/commit/6db67c986f47a0a6e4e3a68b7514c0da8389a13c))
+
+### Features
+
+- **openclaw**: Install gh/himalaya/gog skill CLIs on PVC + PATH
+  ([#393](https://github.com/CalebSargeant/infra/pull/393),
+  [`11acb39`](https://github.com/CalebSargeant/infra/commit/11acb39347b9261b4b9943cac7cbee38a6413567))
+
+
 ## v1.53.1 (2026-06-14)
 
 ### Bug Fixes
