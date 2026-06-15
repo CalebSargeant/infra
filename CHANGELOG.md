@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.56.0 (2026-06-15)
+
+### Features
+
+- **security**: Google SSO for DefectDojo, Dependency-Track, PR dashboard
+  ([#395](https://github.com/CalebSargeant/infra/pull/395),
+  [`f0f0e79`](https://github.com/CalebSargeant/infra/commit/f0f0e79a7eaf2c0227bba3a422c3f0b680b9988f))
+
+
 ## v1.55.0 (2026-06-15)
 
 ### Bug Fixes
