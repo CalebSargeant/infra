@@ -222,11 +222,12 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
-    # DefectDojo UI (vuln management). Has its own login; consider adding a
-    # Cloudflare Access app (access_apps.tf) if you want an extra gate.
+    # DefectDojo UI — fronted by oauth2-proxy (Google SSO, @magmamoose.com).
+    # The proxy forwards to defectdojo-django and bypasses auth for /api/v2 +
+    # /webhook (token/secret-authenticated, non-browser clients).
     ingress_rule {
       hostname = "defectdojo.sargeant.co"
-      service  = "http://defectdojo-django.security.svc.cluster.local:80"
+      service  = "http://oauth2-proxy.security.svc.cluster.local:4180"
       origin_request {}
     }
 
@@ -244,11 +245,11 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
-    # git-pull-request-dashboard — static SPA; the GitHub PAT is entered
-    # client-side (no server-side secret to protect).
+    # git-pull-request-dashboard — static SPA, fronted by oauth2-proxy
+    # (Google SSO, @magmamoose.com). The GitHub PAT is still entered client-side.
     ingress_rule {
       hostname = "pr-dashboard.sargeant.co"
-      service  = "http://git-pull-request-dashboard.automation.svc.cluster.local:80"
+      service  = "http://oauth2-proxy.automation.svc.cluster.local:4180"
       origin_request {}
     }
 

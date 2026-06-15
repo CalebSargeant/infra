@@ -4,7 +4,10 @@ namespace: automation
 resources:
   - deployment.yaml
   - service.yaml
-  - ingress.yaml
+  - externalsecret-oauth2.yaml
+  - oauth2-proxy.yaml
+  # No Ingress: public .co traffic enters via the cloudflared tunnel → the
+  # oauth2-proxy Service (Google gate). See tunnels.tf.
 components:
   # Pin to the worker node (k3s agent, ff-vm1, amd64).
   - ../../../components/node-selectors/worker
