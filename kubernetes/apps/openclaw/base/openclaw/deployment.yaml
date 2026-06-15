@@ -46,6 +46,46 @@ spec:
               memory: 32Mi
             limits:
               memory: 64Mi
+        # Install the static CLIs the github/himalaya/gog skills declare as
+        # required `bins` (the stock image ships none of them). They go onto the
+        # PVC bin dir — added to PATH on the app container below — so they survive
+        # restarts; this initContainer just re-seeds a fresh PVC. Idempotent
+        # (skips anything already present) and best-effort (a download blip must
+        # not block the assistant from starting — binaries on the PVC persist).
+        # whisper is intentionally omitted: the openai-whisper-api skill already
+        # covers speech-to-text via OPENAI_API_KEY without a heavy local model.
+        - name: install-skill-bins
+          image: ghcr.io/openclaw/openclaw:2026.6.6
+          command:
+            - sh
+            - -c
+            - |
+              set -u
+              BIN=/home/node/.openclaw/bin
+              mkdir -p "$BIN"
+              cd /tmp
+              if [ ! -x "$BIN/gh" ]; then
+                curl -fsSL --retry 3 https://github.com/cli/cli/releases/download/v2.94.0/gh_2.94.0_linux_amd64.tar.gz \
+                  | tar -xz && install -m0755 gh_2.94.0_linux_amd64/bin/gh "$BIN/gh" || echo "WARN: gh install failed"
+              fi
+              if [ ! -x "$BIN/himalaya" ]; then
+                curl -fsSL --retry 3 https://github.com/pimalaya/himalaya/releases/download/v1.2.0/himalaya.x86_64-linux.tgz \
+                  | tar -xz && install -m0755 himalaya "$BIN/himalaya" || echo "WARN: himalaya install failed"
+              fi
+              if [ ! -x "$BIN/gog" ]; then
+                curl -fsSL --retry 3 https://github.com/openclaw/gogcli/releases/download/v0.27.0/gogcli_0.27.0_linux_amd64.tar.gz \
+                  | tar -xz && install -m0755 gog "$BIN/gog" || echo "WARN: gog install failed"
+              fi
+              echo "skill bins present:"; ls -l "$BIN" || true
+          volumeMounts:
+            - name: state
+              mountPath: /home/node/.openclaw
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
       containers:
         - name: openclaw
           image: ghcr.io/openclaw/openclaw:2026.6.6
@@ -66,6 +106,11 @@ spec:
             - name: http
               containerPort: 18789
           env:
+            # Put the PVC bin dir (seeded by the install-skill-bins initContainer)
+            # ahead of the system path so skills resolve gh/himalaya/gog. Must
+            # restate the image default PATH — there is no append in k8s env.
+            - name: PATH
+              value: /home/node/.openclaw/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
             - name: HOME
               value: /home/node
             - name: OPENCLAW_HOME
