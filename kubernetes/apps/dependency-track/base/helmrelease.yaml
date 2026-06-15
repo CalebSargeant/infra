@@ -68,6 +68,23 @@ spec:
         # Trim the connection pool on the shared CNPG.
         - name: ALPINE_DATABASE_POOL_MAX_SIZE
           value: "10"
+        # Google OIDC (native). apiserver validates ID tokens against Google's
+        # JWKS; client-id is the shared Google SSO client (public — no secret
+        # needed for the implicit/PKCE flow). USER_PROVISIONING auto-creates the
+        # user on first login (then grant it a team in the DT UI as local admin).
+        - name: ALPINE_OIDC_ENABLED
+          value: "true"
+        - name: ALPINE_OIDC_ISSUER
+          value: "https://accounts.google.com"
+        - name: ALPINE_OIDC_USERNAME_CLAIM
+          value: "email"
+        - name: ALPINE_OIDC_USER_PROVISIONING
+          value: "true"
+        - name: ALPINE_OIDC_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: dependency-track-oidc
+              key: client-id
 
     frontend:
       nodeSelector:
@@ -75,6 +92,23 @@ spec:
       # Browser-reachable URL of the apiserver (baked into the SPA config.json).
       # Served by the second Ingress rule in ingress.yaml.
       apiBaseUrl: "https://dependency-track-api.sargeant.co"
+      # Google OIDC for the SPA login (config.json is rendered from these at
+      # container start). Google redirect URI: the value below must be allowed
+      # on the OAuth client → https://dependency-track.sargeant.co/static/oidc-callback.html
+      extraEnv:
+        - name: OIDC_ISSUER
+          value: "https://accounts.google.com"
+        - name: OIDC_FLOW
+          value: "implicit"
+        - name: OIDC_SCOPE
+          value: "openid email profile"
+        - name: OIDC_LOGIN_BUTTON_TEXT
+          value: "Login with Google"
+        - name: OIDC_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: dependency-track-oidc
+              key: client-id
       resources:
         requests:
           cpu: 100m

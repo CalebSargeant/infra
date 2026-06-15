@@ -6,5 +6,9 @@ resources:
   - database.yaml
   - externalsecret-app.yaml
   - externalsecret-db.yaml
+  - externalsecret-oauth2.yaml
   - helmrelease.yaml
-  - ingress.yaml
+  - oauth2-proxy.yaml
+  # No Ingress: public .co traffic enters via the cloudflared tunnel → the
+  # oauth2-proxy Service (Google gate). Gated apps are .co-only (Google rejects
+  # .local redirect URIs). See terraform/cloudflare/zero-trust/prod/tunnels.tf.

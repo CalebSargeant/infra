@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - database.yaml
   - externalsecret-db.yaml
+  - externalsecret-oidc.yaml
   - externalsecret-secretkey.yaml
   - helmrelease.yaml
   - ingress.yaml
