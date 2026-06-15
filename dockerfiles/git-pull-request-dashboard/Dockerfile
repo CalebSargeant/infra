@@ -21,4 +21,7 @@ FROM ghcr.io/nginxinc/nginx-unprivileged:1.27-alpine
 # SPA routing (try_files → index.html); listens on 8080 as the non-root nginx user.
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
+# The base image already runs as the unprivileged `nginx` user (uid 101); restate
+# it explicitly so image scanners can see the container never runs as root.
+USER 101
 EXPOSE 8080
