@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v1.55.0 (2026-06-15)
+
+### Bug Fixes
+
+- **cloudflare**: Add DNS CNAMEs for the 5 firefly AppSec tunnel hosts
+  ([#394](https://github.com/CalebSargeant/infra/pull/394),
+  [`c4ffbeb`](https://github.com/CalebSargeant/infra/commit/c4ffbeb0dd4f49a5fb32d11ff47876b0c8ef3047))
+
+- **docker**: Set explicit USER 101 in git-pull-request-dashboard image
+  ([#394](https://github.com/CalebSargeant/infra/pull/394),
+  [`c4ffbeb`](https://github.com/CalebSargeant/infra/commit/c4ffbeb0dd4f49a5fb32d11ff47876b0c8ef3047))
+
+### Features
+
+- **security**: Add DefectDojo, Dependency-Track, safe-settings + PR dashboard
+  ([#394](https://github.com/CalebSargeant/infra/pull/394),
+  [`c4ffbeb`](https://github.com/CalebSargeant/infra/commit/c4ffbeb0dd4f49a5fb32d11ff47876b0c8ef3047))
+
+
 ## v1.54.0 (2026-06-15)
 
 ### Chores
