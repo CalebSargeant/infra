@@ -30,7 +30,8 @@ spec:
             - --redirect-url=https://defectdojo.magmamoose.com/oauth2/callback
             - --reverse-proxy=true
             - --cookie-secure=true
-            - --cookie-domain=.magmamoose.com
+            - --cookie-name=_defectdojo_oauth2_proxy
+            - --cookie-domain=defectdojo.magmamoose.com
             - --whitelist-domain=.magmamoose.com
             - --skip-provider-button=true
             # DefectDojo's REST API + inbound webhooks use their own token/secret

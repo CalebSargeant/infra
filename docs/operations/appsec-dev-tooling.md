@@ -28,3 +28,20 @@ hosts, set `external-dns.alpha.kubernetes.io/target` to the firefly
 `*.cfargotunnel.com` hostname and `external-dns.alpha.kubernetes.io/cloudflare-proxied`
 to `"true"`; otherwise external-dns publishes the private Traefik load-balancer
 addresses.
+
+## safe-settings Admin Repository
+
+safe-settings reads its desired-state configuration from
+`MagmaMoose/admin:.github/settings.yml`, with optional overlays under
+`.github/suborgs/` and `.github/repos/`. The Diatreme GitHub App is installed on
+all MagmaMoose repositories, but its webhook URL is owned by Diatreme
+(`https://api.diatreme.magmamoose.com/webhook`). To avoid stealing that webhook,
+the in-cluster safe-settings deployment runs `CRON=*/15 * * * *` for scheduled
+full-sync reconciliation.
+
+## OAuth Cookie Scope
+
+Each oauth2-proxy-protected app must use an app-specific cookie name and a
+host-specific `--cookie-domain`. Do not use `.magmamoose.com` as the cookie
+domain for multiple apps: oauth2-proxy CSRF/session cookies collide across
+subdomains and cause intermittent `Unable to find a valid CSRF token` failures.
