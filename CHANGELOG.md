@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.56.4 (2026-06-16)
+
+### Bug Fixes
+
+- Publish magmamoose ingress hosts via tunnel
+  ([#403](https://github.com/CalebSargeant/infra/pull/403),
+  [`b51cc8b`](https://github.com/CalebSargeant/infra/commit/b51cc8b1af3bd2a79c6ce6cb1c50682006d8b9c1))
+
+
 ## v1.56.3 (2026-06-16)
 
 ### Bug Fixes
