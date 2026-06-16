@@ -4,12 +4,10 @@ repos:
     hooks:
       - id: all
   - repo: https://github.com/MagmaMoose/chargate
-    rev: v1
+    rev: v2.0.2
     hooks:
-      - id: shellcheck
-      - id: actionlint
-      - id: hadolint
-      - id: trivy
-      - id: trufflehog
-      - id: semgrep
-      - id: checkov
+      # v2 collapsed the per-tool hooks (shellcheck/trivy/semgrep/checkov/...)
+      # into one fast staged-file gate. SHA-pinning + branch-name hygiene are
+      # already covered by calebsargeant/pre-commit-hooks `all` above, so we
+      # only take chargate's security gate here.
+      - id: chargate
