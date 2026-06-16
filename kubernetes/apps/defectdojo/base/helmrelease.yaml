@@ -74,13 +74,17 @@ spec:
       uwsgi:
         autoscaling:
           enabled: false
+        # DefectDojo's Django baseline is ~445Mi at idle with 2 uwsgi processes,
+        # so the old 512Mi limit OOM-killed uwsgi the instant the post-login
+        # dashboard (`/`) loaded — surfacing as a 502 from the in-pod nginx.
+        # ff-vm1 has ~10Gi free; give real headroom. No CPU limit (house
+        # convention: CPU requests only — limits cause false CFS-throttle alerts).
         resources:
           requests:
             cpu: 100m
-            memory: 256Mi
-          limits:
-            cpu: 750m
             memory: 512Mi
+          limits:
+            memory: 1Gi
       nginx:
         resources:
           requests:
