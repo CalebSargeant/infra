@@ -2,6 +2,23 @@
 
 <!-- version list -->
 
+## v1.56.1 (2026-06-16)
+
+### Bug Fixes
+
+- **cluster**: Grant kyverno admission-controller get/list on secrets
+  ([#396](https://github.com/CalebSargeant/infra/pull/396),
+  [`d008d6b`](https://github.com/CalebSargeant/infra/commit/d008d6b50bc131c4f8b82c21641716c9ce91abf2))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`78f761d`](https://github.com/CalebSargeant/infra/commit/78f761dc51ecb3fc3bf9d3f8057f443143fa824b))
+
+- **media**: Bump image tags
+  ([`b23f000`](https://github.com/CalebSargeant/infra/commit/b23f000337ef8b762d22966d50899b20a9dbc28c))
+
+
 ## v1.56.0 (2026-06-15)
 
 ### Features
