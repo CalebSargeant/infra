@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v1.56.2 (2026-06-16)
+
+### Bug Fixes
+
+- **safe-settings**: Use the Diatreme GitHub App secrets
+  ([#397](https://github.com/CalebSargeant/infra/pull/397),
+  [`867b300`](https://github.com/CalebSargeant/infra/commit/867b30030d7f447336de1649d27653cc27685c92))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`e594a57`](https://github.com/CalebSargeant/infra/commit/e594a576c467c7e0f6a674370d356f465d500076))
+
+
 ## v1.56.1 (2026-06-16)
 
 ### Bug Fixes
