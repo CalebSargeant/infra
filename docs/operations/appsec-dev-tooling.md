@@ -14,11 +14,17 @@ routed to in-cluster services.
 
 Keep these three layers aligned when changing a hostname:
 
-- Cloudflare DNS CNAMEs in `terraform/cloudflare/dns-magmamoose/prod/terragrunt.hcl`.
 - Cloudflare Tunnel ingress rules in `terraform/cloudflare/zero-trust/prod/tunnels.tf`.
 - App-level URLs and allowed hosts in the Kubernetes manifests.
+- DNS ownership:
+  - Terraform owns tunnel CNAMEs in `terraform/cloudflare/dns-magmamoose/prod/terragrunt.hcl` for hosts without Kubernetes Ingresses (`pullrequests`, `defectdojo`).
+  - external-dns owns Ingress-backed hosts (`dependencytrack`, `dependencytrack-api`, `safesettings`) from their Ingress annotations.
 
 Dependency-Track needs both frontend and API public hostnames because the SPA
 calls the API host directly from the browser. safe-settings must remain public
 without a Cloudflare Access gate for `/api/github/webhooks`; GitHub authenticates
-payloads with the webhook secret instead.
+payloads with the webhook secret instead. For Ingress-backed public tunnel
+hosts, set `external-dns.alpha.kubernetes.io/target` to the firefly
+`*.cfargotunnel.com` hostname and `external-dns.alpha.kubernetes.io/cloudflare-proxied`
+to `"true"`; otherwise external-dns publishes the private Traefik load-balancer
+addresses.
