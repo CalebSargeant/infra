@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.56.5 (2026-06-16)
+
+### Bug Fixes
+
+- Harden appsec auth and safe-settings sync
+  ([#404](https://github.com/CalebSargeant/infra/pull/404),
+  [`91c84f3`](https://github.com/CalebSargeant/infra/commit/91c84f3fd24c71d72d086ebe294fa9c17e2a8bfc))
+
+
 ## v1.56.4 (2026-06-16)
 
 ### Bug Fixes
