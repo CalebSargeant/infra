@@ -1,0 +1,23 @@
+---
+# Kyverno validates a generate/clone policy AT ADMISSION by checking that its
+# controllers already hold the RBAC needed to perform the generate. The
+# admission-controller runs this pre-check and needs get/list on the cloned
+# kind. Without this, ClusterPolicy/sync-ghcr-pull-secret is rejected with:
+#
+#   validate-policy.kyverno.svc denied: spec.rules[0].generate..:
+#   system:serviceaccount:kyverno:kyverno-admission-controller requires
+#   permissions list,get for resource v1/Secret in namespace {{...}}
+#
+# The background-controller grant (create/update/delete to perform the clone)
+# lives in kyverno-background-controller-aggregation.yaml; this is its
+# admission-side counterpart. Both attach via Kyverno's aggregation labels.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyverno:admission-controller:secrets
+  labels:
+    rbac.kyverno.io/aggregate-to-admission-controller: "true"
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
