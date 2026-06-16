@@ -4,5 +4,6 @@ resources:
   - cluster-operator-clusterrole.yaml
   - cluster-operator-clusterrolebinding.yaml
   - kyverno-background-controller-aggregation.yaml
+  - kyverno-admission-controller-aggregation.yaml
   - cluster-operator-policy.yaml
   - sync-ghcr-pull-secret-policy.yaml
