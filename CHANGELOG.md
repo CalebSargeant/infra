@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.56.6 (2026-06-16)
+
+### Bug Fixes
+
+- Raise defectdojo uwsgi memory limit to stop OOM 502
+  ([#405](https://github.com/CalebSargeant/infra/pull/405),
+  [`741c3ff`](https://github.com/CalebSargeant/infra/commit/741c3ffb61a6b8355cefd2e01add51263b630924))
+
+
 ## v1.56.5 (2026-06-16)
 
 ### Bug Fixes
