@@ -40,10 +40,11 @@ spec:
               value: ".github"
             - name: LOG_LEVEL
               value: "info"
-            # Drift-correcting full-sync. Leave unset for webhook-only operation;
-            # uncomment to also reconcile on a schedule.
-            # - name: CRON
-            #   value: "0 * * * *"
+            # The shared Diatreme GitHub App webhook is routed to Diatreme's
+            # API, so safe-settings runs a scheduled full-sync instead of
+            # relying on event delivery.
+            - name: CRON
+              value: "*/15 * * * *"
           envFrom:
             # APP_ID, PRIVATE_KEY (base64 PEM), WEBHOOK_SECRET — from OCI Vault.
             - secretRef:
