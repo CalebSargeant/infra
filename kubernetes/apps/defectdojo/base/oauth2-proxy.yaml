@@ -27,11 +27,11 @@ spec:
             # reaches here via the cloudflared tunnel (tunnels.tf), so the gate
             # actually applies (the tunnel bypasses Traefik/Ingress).
             - --upstream=http://defectdojo-django.security.svc.cluster.local:80
-            - --redirect-url=https://defectdojo.sargeant.co/oauth2/callback
+            - --redirect-url=https://defectdojo.magmamoose.com/oauth2/callback
             - --reverse-proxy=true
             - --cookie-secure=true
-            - --cookie-domain=.sargeant.co
-            - --whitelist-domain=.sargeant.co
+            - --cookie-domain=.magmamoose.com
+            - --whitelist-domain=.magmamoose.com
             - --skip-provider-button=true
             # DefectDojo's REST API + inbound webhooks use their own token/secret
             # auth and are called by non-browser clients — bypass the Google gate
