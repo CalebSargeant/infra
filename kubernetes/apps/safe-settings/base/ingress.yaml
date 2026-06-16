@@ -11,11 +11,11 @@ metadata:
   labels:
     app: safe-settings
 spec:
-  # NOTE: GitHub delivers webhooks to https://safe-settings.sargeant.co/api/github/webhooks
-  # — the .sargeant.co host must be published through the Cloudflare tunnel for
-  # GitHub's delivery IPs to reach it. .sargeant.local is internal-only.
+  # NOTE: GitHub delivers webhooks to https://safesettings.magmamoose.com/api/github/webhooks
+  # — the magmamoose.com host must be published through the Cloudflare tunnel
+  # for GitHub's delivery IPs to reach it. .sargeant.local is internal-only.
   rules:
-    - host: safe-settings.sargeant.co
+    - host: safesettings.magmamoose.com
       http:
         paths:
           - path: /
@@ -37,5 +37,5 @@ spec:
                   number: 3000
   tls:
     - hosts:
-        - safe-settings.sargeant.co
+        - safesettings.magmamoose.com
       secretName: safe-settings-tls

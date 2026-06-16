@@ -78,6 +78,43 @@ inputs = {
       value   = "magmamoose.github.io"
       proxied = false
     },
+
+    # AppSec / dev tooling on firefly. Each record pairs with a tunnel
+    # ingress_rule in terraform/cloudflare/zero-trust/prod/tunnels.tf. These
+    # must stay proxied so Cloudflare routes via the `firefly` tunnel; a
+    # grey-cloud CNAME would expose the cfargotunnel.com target directly.
+    {
+      name    = "pullrequests.magmamoose.com"
+      type    = "CNAME"
+      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
+      proxied = true
+    },
+    {
+      name    = "defectdojo.magmamoose.com"
+      type    = "CNAME"
+      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
+      proxied = true
+    },
+    {
+      name    = "dependencytrack.magmamoose.com"
+      type    = "CNAME"
+      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
+      proxied = true
+    },
+    # The Dependency-Track frontend SPA calls this API host directly from the
+    # browser, so it needs its own public DNS record too.
+    {
+      name    = "dependencytrack-api.magmamoose.com"
+      type    = "CNAME"
+      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
+      proxied = true
+    },
+    {
+      name    = "safesettings.magmamoose.com"
+      type    = "CNAME"
+      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
+      proxied = true
+    },
     # NOTE: dunmir.magmamoose.com (Dün Mir Pro UI) is a Cloudflare Pages custom
     # domain — its DNS is created by the Pages "Custom domains" flow, NOT here.
     # A hand-written proxied CNAME to *.pages.dev is rejected with error 1014

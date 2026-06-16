@@ -22,8 +22,8 @@ spec:
       retries: 3
   values:
     # ── Site / hosting ──────────────────────────────────────────────────────
-    host: defectdojo.sargeant.co
-    siteUrl: "https://defectdojo.sargeant.co"
+    host: defectdojo.magmamoose.com
+    siteUrl: "https://defectdojo.magmamoose.com"
     # 3 components pull the same large django image — avoid re-pulls.
     imagePullPolicy: IfNotPresent
 
@@ -97,9 +97,9 @@ spec:
           value: "2"
         # Accept the internal host too (chart derives ALLOWED_HOSTS from `host`).
         - name: DD_ALLOWED_HOSTS
-          value: "defectdojo.sargeant.co,defectdojo.sargeant.local,localhost"
+          value: "defectdojo.magmamoose.com,defectdojo.sargeant.local,localhost"
         - name: DD_CSRF_TRUSTED_ORIGINS
-          value: "https://defectdojo.sargeant.co,https://defectdojo.sargeant.local"
+          value: "https://defectdojo.magmamoose.com,https://defectdojo.sargeant.local"
 
     celery:
       worker:

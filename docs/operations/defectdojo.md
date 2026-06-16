@@ -1,6 +1,7 @@
 # DefectDojo
 
-DefectDojo runs in the `security` namespace from `kubernetes/apps/defectdojo`.
+DefectDojo runs in the `security` namespace from `kubernetes/apps/defectdojo`
+and is exposed at `https://defectdojo.magmamoose.com`.
 Flux installs the upstream DefectDojo Helm chart, but the app uses shared firefly
 infrastructure instead of bundled subcharts:
 
