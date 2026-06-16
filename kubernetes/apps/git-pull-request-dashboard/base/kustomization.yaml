@@ -1,13 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: automation
+# The app's control-plane library (GitRepository + image automation), applied
+# by the per-env Flux Kustomization (see prod/flux-kustomization.yaml), not
+# aggregated directly. The workload manifests live in the external
+# magmamoose/git-pull-request-dashboard repo.
 resources:
-  - deployment.yaml
-  - service.yaml
-  - externalsecret-oauth2.yaml
-  - oauth2-proxy.yaml
-  # No Ingress: public .co traffic enters via the cloudflared tunnel → the
-  # oauth2-proxy Service (Google gate). See tunnels.tf.
-components:
-  # Pin to the worker node (k3s agent, ff-vm1, amd64).
-  - ../../../components/node-selectors/worker
+  - ./git-pull-request-dashboard
