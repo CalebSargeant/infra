@@ -8,13 +8,11 @@ on:
       - "n8n-v*"
       - "openfortivpn-v*"
       - "atlantis-firefly-v*"
-      - "git-pull-request-dashboard-v*"
   pull_request:
     paths:
       - "dockerfiles/n8n/**"
       - "dockerfiles/openfortivpn/**"
       - "dockerfiles/atlantis-firefly/**"
-      - "dockerfiles/git-pull-request-dashboard/**"
 
 jobs:
   determine-changes:
@@ -29,7 +27,6 @@ jobs:
       build_n8n: ${{ steps.filter.outputs.n8n }}
       build_openfortivpn: ${{ steps.filter.outputs.openfortivpn }}
       build_atlantis_firefly: ${{ steps.filter.outputs.atlantis_firefly }}
-      build_git_pull_request_dashboard: ${{ steps.filter.outputs.git_pull_request_dashboard }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -45,8 +42,6 @@ jobs:
               - 'dockerfiles/openfortivpn/**'
             atlantis_firefly:
               - 'dockerfiles/atlantis-firefly/**'
-            git_pull_request_dashboard:
-              - 'dockerfiles/git-pull-request-dashboard/**'
 
   build:
     needs: determine-changes
@@ -57,7 +52,6 @@ jobs:
           - { name: "n8n", path: "dockerfiles/n8n", tag_prefix: "n8n-v", registry_name: "n8n" }
           - { name: "openfortivpn", path: "dockerfiles/openfortivpn", tag_prefix: "openfortivpn-v", registry_name: "openfortivpn" }
           - { name: "atlantis_firefly", path: "dockerfiles/atlantis-firefly", tag_prefix: "atlantis-firefly-v", registry_name: "atlantis-firefly" }
-          - { name: "git_pull_request_dashboard", path: "dockerfiles/git-pull-request-dashboard", tag_prefix: "git-pull-request-dashboard-v", registry_name: "git-pull-request-dashboard" }
 
     steps:
       - name: Determine if Build is Needed
