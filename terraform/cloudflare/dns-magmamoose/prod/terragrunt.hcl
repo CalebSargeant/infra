@@ -79,10 +79,10 @@ inputs = {
       proxied = false
     },
 
-    # AppSec / dev tooling on firefly. Each record pairs with a tunnel
-    # ingress_rule in terraform/cloudflare/zero-trust/prod/tunnels.tf. These
-    # must stay proxied so Cloudflare routes via the `firefly` tunnel; a
-    # grey-cloud CNAME would expose the cfargotunnel.com target directly.
+    # AppSec / dev tooling on firefly. These hosts have no Kubernetes Ingress
+    # for external-dns to watch, so Terraform owns their tunnel CNAMEs directly.
+    # Ingress-backed hosts such as Dependency-Track and safe-settings are
+    # published by external-dns from their Ingress annotations instead.
     {
       name    = "pullrequests.magmamoose.com"
       type    = "CNAME"
@@ -91,26 +91,6 @@ inputs = {
     },
     {
       name    = "defectdojo.magmamoose.com"
-      type    = "CNAME"
-      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
-      proxied = true
-    },
-    {
-      name    = "dependencytrack.magmamoose.com"
-      type    = "CNAME"
-      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
-      proxied = true
-    },
-    # The Dependency-Track frontend SPA calls this API host directly from the
-    # browser, so it needs its own public DNS record too.
-    {
-      name    = "dependencytrack-api.magmamoose.com"
-      type    = "CNAME"
-      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
-      proxied = true
-    },
-    {
-      name    = "safesettings.magmamoose.com"
       type    = "CNAME"
       value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
       proxied = true
