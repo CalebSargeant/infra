@@ -91,10 +91,10 @@ spec:
         node-role.kubernetes.io/worker: ""
       # Browser-reachable URL of the apiserver (baked into the SPA config.json).
       # Served by the second Ingress rule in ingress.yaml.
-      apiBaseUrl: "https://dependency-track-api.sargeant.co"
+      apiBaseUrl: "https://dependencytrack-api.magmamoose.com"
       # Google OIDC for the SPA login (config.json is rendered from these at
       # container start). Google redirect URI: the value below must be allowed
-      # on the OAuth client → https://dependency-track.sargeant.co/static/oidc-callback.html
+      # on the OAuth client → https://dependencytrack.magmamoose.com/static/oidc-callback.html
       extraEnv:
         - name: OIDC_ISSUER
           value: "https://accounts.google.com"

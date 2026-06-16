@@ -217,6 +217,12 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
     # delivery IPs can POST to /api/github/webhooks. No Access gate (GitHub can't
     # authenticate through Access); the webhook secret authenticates payloads.
     ingress_rule {
+      hostname = "safesettings.magmamoose.com"
+      service  = "http://safe-settings.security.svc.cluster.local:3000"
+      origin_request {}
+    }
+    # Legacy alias kept during the hostname move to magmamoose.com.
+    ingress_rule {
       hostname = "safe-settings.sargeant.co"
       service  = "http://safe-settings.security.svc.cluster.local:3000"
       origin_request {}
@@ -226,14 +232,31 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
     # The proxy forwards to defectdojo-django and bypasses auth for /api/v2 +
     # /webhook (token/secret-authenticated, non-browser clients).
     ingress_rule {
+      hostname = "defectdojo.magmamoose.com"
+      service  = "http://oauth2-proxy.security.svc.cluster.local:4180"
+      origin_request {}
+    }
+    # Legacy alias kept during the hostname move to magmamoose.com.
+    ingress_rule {
       hostname = "defectdojo.sargeant.co"
       service  = "http://oauth2-proxy.security.svc.cluster.local:4180"
       origin_request {}
     }
 
     # Dependency-Track frontend (UI) + apiserver (the SPA calls the API host
-    # directly from the browser, so both must be reachable; frontend.apiBaseUrl
-    # points at dependency-track-api.sargeant.co). Both have their own login.
+    # directly from the browser, so both must be reachable). Both have their own
+    # login.
+    ingress_rule {
+      hostname = "dependencytrack.magmamoose.com"
+      service  = "http://dependency-track-frontend.security.svc.cluster.local:8080"
+      origin_request {}
+    }
+    ingress_rule {
+      hostname = "dependencytrack-api.magmamoose.com"
+      service  = "http://dependency-track-api-server.security.svc.cluster.local:8080"
+      origin_request {}
+    }
+    # Legacy aliases kept during the hostname move to magmamoose.com.
     ingress_rule {
       hostname = "dependency-track.sargeant.co"
       service  = "http://dependency-track-frontend.security.svc.cluster.local:8080"
@@ -247,6 +270,12 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
 
     # git-pull-request-dashboard — static SPA, fronted by oauth2-proxy
     # (Google SSO, @magmamoose.com). The GitHub PAT is still entered client-side.
+    ingress_rule {
+      hostname = "pullrequests.magmamoose.com"
+      service  = "http://oauth2-proxy.automation.svc.cluster.local:4180"
+      origin_request {}
+    }
+    # Legacy alias kept during the hostname move to magmamoose.com.
     ingress_rule {
       hostname = "pr-dashboard.sargeant.co"
       service  = "http://oauth2-proxy.automation.svc.cluster.local:4180"
