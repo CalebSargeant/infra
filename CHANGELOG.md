@@ -2,6 +2,35 @@
 
 <!-- version list -->
 
+## v1.56.3 (2026-06-16)
+
+### Bug Fixes
+
+- **defectdojo**: Satisfy chart runtime requirements
+  ([#401](https://github.com/CalebSargeant/infra/pull/401),
+  [`4a0125a`](https://github.com/CalebSargeant/infra/commit/4a0125afcc0db9627f5f6c44ff17630fea33d3f6))
+
+### Chores
+
+- **chargate**: Migrate to v2 + add CI security gate
+  ([#398](https://github.com/CalebSargeant/infra/pull/398),
+  [`4b64e48`](https://github.com/CalebSargeant/infra/commit/4b64e480197b35ffb0c3c4c71c1a49c475cfbed2))
+
+### Refactoring
+
+- **git-pull-request-dashboard**: Mono-env via external repo
+  ([#400](https://github.com/CalebSargeant/infra/pull/400),
+  [`2ab7f3f`](https://github.com/CalebSargeant/infra/commit/2ab7f3f68db06a3a1f601f1fce8e04188c38fe8a))
+
+- **git-pull-request-dashboard**: Mono-env via external repo
+  ([#399](https://github.com/CalebSargeant/infra/pull/399),
+  [`988e195`](https://github.com/CalebSargeant/infra/commit/988e1954ac7572c9299958c4e31504baf4129a09))
+
+- **ingress**: Update hostnames to use magmamoose.com
+  ([#400](https://github.com/CalebSargeant/infra/pull/400),
+  [`2ab7f3f`](https://github.com/CalebSargeant/infra/commit/2ab7f3f68db06a3a1f601f1fce8e04188c38fe8a))
+
+
 ## v1.56.2 (2026-06-16)
 
 ### Bug Fixes
