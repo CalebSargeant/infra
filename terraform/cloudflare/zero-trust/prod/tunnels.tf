@@ -243,14 +243,29 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
-    # Dependency-Track frontend (UI) + apiserver (the SPA calls the API host
-    # directly from the browser, so both must be reachable). Both have their own
-    # login.
+    # Dependency-Track on a single public hostname. cloudflared evaluates rules
+    # top-to-bottom, so the /api split MUST precede the frontend catch-all:
+    #   dependencytrack.magmamoose.com/api/* (REST API, all methods) → apiserver
+    #   dependencytrack.magmamoose.com/<rest>                        → frontend SPA
+    # The frontend is nginx serving static files and 405s any non-GET method, so
+    # SBOM uploads (POST /api/v1/bom, multipart, a few MB — well under Cloudflare's
+    # edge body limit, no tunnel-side cap needed) MUST hit the apiserver here.
+    # Mirrors the zoey.sargeant.co api/frontend split above. frontend.apiBaseUrl
+    # now points at this same host, so the SPA is same-origin too.
+    ingress_rule {
+      hostname = "dependencytrack.magmamoose.com"
+      path     = "^/api(/|$)"
+      service  = "http://dependency-track-api-server.security.svc.cluster.local:8080"
+      origin_request {}
+    }
     ingress_rule {
       hostname = "dependencytrack.magmamoose.com"
       service  = "http://dependency-track-frontend.security.svc.cluster.local:8080"
       origin_request {}
     }
+    # Dedicated API hostname — kept as a backward-compatible fallback. The SPA no
+    # longer needs it now that it's same-origin, but it's harmless for any direct
+    # API client still pointed here.
     ingress_rule {
       hostname = "dependencytrack-api.magmamoose.com"
       service  = "http://dependency-track-api-server.security.svc.cluster.local:8080"

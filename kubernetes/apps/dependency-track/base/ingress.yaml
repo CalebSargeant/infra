@@ -1,6 +1,12 @@
 ---
-# UI (Vue SPA, nginx). The browser then calls the apiserver directly at the
-# apiBaseUrl host below — hence a second, separate Ingress for the API.
+# NOTE: these Ingresses exist only so external-dns publishes the CNAME (the
+# `target` annotation) and cert-manager mints a cert. Actual request routing is
+# done by the cloudflared tunnel (terraform/cloudflare/zero-trust/prod/tunnels.tf),
+# which connects straight to these Services and bypasses Traefik. The tunnel
+# splits dependencytrack.magmamoose.com/api/* → apiserver and /<rest> → frontend,
+# so the SPA (frontend.apiBaseUrl) is now same-origin on this host.
+#
+# UI (Vue SPA, nginx).
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -33,7 +39,9 @@ spec:
         - dependencytrack.magmamoose.com
       secretName: dependency-track-tls
 ---
-# REST API + health endpoints. frontend.apiBaseUrl points here.
+# REST API + health endpoints on a dedicated host. Kept as a backward-compatible
+# fallback; the SPA now uses the main host's /api/* (frontend.apiBaseUrl), so this
+# host is no longer required for the UI.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
