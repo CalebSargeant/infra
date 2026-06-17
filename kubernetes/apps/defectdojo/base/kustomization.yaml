@@ -7,6 +7,7 @@ resources:
   - database.yaml
   - externalsecret-app.yaml
   - externalsecret-db.yaml
+  - externalsecret-github.yaml
   - externalsecret-integrations.yaml
   - externalsecret-oauth2.yaml
   - helmrelease.yaml
