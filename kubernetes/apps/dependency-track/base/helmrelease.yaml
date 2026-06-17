@@ -90,8 +90,11 @@ spec:
       nodeSelector:
         node-role.kubernetes.io/worker: ""
       # Browser-reachable URL of the apiserver (baked into the SPA config.json).
-      # Served by the second Ingress rule in ingress.yaml.
-      apiBaseUrl: "https://dependencytrack-api.magmamoose.com"
+      # Same-origin: the cloudflared tunnel routes this host's /api/* to the
+      # apiserver (terraform/cloudflare/zero-trust/prod/tunnels.tf), so the SPA,
+      # the chargate CI, and any other client all share one hostname — no CORS,
+      # no separate API host required.
+      apiBaseUrl: "https://dependencytrack.magmamoose.com"
       # Google OIDC for the SPA login (config.json is rendered from these at
       # container start). Google redirect URI: the value below must be allowed
       # on the OAuth client → https://dependencytrack.magmamoose.com/static/oidc-callback.html
