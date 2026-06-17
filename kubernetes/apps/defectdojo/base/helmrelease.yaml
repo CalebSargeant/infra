@@ -120,11 +120,17 @@ spec:
           image: defectdojo/defectdojo-django:2.58.4
           imagePullPolicy: IfNotPresent
           command: ["python", "/scripts/bootstrap.py"]
+          # The `dojo` package lives at /app (image WORKDIR); a script run from
+          # /scripts isn't on its path, so without this django.setup() dies with
+          # ModuleNotFoundError and crashes the init container.
+          workingDir: /app
           volumeMounts:
             - name: dd-bootstrap
               mountPath: /scripts
               readOnly: true
           env:
+            - name: PYTHONPATH
+              value: /app
             - name: DJANGO_SETTINGS_MODULE
               value: dojo.settings.settings
             - name: DD_DATABASE_ENGINE

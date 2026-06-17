@@ -18,10 +18,13 @@ data:
     only flip `enable_github` here so the finding UI renders the linked issue; we do
     NOT create a GITHUB_Conf (the sync holds the tokens, per target, in OCI Vault).
 
+    This runs as an init container, so its exit status gates the DefectDojo rollout
+    (a non-zero exit fails the Helm upgrade). It is therefore wrapped to ALWAYS exit
+    0 — every step is best-effort; on any error we log and let DefectDojo start.
+
     Ordering note: the chart renders extraInitContainers BEFORE its dbMigrationChecker,
     and migrations run in a separate `initializer` Job, so we poll until the
-    System_Settings row exists before reconciling. We never wedge DefectDojo: on any
-    unrecoverable error we log and exit 0 so the app can still start.
+    System_Settings row exists before reconciling.
     """
     import logging
     import os
@@ -31,14 +34,6 @@ data:
     logging.basicConfig(level=logging.INFO, format="dd-bootstrap: %(message)s")
     log = logging.getLogger("dd-bootstrap")
 
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
-
-    import django  # noqa: E402
-
-    django.setup()
-
-    from django.db.utils import OperationalError, ProgrammingError  # noqa: E402
-
     SLACK_TOKEN = os.environ.get("SLACK_TOKEN", "").strip()
     SLACK_CHANNEL = os.environ.get("SLACK_CHANNEL", "#engineering-alerts").strip()
     # Events routed to Slack on the system-wide Notifications object.
@@ -47,6 +42,8 @@ data:
 
     def wait_for_schema(attempts=60, delay=5):
         """Block until migrations have run AND the System_Settings row exists."""
+        from django.db.utils import OperationalError, ProgrammingError
+
         from dojo.models import System_Settings
         for i in range(1, attempts + 1):
             try:
@@ -93,10 +90,15 @@ data:
 
 
     def main():
-        if not wait_for_schema():
-            log.error("schema not ready after wait; skipping (will retry on next deploy)")
-            return 0
+        # Everything (incl. django.setup) is wrapped so a failure can never fail
+        # the init container and therefore the Helm upgrade — config is best-effort.
         try:
+            os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
+            import django
+            django.setup()
+            if not wait_for_schema():
+                log.error("schema not ready after wait; skipping (will retry next deploy)")
+                return 0
             reconcile()
             log.info("bootstrap complete")
         except Exception:  # noqa: BLE001 — never block DefectDojo from starting
