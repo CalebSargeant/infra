@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.57.2 (2026-06-17)
+
+### Bug Fixes
+
+- **security**: Make DefectDojo integration secrets optional + split Slack/GitHub
+  ([#409](https://github.com/CalebSargeant/infra/pull/409),
+  [`2739aeb`](https://github.com/CalebSargeant/infra/commit/2739aeb0981310eed13df973cbb2c83ecf30973f))
+
+
 ## v1.57.1 (2026-06-17)
 
 ### Bug Fixes
