@@ -20,9 +20,12 @@ DefectDojo's GitHub config + finding→issue push are Django-ORM-only (no REST A
 1. **OCI Vault secrets** (the ExternalSecrets reference these keys):
    - `dependency-track-api-key` — a Dependency-Track API key for a team with
      `VIEW_PORTFOLIO` + `VIEW_VULNERABILITY` (DTrack → Administration → Teams → API Keys).
-   - `github-pat-defectdojo` — a **fine-grained** GitHub PAT scoped to the target
-     repo(s): **Issues: read/write**, **Metadata: read**. (DefectDojo has no GitHub
-     App support — a PAT is the only option; this is the least-privilege form.)
+   - `github-pat-defectdojo` — a **fine-grained github.com PAT** scoped to the
+     target repo(s): **Issues: read/write**, **Metadata: read**. (DefectDojo has
+     no GitHub App support — a PAT is the only option; this is the least-privilege
+     form.) **github.com only** — see the GitHub Enterprise note below.
+     This is optional: skip it entirely and findings still import + Slack still
+     fires; only GitHub issue creation is disabled.
 2. **Slack** — invite the bot behind `slack-bot-token` (the same one Alertmanager/Flux
    use) to the target channel. Default channel is `#engineering-alerts`; change it via
    `SLACK_CHANNEL` on the `dd-bootstrap` init container in
@@ -46,8 +49,31 @@ kubectl -n security logs job/sync-test -f
 Then in DefectDojo: **System Settings** shows Slack + GitHub enabled; a GitHub
 Configuration exists; products (one per DTrack project) carry imported findings.
 
+## GitHub Enterprise (*.ghe.com)
+
+DefectDojo OSS can push issues **only to github.com**. The `GITHUB_Conf` model has
+just `configuration_name` + `api_key` (no base-URL field), and the push code calls
+PyGithub `Github(auth=...)` with no `base_url`, so it always hits `api.github.com`.
+Consequences:
+
+- A `tenant.ghe.com` PAT here will **not** work — DefectDojo would send it to
+  github.com. PATs are per-server, so github.com and a GHE tenant always need
+  separate tokens *and* separate endpoints, and DefectDojo only knows the github.com one.
+- Multiple `GITHUB_Conf` entries are allowed (e.g. different github.com orgs/PATs,
+  linked per-product via `GITHUB_PKey.git_conf`) but they **all** target github.com.
+- For GHE-hosted repos you have three options: (a) import findings into DefectDojo
+  but don't auto-open GHE issues; (b) extend `sync.py` to open GHE issues directly
+  via PyGithub `base_url=https://<tenant>.ghe.com/api/v3` with a GHE PAT (bypasses
+  DefectDojo's github.com-only push); (c) patch the DefectDojo image (not advised).
+  Ask if you want (b) wired in.
+
 ## Notes / limits
 
+- Integration secrets are **optional** — the init-container `SLACK_TOKEN`/`GITHUB_PAT`
+  and the CronJob `DTRACK_API_KEY` are `optional: true`, so missing OCI Vault keys
+  never wedge the DefectDojo rollout or spawn `CreateContainerConfigError` cron pods.
+  Slack + GitHub PATs live in separate ExternalSecrets so a missing GitHub key
+  doesn't block Slack.
 - OSS DefectDojo's GitHub push is lightly maintained — issues are opened by the sync
   job calling `add_external_issue` directly (the importer never does). Findings must be
   **Active + Verified** to push, so mapped projects are reimported with `verified=true`.
