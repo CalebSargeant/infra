@@ -1,0 +1,22 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: prod-security-integrations
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./kubernetes/apps/security-integrations/base
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 5m
+  wait: true
+  # The sync CronJob talks to both apps' in-cluster Services and uses the
+  # DefectDojo DB/ORM — both must be reconciled first. (They each, in turn,
+  # depend on infrastructure-services for CNPG + external-secrets.)
+  dependsOn:
+    - name: prod-defectdojo
+    - name: prod-dependency-track
+# No `decryption` block: all secrets are ExternalSecrets (OCI Vault).

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # Maps a Dependency-Track project name (== the DefectDojo product name the sync
+  # creates) to a GitHub repo "owner/repo". ONLY mapped products get a GitHub
+  # issue link + auto-pushed issues; unmapped products are imported but never push.
+  # There is no reliable way to infer the repo from a DTrack project, so this is
+  # curated by hand. Edit + commit to add repos (picked up next reconcile/run).
+  name: github-repo-map
+  namespace: security
+data:
+  # JSON object: { "<dtrack project / dd product name>": "<owner>/<repo>" }
+  # Example (replace with your real projects):
+  #   "infra": "calebsargeant/infra"
+  repo-map.json: |
+    {}

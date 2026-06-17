@@ -1,0 +1,121 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # Mounted at /scripts in the `dd-bootstrap` init container (see helmrelease.yaml).
+  name: defectdojo-bootstrap
+  namespace: security
+data:
+  bootstrap.py: |
+    #!/usr/bin/env python3
+    """Idempotent DefectDojo bootstrap — Slack notifications + GitHub global config.
+
+    Runs as an init container in the DefectDojo django pod (same image), so it has
+    Django + the ORM. None of this is configurable via the chart or the REST API:
+    System_Settings, the system Notifications routing, and GITHUB_Conf all live in
+    the DB. Per-product GitHub linking + finding->issue push live in the
+    `dt-defectdojo-sync` CronJob (products don't exist until findings are imported).
+
+    Ordering note: the chart renders extraInitContainers BEFORE its dbMigrationChecker,
+    and migrations run in a separate `initializer` Job, so we poll until the
+    System_Settings row exists before reconciling. We never wedge DefectDojo: on any
+    unrecoverable error we log and exit 0 so the app can still start.
+    """
+    import logging
+    import os
+    import sys
+    import time
+
+    logging.basicConfig(level=logging.INFO, format="dd-bootstrap: %(message)s")
+    log = logging.getLogger("dd-bootstrap")
+
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
+
+    import django  # noqa: E402
+
+    django.setup()
+
+    from django.db.utils import OperationalError, ProgrammingError  # noqa: E402
+
+    SLACK_TOKEN = os.environ.get("SLACK_TOKEN", "").strip()
+    SLACK_CHANNEL = os.environ.get("SLACK_CHANNEL", "#engineering-alerts").strip()
+    GITHUB_PAT = os.environ.get("GITHUB_PAT", "").strip()
+    GITHUB_CONF_NAME = os.environ.get("GITHUB_CONF_NAME", "firefly").strip()
+    # Events routed to Slack on the system-wide Notifications object.
+    SLACK_EVENTS = ("scan_added", "sla_breach", "sla_breach_combined", "risk_acceptance_expiration")
+
+
+    def wait_for_schema(attempts=60, delay=5):
+        """Block until migrations have run AND the System_Settings row exists."""
+        from dojo.models import System_Settings
+        for i in range(1, attempts + 1):
+            try:
+                if System_Settings.objects.exists():
+                    return True
+                log.info("waiting for System_Settings row (%s/%s)", i, attempts)
+            except (OperationalError, ProgrammingError) as exc:
+                log.info("waiting for migrations (%s/%s): %s", i, attempts, exc)
+            time.sleep(delay)
+        return False
+
+
+    def reconcile():
+        from dojo.github.models import GITHUB_Conf
+        from dojo.models import System_Settings
+        from dojo.notifications.models import Notifications
+
+        settings_obj = System_Settings.objects.get()
+
+        # ── Slack notifications (System_Settings) ────────────────────────────────
+        if SLACK_TOKEN:
+            settings_obj.enable_slack_notifications = True
+            settings_obj.slack_token = SLACK_TOKEN
+            settings_obj.slack_channel = SLACK_CHANNEL
+            log.info("slack notifications enabled -> %s", SLACK_CHANNEL)
+        else:
+            log.warning("SLACK_TOKEN empty; leaving slack settings unchanged")
+
+        # ── GitHub global toggle ─────────────────────────────────────────────────
+        if GITHUB_PAT:
+            settings_obj.enable_github = True
+        settings_obj.save()
+
+        # ── Route import/SLA events to Slack (merge, don't clobber 'alert') ───────
+        if SLACK_TOKEN:
+            sys_notif, _ = Notifications.objects.get_or_create(
+                user=None, product=None, template=False,
+            )
+            for field in SLACK_EVENTS:
+                current = set(getattr(sys_notif, field) or [])
+                current.add("slack")
+                setattr(sys_notif, field, list(current))
+            sys_notif.save()
+            log.info("system notifications routed to slack: %s", ", ".join(SLACK_EVENTS))
+
+        # ── GitHub configuration (holds the PAT; products linked by the sync job) ─
+        if GITHUB_PAT:
+            conf, created = GITHUB_Conf.objects.get_or_create(
+                configuration_name=GITHUB_CONF_NAME,
+                defaults={"api_key": GITHUB_PAT},
+            )
+            if not created and conf.api_key != GITHUB_PAT:
+                conf.api_key = GITHUB_PAT
+                conf.save()
+            log.info("GITHUB_Conf '%s' %s", GITHUB_CONF_NAME, "created" if created else "ensured")
+        else:
+            log.warning("GITHUB_PAT empty; skipping GitHub configuration")
+
+
+    def main():
+        if not wait_for_schema():
+            log.error("schema not ready after wait; skipping (will retry on next deploy)")
+            return 0
+        try:
+            reconcile()
+            log.info("bootstrap complete")
+        except Exception:  # noqa: BLE001 — never block DefectDojo from starting
+            log.exception("bootstrap failed (continuing so DefectDojo can still start)")
+        return 0
+
+
+    if __name__ == "__main__":
+        sys.exit(main())
