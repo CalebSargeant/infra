@@ -33,7 +33,12 @@ spec:
               image: defectdojo/defectdojo-django:2.58.4
               imagePullPolicy: IfNotPresent
               command: ["python", "/scripts/sync.py"]
+              # `dojo` package is at /app (image WORKDIR) — put it on the path so
+              # django.setup() can import it from a /scripts script.
+              workingDir: /app
               env:
+                - name: PYTHONPATH
+                  value: /app
                 - name: DJANGO_SETTINGS_MODULE
                   value: dojo.settings.settings
                 # In-cluster service endpoints (no Cloudflare round-trip).
