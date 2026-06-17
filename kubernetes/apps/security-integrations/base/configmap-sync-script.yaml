@@ -1,0 +1,229 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # Mounted at /scripts in the dt-defectdojo-sync CronJob (defectdojo image).
+  name: dt-defectdojo-sync
+  namespace: security
+data:
+  sync.py: |
+    #!/usr/bin/env python3
+    """Dependency-Track -> DefectDojo sync (+ optional GitHub issue push).
+
+    Runs in the DefectDojo django image (Django ORM + requests + PyGithub all
+    present). For every Dependency-Track project it:
+      1. exports findings in FPF (Finding Packaging Format),
+      2. reimport-scans them into DefectDojo via the stable REST API
+         (auto_create_context creates the product/engagement/test on first run,
+         dedups thereafter),
+      3. for projects listed in the github-repo-map, links the DefectDojo product
+         to a GitHub repo and opens GitHub issues for new Active+Verified findings.
+
+    Why ORM *and* REST: reimport is the stable public contract (use REST), but
+    DefectDojo's GitHub config + the finding->issue push have NO REST API and are
+    UI-only — so we drive them through the ORM. add_external_issue() is normally
+    triggered from the UI, never from the importer, so the sync must call it.
+
+    Idempotent + safe to re-run hourly. Per-project errors are logged and skipped;
+    the job only fails hard on setup errors (no token / DTrack unreachable).
+    """
+    import json
+    import logging
+    import os
+    import sys
+
+    logging.basicConfig(level=logging.INFO, format="dt-sync: %(message)s")
+    log = logging.getLogger("dt-sync")
+
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
+
+    import django  # noqa: E402
+
+    django.setup()
+
+    import requests  # noqa: E402
+
+    DD_URL = os.environ.get("DEFECTDOJO_URL", "http://defectdojo-django.security.svc.cluster.local").rstrip("/")
+    DT_URL = os.environ.get("DTRACK_API_URL", "http://dependency-track-api-server.security.svc.cluster.local:8080").rstrip("/")
+    DT_KEY = os.environ.get("DTRACK_API_KEY", "").strip()
+    PRODUCT_TYPE = os.environ.get("DD_PRODUCT_TYPE", "Dependency-Track")
+    ENGAGEMENT = os.environ.get("DD_ENGAGEMENT", "Dependency Track")
+    REPO_MAP_PATH = os.environ.get("REPO_MAP_PATH", "/config/repo-map.json")
+    MIN_SEVERITY = os.environ.get("GITHUB_MIN_SEVERITY", "High")
+    MAX_ISSUES = int(os.environ.get("MAX_GITHUB_ISSUES_PER_RUN", "50"))
+    HTTP_TIMEOUT = int(os.environ.get("HTTP_TIMEOUT", "300"))
+
+    SEV_RANK = {"Critical": 4, "High": 3, "Medium": 2, "Low": 1, "Info": 0}
+    SEV_FLOOR = SEV_RANK.get(MIN_SEVERITY, 3)
+
+
+    def load_repo_map():
+        try:
+            with open(REPO_MAP_PATH) as fh:
+                data = json.load(fh) or {}
+            log.info("loaded %d github repo mapping(s)", len(data))
+            return data
+        except FileNotFoundError:
+            log.warning("repo-map %s not found; GitHub linking disabled", REPO_MAP_PATH)
+            return {}
+        except (ValueError, OSError) as exc:
+            log.warning("repo-map %s unreadable (%s); GitHub linking disabled", REPO_MAP_PATH, exc)
+            return {}
+
+
+    def dd_token():
+        """Mint/fetch an API token for a superuser via the ORM (no password needed)."""
+        from rest_framework.authtoken.models import Token
+
+        from dojo.models import Dojo_User
+        admin = Dojo_User.objects.filter(is_superuser=True, is_active=True).order_by("id").first()
+        if not admin:
+            raise RuntimeError("no active superuser found to mint a DefectDojo token")
+        token, _ = Token.objects.get_or_create(user=admin)
+        return token.key
+
+
+    def dt_projects():
+        """All active DTrack projects, paginated."""
+        out, page, size = [], 1, 100
+        while True:
+            resp = requests.get(
+                f"{DT_URL}/api/v1/project",
+                headers={"X-Api-Key": DT_KEY, "Accept": "application/json"},
+                params={"excludeInactive": "true", "pageSize": size, "pageNumber": page},
+                timeout=HTTP_TIMEOUT,
+            )
+            resp.raise_for_status()
+            batch = resp.json()
+            out.extend(batch)
+            if len(batch) < size:
+                break
+            page += 1
+        return out
+
+
+    def dt_export_fpf(uuid):
+        resp = requests.get(
+            f"{DT_URL}/api/v1/finding/project/{uuid}/export",
+            headers={"X-Api-Key": DT_KEY, "Accept": "application/json"},
+            timeout=HTTP_TIMEOUT,
+        )
+        resp.raise_for_status()
+        return resp.content
+
+
+    def dd_reimport(token, product_name, fpf_bytes, verified):
+        data = {
+            "scan_type": "Dependency Track Finding Packaging Format (FPF) Export",
+            "product_type_name": PRODUCT_TYPE,
+            "product_name": product_name,
+            "engagement_name": ENGAGEMENT,
+            "auto_create_context": "true",
+            "active": "true",
+            "verified": "true" if verified else "false",
+            "close_old_findings": "true",
+            "minimum_severity": "Info",
+        }
+        files = {"file": ("findings.json", fpf_bytes, "application/json")}
+        resp = requests.post(
+            f"{DD_URL}/api/v2/reimport-scan/",
+            headers={"Authorization": f"Token {token}"},
+            data=data,
+            files=files,
+            timeout=HTTP_TIMEOUT,
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+
+    def link_and_push_github(product_name, repo, issue_budget):
+        """Ensure GITHUB_PKey for the product, then open issues for new findings.
+
+        Returns the number of GitHub issues created (to track the per-run budget).
+        """
+        from dojo.github.models import GITHUB_Conf, GITHUB_Issue, GITHUB_PKey
+        from dojo.models import Finding, Product
+        from dojo.utils import add_external_issue
+
+        conf = GITHUB_Conf.objects.first()
+        if not conf:
+            log.warning("[%s] no GITHUB_Conf yet (init container pending); skipping GitHub", product_name)
+            return 0
+        try:
+            prod = Product.objects.get(name=product_name)
+        except Product.DoesNotExist:
+            log.warning("[%s] product not found post-import; skipping GitHub", product_name)
+            return 0
+
+        pkey, created = GITHUB_PKey.objects.get_or_create(
+            product=prod, defaults={"git_conf": conf, "git_project": repo},
+        )
+        if not created and (pkey.git_project != repo or pkey.git_conf_id != conf.id):
+            pkey.git_project, pkey.git_conf = repo, conf
+            pkey.save()
+        log.info("[%s] github link -> %s (%s)", product_name, repo, "created" if created else "ensured")
+
+        created_count = 0
+        findings = Finding.objects.filter(
+            test__engagement__product=prod, active=True, verified=True,
+        )
+        for find in findings:
+            if SEV_RANK.get(find.severity, 0) < SEV_FLOOR:
+                continue
+            if GITHUB_Issue.objects.filter(finding=find).exists():
+                continue
+            if created_count >= issue_budget:
+                log.warning("[%s] hit per-run GitHub issue budget (%d); remaining findings deferred to next run",
+                            product_name, MAX_ISSUES)
+                break
+            try:
+                add_external_issue(find.id, "github")  # @app.task, runs synchronously when called
+                created_count += 1
+            except Exception:  # noqa: BLE001
+                log.exception("[%s] failed to push finding %s to github", product_name, find.id)
+        if created_count:
+            log.info("[%s] opened %d github issue(s)", product_name, created_count)
+        return created_count
+
+
+    def main():
+        if not DT_KEY:
+            log.error("DTRACK_API_KEY is empty; aborting")
+            return 1
+        repo_map = load_repo_map()
+        token = dd_token()
+
+        try:
+            projects = dt_projects()
+        except requests.RequestException:
+            log.exception("failed to list Dependency-Track projects; aborting")
+            return 1
+        log.info("found %d active Dependency-Track project(s)", len(projects))
+
+        ok = skipped = 0
+        issue_budget = MAX_ISSUES
+        for proj in projects:
+            name, uuid = proj.get("name"), proj.get("uuid")
+            version = proj.get("version")
+            label = f"{name} ({version})" if version else name
+            if not name or not uuid:
+                continue
+            mapped = name in repo_map
+            try:
+                fpf = dt_export_fpf(uuid)
+                # Mapped products are pushed to GitHub, which requires Verified findings.
+                dd_reimport(token, name, fpf, verified=mapped)
+                log.info("[%s] imported into DefectDojo", label)
+                if mapped and issue_budget > 0:
+                    issue_budget -= link_and_push_github(name, repo_map[name], issue_budget)
+                ok += 1
+            except Exception:  # noqa: BLE001
+                log.exception("[%s] sync failed; skipping", label)
+                skipped += 1
+
+        log.info("done: %d synced, %d skipped, %d github issue(s) created",
+                 ok, skipped, MAX_ISSUES - issue_budget)
+        return 0
+
+
+    if __name__ == "__main__":
+        sys.exit(main())
