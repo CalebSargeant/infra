@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.57.1 (2026-06-17)
+
+### Bug Fixes
+
+- **dependency-track**: Route /api on main host to apiserver
+  ([#408](https://github.com/CalebSargeant/infra/pull/408),
+  [`bde5c3b`](https://github.com/CalebSargeant/infra/commit/bde5c3b357569ad5241606df0435e459ce1e7362))
+
+
 ## v1.57.0 (2026-06-17)
 
 ### Chores
