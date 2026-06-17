@@ -7,13 +7,16 @@ metadata:
 data:
   bootstrap.py: |
     #!/usr/bin/env python3
-    """Idempotent DefectDojo bootstrap — Slack notifications + GitHub global config.
+    """Idempotent DefectDojo bootstrap — Slack notifications + GitHub UI awareness.
 
     Runs as an init container in the DefectDojo django pod (same image), so it has
-    Django + the ORM. None of this is configurable via the chart or the REST API:
-    System_Settings, the system Notifications routing, and GITHUB_Conf all live in
-    the DB. Per-product GitHub linking + finding->issue push live in the
-    `dt-defectdojo-sync` CronJob (products don't exist until findings are imported).
+    Django + the ORM. None of this is configurable via the chart or REST API:
+    System_Settings and the system Notifications routing live in the DB.
+
+    GitHub *issue creation* is handled by the dt-defectdojo-sync CronJob (direct
+    PyGithub push across github.com + GHE), not by DefectDojo's native push — so we
+    only flip `enable_github` here so the finding UI renders the linked issue; we do
+    NOT create a GITHUB_Conf (the sync holds the tokens, per target, in OCI Vault).
 
     Ordering note: the chart renders extraInitContainers BEFORE its dbMigrationChecker,
     and migrations run in a separate `initializer` Job, so we poll until the
@@ -38,8 +41,6 @@ data:
 
     SLACK_TOKEN = os.environ.get("SLACK_TOKEN", "").strip()
     SLACK_CHANNEL = os.environ.get("SLACK_CHANNEL", "#engineering-alerts").strip()
-    GITHUB_PAT = os.environ.get("GITHUB_PAT", "").strip()
-    GITHUB_CONF_NAME = os.environ.get("GITHUB_CONF_NAME", "firefly").strip()
     # Events routed to Slack on the system-wide Notifications object.
     SLACK_EVENTS = ("scan_added", "sla_breach", "sla_breach_combined", "risk_acceptance_expiration")
 
@@ -59,7 +60,6 @@ data:
 
 
     def reconcile():
-        from dojo.github.models import GITHUB_Conf
         from dojo.models import System_Settings
         from dojo.notifications.models import Notifications
 
@@ -74,9 +74,9 @@ data:
         else:
             log.warning("SLACK_TOKEN empty; leaving slack settings unchanged")
 
-        # ── GitHub global toggle ─────────────────────────────────────────────────
-        if GITHUB_PAT:
-            settings_obj.enable_github = True
+        # ── GitHub: flip the flag so the UI shows issue links the sync records.
+        # No GITHUB_Conf — the sync pushes issues directly (multi-server, OCI Vault).
+        settings_obj.enable_github = True
         settings_obj.save()
 
         # ── Route import/SLA events to Slack (merge, don't clobber 'alert') ───────
@@ -90,19 +90,6 @@ data:
                 setattr(sys_notif, field, list(current))
             sys_notif.save()
             log.info("system notifications routed to slack: %s", ", ".join(SLACK_EVENTS))
-
-        # ── GitHub configuration (holds the PAT; products linked by the sync job) ─
-        if GITHUB_PAT:
-            conf, created = GITHUB_Conf.objects.get_or_create(
-                configuration_name=GITHUB_CONF_NAME,
-                defaults={"api_key": GITHUB_PAT},
-            )
-            if not created and conf.api_key != GITHUB_PAT:
-                conf.api_key = GITHUB_PAT
-                conf.save()
-            log.info("GITHUB_Conf '%s' %s", GITHUB_CONF_NAME, "created" if created else "ensured")
-        else:
-            log.warning("GITHUB_PAT empty; skipping GitHub configuration")
 
 
     def main():
