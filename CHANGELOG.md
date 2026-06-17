@@ -2,6 +2,23 @@
 
 <!-- version list -->
 
+## v1.57.0 (2026-06-17)
+
+### Chores
+
+- **media**: Bump image tags
+  ([`5625e54`](https://github.com/CalebSargeant/infra/commit/5625e54d0be105b4d2303021347bce662ca579d0))
+
+- **media**: Bump image tags
+  ([`ca5db26`](https://github.com/CalebSargeant/infra/commit/ca5db26238439af251f2bb8fbc679585c1f0024e))
+
+### Features
+
+- **security**: Auto-integrate Dependency-Track with DefectDojo + GitHub/Slack
+  ([#407](https://github.com/CalebSargeant/infra/pull/407),
+  [`59ac7bf`](https://github.com/CalebSargeant/infra/commit/59ac7bf99832222b9bd82fedf5ff67a4d76cecd7))
+
+
 ## v1.56.6 (2026-06-16)
 
 ### Bug Fixes
