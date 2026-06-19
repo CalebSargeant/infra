@@ -68,10 +68,33 @@ variable "fortigates" {
       netmask = optional(string, "255.255.255.252")
     })
 
-    # The other site's LAN CIDR (e.g. "10.20.20.0/24") — installs an east-west
+    # The other site's supernet (e.g. "10.20.0.0/16") — installs an east-west
     # static route to it via the interconnect peer.
     peer_lan_subnet = string
+
+    # Optional route-based IPsec site-to-site VPN to OCI (see vpn.tf). Omit to
+    # disable. tunnels = OCI's two tunnel public IPs for this unit's IPSec
+    # connection (from the oci/vpn-fortigate module's tunnel_ips output).
+    oci_vpn = optional(object({
+      enabled       = optional(bool, true)
+      local_subnet  = string                                 # on-prem CIDR to encrypt/advertise, e.g. "10.10.0.0/16"
+      remote_subnet = optional(string, "192.168.223.0/24")   # OCI VCN supernet
+      ike_version   = optional(string, "2")
+      proposal      = optional(string, "aes256-sha256")
+      dhgrp         = optional(string, "14")
+      tunnels = list(object({
+        name      = string # FortiGate IPsec interface name (<= 15 chars), e.g. "oci-t1"
+        remote_gw = string # OCI tunnel public IP
+      }))
+    }))
   }))
+}
+
+variable "fortigate_oci_vpn_psks" {
+  description = "Pre-shared key per FortiGate for the OCI IPsec tunnels (shared with the OCI IPSecConnection). Sourced from OCI Vault by the leaf — never commit a real PSK."
+  type        = map(string)
+  sensitive   = true
+  default     = {}
 }
 
 variable "lan_allowaccess" {

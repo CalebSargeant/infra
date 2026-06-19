@@ -160,6 +160,19 @@ projects:
       enabled: true
     apply_requirements: [approved, mergeable]
 
+  # FortiGate site-to-site VPN (OCI side). autoplan disabled: peer_ip is each
+  # FortiGate's WAN public IP, unknown until the units are online. Apply
+  # manually once live: atlantis plan -p oci-prod-eu-amsterdam-1-vpn-fortigate
+  - name: oci-prod-eu-amsterdam-1-vpn-fortigate
+    dir: terraform/oci/prod/eu-amsterdam-1/vpn-fortigate
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
+      enabled: false
+    apply_requirements: [approved, mergeable]
+
   - name: oci-prod-eu-amsterdam-1-database
     dir: terraform/oci/prod/eu-amsterdam-1/database
     workspace: default

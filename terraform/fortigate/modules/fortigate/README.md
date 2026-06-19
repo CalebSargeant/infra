@@ -55,6 +55,14 @@ FortiGate arrive on its cross-link, and the `crosslink→wan` SNAT policy egress
 them out that unit's ISP. There is no backup default route and no failover
 egress policy.
 
+**OCI site-to-site VPN** (`vpn.tf`): route-based IPsec from each FortiGate to
+OCI's managed Site-to-Site VPN (DRG headend). Both of OCI's tunnel public IPs
+are configured per unit and run active-active (ECMP). The `trusted` VLAN reaches
+the OCI VCN (`192.168.223.0/24`) un-NATed; extend to other VLANs as needed. The
+OCI side (CPE + IPSecConnection per unit) is
+`terraform/oci/prod/eu-amsterdam-1/vpn-fortigate`; the PSK and OCI tunnel IPs are
+shared between the two sides via the leaf.
+
 ## ⚠️ Before you apply
 
 1. **Verify physical port names.** Defaults are `wan` + `internal1..3`. The 40F's

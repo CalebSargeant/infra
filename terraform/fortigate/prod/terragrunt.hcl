@@ -53,6 +53,12 @@ terraform {
 locals {
   fgt1_token = get_env("FORTIGATE_FGT1_TOKEN", "")
   fgt2_token = get_env("FORTIGATE_FGT2_TOKEN", "")
+
+  # OCI IPsec PSKs (one per FortiGate, shared with the OCI IPSecConnection).
+  # When live: store in OCI Vault and swap to run_cmd, OR read straight from the
+  # oci/vpn-fortigate module's psk_secret_ids. Empty default keeps parse working.
+  fgt1_oci_psk = get_env("FORTIGATE_FGT1_OCI_PSK", "")
+  fgt2_oci_psk = get_env("FORTIGATE_FGT2_OCI_PSK", "")
 }
 
 inputs = {
@@ -61,6 +67,12 @@ inputs = {
   fortigate_tokens = {
     fgt1 = local.fgt1_token
     fgt2 = local.fgt2_token
+  }
+
+  # Shared with the OCI side (terraform/oci/.../vpn-fortigate).
+  fortigate_oci_vpn_psks = {
+    fgt1 = local.fgt1_oci_psk
+    fgt2 = local.fgt2_oci_psk
   }
 
   # --- Topology (PLACEHOLDER addressing — edit to your real scheme) ----------
@@ -86,6 +98,16 @@ inputs = {
       }
       crosslink       = { ip = "10.255.255.9" } # to MikroTik2
       peer_lan_subnet = "10.20.0.0/16"          # Site2 supernet
+
+      # OCI tunnel public IPs come from the oci/vpn-fortigate `tunnel_ips`
+      # output (fortigate1). Placeholders (TEST-NET-1) until the OCI side exists.
+      oci_vpn = {
+        local_subnet = "10.10.0.0/16"
+        tunnels = [
+          { name = "oci-t1", remote_gw = get_env("FORTIGATE_FGT1_OCI_T1", "192.0.2.1") },
+          { name = "oci-t2", remote_gw = get_env("FORTIGATE_FGT1_OCI_T2", "192.0.2.2") },
+        ]
+      }
     }
 
     fgt2 = {
@@ -102,6 +124,14 @@ inputs = {
       }
       crosslink       = { ip = "10.255.255.5" } # to MikroTik1
       peer_lan_subnet = "10.10.0.0/16"          # Site1 supernet
+
+      oci_vpn = {
+        local_subnet = "10.20.0.0/16"
+        tunnels = [
+          { name = "oci-t1", remote_gw = get_env("FORTIGATE_FGT2_OCI_T1", "192.0.2.3") },
+          { name = "oci-t2", remote_gw = get_env("FORTIGATE_FGT2_OCI_T2", "192.0.2.4") },
+        ]
+      }
     }
   }
 }

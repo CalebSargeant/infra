@@ -27,7 +27,7 @@
         },
         "terraform-fortigate": {
             "path": "terraform/fortigate/",
-            "purpose": "Two standalone home-lab FortiGate 40Fs (no HA), dual-ISP resilient edge. fortios provider iterated per-unit via for_each (OpenTofu 1.9+). Self-contained leaf (no root.hcl include). VLAN segmentation (trusted/iot/guest/mgmt) over an 802.1Q trunk to the MikroTik; per-VLAN DHCP + segmentation policies. Both ISPs active-active.",
+            "purpose": "Two standalone home-lab FortiGate 40Fs (no HA), dual-ISP resilient edge. fortios provider iterated per-unit via for_each (OpenTofu 1.9+). Self-contained leaf (no root.hcl include). VLAN segmentation (trusted/iot/guest/mgmt) over an 802.1Q trunk to the MikroTik; per-VLAN DHCP + segmentation policies. Both ISPs active-active. Route-based IPsec site-to-site VPN to OCI (vpn.tf); OCI side is oci/.../vpn-fortigate.",
             "leaves": [
                 "prod"
             ],
@@ -62,7 +62,7 @@
             "purpose": "OCI tenancy infra (network, edge, server, mikrotik, vpn, database, drg-peering, policy) + tenancy-root IAM",
             "leaves": [
                 "iam-policy",
-                "prod/eu-amsterdam-1/{network,edge,server,mikrotik,vpn,database,drg-peering,policy}"
+                "prod/eu-amsterdam-1/{network,edge,server,mikrotik,vpn,vpn-fortigate,database,drg-peering,policy}"
             ],
             "shared_modules": [
                 "modules/{network,edge,server,mikrotik,vpn,database,drg-peering,policy,iam-policy}"
