@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v1.60.0 (2026-06-19)
+
+### Bug Fixes
+
+- Caldrith webhook host -> caldrith.magmamoose.com (2nd-level)
+  ([#415](https://github.com/CalebSargeant/infra/pull/415),
+  [`9af91b5`](https://github.com/CalebSargeant/infra/commit/9af91b5df5654e9ddb11cb6aa426f66c206bbd69))
+
+- Caldrith webhook host -> caldrith.magmamoose.com (2nd-level, cert coverage)
+  ([#415](https://github.com/CalebSargeant/infra/pull/415),
+  [`9af91b5`](https://github.com/CalebSargeant/infra/commit/9af91b5df5654e9ddb11cb6aa426f66c206bbd69))
+
+### Features
+
+- Add caldrith app, retire safe-settings ([#415](https://github.com/CalebSargeant/infra/pull/415),
+  [`9af91b5`](https://github.com/CalebSargeant/infra/commit/9af91b5df5654e9ddb11cb6aa426f66c206bbd69))
+
+
 ## v1.59.0 (2026-06-19)
 
 ### Bug Fixes
