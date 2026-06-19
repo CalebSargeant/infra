@@ -73,11 +73,11 @@ data:
         for entry in raw:
             api = (entry.get("api_url") or "https://api.github.com").rstrip("/")
             owners = entry.get("owners") or []
-            token = entry.get("token") or ""
-            if not owners or not token:
-                log.warning("skipping github target with missing owners/token: %s", api)
+            pat = entry.get("token") or ""
+            if not owners or not pat:
+                log.warning("skipping github target with missing owners/pat: %s", api)
                 continue
-            out.append({"client": Github(base_url=api, auth=Auth.Token(token)), "owners": owners, "api_url": api})
+            out.append({"client": Github(base_url=api, auth=Auth.Token(pat)), "owners": owners, "api_url": api})
         log.info("loaded %d github target(s)", len(out))
         return out
 

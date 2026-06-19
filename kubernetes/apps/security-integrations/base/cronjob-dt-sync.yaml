@@ -54,7 +54,7 @@ spec:
                 # GitHub accounts to auto-resolve repos against (github.com first,
                 # then any GHE). JSON in OCI Vault; optional so a missing key just
                 # disables GitHub push (findings still import).
-                - name: GITHUB_TARGETS
+                - name: GITHUB_TARGETS # kics-scan ignore-line - secretKeyRef is the secure K8s pattern for secret injection
                   valueFrom:
                     secretKeyRef:
                       name: github-issue-targets
