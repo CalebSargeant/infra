@@ -180,24 +180,11 @@ resource "fortios_firewall_policy" "interconnect_to_internal" {
   logtraffic = "all"
 }
 
-# interconnect -> wan : failover egress for the OTHER site when its ISP is down
-# (the other FortiGate's backup default route points back over the interconnect).
-resource "fortios_firewall_policy" "interconnect_to_wan" {
-  for_each = local.keys
-  provider = fortios.by_fortigate[each.key]
-
-  policyid   = 4
-  name       = "interconnect-to-wan-failover"
-  srcintf { name = fortios_system_interface.interconnect[each.key].name }
-  dstintf { name = fortios_system_interface.wan[each.key].name }
-  srcaddr { name = "all" }
-  dstaddr { name = "all" }
-  service { name = "ALL" }
-  action     = "accept"
-  schedule   = "always"
-  nat        = "enable"
-  logtraffic = "all"
-}
+# NOTE: both ISPs run active-active — each FortiGate only ever NATs out its OWN
+# WAN. Cross-site egress is the MikroTik load-balancing (ECMP) onto whichever
+# FortiGate, arriving on the cross-link (which sits in the `internal` zone), so
+# the internal->wan policy above already covers it. There is deliberately no
+# interconnect->wan "failover egress" policy and no backup default route.
 
 # ---------------------------------------------------------------------------
 # Routing
@@ -214,20 +201,4 @@ resource "fortios_router_static" "peer_lan" {
   distance = 10
   status   = "enable"
   comment  = "${local.marker} — route to peer site LAN"
-}
-
-# ISP-failover backup default route via the interconnect peer. Higher distance
-# than the ISP-supplied default, so it only takes over when the local WAN
-# default is withdrawn (link/lease down). For sub-second/path-aware failover,
-# pair this with a WAN link-monitor or SD-WAN performance SLA (not modelled).
-resource "fortios_router_static" "backup_default" {
-  for_each = local.keys
-  provider = fortios.by_fortigate[each.key]
-
-  dst      = "0.0.0.0 0.0.0.0"
-  gateway  = var.fortigates[each.key].interconnect.peer_ip
-  device   = fortios_system_interface.interconnect[each.key].name
-  distance = 20
-  status   = "enable"
-  comment  = "${local.marker} — backup default via other FortiGate"
 }

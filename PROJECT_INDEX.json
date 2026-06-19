@@ -38,7 +38,7 @@
         },
         "terraform-mikrotik": {
             "path": "terraform/mikrotik/",
-            "purpose": "Two physical home-lab MikroTik CRS edge switches (one behind each FortiGate). routeros provider iterated per-unit via for_each (OpenTofu 1.9+). L2 access bridge (RSTP) + routed /30 cross-link & inter-switch uplinks. Pairs with terraform/fortigate. NOT the OCI CHRs under terraform/oci/.../mikrotik.",
+            "purpose": "Two physical home-lab MikroTik CRS edge switches (one behind each FortiGate). routeros provider iterated per-unit via for_each (OpenTofu 1.9+). L2 access bridge (MSTP, shared region) + routed /30 cross-link & inter-switch uplinks. Both ISPs active-active via ECMP (equal-distance default routes), no failover. Pairs with terraform/fortigate. NOT the OCI CHRs under terraform/oci/.../mikrotik.",
             "leaves": [
                 "prod"
             ],

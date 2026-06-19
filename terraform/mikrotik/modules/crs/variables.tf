@@ -25,13 +25,16 @@ variable "routeros_insecure" {
 # Each CRS is an L2 access switch (FortiGate is the gateway + DHCP server) with
 # two routed point-to-point uplinks for resilience:
 #   - LAN bridge  : local FortiGate uplink + client ports (one subnet)
-#   - crosslink   : /30 to the OPPOSITE FortiGate (backup default route)
+#   - crosslink   : /30 to the OPPOSITE FortiGate (2nd active default, ECMP)
 #   - mt_link     : /30 to the OTHER MikroTik (reach the peer site's LAN)
+#
+# Both ISPs run active-active: equal-distance default routes via the local and
+# opposite FortiGate ECMP-balance client traffic across both ISPs at once.
 #
 # All IPs are PLACEHOLDERS and are kept consistent with the fortigate module's
 # placeholder scheme (10.255.255.0/24 carves the /30s; LANs 10.10.10/24,
 # 10.20.20/24). The crosslink + mt_link are routed ether ports, NOT bridged, so
-# there's no L2 loop between sites; RSTP still guards the local bridge.
+# there's no L2 loop between sites; MSTP still guards the local bridge.
 # ---------------------------------------------------------------------------
 variable "mikrotiks" {
   description = "Per-CRS connection + interface/topology config, keyed mt1/mt2."
@@ -50,12 +53,12 @@ variable "mikrotiks" {
 
     lan = object({
       bridge_ip = string # mgmt IP on the LAN bridge WITH prefix, e.g. "10.10.10.2/24"
-      gateway   = string # local FortiGate LAN IP (primary default route), e.g. "10.10.10.1"
+      gateway   = string # local FortiGate LAN IP (one ECMP default route), e.g. "10.10.10.1"
     })
 
     crosslink = object({
       address     = string # this switch's /30 IP WITH prefix, e.g. "10.255.255.6/30"
-      fgt_gateway = string # opposite FortiGate's crosslink IP (backup default), e.g. "10.255.255.5"
+      fgt_gateway = string # opposite FortiGate's crosslink IP (2nd ECMP default), e.g. "10.255.255.5"
     })
 
     mt_link = object({
@@ -73,4 +76,25 @@ variable "bridge_name" {
   description = "Name of the LAN bridge created on each switch."
   type        = string
   default     = "bridge-lan"
+}
+
+variable "bridge_protocol_mode" {
+  description = "Spanning-tree mode for the LAN bridge. MSTP preferred over RSTP."
+  type        = string
+  default     = "mstp"
+}
+
+# region_name + region_revision must be IDENTICAL on both switches for them to
+# form a single MST region (otherwise each ends up in its own region and MSTP
+# degrades to RSTP between them).
+variable "mst_region_name" {
+  description = "MSTP region name (must match across both switches). Only used when bridge_protocol_mode = mstp."
+  type        = string
+  default     = "home-edge"
+}
+
+variable "mst_region_revision" {
+  description = "MSTP configuration revision number (must match across both switches)."
+  type        = number
+  default     = 1
 }

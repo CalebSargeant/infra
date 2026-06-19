@@ -38,9 +38,15 @@ the routeros pattern when you add it).
 ## What it configures, per unit
 
 Interfaces (wan/interconnect/lan/crosslink) · `internal` zone · LAN DHCP server ·
-4 firewall policies (internal→wan SNAT, internal↔interconnect east-west,
-interconnect→wan ISP-failover egress) · east-west static route to the peer LAN ·
-backup default route via the interconnect for ISP failover.
+3 firewall policies (internal→wan SNAT, internal↔interconnect east-west) ·
+east-west static route to the peer LAN.
+
+**Both ISPs run active-active** (no failover): each FortiGate only NATs out its
+own WAN. The two ISPs carry traffic simultaneously because the MikroTik
+load-balances (ECMP) across both FortiGates — flows sent to the *opposite*
+FortiGate arrive on its cross-link (part of the `internal` zone), so the
+internal→wan SNAT policy egresses them out that unit's ISP. There is no backup
+default route and no failover egress policy.
 
 ## ⚠️ Before you apply
 

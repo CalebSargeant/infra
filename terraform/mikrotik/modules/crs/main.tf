@@ -25,15 +25,19 @@ locals {
 }
 
 # ---------------------------------------------------------------------------
-# LAN bridge (RSTP for loop protection on the access ports)
+# LAN bridge (MSTP for loop protection on the access ports). Both switches
+# share one MST region (region_name + region_revision) so they interoperate as
+# a single MSTP domain rather than degrading to RSTP between them.
 # ---------------------------------------------------------------------------
 resource "routeros_interface_bridge" "lan" {
   for_each = local.keys
   provider = routeros.by_router[each.key]
 
-  name          = var.bridge_name
-  protocol_mode = "rstp"
-  comment       = local.marker
+  name            = var.bridge_name
+  protocol_mode   = var.bridge_protocol_mode
+  region_name     = var.mst_region_name
+  region_revision = var.mst_region_revision
+  comment         = local.marker
 }
 
 # Bridge members: the local FortiGate uplink + all client ports.
@@ -67,7 +71,7 @@ resource "routeros_ip_address" "bridge_lan" {
   }
 }
 
-# Routed /30 to the OPPOSITE FortiGate (backup internet path).
+# Routed /30 to the OPPOSITE FortiGate (second active internet path, ECMP).
 resource "routeros_ip_address" "crosslink" {
   for_each = local.keys
   provider = routeros.by_router[each.key]
@@ -98,30 +102,36 @@ resource "routeros_ip_address" "mt_link" {
 }
 
 # ---------------------------------------------------------------------------
-# Routing
+# Routing — both ISPs active-active (NOT failover).
+#
+# Two equal-distance (distance 1) default routes: one via the local FortiGate,
+# one via the opposite FortiGate over the cross-link. RouterOS treats two routes
+# with the same dst and same distance as ECMP, so client flows are load-balanced
+# (per src+dst hash) across BOTH FortiGates / ISPs simultaneously. Each flow is
+# pinned to one path, and the egress FortiGate SNATs it out its own ISP, so
+# return traffic stays symmetric.
 # ---------------------------------------------------------------------------
 
-# Primary default route via the local FortiGate.
-resource "routeros_ip_route" "default_primary" {
+# Default route via the local FortiGate (ECMP member 1).
+resource "routeros_ip_route" "default_local" {
   for_each = local.keys
   provider = routeros.by_router[each.key]
 
   dst_address = "0.0.0.0/0"
   gateway     = var.mikrotiks[each.key].lan.gateway
   distance    = 1
-  comment     = "${local.marker} — default via local FortiGate"
+  comment     = "${local.marker} — default via local FortiGate (ECMP)"
 }
 
-# Backup default route via the opposite FortiGate over the cross-link. Higher
-# distance, so it only takes over when the primary next-hop is unreachable.
-resource "routeros_ip_route" "default_backup" {
+# Default route via the opposite FortiGate over the cross-link (ECMP member 2).
+resource "routeros_ip_route" "default_crosslink" {
   for_each = local.keys
   provider = routeros.by_router[each.key]
 
   dst_address = "0.0.0.0/0"
   gateway     = var.mikrotiks[each.key].crosslink.fgt_gateway
-  distance    = 20
-  comment     = "${local.marker} — backup default via opposite FortiGate (cross-link)"
+  distance    = 1
+  comment     = "${local.marker} — default via opposite FortiGate / cross-link (ECMP)"
 }
 
 # Reach the other site's LAN directly over the inter-switch link.

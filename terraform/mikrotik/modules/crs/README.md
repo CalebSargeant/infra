@@ -21,27 +21,30 @@ whose FortiGate half lives in `terraform/fortigate`.
 ```
 
 Each CRS is an **L2 access switch** — the FortiGate behind it is the gateway and
-DHCP server. For resilience each switch also has two **routed** point-to-point
-uplinks:
+DHCP server. Each switch also has two **routed** point-to-point uplinks:
 
-- **LAN bridge** (`bridge-lan`, RSTP) — the local FortiGate uplink + client
-  ports, all in one subnet (MT1 `10.10.10.0/24`, MT2 `10.20.20.0/24`).
-- **crosslink** — `/30` to the *opposite* FortiGate; backup default route so the
-  switch still reaches the internet if its local FortiGate / ISP is down.
+- **LAN bridge** (`bridge-lan`, **MSTP**) — the local FortiGate uplink + client
+  ports, all in one subnet (MT1 `10.10.10.0/24`, MT2 `10.20.20.0/24`). Both
+  switches share one MST region (`region_name`/`region_revision`).
+- **crosslink** — `/30` to the *opposite* FortiGate.
 - **mt_link** — `/30` to the *other* MikroTik; reaches the peer site's LAN.
 
 The crosslink + mt_link are routed ether ports (not bridged), so there's no L2
-loop between sites; RSTP just guards the local access bridge. Failover is
-distance-based static routing (primary via local FGT = distance 1, backup via
-the cross-link = distance 20). The cross-link terminates in the opposite
-FortiGate's `internal` zone, so its `internal→wan` SNAT policy already covers
-this failover egress.
+loop between sites; MSTP guards the local access bridge.
+
+**Both ISPs run active-active (NOT failover).** Two equal-distance (distance 1)
+default routes — via the local FortiGate and via the opposite FortiGate over the
+cross-link — give RouterOS **ECMP**, so client flows load-balance across both
+FortiGates / ISPs at the same time. Each flow is pinned to one path and the
+egress FortiGate SNATs it out its own ISP, keeping return traffic symmetric. The
+cross-link terminates in the opposite FortiGate's `internal` zone, so its
+`internal→wan` SNAT policy covers the egress.
 
 ## What it configures, per switch
 
-LAN bridge (RSTP) · bridge member ports (uplink + clients) · bridge mgmt IP ·
-cross-link `/30` · inter-switch `/30` · primary + backup default routes · a
-route to the peer site's LAN.
+LAN bridge (MSTP) · bridge member ports (uplink + clients) · bridge mgmt IP ·
+cross-link `/30` · inter-switch `/30` · two equal-distance (ECMP) default routes
+· a route to the peer site's LAN.
 
 ## ⚠️ Before you apply
 
