@@ -25,6 +25,17 @@
                 "terraform-root"
             ]
         },
+        "terraform-fortigate": {
+            "path": "terraform/fortigate/",
+            "purpose": "Two standalone home-lab FortiGate 40Fs (no HA), dual-ISP resilient edge. fortios provider iterated per-unit via for_each (OpenTofu 1.9+). Self-contained leaf (no root.hcl include).",
+            "leaves": [
+                "prod"
+            ],
+            "shared_modules": [
+                "modules/fortigate"
+            ],
+            "notes": "Hardware not wired yet — Atlantis autoplan disabled (enabled:false); run 'atlantis plan -p fortigate-prod' once units are reachable + API tokens are in OCI Vault. Placeholder RFC1918 addressing; verify 40F physical port names before apply."
+        },
         "terraform-gcp": {
             "path": "terraform/gcp/",
             "purpose": "GCP project setup (state bucket, IAM); state lives in GCS magmamoose-terraform project",

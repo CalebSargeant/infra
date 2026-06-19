@@ -58,6 +58,20 @@ projects:
       enabled: true
     apply_requirements: [approved, mergeable]
 
+  # ─── FortiGate (home-lab edge — physical 40Fs) ───────────────────────────
+  # autoplan disabled: a plan connects to the live FortiGate API, and the units
+  # aren't wired/reachable yet. Run manually once hardware + tokens exist:
+  #   atlantis plan -p fortigate-prod
+  - name: fortigate-prod
+    dir: terraform/fortigate/prod
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
+      enabled: false
+    apply_requirements: [approved, mergeable]
+
   # ─── GCP ─────────────────────────────────────────────────────────────────
   - name: gcp-prod-project
     dir: terraform/gcp/prod/europe-west4/project
