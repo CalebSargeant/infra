@@ -213,18 +213,13 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
     }
 
     # ── AppSec / dev tooling (firefly cluster) ───────────────────────────────
-    # safe-settings GitHub App webhook — MUST be publicly reachable so GitHub's
-    # delivery IPs can POST to /api/github/webhooks. No Access gate (GitHub can't
-    # authenticate through Access); the webhook secret authenticates payloads.
+    # Caldrith GitHub App webhook — MUST be publicly reachable so GitHub's
+    # delivery IPs can POST to the apex (api.caldrith.magmamoose.com). No Access
+    # gate (GitHub can't authenticate through Access); the webhook secret + HMAC
+    # signature authenticate payloads. Supersedes the retired safe-settings app.
     ingress_rule {
-      hostname = "safesettings.magmamoose.com"
-      service  = "http://safe-settings.security.svc.cluster.local:3000"
-      origin_request {}
-    }
-    # Legacy alias kept during the hostname move to magmamoose.com.
-    ingress_rule {
-      hostname = "safe-settings.sargeant.co"
-      service  = "http://safe-settings.security.svc.cluster.local:3000"
+      hostname = "api.caldrith.magmamoose.com"
+      service  = "http://caldrith.caldrith.svc.cluster.local:8000"
       origin_request {}
     }
 
