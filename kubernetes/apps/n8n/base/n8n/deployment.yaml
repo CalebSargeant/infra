@@ -30,7 +30,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: n8n
-          image: n8nio/n8n:2.27.2 # {"$imagepolicy": "flux-system:n8n"}
+          image: n8nio/n8n:2.27.3 # {"$imagepolicy": "flux-system:n8n"}
           resources:
             # KRR ~277Mi working set. Raw values (no resource-profile component,
             # which would have overridden these up to c.small's 512Mi). 320Mi
