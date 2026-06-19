@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.58.1 (2026-06-19)
+
+### Bug Fixes
+
+- **security**: Set PYTHONPATH=/app so DefectDojo bootstrap/sync can import dojo
+  ([#411](https://github.com/CalebSargeant/infra/pull/411),
+  [`82d1ea7`](https://github.com/CalebSargeant/infra/commit/82d1ea79bbf724d3eca0bec3acd87599797dd8e1))
+
+
 ## v1.58.0 (2026-06-19)
 
 ### Chores
