@@ -72,6 +72,21 @@ projects:
       enabled: false
     apply_requirements: [approved, mergeable]
 
+  # ─── MikroTik CRS (home-lab edge switches — physical) ────────────────────
+  # autoplan disabled: a plan connects to the live RouterOS API, and the
+  # switches aren't wired/reachable yet (mt2 isn't even installed). Run
+  # manually once hardware + credentials exist:
+  #   atlantis plan -p mikrotik-prod
+  - name: mikrotik-prod
+    dir: terraform/mikrotik/prod
+    workspace: default
+    terraform_version: v1.11.3
+    workflow: terragrunt
+    autoplan:
+      when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
+      enabled: false
+    apply_requirements: [approved, mergeable]
+
   # ─── GCP ─────────────────────────────────────────────────────────────────
   - name: gcp-prod-project
     dir: terraform/gcp/prod/europe-west4/project

@@ -36,6 +36,17 @@
             ],
             "notes": "Hardware not wired yet — Atlantis autoplan disabled (enabled:false); run 'atlantis plan -p fortigate-prod' once units are reachable + API tokens are in OCI Vault. Placeholder RFC1918 addressing; verify 40F physical port names before apply."
         },
+        "terraform-mikrotik": {
+            "path": "terraform/mikrotik/",
+            "purpose": "Two physical home-lab MikroTik CRS edge switches (one behind each FortiGate). routeros provider iterated per-unit via for_each (OpenTofu 1.9+). L2 access bridge (RSTP) + routed /30 cross-link & inter-switch uplinks. Pairs with terraform/fortigate. NOT the OCI CHRs under terraform/oci/.../mikrotik.",
+            "leaves": [
+                "prod"
+            ],
+            "shared_modules": [
+                "modules/crs"
+            ],
+            "notes": "Hardware not wired yet (mt2 not installed) — Atlantis autoplan disabled; run 'atlantis plan -p mikrotik-prod' once reachable + password in OCI Vault. Placeholder addressing consistent with terraform/fortigate; verify CRS port names before apply."
+        },
         "terraform-gcp": {
             "path": "terraform/gcp/",
             "purpose": "GCP project setup (state bucket, IAM); state lives in GCS magmamoose-terraform project",
