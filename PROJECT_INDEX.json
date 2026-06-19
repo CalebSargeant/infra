@@ -27,7 +27,7 @@
         },
         "terraform-fortigate": {
             "path": "terraform/fortigate/",
-            "purpose": "Two standalone home-lab FortiGate 40Fs (no HA), dual-ISP resilient edge. fortios provider iterated per-unit via for_each (OpenTofu 1.9+). Self-contained leaf (no root.hcl include). VLAN segmentation (trusted/iot/guest/mgmt) over an 802.1Q trunk to the MikroTik; per-VLAN DHCP + segmentation policies. Both ISPs active-active. Route-based IPsec site-to-site VPN to OCI (vpn.tf); OCI side is oci/.../vpn-fortigate.",
+            "purpose": "Two standalone home-lab FortiGate 40Fs (no HA), dual-ISP resilient edge. fortios provider iterated per-unit via for_each (OpenTofu 1.9+). Self-contained leaf (no root.hcl include). VLAN segmentation (trusted/iot/guest/mgmt) over an 802.1Q trunk to the MikroTik; per-VLAN DHCP + segmentation policies. Both ISPs active-active. BGP-routed IPsec site-to-site VPN to OCI (vpn.tf/bgp.tf, OCI side oci/.../vpn-fortigate) with SD-WAN steering (sdwan.tf); BGP scope OCI+FGT-FGT. IPsec dial-up remote access via Google SAML (remote-access.tf). Syslog/NetFlow + automation stitches (monitoring.tf). Base-license only.",
             "leaves": [
                 "prod"
             ],

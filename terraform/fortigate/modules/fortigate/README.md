@@ -28,7 +28,7 @@ boxes at the same time — the same pattern as `oci/modules/mikrotik`.
   behind the MikroTik; the FortiGate is their gateway + DHCP server).
 - `crosslink` — link to the **opposite** unit's MikroTik (FGT1↔MikroTik2,
   FGT2↔MikroTik1) for a redundant fabric path.
-- `lan_mikrotik` + `crosslink` are grouped into the `internal` zone.
+- `lan_mikrotik` is an 802.1Q trunk (VLAN subinterfaces); `crosslink` is routed.
 
 MikroTik2 isn't installed yet — its FGT2 `lan_mikrotik` and the cross-links can
 be configured ahead of cabling; the interfaces simply sit link-down until wired.
@@ -56,12 +56,39 @@ them out that unit's ISP. There is no backup default route and no failover
 egress policy.
 
 **OCI site-to-site VPN** (`vpn.tf`): route-based IPsec from each FortiGate to
-OCI's managed Site-to-Site VPN (DRG headend). Both of OCI's tunnel public IPs
-are configured per unit and run active-active (ECMP). The `trusted` VLAN reaches
-the OCI VCN (`192.168.223.0/24`) un-NATed; extend to other VLANs as needed. The
-OCI side (CPE + IPSecConnection per unit) is
-`terraform/oci/prod/eu-amsterdam-1/vpn-fortigate`; the PSK and OCI tunnel IPs are
-shared between the two sides via the leaf.
+OCI's managed Site-to-Site VPN (DRG headend). Both of OCI's tunnel public IPs are
+configured per unit; routing is **BGP** (`bgp.tf`) and **SD-WAN** (`sdwan.tf`)
+steers VCN traffic across both tunnels. `trusted` reaches the OCI VCN
+(`192.168.223.0/24`) un-NATed. OCI side: `oci/.../vpn-fortigate` (routing_type
+BGP); PSK + tunnel/BGP inside IPs are shared between the two sides via the leaves.
+
+**BGP** (`bgp.tf`): each FortiGate runs its own ASN (FGT1 65010 / FGT2 65020),
+eBGP-peers with OCI (AS 31898) over both tunnels with ECMP, and eBGP-peers with
+the other FortiGate over the interconnect. It advertises its VLAN /24s. (Scope:
+"OCI + FGT↔FGT"; the MikroTik keeps static ECMP defaults.)
+
+**SD-WAN** (`sdwan.tf`): an `oci` SD-WAN zone with both OCI tunnels as members, a
+health-check SLA, and a load-balance service rule for VCN-bound traffic. Each
+unit has a single physical ISP, so SD-WAN here is the OCI overlay, not a WAN
+underlay. The `trusted↔OCI` policies reference the SD-WAN `oci` zone.
+
+**Remote access** (`remote-access.tf`): IPsec **dial-up** (FortiClient) — not
+SSL-VPN, which is removed/constrained on 2GB-RAM models (40F) in recent FortiOS.
+mode-config assigns a client pool + split route. Users authenticate via **Google
+Workspace SAML** (`fortios_user_saml`, IKEv2 EAP). The SAML SP URLs + the
+SAML-over-IPsec knobs vary by FortiOS version — validate before apply.
+
+**Identity**: Google Workspace as the SAML IdP (`var.saml_idp`); the imported
+`idp_cert_name` must exist on the unit. Used to gate the remote-access policy via
+the `vpn-saml` user group.
+
+**Visibility & automation** (`monitoring.tf`): remote syslog + NetFlow export
+(self-disable when unset), and a sample automation stitch (reboot → webhook).
+Clone the trigger/action/stitch trio for more events.
+
+> **Licensing:** everything here works on the **base license**. FortiGuard-only
+> UTM (IPS, AV, web/app/DNS filtering, SSL deep-inspection) is intentionally not
+> configured — add those profiles to the `*-to-wan` policies if you subscribe.
 
 ## ⚠️ Before you apply
 

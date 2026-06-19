@@ -75,6 +75,27 @@ inputs = {
     fgt2 = local.fgt2_oci_psk
   }
 
+  # Gateway PSK for the IPsec dial-up remote-access VPN (users auth via SAML).
+  fortigate_remote_access_psks = {
+    fgt1 = get_env("FORTIGATE_FGT1_RA_PSK", "")
+    fgt2 = get_env("FORTIGATE_FGT2_RA_PSK", "")
+  }
+
+  # Identity — Google Workspace SAML IdP for the remote-access VPN. Fill from the
+  # Google Admin SAML app; idp_cert_name must be an imported cert on the unit.
+  saml_idp = {
+    idp_entity_id = get_env("FORTIGATE_SAML_IDP_ENTITY_ID", "")
+    idp_sso_url   = get_env("FORTIGATE_SAML_IDP_SSO_URL", "")
+    idp_cert_name = "google-idp-cert"
+  }
+
+  # Visibility — empty server/collector disables the resource (placeholder host).
+  syslog  = { server = get_env("FORTIGATE_SYSLOG_SERVER", "") }
+  netflow = { collector_ip = get_env("FORTIGATE_NETFLOW_COLLECTOR", "") }
+
+  # Automation-stitch webhook (chat/incident endpoint). Empty disables stitches.
+  automation_webhook_url = get_env("FORTIGATE_AUTOMATION_WEBHOOK", "")
+
   # --- Topology (PLACEHOLDER addressing — edit to your real scheme) ----------
   # Interconnect /30s + cross-link /30s share 10.255.255.0/24:
   #   FGT1<->FGT2 : 10.255.255.0/30  (FGT1 .1, FGT2 .2)
@@ -99,14 +120,23 @@ inputs = {
       crosslink       = { ip = "10.255.255.9" } # to MikroTik2
       peer_lan_subnet = "10.20.0.0/16"          # Site2 supernet
 
-      # OCI tunnel public IPs come from the oci/vpn-fortigate `tunnel_ips`
-      # output (fortigate1). Placeholders (TEST-NET-1) until the OCI side exists.
+      bgp_asn      = 65010
+      peer_bgp_asn = 65020 # FGT2
+
+      # OCI tunnel public IPs come from the oci/vpn-fortigate `tunnel_ips` output
+      # (fortigate1); BGP inside IPs match that leaf. Placeholders until live.
       oci_vpn = {
-        local_subnet = "10.10.0.0/16"
         tunnels = [
-          { name = "oci-t1", remote_gw = get_env("FORTIGATE_FGT1_OCI_T1", "192.0.2.1") },
-          { name = "oci-t2", remote_gw = get_env("FORTIGATE_FGT1_OCI_T2", "192.0.2.2") },
+          { name = "oci-t1", remote_gw = get_env("FORTIGATE_FGT1_OCI_T1", "192.0.2.1"), bgp_customer_ip = "169.254.22.2/30", bgp_oracle_ip = "169.254.22.1" },
+          { name = "oci-t2", remote_gw = get_env("FORTIGATE_FGT1_OCI_T2", "192.0.2.2"), bgp_customer_ip = "169.254.22.6/30", bgp_oracle_ip = "169.254.22.5" },
         ]
+      }
+
+      remote_access = {
+        pool_start    = "10.10.250.1"
+        pool_end      = "10.10.250.50"
+        client_dns    = "10.10.10.1" # trusted VLAN gateway
+        split_include = "10.10.0.0/16"
       }
     }
 
@@ -125,12 +155,21 @@ inputs = {
       crosslink       = { ip = "10.255.255.5" } # to MikroTik1
       peer_lan_subnet = "10.10.0.0/16"          # Site1 supernet
 
+      bgp_asn      = 65020
+      peer_bgp_asn = 65010 # FGT1
+
       oci_vpn = {
-        local_subnet = "10.20.0.0/16"
         tunnels = [
-          { name = "oci-t1", remote_gw = get_env("FORTIGATE_FGT2_OCI_T1", "192.0.2.3") },
-          { name = "oci-t2", remote_gw = get_env("FORTIGATE_FGT2_OCI_T2", "192.0.2.4") },
+          { name = "oci-t1", remote_gw = get_env("FORTIGATE_FGT2_OCI_T1", "192.0.2.3"), bgp_customer_ip = "169.254.23.2/30", bgp_oracle_ip = "169.254.23.1" },
+          { name = "oci-t2", remote_gw = get_env("FORTIGATE_FGT2_OCI_T2", "192.0.2.4"), bgp_customer_ip = "169.254.23.6/30", bgp_oracle_ip = "169.254.23.5" },
         ]
+      }
+
+      remote_access = {
+        pool_start    = "10.20.250.1"
+        pool_end      = "10.20.250.50"
+        client_dns    = "10.20.10.1" # trusted VLAN gateway
+        split_include = "10.20.0.0/16"
       }
     }
   }

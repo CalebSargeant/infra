@@ -72,26 +72,51 @@ variable "fortigates" {
     # static route to it via the interconnect peer.
     peer_lan_subnet = string
 
-    # Optional route-based IPsec site-to-site VPN to OCI (see vpn.tf). Omit to
-    # disable. tunnels = OCI's two tunnel public IPs for this unit's IPSec
-    # connection (from the oci/vpn-fortigate module's tunnel_ips output).
+    # BGP (see bgp.tf). Each FortiGate runs its own ASN, peers with OCI over the
+    # IPsec tunnels, and eBGP-peers with the other FortiGate over the interconnect.
+    bgp_asn      = number # this unit's ASN, e.g. 65010
+    peer_bgp_asn = number # the other FortiGate's ASN (interconnect eBGP), e.g. 65020
+
+    # Optional route-based IPsec site-to-site VPN to OCI (vpn.tf) — BGP-routed
+    # (bgp.tf) and steered by SD-WAN (sdwan.tf). tunnels = OCI's two tunnel
+    # public IPs + BGP inside IPs for this unit's IPSec connection.
     oci_vpn = optional(object({
       enabled       = optional(bool, true)
-      local_subnet  = string                                 # on-prem CIDR to encrypt/advertise, e.g. "10.10.0.0/16"
-      remote_subnet = optional(string, "192.168.223.0/24")   # OCI VCN supernet
+      remote_subnet = optional(string, "192.168.223.0/24") # OCI VCN (SD-WAN service dst / health-check)
       ike_version   = optional(string, "2")
       proposal      = optional(string, "aes256-sha256")
       dhgrp         = optional(string, "14")
       tunnels = list(object({
-        name      = string # FortiGate IPsec interface name (<= 15 chars), e.g. "oci-t1"
-        remote_gw = string # OCI tunnel public IP
+        name            = string # FortiGate IPsec interface name (<= 15 chars), e.g. "oci-t1"
+        remote_gw       = string # OCI tunnel public IP
+        bgp_customer_ip = string # this unit's BGP inside IP on the tunnel WITH prefix, e.g. "169.254.22.2/30"
+        bgp_oracle_ip   = string # OCI's BGP inside IP (neighbor), e.g. "169.254.22.1"
+        health_check_ip = optional(string) # SD-WAN probe target reachable over this tunnel (defaults to bgp_oracle_ip)
       }))
+    }))
+
+    # Optional IPsec dial-up remote access (remote-access.tf), authenticated via
+    # Google SAML. mode-config assigns clients from this pool.
+    remote_access = optional(object({
+      enabled       = optional(bool, true)
+      pool_start    = string                          # e.g. "10.10.250.1"
+      pool_end      = string                          # e.g. "10.10.250.50"
+      pool_netmask  = optional(string, "255.255.255.0")
+      client_dns    = string                          # DNS pushed to clients (the trusted VLAN gw)
+      split_include = string                          # subnet clients route over the tunnel, e.g. "10.10.0.0/16"
     }))
   }))
 }
 
 variable "fortigate_oci_vpn_psks" {
   description = "Pre-shared key per FortiGate for the OCI IPsec tunnels (shared with the OCI IPSecConnection). Sourced from OCI Vault by the leaf — never commit a real PSK."
+  type        = map(string)
+  sensitive   = true
+  default     = {}
+}
+
+variable "fortigate_remote_access_psks" {
+  description = "Gateway pre-shared key per FortiGate for the IPsec dial-up remote-access VPN (users still auth via Google SAML). Sourced from OCI Vault by the leaf."
   type        = map(string)
   sensitive   = true
   default     = {}
@@ -107,5 +132,63 @@ variable "wan_allowaccess" {
   description = "Management protocols permitted on WAN interfaces. Keep minimal on an internet-facing link (ideally empty / ping only)."
   type        = string
   default     = "ping"
+}
+
+variable "oci_bgp_asn" {
+  description = "OCI's BGP ASN for the Site-to-Site VPN (commercial realm default 31898). The FortiGates eBGP-peer with this over the tunnels."
+  type        = number
+  default     = 31898
+}
+
+# ---------------------------------------------------------------------------
+# Identity — Google Workspace as a SAML IdP (remote-access.tf)
+# ---------------------------------------------------------------------------
+variable "saml_idp" {
+  description = "Google Workspace SAML IdP details for the remote-access VPN. Values come from the Google Admin SAML app; idp_cert must already be imported on the FortiGate."
+  type = object({
+    idp_entity_id   = string # e.g. "https://accounts.google.com/o/saml2?idpid=XXXX"
+    idp_sso_url     = string # Google SSO URL
+    idp_slo_url     = optional(string, "")
+    idp_cert_name   = string # name of the imported Google signing cert on the FortiGate
+    sp_cert         = optional(string, "Fortinet_Factory") # SP signing cert
+    user_name_field = optional(string, "username")
+    group_name      = optional(string, "group")
+  })
+  default = {
+    idp_entity_id = ""
+    idp_sso_url   = ""
+    idp_cert_name = "google-idp-cert"
+  }
+}
+
+# ---------------------------------------------------------------------------
+# Visibility (monitoring.tf)
+# ---------------------------------------------------------------------------
+variable "syslog" {
+  description = "Remote syslog collector. Disabled if server is empty."
+  type = object({
+    server    = optional(string, "")
+    port      = optional(number, 514)
+    mode      = optional(string, "udp")
+    facility  = optional(string, "local7")
+    source_ip = optional(string, "")
+  })
+  default = {}
+}
+
+variable "netflow" {
+  description = "NetFlow collector. Disabled if collector_ip is empty."
+  type = object({
+    collector_ip   = optional(string, "")
+    collector_port = optional(number, 2055)
+    source_ip      = optional(string, "")
+  })
+  default = {}
+}
+
+variable "automation_webhook_url" {
+  description = "Webhook URL for automation-stitch notifications (e.g. a chat/incident endpoint). Disabled if empty."
+  type        = string
+  default     = ""
 }
 

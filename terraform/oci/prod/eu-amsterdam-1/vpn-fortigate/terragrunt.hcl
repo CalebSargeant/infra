@@ -61,29 +61,41 @@ inputs = {
   # OCI VCN advertised to the FortiGates.
   local_networks = ["192.168.223.0/24"]
 
-  # One IPSec connection per FortiGate. STATIC routing: each advertises its own
-  # site /16 (which summarises that site's VLAN subnets 10.<site>.<vlan>.0/24).
+  # One IPSec connection per FortiGate, BGP-routed. The BGP inside IPs (/30 per
+  # tunnel) MUST match the FortiGate side (terraform/fortigate/prod oci_vpn
+  # tunnels: bgp_customer_ip / bgp_oracle_ip). Customer ASN = the FortiGate ASN.
+  #   FGT1 (AS 65010): 169.254.22.0/24   FGT2 (AS 65020): 169.254.23.0/24
   vpn_connections = {
     fortigate1 = {
-      peer_ip               = local.fgt1_wan_ip
-      cpe_device_shape_id   = null
-      type                  = "other"
-      static_routes         = ["10.10.0.0/16"]
-      routing_type          = "STATIC"
-      ike_version           = "V2"
-      shared_secret_tunnel1 = local.fgt1_psk != "" ? local.fgt1_psk : null
-      shared_secret_tunnel2 = local.fgt1_psk != "" ? local.fgt1_psk : null
+      peer_ip                 = local.fgt1_wan_ip
+      cpe_device_shape_id     = null
+      type                    = "other"
+      static_routes           = [] # BGP-routed
+      routing_type            = "BGP"
+      ike_version             = "V2"
+      bgp_asn                 = 65010
+      bgp_oracle_ip_tunnel1   = "169.254.22.1/30"
+      bgp_customer_ip_tunnel1 = "169.254.22.2/30"
+      bgp_oracle_ip_tunnel2   = "169.254.22.5/30"
+      bgp_customer_ip_tunnel2 = "169.254.22.6/30"
+      shared_secret_tunnel1   = local.fgt1_psk != "" ? local.fgt1_psk : null
+      shared_secret_tunnel2   = local.fgt1_psk != "" ? local.fgt1_psk : null
     }
 
     fortigate2 = {
-      peer_ip               = local.fgt2_wan_ip
-      cpe_device_shape_id   = null
-      type                  = "other"
-      static_routes         = ["10.20.0.0/16"]
-      routing_type          = "STATIC"
-      ike_version           = "V2"
-      shared_secret_tunnel1 = local.fgt2_psk != "" ? local.fgt2_psk : null
-      shared_secret_tunnel2 = local.fgt2_psk != "" ? local.fgt2_psk : null
+      peer_ip                 = local.fgt2_wan_ip
+      cpe_device_shape_id     = null
+      type                    = "other"
+      static_routes           = []
+      routing_type            = "BGP"
+      ike_version             = "V2"
+      bgp_asn                 = 65020
+      bgp_oracle_ip_tunnel1   = "169.254.23.1/30"
+      bgp_customer_ip_tunnel1 = "169.254.23.2/30"
+      bgp_oracle_ip_tunnel2   = "169.254.23.5/30"
+      bgp_customer_ip_tunnel2 = "169.254.23.6/30"
+      shared_secret_tunnel1   = local.fgt2_psk != "" ? local.fgt2_psk : null
+      shared_secret_tunnel2   = local.fgt2_psk != "" ? local.fgt2_psk : null
     }
   }
 }
