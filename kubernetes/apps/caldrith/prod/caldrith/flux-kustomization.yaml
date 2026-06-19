@@ -22,7 +22,7 @@ spec:
   # NotReady until the first ghcr.io/magmamoose/caldrith image is published. With
   # wait: true a NotReady ImageRepository would hang this Kustomization and — via
   # the dependsOn below — block the workload's Ingress from ever applying, so
-  # external-dns would never publish api.caldrith.magmamoose.com. We only need
+  # external-dns would never publish caldrith.magmamoose.com. We only need
   # these control-plane resources APPLIED (namespace + GitRepository must exist
   # before the workload); their health must not gate DNS.
   wait: false
@@ -34,7 +34,7 @@ spec:
 # Workload: the Caldrith webhook service, pulled from the EXTERNAL
 # MagmaMoose/caldrith repo (./k8s/overlays/prod) via the GitRepository created
 # above. The image tag in that overlay is bumped by the ImageUpdateAutomation.
-# DNS for api.caldrith.magmamoose.com is published by external-dns from the app's
+# DNS for caldrith.magmamoose.com is published by external-dns from the app's
 # Ingress; the firefly tunnel ingress_rule (tunnels.tf) terminates that hostname
 # at the in-cluster Service. NOT Access-gated — GitHub posts webhooks directly and
 # the app authenticates them via the webhook secret + HMAC signature. Caldrith
