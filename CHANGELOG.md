@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v1.59.0 (2026-06-19)
+
+### Bug Fixes
+
+- **security**: PYTHONPATH=/app + bulletproof bootstrap so it can't wedge the upgrade
+  ([#410](https://github.com/CalebSargeant/infra/pull/410),
+  [`b4e9685`](https://github.com/CalebSargeant/infra/commit/b4e9685eca959a1a6342ba66d7b033da821d87bd))
+
+- **security**: Suppress KICS false positives on GitHub token injection
+  ([#410](https://github.com/CalebSargeant/infra/pull/410),
+  [`b4e9685`](https://github.com/CalebSargeant/infra/commit/b4e9685eca959a1a6342ba66d7b033da821d87bd))
+
+### Features
+
+- **security**: Zero-touch GitHub issue auto-discovery (github.com + GHE)
+  ([#410](https://github.com/CalebSargeant/infra/pull/410),
+  [`b4e9685`](https://github.com/CalebSargeant/infra/commit/b4e9685eca959a1a6342ba66d7b033da821d87bd))
+
+
 ## v1.58.1 (2026-06-19)
 
 ### Bug Fixes
