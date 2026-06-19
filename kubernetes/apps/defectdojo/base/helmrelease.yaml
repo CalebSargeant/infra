@@ -120,11 +120,18 @@ spec:
           image: defectdojo/defectdojo-django:2.58.4
           imagePullPolicy: IfNotPresent
           command: ["python", "/scripts/bootstrap.py"]
+          # The `dojo` package lives at /app (image WORKDIR); a script run from
+          # /scripts isn't on its path, so without this django.setup() dies with
+          # ModuleNotFoundError, crashing the init container and failing the
+          # Helm upgrade (rollback loop). Keep both in sync.
+          workingDir: /app
           volumeMounts:
             - name: dd-bootstrap
               mountPath: /scripts
               readOnly: true
           env:
+            - name: PYTHONPATH
+              value: /app
             - name: DJANGO_SETTINGS_MODULE
               value: dojo.settings.settings
             - name: DD_DATABASE_ENGINE
@@ -152,16 +159,17 @@ spec:
                 secretKeyRef:
                   name: defectdojo
                   key: DD_CREDENTIAL_AES_256_KEY
+            # optional: a missing/SecretSyncedError Slack secret (e.g. before the
+            # OCI Vault key exists) must NOT wedge the DefectDojo rollout — the
+            # bootstrap script skips Slack when the token is empty.
+            # (GitHub issue push is handled by the dt-defectdojo-sync CronJob, so
+            # no GitHub PAT is needed here.)
             - name: SLACK_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: defectdojo-integrations
                   key: SLACK_TOKEN
-            - name: GITHUB_PAT
-              valueFrom:
-                secretKeyRef:
-                  name: defectdojo-integrations
-                  key: GITHUB_PAT
+                  optional: true
             - name: SLACK_CHANNEL
               value: "#engineering-alerts"
           resources:

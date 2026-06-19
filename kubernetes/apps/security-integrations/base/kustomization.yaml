@@ -3,7 +3,7 @@ kind: Kustomization
 # Runs in the `security` namespace alongside defectdojo + dependency-track; each
 # resource carries its own metadata.namespace.
 resources:
-  - configmap-github-repo-map.yaml
   - configmap-sync-script.yaml
   - cronjob-dt-sync.yaml
+  - externalsecret-github-targets.yaml
   - externalsecret-sync.yaml
