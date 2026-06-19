@@ -12,13 +12,44 @@ locals {
   # provider instances outlive resources during destroy (OpenTofu requirement).
   keys = toset(keys(var.mikrotiks))
 
-  # router × (local-FGT-uplink + client ports) -> flat list of bridge members.
+  # Per switch: client port -> VLAN name (defaults to default_access_vlan).
+  port_vlan = {
+    for k, m in var.mikrotiks : k => {
+      for port in m.client_ports : port => lookup(m.access_port_vlans, port, m.default_access_vlan)
+    }
+  }
+
+  # router × bridge member ports. fgt_uplink is the tagged 802.1Q trunk to the
+  # FortiGate (pvid 1, native); client ports are untagged access ports whose
+  # pvid is their assigned VLAN id.
   bridge_port_entries = flatten([
-    for k, m in var.mikrotiks : [
-      for port in concat([m.ports.fgt_uplink], m.client_ports) : {
+    for k, m in var.mikrotiks : concat(
+      [{
+        router = k
+        port   = m.ports.fgt_uplink
+        key    = "${k}/${m.ports.fgt_uplink}"
+        pvid   = 1
+      }],
+      [for port in m.client_ports : {
         router = k
         port   = port
         key    = "${k}/${port}"
+        pvid   = var.vlans[local.port_vlan[k][port]].id
+      }]
+    )
+  ])
+
+  # router × vlan -> bridge VLAN table entry. The bridge + the FortiGate trunk
+  # are tagged members of every VLAN; client access ports appear untagged in
+  # the VLAN their pvid points at.
+  bridge_vlan_entries = flatten([
+    for k, m in var.mikrotiks : [
+      for vname, v in var.vlans : {
+        router   = k
+        vlan     = vname
+        id       = v.id
+        key      = "${k}/${vname}"
+        untagged = [for port in m.client_ports : port if local.port_vlan[k][port] == vname]
       }
     ]
   ])
@@ -37,30 +68,58 @@ resource "routeros_interface_bridge" "lan" {
   protocol_mode   = var.bridge_protocol_mode
   region_name     = var.mst_region_name
   region_revision = var.mst_region_revision
+  vlan_filtering  = true
   comment         = local.marker
 }
 
-# Bridge members: the local FortiGate uplink + all client ports.
+# Bridge members: the local FortiGate trunk + all client (access) ports. pvid
+# tags ingress untagged frames into the port's VLAN.
 resource "routeros_interface_bridge_port" "lan" {
   for_each = { for e in local.bridge_port_entries : e.key => e }
   provider = routeros.by_router[each.value.router]
 
   bridge    = routeros_interface_bridge.lan[each.value.router].name
   interface = each.value.port
+  pvid      = each.value.pvid
   comment   = local.marker
+}
+
+# Bridge VLAN table: tag every VLAN on the bridge + FortiGate trunk, and present
+# access ports untagged in their VLAN.
+resource "routeros_interface_bridge_vlan" "v" {
+  for_each = { for e in local.bridge_vlan_entries : e.key => e }
+  provider = routeros.by_router[each.value.router]
+
+  bridge   = routeros_interface_bridge.lan[each.value.router].name
+  vlan_ids = [tostring(each.value.id)]
+  tagged   = [routeros_interface_bridge.lan[each.value.router].name, var.mikrotiks[each.value.router].ports.fgt_uplink]
+  untagged = each.value.untagged
+}
+
+# Switch management lives on a VLAN interface (the mgmt VLAN) over the bridge,
+# since vlan_filtering is on — untagged bridge frames would otherwise land in
+# the native VLAN 1.
+resource "routeros_interface_vlan" "mgmt" {
+  for_each = local.keys
+  provider = routeros.by_router[each.key]
+
+  name      = "vlan-${var.mikrotiks[each.key].mgmt_vlan}"
+  interface = routeros_interface_bridge.lan[each.key].name
+  vlan_id   = var.vlans[var.mikrotiks[each.key].mgmt_vlan].id
 }
 
 # ---------------------------------------------------------------------------
 # IP addressing
 # ---------------------------------------------------------------------------
 
-# Management IP on the LAN bridge (FortiGate hands clients their addresses).
+# Switch management IP on the mgmt-VLAN interface (FortiGate is the gateway and
+# serves client DHCP per VLAN).
 resource "routeros_ip_address" "bridge_lan" {
   for_each = local.keys
   provider = routeros.by_router[each.key]
 
   address   = var.mikrotiks[each.key].lan.bridge_ip
-  interface = routeros_interface_bridge.lan[each.key].name
+  interface = routeros_interface_vlan.mgmt[each.key].name
   network   = cidrhost(var.mikrotiks[each.key].lan.bridge_ip, 0)
   comment   = local.marker
 

@@ -43,13 +43,17 @@ variable "fortigates" {
       crosslink    = optional(string, "internal3") # cross-link to the OPPOSITE unit's MikroTik
     }), {})
 
-    # LAN segment (clients live behind the MikroTik; this FortiGate is the gw).
-    lan = object({
+    # VLANs trunked over ports.lan_mikrotik. Each becomes an L3 subinterface +
+    # DHCP scope + firewall policies. Exactly ONE vlan should set trusted=true.
+    # Convention: subnet = 10.<site>.<vlanid>.0/24.
+    vlans = map(object({
+      id         = number                          # 802.1Q tag
       ip         = string                          # gateway IP, e.g. "10.10.10.1"
       netmask    = optional(string, "255.255.255.0")
       dhcp_start = string
       dhcp_end   = string
-    })
+      trusted    = optional(bool, false)           # may initiate to all other VLANs + interconnect
+    }))
 
     # Point-to-point /30 to the other FortiGate.
     interconnect = object({
@@ -82,8 +86,3 @@ variable "wan_allowaccess" {
   default     = "ping"
 }
 
-variable "internal_zone_name" {
-  description = "Name of the zone grouping the internal-facing (LAN + cross-link) interfaces."
-  type        = string
-  default     = "internal"
-}

@@ -42,9 +42,16 @@ cross-link terminates in the opposite FortiGate's `internal` zone, so its
 
 ## What it configures, per switch
 
-LAN bridge (MSTP) · bridge member ports (uplink + clients) · bridge mgmt IP ·
-cross-link `/30` · inter-switch `/30` · two equal-distance (ECMP) default routes
-· a route to the peer site's LAN.
+LAN bridge (MSTP, **vlan_filtering**) · bridge member ports (tagged FortiGate
+trunk + untagged client access ports with PVIDs) · bridge VLAN table · mgmt-VLAN
+interface + switch mgmt IP · cross-link `/30` · inter-switch `/30` · two
+equal-distance (ECMP) default routes · a route to the peer site supernet.
+
+**VLANs:** `vlan_filtering` is on. The FortiGate uplink is a tagged trunk
+carrying every VLAN; client ports are untagged access ports (default VLAN
+`trusted`, override per port via `access_port_vlans`). The FortiGate does the
+inter-VLAN routing — the switch is pure L2 here. VLAN ids must match the
+FortiGate module (`trusted` 10 / `iot` 20 / `guest` 30 / `mgmt` 99).
 
 ## ⚠️ Before you apply
 

@@ -51,9 +51,16 @@ variable "mikrotiks" {
 
     client_ports = list(string) # additional ether ports bridged into the LAN
 
+    # VLAN access config. Client ports are untagged access ports; by default
+    # they land in default_access_vlan, override per port via access_port_vlans
+    # (port name -> VLAN name). The FortiGate trunk carries all VLANs tagged.
+    default_access_vlan = optional(string, "trusted")
+    access_port_vlans   = optional(map(string), {})
+    mgmt_vlan           = optional(string, "mgmt") # VLAN the switch mgmt IP sits on
+
     lan = object({
-      bridge_ip = string # mgmt IP on the LAN bridge WITH prefix, e.g. "10.10.10.2/24"
-      gateway   = string # local FortiGate LAN IP (one ECMP default route), e.g. "10.10.10.1"
+      bridge_ip = string # switch mgmt IP on the mgmt VLAN WITH prefix, e.g. "10.10.99.2/24"
+      gateway   = string # FortiGate mgmt-VLAN IP (one ECMP default route), e.g. "10.10.99.1"
     })
 
     crosslink = object({
@@ -66,10 +73,21 @@ variable "mikrotiks" {
     })
 
     peer = object({
-      lan_subnet = string # other site's LAN CIDR, routed via mt_link, e.g. "10.20.20.0/24"
+      lan_subnet = string # other site's supernet, routed via mt_link, e.g. "10.20.0.0/16"
       mt_link_ip = string # other MikroTik's mt_link IP (next hop), e.g. "10.255.255.14"
     })
   }))
+}
+
+variable "vlans" {
+  description = "VLANs trunked on each switch (name -> 802.1Q id). Shared across both switches; must match the FortiGate vlan ids."
+  type        = map(object({ id = number }))
+  default = {
+    trusted = { id = 10 }
+    iot     = { id = 20 }
+    guest   = { id = 30 }
+    mgmt    = { id = 99 }
+  }
 }
 
 variable "bridge_name" {

@@ -68,36 +68,40 @@ inputs = {
   #   FGT1<->FGT2 : 10.255.255.0/30  (FGT1 .1, FGT2 .2)
   #   FGT2<->MT1  : 10.255.255.4/30  (FGT2 .5)   [cross-link]
   #   FGT1<->MT2  : 10.255.255.8/30  (FGT1 .9)   [cross-link]
-  # LANs: FGT1 10.10.10.0/24, FGT2 10.20.20.0/24
+  # Client space per site: 10.<site>.<vlanid>.0/24, summarised as a /16 for
+  # east-west routing. Site1 = 10.10.0.0/16, Site2 = 10.20.0.0/16.
+  # VLANs: 10 trusted, 20 iot, 30 guest, 99 mgmt.
   fortigates = {
     fgt1 = {
       hostname = get_env("FORTIGATE_FGT1_HOST", "192.168.1.99") # 40F default mgmt IP
-      lan = {
-        ip         = "10.10.10.1"
-        dhcp_start = "10.10.10.100"
-        dhcp_end   = "10.10.10.200"
+      vlans = {
+        trusted = { id = 10, ip = "10.10.10.1", dhcp_start = "10.10.10.100", dhcp_end = "10.10.10.200", trusted = true }
+        iot     = { id = 20, ip = "10.10.20.1", dhcp_start = "10.10.20.100", dhcp_end = "10.10.20.200" }
+        guest   = { id = 30, ip = "10.10.30.1", dhcp_start = "10.10.30.100", dhcp_end = "10.10.30.200" }
+        mgmt    = { id = 99, ip = "10.10.99.1", dhcp_start = "10.10.99.100", dhcp_end = "10.10.99.200" }
       }
       interconnect = {
         ip      = "10.255.255.1"
         peer_ip = "10.255.255.2"
       }
       crosslink       = { ip = "10.255.255.9" } # to MikroTik2
-      peer_lan_subnet = "10.20.20.0/24"
+      peer_lan_subnet = "10.20.0.0/16"          # Site2 supernet
     }
 
     fgt2 = {
       hostname = get_env("FORTIGATE_FGT2_HOST", "192.168.1.98")
-      lan = {
-        ip         = "10.20.20.1"
-        dhcp_start = "10.20.20.100"
-        dhcp_end   = "10.20.20.200"
+      vlans = {
+        trusted = { id = 10, ip = "10.20.10.1", dhcp_start = "10.20.10.100", dhcp_end = "10.20.10.200", trusted = true }
+        iot     = { id = 20, ip = "10.20.20.1", dhcp_start = "10.20.20.100", dhcp_end = "10.20.20.200" }
+        guest   = { id = 30, ip = "10.20.30.1", dhcp_start = "10.20.30.100", dhcp_end = "10.20.30.200" }
+        mgmt    = { id = 99, ip = "10.20.99.1", dhcp_start = "10.20.99.100", dhcp_end = "10.20.99.200" }
       }
       interconnect = {
         ip      = "10.255.255.2"
         peer_ip = "10.255.255.1"
       }
       crosslink       = { ip = "10.255.255.5" } # to MikroTik1
-      peer_lan_subnet = "10.10.10.0/24"
+      peer_lan_subnet = "10.10.0.0/16"          # Site1 supernet
     }
   }
 }

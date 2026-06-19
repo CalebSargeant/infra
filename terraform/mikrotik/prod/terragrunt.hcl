@@ -70,9 +70,12 @@ inputs = {
         mt_link    = "ether3"
       }
       client_ports = ["ether4", "ether5", "ether6", "ether7", "ether8"]
+      # Per-port VLAN overrides, e.g. { ether7 = "iot", ether8 = "guest" }.
+      # Unlisted ports fall back to default_access_vlan ("trusted").
+      access_port_vlans = {}
       lan = {
-        bridge_ip = "10.10.10.2/24"
-        gateway   = "10.10.10.1" # FGT1 LAN
+        bridge_ip = "10.10.99.2/24" # mgmt VLAN
+        gateway   = "10.10.99.1"    # FGT1 mgmt-VLAN gateway
       }
       crosslink = {
         address     = "10.255.255.6/30"
@@ -80,7 +83,7 @@ inputs = {
       }
       mt_link = { address = "10.255.255.13/30" }
       peer = {
-        lan_subnet = "10.20.20.0/24"
+        lan_subnet = "10.20.0.0/16" # Site2 supernet
         mt_link_ip = "10.255.255.14" # MT2
       }
     }
@@ -94,10 +97,11 @@ inputs = {
         crosslink  = "ether2"
         mt_link    = "ether3"
       }
-      client_ports = ["ether4", "ether5", "ether6", "ether7", "ether8"]
+      client_ports     = ["ether4", "ether5", "ether6", "ether7", "ether8"]
+      access_port_vlans = {}
       lan = {
-        bridge_ip = "10.20.20.2/24"
-        gateway   = "10.20.20.1" # FGT2 LAN
+        bridge_ip = "10.20.99.2/24" # mgmt VLAN
+        gateway   = "10.20.99.1"    # FGT2 mgmt-VLAN gateway
       }
       crosslink = {
         address     = "10.255.255.10/30"
@@ -105,7 +109,7 @@ inputs = {
       }
       mt_link = { address = "10.255.255.14/30" }
       peer = {
-        lan_subnet = "10.10.10.0/24"
+        lan_subnet = "10.10.0.0/16" # Site1 supernet
         mt_link_ip = "10.255.255.13" # MT1
       }
     }

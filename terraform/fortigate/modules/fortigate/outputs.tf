@@ -1,6 +1,6 @@
-output "lan_gateways" {
-  description = "Per-FortiGate LAN gateway IP (DHCP default-gateway handed to clients)."
-  value       = { for k, v in var.fortigates : k => v.lan.ip }
+output "vlan_gateways" {
+  description = "Per-FortiGate, per-VLAN gateway IP (DHCP default-gateway handed to clients)."
+  value       = { for k, v in var.fortigates : k => { for vn, vl in v.vlans : vn => vl.ip } }
 }
 
 output "interconnect_ips" {
@@ -14,7 +14,7 @@ output "managed_interfaces" {
     for k in keys(var.fortigates) : k => {
       wan          = fortios_system_interface.wan[k].name
       interconnect = fortios_system_interface.interconnect[k].name
-      lan_mikrotik = fortios_system_interface.lan[k].name
+      lan_trunk    = fortios_system_interface.lan_trunk[k].name
       crosslink    = fortios_system_interface.crosslink[k].name
     }
   }

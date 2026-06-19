@@ -37,16 +37,23 @@ the routeros pattern when you add it).
 
 ## What it configures, per unit
 
-Interfaces (wan/interconnect/lan/crosslink) · `internal` zone · LAN DHCP server ·
-3 firewall policies (internal→wan SNAT, internal↔interconnect east-west) ·
-east-west static route to the peer LAN.
+Physical interfaces (wan / interconnect / lan trunk / crosslink) · **VLAN
+subinterfaces** on the LAN trunk (`vlans.tf`) · a DHCP scope per VLAN ·
+per-VLAN internet SNAT · trusted-VLAN segmentation policies · cross-link SNAT ·
+east-west static route to the peer site.
+
+**VLANs / segmentation** (`vlans.tf`): the LAN port is an 802.1Q trunk to the
+MikroTik; each VLAN (default `trusted`/`iot`/`guest`/`mgmt`, subnet
+`10.<site>.<vlanid>.0/24`) is an L3 subinterface with its own DHCP. Every VLAN
+gets internet egress; the `trusted` VLAN may reach all others + the
+interconnect; `iot`/`guest` are isolated by the implicit default-deny.
 
 **Both ISPs run active-active** (no failover): each FortiGate only NATs out its
 own WAN. The two ISPs carry traffic simultaneously because the MikroTik
 load-balances (ECMP) across both FortiGates — flows sent to the *opposite*
-FortiGate arrive on its cross-link (part of the `internal` zone), so the
-internal→wan SNAT policy egresses them out that unit's ISP. There is no backup
-default route and no failover egress policy.
+FortiGate arrive on its cross-link, and the `crosslink→wan` SNAT policy egresses
+them out that unit's ISP. There is no backup default route and no failover
+egress policy.
 
 ## ⚠️ Before you apply
 
