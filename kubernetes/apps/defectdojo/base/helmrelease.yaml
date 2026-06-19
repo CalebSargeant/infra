@@ -159,20 +159,16 @@ spec:
                 secretKeyRef:
                   name: defectdojo
                   key: DD_CREDENTIAL_AES_256_KEY
-            # optional: integrations are best-effort — a missing/SecretSyncedError
-            # secret (e.g. before the OCI Vault keys exist) must NOT wedge the
-            # DefectDojo rollout. The bootstrap script skips whatever is empty.
+            # optional: a missing/SecretSyncedError Slack secret (e.g. before the
+            # OCI Vault key exists) must NOT wedge the DefectDojo rollout — the
+            # bootstrap script skips Slack when the token is empty.
+            # (GitHub issue push is handled by the dt-defectdojo-sync CronJob, so
+            # no GitHub PAT is needed here.)
             - name: SLACK_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: defectdojo-integrations
                   key: SLACK_TOKEN
-                  optional: true
-            - name: GITHUB_PAT
-              valueFrom:
-                secretKeyRef:
-                  name: defectdojo-github
-                  key: GITHUB_PAT
                   optional: true
             - name: SLACK_CHANNEL
               value: "#engineering-alerts"

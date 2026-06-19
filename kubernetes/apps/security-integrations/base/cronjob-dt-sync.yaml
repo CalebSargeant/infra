@@ -49,8 +49,17 @@ spec:
                 # Only High/Critical findings open GitHub issues (limit noise).
                 - name: GITHUB_MIN_SEVERITY
                   value: "High"
-                - name: REPO_MAP_PATH
-                  value: /config/repo-map.json
+                - name: DD_SITE_URL
+                  value: https://defectdojo.magmamoose.com
+                # GitHub accounts to auto-resolve repos against (github.com first,
+                # then any GHE). JSON in OCI Vault; optional so a missing key just
+                # disables GitHub push (findings still import).
+                - name: GITHUB_TARGETS # kics-scan ignore-line - secretKeyRef is the secure K8s pattern for secret injection
+                  valueFrom:
+                    secretKeyRef:
+                      name: github-issue-targets
+                      key: GITHUB_TARGETS
+                      optional: true
                 # ── DefectDojo DB connection for the ORM (mirror the chart) ──
                 - name: DD_DATABASE_ENGINE
                   value: django.db.backends.postgresql
@@ -90,9 +99,6 @@ spec:
                 - name: sync-script
                   mountPath: /scripts
                   readOnly: true
-                - name: repo-map
-                  mountPath: /config
-                  readOnly: true
               resources:
                 requests:
                   # CPU request only — no CPU limit (house convention).
@@ -105,6 +111,3 @@ spec:
               configMap:
                 name: dt-defectdojo-sync
                 defaultMode: 0555
-            - name: repo-map
-              configMap:
-                name: github-repo-map
