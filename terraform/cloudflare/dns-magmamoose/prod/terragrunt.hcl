@@ -81,7 +81,7 @@ inputs = {
 
     # AppSec / dev tooling on firefly. These hosts have no Kubernetes Ingress
     # for external-dns to watch, so Terraform owns their tunnel CNAMEs directly.
-    # Ingress-backed hosts such as Dependency-Track and safe-settings are
+    # Ingress-backed hosts such as Dependency-Track and Caldrith are
     # published by external-dns from their Ingress annotations instead.
     {
       name    = "pullrequests.magmamoose.com"
