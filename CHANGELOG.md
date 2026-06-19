@@ -2,6 +2,37 @@
 
 <!-- version list -->
 
+## v1.58.1 (2026-06-19)
+
+### Bug Fixes
+
+- **security**: Set PYTHONPATH=/app so DefectDojo bootstrap/sync can import dojo
+  ([#411](https://github.com/CalebSargeant/infra/pull/411),
+  [`82d1ea7`](https://github.com/CalebSargeant/infra/commit/82d1ea79bbf724d3eca0bec3acd87599797dd8e1))
+
+
+## v1.58.0 (2026-06-19)
+
+### Chores
+
+- **media**: Bump image tags
+  ([`701ba6e`](https://github.com/CalebSargeant/infra/commit/701ba6e97a947cb63dc450df0ee0bb9a51114ea6))
+
+- **media**: Bump image tags
+  ([`1c4cda5`](https://github.com/CalebSargeant/infra/commit/1c4cda52233bdf2147dbd51d5090a6326511b06b))
+
+- **media**: Bump image tags
+  ([`89a8408`](https://github.com/CalebSargeant/infra/commit/89a84086f6fdb53e3dc9df0ce0603b330189543b))
+
+- **media**: Bump image tags
+  ([`c53a4ac`](https://github.com/CalebSargeant/infra/commit/c53a4ac09d7db8cf538f14432668ac040e6d6738))
+
+### Features
+
+- Add caldrith app, retire safe-settings ([#414](https://github.com/CalebSargeant/infra/pull/414),
+  [`fbf49ea`](https://github.com/CalebSargeant/infra/commit/fbf49eaa5842b540ba333f872ff456e1eb46d639))
+
+
 ## v1.57.2 (2026-06-17)
 
 ### Bug Fixes

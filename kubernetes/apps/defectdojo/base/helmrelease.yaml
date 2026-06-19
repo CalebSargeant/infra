@@ -122,7 +122,8 @@ spec:
           command: ["python", "/scripts/bootstrap.py"]
           # The `dojo` package lives at /app (image WORKDIR); a script run from
           # /scripts isn't on its path, so without this django.setup() dies with
-          # ModuleNotFoundError and crashes the init container.
+          # ModuleNotFoundError, crashing the init container and failing the
+          # Helm upgrade (rollback loop). Keep both in sync.
           workingDir: /app
           volumeMounts:
             - name: dd-bootstrap

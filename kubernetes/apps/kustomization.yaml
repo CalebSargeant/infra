@@ -11,7 +11,8 @@ resources:
   - ./mikrotik-minder
   - ./n8n
   - ./openclaw
-  # magmamoose products (open-core dashboards; external-repo + image automation)
+  # magmamoose products (open-core; external-repo + image automation)
+  - ./caldrith
   - ./diatreme-pro
   # backup
   - ./timemachine
@@ -53,7 +54,6 @@ resources:
   - ./dependency-track
   - ./gatekeeper
   - ./kubescape
-  - ./safe-settings
   - ./security-integrations
   # external-repo apps (workload manifests live in their own GitHub repos;
   # each dir holds only the in-cluster Flux plumbing — source, image
