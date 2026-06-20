@@ -67,8 +67,8 @@ resource "fortios_system_sdwan" "this" {
     }
 
     sla {
-      id                  = 1
-      latency_threshold   = 200
+      id                   = 1
+      latency_threshold    = 200
       packetloss_threshold = 5
     }
   }
