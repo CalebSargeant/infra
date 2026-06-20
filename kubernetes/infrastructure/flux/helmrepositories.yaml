@@ -163,3 +163,12 @@ metadata:
 spec:
   interval: 1h
   url: https://dependencytrack.github.io/helm-charts
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: goauthentik
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://charts.goauthentik.io

@@ -49,6 +49,8 @@ resources:
   - ./thanos-store
   # platform (node-level tuning)
   - ./node-tuning
+  # identity (SSO)
+  - ./authentik
   # security
   - ./defectdojo
   - ./dependency-track

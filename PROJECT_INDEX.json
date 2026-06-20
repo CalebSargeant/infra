@@ -77,6 +77,7 @@
             "purpose": "Per-app manifests. Each app has base/<app>/ (kustomize manifests) + prod/<app>/ (Flux Kustomization CR)",
             "apps": [
                 "atlantis",
+                "authentik",
                 "bazarr",
                 "blackbox-exporter",
                 "defectdojo",

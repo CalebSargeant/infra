@@ -292,6 +292,15 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # Authentik — the identity provider (kubernetes/apps/authentik). It carries its
+    # own auth, so no Access gate. external-dns publishes the CNAME from the k8s
+    # Ingress; the tunnel routes to the server Service.
+    ingress_rule {
+      hostname = "authentik.magmamoose.com"
+      service  = "http://authentik-server.authentik.svc.cluster.local:80"
+      origin_request {}
+    }
+
     # Cloudflared requires the last rule to be a catch-all with no hostname.
     ingress_rule {
       service = "http_status:404"
