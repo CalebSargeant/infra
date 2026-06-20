@@ -11,6 +11,7 @@ resources:
   - ./mikrotik-minder
   - ./n8n
   - ./openclaw
+  - ./renovate
   # magmamoose products (open-core; external-repo + image automation)
   - ./caldrith
   - ./diatreme-pro
@@ -49,11 +50,14 @@ resources:
   - ./thanos-store
   # platform (node-level tuning)
   - ./node-tuning
+  # progressive delivery
+  - ./flagger
   # security
   - ./defectdojo
   - ./dependency-track
   - ./gatekeeper
   - ./kubescape
+  - ./kyverno-policies
   - ./security-integrations
   # external-repo apps (workload manifests live in their own GitHub repos;
   # each dir holds only the in-cluster Flux plumbing — source, image
