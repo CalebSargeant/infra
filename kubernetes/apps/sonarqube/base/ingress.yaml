@@ -2,11 +2,8 @@
 # Exists only so external-dns publishes the CNAME (the `target` annotation) and
 # cert-manager mints the cert. Actual request routing is the cloudflared tunnel
 # (terraform/cloudflare/zero-trust/prod/tunnels.tf), which connects straight to
-# the Service and bypasses Traefik.
-#
-# Host on sargeant.co (not the magmamoose.com dev-tooling convention) because
-# magmamoose.com is on Tucows clientHold and does not resolve — switch when the
-# hold lifts.
+# the Service and bypasses Traefik. Host on magmamoose.com (the AppSec/dev-tooling
+# convention; note magmamoose.com is on Tucows clientHold until that lifts).
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -23,7 +20,7 @@ metadata:
     app: sonarqube
 spec:
   rules:
-    - host: sonarqube.sargeant.co
+    - host: sonarqube.magmamoose.com
       http:
         paths:
           - path: /
@@ -35,5 +32,5 @@ spec:
                   number: 9000
   tls:
     - hosts:
-        - sonarqube.sargeant.co
+        - sonarqube.magmamoose.com
       secretName: sonarqube-tls

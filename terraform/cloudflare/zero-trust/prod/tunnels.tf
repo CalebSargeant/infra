@@ -292,20 +292,20 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
-    # SonarQube — self-hosted code-quality (firefly cluster). On sargeant.co
-    # because magmamoose.com is on Tucows clientHold; DNS is published by
-    # external-dns from the k8s Ingress (kubernetes/apps/sonarqube).
+    # SonarQube — self-hosted code-quality + security (firefly cluster). DNS is
+    # published by external-dns from the k8s Ingress (kubernetes/apps/sonarqube).
+    # Its security findings are imported into DefectDojo (security-integrations).
     ingress_rule {
-      hostname = "sonarqube.sargeant.co"
+      hostname = "sonarqube.magmamoose.com"
       service  = "http://sonarqube-sonarqube.security.svc.cluster.local:9000"
       origin_request {}
     }
 
-    # Backstage developer portal (firefly cluster). Placeholder image until the
-    # app image is built — see kubernetes/apps/backstage. sargeant.co (clientHold).
+    # Backstage developer portal (firefly cluster) — Red Hat Developer Hub
+    # community build (kubernetes/apps/backstage). Service is <release>-developer-hub.
     ingress_rule {
-      hostname = "backstage.sargeant.co"
-      service  = "http://backstage.core.svc.cluster.local:7007"
+      hostname = "backstage.magmamoose.com"
+      service  = "http://backstage-developer-hub.core.svc.cluster.local:7007"
       origin_request {}
     }
 
