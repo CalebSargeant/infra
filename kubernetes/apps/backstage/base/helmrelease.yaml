@@ -73,6 +73,33 @@ spec:
             github:
               - host: github.com
                 token: ${GITHUB_TOKEN}
+          # Catalog auto-discovery — import entities from both GitHub orgs using
+          # GITHUB_TOKEN. This is the CONFIG; it takes effect once the github-org
+          # catalog dynamic plugin is enabled (baked into the RHDH image but
+          # disabled by default). Enabling it blind is unsafe — a wrong package ref
+          # fails the install-dynamic-plugins initContainer and the pod never starts
+          # — so verify the exact ref for this RHDH version on first boot, then add:
+          #   global.dynamic.plugins:
+          #     - package: ./dynamic-plugins/dist/backstage-community-plugin-catalog-backend-module-github-org-dynamic
+          #       disabled: false
+          # Until then this block is simply unread (Backstage boots fine).
+          catalog:
+            providers:
+              github:
+                calebsargeant:
+                  organization: "CalebSargeant"
+                  schedule:
+                    frequency:
+                      minutes: 30
+                    timeout:
+                      minutes: 3
+                magmamoose:
+                  organization: "MagmaMoose"
+                  schedule:
+                    frequency:
+                      minutes: 30
+                    timeout:
+                      minutes: 3
         extraEnvVars:
           # Kept from the chart default (backend service-to-service auth secret).
           - name: BACKEND_SECRET
