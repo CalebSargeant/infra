@@ -1,0 +1,15 @@
+---
+# Empty database on the SHARED CNPG cluster (do NOT create a new Cluster).
+# Authentik runs its own migrations. Owned by the shared `neondb_owner` role
+# (password from OCI Vault `neondb-owner-password`, surfaced via externalsecret.yaml).
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: authentik
+  namespace: database
+spec:
+  cluster:
+    name: postgres
+  name: authentik
+  owner: neondb_owner
+  databaseReclaimPolicy: retain

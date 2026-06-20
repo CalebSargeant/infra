@@ -1,0 +1,53 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: authentik
+  namespace: authentik
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: authentik
+      version: "2026.5.3"
+      sourceRef:
+        kind: HelmRepository
+        name: goauthentik
+        namespace: flux-system
+      interval: 10m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    global:
+      env:
+        # Authentik needs Redis — use the shared authless Valkey (own DB index to
+        # avoid colliding with DefectDojo). NOT a bundled redis (chart has none).
+        - name: AUTHENTIK_REDIS__HOST
+          value: valkey.database.svc.cluster.local
+        - name: AUTHENTIK_REDIS__DB
+          value: "4"
+    authentik:
+      # Single secret carries AUTHENTIK_SECRET_KEY + POSTGRESQL__PASSWORD +
+      # BOOTSTRAP_* (env-injected into server + worker).
+      existingSecret:
+        secretName: authentik
+      # Shared CloudNativePG, not the chart's (already-disabled) bundled Postgres.
+      postgresql:
+        host: postgres-rw.database.svc.cluster.local
+        name: authentik
+        user: neondb_owner
+      error_reporting:
+        enabled: false
+    postgresql:
+      enabled: false
+    server:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      ingress:
+        enabled: false
+    worker:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
