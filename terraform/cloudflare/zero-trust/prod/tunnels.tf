@@ -292,6 +292,23 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # SonarQube — self-hosted code-quality (firefly cluster). On sargeant.co
+    # because magmamoose.com is on Tucows clientHold; DNS is published by
+    # external-dns from the k8s Ingress (kubernetes/apps/sonarqube).
+    ingress_rule {
+      hostname = "sonarqube.sargeant.co"
+      service  = "http://sonarqube-sonarqube.security.svc.cluster.local:9000"
+      origin_request {}
+    }
+
+    # Backstage developer portal (firefly cluster). Placeholder image until the
+    # app image is built — see kubernetes/apps/backstage. sargeant.co (clientHold).
+    ingress_rule {
+      hostname = "backstage.sargeant.co"
+      service  = "http://backstage.core.svc.cluster.local:7007"
+      origin_request {}
+    }
+
     # Cloudflared requires the last rule to be a catch-all with no hostname.
     ingress_rule {
       service = "http_status:404"
