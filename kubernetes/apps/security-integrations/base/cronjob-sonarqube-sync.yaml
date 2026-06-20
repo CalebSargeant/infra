@@ -44,9 +44,9 @@ spec:
                   value: dojo.settings.settings
                 # In-cluster service endpoints (no Cloudflare round-trip).
                 - name: DEFECTDOJO_URL
-                  value: http://defectdojo-django.security.svc.cluster.local
+                  value: http://defectdojo-django.security.svc.cluster.local # NOSONAR S5332 - in-cluster east-west; TLS terminates at the tunnel, not the pod network (same as dt-sync)
                 - name: SONARQUBE_URL
-                  value: http://sonarqube-sonarqube.security.svc.cluster.local:9000
+                  value: http://sonarqube-sonarqube.security.svc.cluster.local:9000 # NOSONAR S5332 - in-cluster east-west; TLS terminates at the tunnel, not the pod network
                 # ── DefectDojo DB connection for the ORM (mirror the chart) ──
                 - name: DD_DATABASE_ENGINE
                   value: django.db.backends.postgresql
