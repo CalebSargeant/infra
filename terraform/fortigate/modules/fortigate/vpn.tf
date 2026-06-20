@@ -53,14 +53,28 @@ resource "fortios_vpnipsec_phase1interface" "oci" {
   psksecret    = var.fortigate_oci_vpn_psks[each.value.fgt]
   dpd          = "on-idle"
   nattraversal = "enable"
-  comment      = "${local.marker} — to OCI (${each.value.name})"
+  comments     = "${local.marker} — to OCI (${each.value.name})"
+
+  lifecycle {
+    precondition {
+      condition     = length(lookup(var.fortigate_oci_vpn_psks, each.value.fgt, "")) >= 16
+      error_message = "OCI IPsec PSK for ${each.value.fgt} must be set (>=16 chars) and match the OCI side; an empty value mismatches OCI's auto-generated secret and the tunnel never comes up."
+    }
+  }
 }
 
 # --- Tunnel-interface inside IPs (BGP transit) -----------------------------
-# Sets the /30 inside addresses OCI expects for BGP over each tunnel. NOTE: the
-# phase1 above auto-creates this interface (net_device); on a first real apply
-# you may need to `terraform import` it (or set ip/remote-ip out-of-band) since
-# the provider can't create an interface that already exists.
+# Sets the /30 inside addresses OCI expects for BGP over each tunnel.
+#
+# FIRST-APPLY IMPORT (required): phase1 above sets net_device=enable, so FortiOS
+# auto-creates this tunnel interface — OpenTofu then can't *create* it. Import
+# the existing interface once per tunnel before the first apply (run each against
+# the matching unit's provider; the import id is the interface name):
+#   terragrunt import 'fortios_system_interface.oci_tunnel["fgt1/oci-t1"]' oci-t1
+#   terragrunt import 'fortios_system_interface.oci_tunnel["fgt1/oci-t2"]' oci-t2
+#   terragrunt import 'fortios_system_interface.oci_tunnel["fgt2/oci-t1"]' oci-t1
+#   terragrunt import 'fortios_system_interface.oci_tunnel["fgt2/oci-t2"]' oci-t2
+# After import, this resource just manages the inside ip/remote-ip going forward.
 resource "fortios_system_interface" "oci_tunnel" {
   for_each = { for e in local.vpn_tunnel_entries : e.key => e }
   provider = fortios.by_fortigate[each.value.fgt]
