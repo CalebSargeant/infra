@@ -82,6 +82,7 @@
                 "defectdojo",
                 "dependency-track",
                 "excalidraw",
+                "falco",
                 "flaresolverr",
                 "fluent-bit",
                 "gatekeeper",
@@ -111,6 +112,7 @@
                 "thanos-query",
                 "thanos-store",
                 "timemachine",
+                "trivy-operator",
                 "wordpress"
             ],
             "depends_on": [

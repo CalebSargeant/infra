@@ -49,6 +49,7 @@ nav:
       - Single-Hook Implementation: guides/single-hook-implementation.md
   - Operations:
       - AppSec and Dev Tooling: operations/appsec-dev-tooling.md
+      - Runtime & Continuous Security: operations/runtime-continuous-security.md
       - DefectDojo: operations/defectdojo.md
       - Observability Stack: operations/observability-stack.md
       - Auto Shutdown: operations/auto-shutdown.md
