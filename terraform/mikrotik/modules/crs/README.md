@@ -24,7 +24,7 @@ Each CRS is an **L2 access switch** — the FortiGate behind it is the gateway a
 DHCP server. Each switch also has two **routed** point-to-point uplinks:
 
 - **LAN bridge** (`bridge-lan`, **MSTP**) — the local FortiGate uplink + client
-  ports, all in one subnet (MT1 `10.10.10.0/24`, MT2 `10.20.20.0/24`). Both
+  ports, all in one subnet (MT1 `10.10.10.0/24`, MT2 `10.20.10.0/24`). Both
   switches share one MST region (`region_name`/`region_revision`).
 - **crosslink** — `/30` to the *opposite* FortiGate.
 - **mt_link** — `/30` to the *other* MikroTik; reaches the peer site's LAN.

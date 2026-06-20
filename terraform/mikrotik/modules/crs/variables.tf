@@ -33,7 +33,7 @@ variable "routeros_insecure" {
 #
 # All IPs are PLACEHOLDERS and are kept consistent with the fortigate module's
 # placeholder scheme (10.255.255.0/24 carves the /30s; LANs 10.10.10/24,
-# 10.20.20/24). The crosslink + mt_link are routed ether ports, NOT bridged, so
+# 10.20.10/24). The crosslink + mt_link are routed ether ports, NOT bridged, so
 # there's no L2 loop between sites; MSTP still guards the local bridge.
 # ---------------------------------------------------------------------------
 variable "mikrotiks" {
