@@ -98,7 +98,14 @@ resource "fortios_vpnipsec_phase1interface" "dialup" {
   ipv4_dns_server1   = each.value.client_dns
   ipv4_split_include = fortios_firewall_address.ra_split[each.key].name
 
-  comment = "${local.marker} — remote-access dial-up (Google SAML)"
+  comments = "${local.marker} — remote-access dial-up (Google SAML)"
+
+  lifecycle {
+    precondition {
+      condition     = length(lookup(var.fortigate_remote_access_psks, each.key, "")) >= 16
+      error_message = "Remote-access PSK for ${each.key} must be set (>=16 chars); an empty PSK would stand up an open IKE dial-up gateway. Source it from OCI Vault."
+    }
+  }
 }
 
 resource "fortios_vpnipsec_phase2interface" "dialup" {
