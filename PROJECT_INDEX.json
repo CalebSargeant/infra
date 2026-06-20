@@ -25,6 +25,28 @@
                 "terraform-root"
             ]
         },
+        "terraform-fortigate": {
+            "path": "terraform/fortigate/",
+            "purpose": "Two standalone home-lab FortiGate 40Fs (no HA), dual-ISP resilient edge. fortios provider iterated per-unit via for_each (OpenTofu 1.9+). Self-contained leaf (no root.hcl include). VLAN segmentation (trusted/iot/guest/mgmt) over an 802.1Q trunk to the MikroTik; per-VLAN DHCP + segmentation policies. Both ISPs active-active. BGP-routed IPsec site-to-site VPN to OCI (vpn.tf/bgp.tf, OCI side oci/.../vpn-fortigate) with SD-WAN steering (sdwan.tf); BGP scope OCI+FGT-FGT. IPsec dial-up remote access via Google SAML (remote-access.tf). Syslog/NetFlow + automation stitches (monitoring.tf). Base-license only.",
+            "leaves": [
+                "prod"
+            ],
+            "shared_modules": [
+                "modules/fortigate"
+            ],
+            "notes": "Hardware not wired yet — Atlantis autoplan disabled (enabled:false); run 'atlantis plan -p fortigate-prod' once units are reachable + API tokens are in OCI Vault. Placeholder RFC1918 addressing; verify 40F physical port names before apply."
+        },
+        "terraform-mikrotik": {
+            "path": "terraform/mikrotik/",
+            "purpose": "Two physical home-lab MikroTik CRS edge switches (one behind each FortiGate). routeros provider iterated per-unit via for_each (OpenTofu 1.9+). L2 access bridge (MSTP, shared region) + routed /30 cross-link & inter-switch uplinks. Both ISPs active-active via ECMP (equal-distance default routes), no failover. Pairs with terraform/fortigate. NOT the OCI CHRs under terraform/oci/.../mikrotik.",
+            "leaves": [
+                "prod"
+            ],
+            "shared_modules": [
+                "modules/crs"
+            ],
+            "notes": "Hardware not wired yet (mt2 not installed) — Atlantis autoplan disabled; run 'atlantis plan -p mikrotik-prod' once reachable + password in OCI Vault. Placeholder addressing consistent with terraform/fortigate; verify CRS port names before apply."
+        },
         "terraform-gcp": {
             "path": "terraform/gcp/",
             "purpose": "GCP project setup (state bucket, IAM); state lives in GCS magmamoose-terraform project",
@@ -40,7 +62,7 @@
             "purpose": "OCI tenancy infra (network, edge, server, mikrotik, vpn, database, drg-peering, policy) + tenancy-root IAM",
             "leaves": [
                 "iam-policy",
-                "prod/eu-amsterdam-1/{network,edge,server,mikrotik,vpn,database,drg-peering,policy}"
+                "prod/eu-amsterdam-1/{network,edge,server,mikrotik,vpn,vpn-fortigate,database,drg-peering,policy}"
             ],
             "shared_modules": [
                 "modules/{network,edge,server,mikrotik,vpn,database,drg-peering,policy,iam-policy}"
