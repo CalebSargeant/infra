@@ -1,0 +1,88 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: backstage
+  namespace: core
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: backstage
+      version: "2.8.2"
+      sourceRef:
+        kind: HelmRepository
+        name: backstage
+        namespace: flux-system
+      interval: 10m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    backstage:
+      # PLACEHOLDER image. Upstream Backstage ships no runnable image — you build
+      # your own app. The real image (ghcr.io/calebsargeant/backstage) is a
+      # follow-up (see docs/apps/backstage.md); until it exists this pod sits in
+      # ImagePullBackOff by design. All other wiring below is production-ready.
+      image:
+        registry: ghcr.io
+        repository: calebsargeant/backstage
+        tag: placeholder
+        pullPolicy: IfNotPresent
+
+      # Pin to the amd64 worker (ff-vm1).
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+
+      # Shared CloudNativePG connection (consumed by appConfig below). The
+      # password comes from the backstage-db ExternalSecret (OCI Vault).
+      extraEnvVars:
+        - name: POSTGRES_HOST
+          value: postgres-rw.database.svc.cluster.local
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_USER
+          value: neondb_owner
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backstage-db
+              key: password
+
+      # Generates a backstage-app-config ConfigMap mounted into the pod. Ready for
+      # when the real image lands; the placeholder image ignores it.
+      appConfig:
+        app:
+          baseUrl: https://backstage.sargeant.co
+        backend:
+          baseUrl: https://backstage.sargeant.co
+          listen:
+            port: 7007
+          database:
+            client: pg
+            connection:
+              host: ${POSTGRES_HOST}
+              port: ${POSTGRES_PORT}
+              user: ${POSTGRES_USER}
+              password: ${POSTGRES_PASSWORD}
+
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
+
+    # Use the shared CNPG cluster, not the chart's bundled Postgres.
+    postgresql:
+      enabled: false
+
+    # Routing is the cloudflared tunnel (ingress.yaml + tunnels.tf).
+    ingress:
+      enabled: false
+
+    service:
+      ports:
+        backend: 7007
