@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v1.61.1 (2026-06-20)
+
+### Bug Fixes
+
+- **fortigate**: Iterate ra_fgts not its keyset in remote-access for_each
+  ([#423](https://github.com/CalebSargeant/infra/pull/423),
+  [`e9eab3f`](https://github.com/CalebSargeant/infra/commit/e9eab3f96ff83fab823e75288facac0353d651b4))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`994ccac`](https://github.com/CalebSargeant/infra/commit/994ccac395fbdbb9f333c6f7c366afedbaee8478))
+
+
 ## v1.61.0 (2026-06-20)
 
 ### Chores
