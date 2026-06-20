@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v1.61.0 (2026-06-20)
+
+### Chores
+
+- **media**: Bump image tags
+  ([`a0c982e`](https://github.com/CalebSargeant/infra/commit/a0c982e2a99b9e3c416555481682a1b585251f85))
+
+### Features
+
+- **edge**: Terraform two FortiGate 40Fs + MikroTik CRS edge (VLANs, BGP, OCI VPN, SD-WAN, remote
+  access) ([#417](https://github.com/CalebSargeant/infra/pull/417),
+  [`3499de9`](https://github.com/CalebSargeant/infra/commit/3499de9084322e0a5740b048a26da97363323820))
+
+
 ## v1.60.0 (2026-06-19)
 
 ### Bug Fixes
