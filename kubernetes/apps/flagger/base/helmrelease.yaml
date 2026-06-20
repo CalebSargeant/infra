@@ -29,7 +29,7 @@ spec:
     # Reuse the existing kube-prometheus-stack for canary metric analysis (don't
     # install Flagger's bundled Prometheus). `prometheus-operated` is the
     # prometheus-operator's always-present Service in the observability namespace.
-    metricsServer: "http://prometheus-operated.observability.svc.cluster.local:9090"
+    metricsServer: "http://prometheus-operated.observability.svc.cluster.local:9090" # NOSONAR S5332 - in-cluster metrics endpoint (east-west), not internet-facing
     prometheus:
       install: false
     # Controller on the amd64 worker.
