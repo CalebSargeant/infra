@@ -48,12 +48,12 @@ resource "fortios_router_bgp" "this" {
     }
   }
 
-  # Advertise this unit's VLAN subnets (assumed /24 per the placeholder scheme).
+  # Advertise this unit's VLAN subnets (prefix derived from each VLAN's netmask).
   dynamic "network" {
     for_each = { for e in local.vlan_entries : tostring(e.id) => e if e.fgt == each.key }
     content {
       id     = network.value.id
-      prefix = "${cidrhost("${network.value.ip}/24", 0)} 255.255.255.0"
+      prefix = "${cidrhost("${network.value.ip}/${network.value.prefix_len}", 0)} ${network.value.netmask}"
     }
   }
 }

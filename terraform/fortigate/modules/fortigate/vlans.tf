@@ -22,6 +22,7 @@ locals {
         id         = v.id
         ip         = v.ip
         netmask    = v.netmask
+        prefix_len = one([for p in range(0, 33) : p if cidrnetmask("0.0.0.0/${p}") == v.netmask])
         dhcp_start = v.dhcp_start
         dhcp_end   = v.dhcp_end
         trusted    = v.trusted
@@ -38,10 +39,10 @@ locals {
   trusted_to_other = flatten([
     for fk, f in var.fortigates : [
       for vname, v in f.vlans : {
-        fgt  = fk
-        dst  = vname
-        key  = "${fk}/${vname}"
-        id   = v.id
+        fgt = fk
+        dst = vname
+        key = "${fk}/${vname}"
+        id  = v.id
       } if !v.trusted
     ]
   ])
