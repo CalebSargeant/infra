@@ -2,11 +2,8 @@
 # Exists only so external-dns publishes the CNAME (the `target` annotation) and
 # cert-manager mints the cert. Actual request routing is the cloudflared tunnel
 # (terraform/cloudflare/zero-trust/prod/tunnels.tf), which connects straight to
-# the Service and bypasses Traefik.
-#
-# Host on sargeant.co (not the magmamoose.com dev-tooling convention) because
-# magmamoose.com is on Tucows clientHold and does not resolve — switch when the
-# hold lifts.
+# the Service and bypasses Traefik. Host on magmamoose.com (the dev-tooling
+# convention; note magmamoose.com is on Tucows clientHold until that lifts).
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -23,17 +20,18 @@ metadata:
     app: backstage
 spec:
   rules:
-    - host: backstage.sargeant.co
+    - host: backstage.magmamoose.com
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: backstage
+                # RHDH chart names the Service <release>-developer-hub.
+                name: backstage-developer-hub
                 port:
                   number: 7007
   tls:
     - hosts:
-        - backstage.sargeant.co
+        - backstage.magmamoose.com
       secretName: backstage-tls

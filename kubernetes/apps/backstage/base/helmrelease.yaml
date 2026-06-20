@@ -7,11 +7,15 @@ spec:
   interval: 10m
   chart:
     spec:
+      # Red Hat Developer Hub — the free community Backstage distribution. Unlike
+      # upstream Backstage (which ships no runnable image), RHDH publishes a
+      # prebuilt community image with batteries included (catalog, TechDocs,
+      # software templates, 25+ dynamic plugins configured via YAML — no app build).
       chart: backstage
-      version: "2.8.2"
+      version: "6.1.1" # RHDH 1.10
       sourceRef:
         kind: HelmRepository
-        name: backstage
+        name: rhdh
         namespace: flux-system
       interval: 10m
   install:
@@ -21,68 +25,72 @@ spec:
     remediation:
       retries: 3
   values:
-    backstage:
-      # PLACEHOLDER image. Upstream Backstage ships no runnable image — you build
-      # your own app. The real image (ghcr.io/calebsargeant/backstage) is a
-      # follow-up (see docs/apps/backstage.md); until it exists this pod sits in
-      # ImagePullBackOff by design. All other wiring below is production-ready.
-      image:
-        registry: ghcr.io
-        repository: calebsargeant/backstage
-        tag: placeholder
-        pullPolicy: IfNotPresent
-
-      # Pin to the amd64 worker (ff-vm1).
-      nodeSelector:
-        node-role.kubernetes.io/worker: ""
-
-      # Shared CloudNativePG connection (consumed by appConfig below). The
-      # password comes from the backstage-db ExternalSecret (OCI Vault).
-      extraEnvVars:
-        - name: POSTGRES_HOST
-          value: postgres-rw.database.svc.cluster.local
-        - name: POSTGRES_PORT
-          value: "5432"
-        - name: POSTGRES_USER
-          value: neondb_owner
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: backstage-db
-              key: password
-
-      # Generates a backstage-app-config ConfigMap mounted into the pod. Ready for
-      # when the real image lands; the placeholder image ignores it.
-      appConfig:
-        app:
-          baseUrl: https://backstage.sargeant.co
-        backend:
-          baseUrl: https://backstage.sargeant.co
-          listen:
-            port: 7007
-          database:
-            client: pg
-            connection:
-              host: ${POSTGRES_HOST}
-              port: ${POSTGRES_PORT}
-              user: ${POSTGRES_USER}
-              password: ${POSTGRES_PASSWORD}
-
-      resources:
-        requests:
-          cpu: 100m
-          memory: 256Mi
-        limits:
-          memory: 1Gi
-
-    # Use the shared CNPG cluster, not the chart's bundled Postgres.
-    postgresql:
+    global:
+      # Resolves the baseUrls in upstream.backstage.appConfig via the rhdh.hostname helper.
+      host: backstage.magmamoose.com
+      # Disable the built-in Lightspeed AI feature (pulls registry.access.redhat.com images).
+      lightspeed:
+        enabled: false
+    # OpenShift Route — disabled; this is plain k3s and we expose via a standalone
+    # Ingress (ingress.yaml) + the cloudflared tunnel.
+    route:
       enabled: false
-
-    # Routing is the cloudflared tunnel (ingress.yaml + tunnels.tf).
-    ingress:
-      enabled: false
-
-    service:
-      ports:
-        backend: 7007
+    upstream:
+      ingress:
+        enabled: false
+      # Use the shared CloudNativePG cluster, not the chart's bundled Postgres.
+      postgresql:
+        enabled: false
+      backstage:
+        image:
+          # registry/repository already default to quay.io/rhdh-community/rhdh
+          # (community, free). Pin the 1.10 community release-branch build.
+          tag: "next-1.10"
+        # Pin to the amd64 worker (ff-vm1).
+        nodeSelector:
+          node-role.kubernetes.io/worker: ""
+        appConfig:
+          app:
+            baseUrl: https://backstage.magmamoose.com
+          backend:
+            baseUrl: https://backstage.magmamoose.com
+            cors:
+              origin: https://backstage.magmamoose.com
+            database:
+              client: pg
+              # Keep all plugin data in the single `backstage` DB via schemas
+              # (tidy on the shared CNPG) instead of many *_plugin databases.
+              pluginDivisionMode: schema
+              connection:
+                host: postgres-rw.database.svc.cluster.local
+                port: 5432
+                user: neondb_owner
+                password: ${POSTGRES_PASSWORD}
+          # Integration with GitHub (catalog reads, scaffolder, TechDocs sources).
+          # Inert until backstage-github-token exists in OCI Vault — Backstage still
+          # boots; GitHub-sourced catalog entities just won't load.
+          integrations:
+            github:
+              - host: github.com
+                token: ${GITHUB_TOKEN}
+        extraEnvVars:
+          # Kept from the chart default (backend service-to-service auth secret).
+          - name: BACKEND_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: backend-secret
+                name: '{{ include "rhdh.backend-secret-name" $ }}'
+          # Shared CNPG password (replaces the bundled-Postgres admin password).
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: backstage-db
+                key: password
+          # GitHub PAT for the integration above — optional so the pod starts
+          # before the OCI Vault key exists.
+          - name: GITHUB_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: backstage-github
+                key: token
+                optional: true
