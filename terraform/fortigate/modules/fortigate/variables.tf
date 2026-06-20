@@ -10,7 +10,7 @@ variable "fortigate_tokens" {
 variable "fortigate_insecure" {
   description = "Skip TLS verification of the FortiGate management cert (self-signed by default on a 40F). Set false once a trusted cert is installed."
   type        = bool
-  default     = true
+  default     = true # TODO(when-cert-installed): flip to false once each unit has a trusted mgmt cert
 }
 
 # ---------------------------------------------------------------------------
@@ -29,9 +29,9 @@ variable "fortigate_insecure" {
 variable "fortigates" {
   description = "Per-FortiGate connection + interface/topology config, keyed fgt1/fgt2."
   type = map(object({
-    hostname = string                     # management host the provider connects to (mgmt IP / FQDN)
+    hostname = string # management host the provider connects to (mgmt IP / FQDN)
     vdom     = optional(string, "root")
-    wan_mode = optional(string, "dhcp")   # static | dhcp | pppoe — each FortiGate has its own ISP
+    wan_mode = optional(string, "dhcp") # static | dhcp | pppoe — each FortiGate has its own ISP
 
     # Physical port roles on the 40F. The 40F ships its 4 internal GE ports as
     # one hardware switch; break it up (or remap) here. VERIFY the real names
@@ -47,19 +47,19 @@ variable "fortigates" {
     # DHCP scope + firewall policies. Exactly ONE vlan should set trusted=true.
     # Convention: subnet = 10.<site>.<vlanid>.0/24.
     vlans = map(object({
-      id         = number                          # 802.1Q tag
-      ip         = string                          # gateway IP, e.g. "10.10.10.1"
+      id         = number # 802.1Q tag
+      ip         = string # gateway IP, e.g. "10.10.10.1"
       netmask    = optional(string, "255.255.255.0")
       dhcp_start = string
       dhcp_end   = string
-      trusted    = optional(bool, false)           # may initiate to all other VLANs + interconnect
+      trusted    = optional(bool, false) # may initiate to all other VLANs + interconnect
     }))
 
     # Point-to-point /30 to the other FortiGate.
     interconnect = object({
-      ip      = string                             # this unit's IP, e.g. "10.255.255.1"
+      ip      = string # this unit's IP, e.g. "10.255.255.1"
       netmask = optional(string, "255.255.255.252")
-      peer_ip = string                             # the other unit's interconnect IP (failover/east-west next-hop)
+      peer_ip = string # the other unit's interconnect IP (failover/east-west next-hop)
     })
 
     # Point-to-point /30 to the OPPOSITE unit's MikroTik.
@@ -87,10 +87,10 @@ variable "fortigates" {
       proposal      = optional(string, "aes256-sha256")
       dhgrp         = optional(string, "14")
       tunnels = list(object({
-        name            = string # FortiGate IPsec interface name (<= 15 chars), e.g. "oci-t1"
-        remote_gw       = string # OCI tunnel public IP
-        bgp_customer_ip = string # this unit's BGP inside IP on the tunnel WITH prefix, e.g. "169.254.22.2/30"
-        bgp_oracle_ip   = string # OCI's BGP inside IP (neighbor), e.g. "169.254.22.1"
+        name            = string           # FortiGate IPsec interface name (<= 15 chars), e.g. "oci-t1"
+        remote_gw       = string           # OCI tunnel public IP
+        bgp_customer_ip = string           # this unit's BGP inside IP on the tunnel WITH prefix, e.g. "169.254.22.2/30"
+        bgp_oracle_ip   = string           # OCI's BGP inside IP (neighbor), e.g. "169.254.22.1"
         health_check_ip = optional(string) # SD-WAN probe target reachable over this tunnel (defaults to bgp_oracle_ip)
       }))
     }))
@@ -99,13 +99,18 @@ variable "fortigates" {
     # Google SAML. mode-config assigns clients from this pool.
     remote_access = optional(object({
       enabled       = optional(bool, true)
-      pool_start    = string                          # e.g. "10.10.250.1"
-      pool_end      = string                          # e.g. "10.10.250.50"
+      pool_start    = string # e.g. "10.10.250.1"
+      pool_end      = string # e.g. "10.10.250.50"
       pool_netmask  = optional(string, "255.255.255.0")
-      client_dns    = string                          # DNS pushed to clients (the trusted VLAN gw)
-      split_include = string                          # subnet clients route over the tunnel, e.g. "10.10.0.0/16"
+      client_dns    = string # DNS pushed to clients (the trusted VLAN gw)
+      split_include = string # subnet clients route over the tunnel, e.g. "10.10.0.0/16"
     }))
   }))
+
+  validation {
+    condition     = alltrue([for k, f in var.fortigates : length([for vn, v in f.vlans : vn if try(v.trusted, false)]) == 1])
+    error_message = "Each FortiGate must have exactly one VLAN with trusted = true."
+  }
 }
 
 variable "fortigate_oci_vpn_psks" {
@@ -149,7 +154,7 @@ variable "saml_idp" {
     idp_entity_id   = string # e.g. "https://accounts.google.com/o/saml2?idpid=XXXX"
     idp_sso_url     = string # Google SSO URL
     idp_slo_url     = optional(string, "")
-    idp_cert_name   = string # name of the imported Google signing cert on the FortiGate
+    idp_cert_name   = string                               # name of the imported Google signing cert on the FortiGate
     sp_cert         = optional(string, "Fortinet_Factory") # SP signing cert
     user_name_field = optional(string, "username")
     group_name      = optional(string, "group")
