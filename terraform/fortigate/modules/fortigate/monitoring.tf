@@ -12,7 +12,7 @@ locals {
 }
 
 # --- Remote syslog ---------------------------------------------------------
-resource "fortios_log_syslogd_setting" "this" {
+resource "fortios_logsyslogd_setting" "this" {
   for_each = local.syslog_keys
   provider = fortios.by_fortigate[each.key]
 
