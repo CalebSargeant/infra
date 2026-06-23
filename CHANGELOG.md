@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.62.1 (2026-06-23)
+
+### Bug Fixes
+
+- **security-integrations**: Source SONARQUBE_TOKEN from existing defectdojo-api-key vault secret
+  ([#425](https://github.com/CalebSargeant/infra/pull/425),
+  [`473695a`](https://github.com/CalebSargeant/infra/commit/473695a745e539a77bbd1d0d3e4dc7afed77522e))
+
+
 ## v1.62.0 (2026-06-23)
 
 ### Bug Fixes
