@@ -2,6 +2,75 @@
 
 <!-- version list -->
 
+## v1.62.0 (2026-06-23)
+
+### Bug Fixes
+
+- **security-integrations**: Harden sonarqube-sync CronJob to clear the net-new gate
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **security-integrations**: Suppress SonarCloud S5332 on in-cluster http URLs
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`8fae796`](https://github.com/CalebSargeant/infra/commit/8fae796ad5e659d300c09e7f421c4c9a78dd62d2))
+
+- **media**: Bump image tags
+  ([`b19aff5`](https://github.com/CalebSargeant/infra/commit/b19aff5eebf77487e775265f2c456768e538c64d))
+
+### Documentation
+
+- Document sonarqube + backstage on firefly
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- Update sonarqube/backstage for magmamoose.com, RHDH, DefectDojo bridge
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+### Features
+
+- SonarQube + Backstage on firefly (GitOps via Flux)
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **backstage**: Add Backstage portal plumbing (placeholder image)
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **backstage**: GitHub org catalog auto-discovery config
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **backstage**: Switch to Red Hat Developer Hub community + GitHub integration
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **cloudflare**: Tunnel routes for sonarqube + backstage
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **flux**: Register sonarqube + backstage Helm sources and apps
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **security-integrations**: Import SonarQube security findings into DefectDojo
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **sonarqube**: Deploy SonarQube Community Build on firefly
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **sonarqube,backstage**: Move public hosts to magmamoose.com
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+
 ## v1.61.1 (2026-06-20)
 
 ### Bug Fixes
