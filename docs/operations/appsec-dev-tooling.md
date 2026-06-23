@@ -45,3 +45,44 @@ Each oauth2-proxy-protected app must use an app-specific cookie name and a
 host-specific `--cookie-domain`. Do not use `.magmamoose.com` as the cookie
 domain for multiple apps: oauth2-proxy CSRF/session cookies collide across
 subdomains and cause intermittent `Unable to find a valid CSRF token` failures.
+
+## SonarQube and Backstage (firefly)
+
+Two `worker`-pinned apps under `kubernetes/apps/{sonarqube,backstage}`, mirroring
+the Dependency-Track pattern (Helm chart + shared CNPG + external-dns →
+Cloudflare-Tunnel Ingress on `magmamoose.com`).
+
+| App | Host | Namespace | Chart | Notes |
+|-----|------|-----------|-------|-------|
+| SonarQube | `sonarqube.magmamoose.com` | `security` | `sonarqube/sonarqube` (Community Build) | code-quality + security; security findings flow to DefectDojo |
+| Backstage | `backstage.magmamoose.com` | `core` | `rhdh/backstage` (Red Hat Developer Hub community) | prebuilt `quay.io/rhdh-community/rhdh:next-1.10`; catalog + TechDocs + dynamic plugins |
+
+- **Database**: both use the shared CNPG cluster via a `Database` CR
+  (`base/database.yaml`, owner `neondb_owner`) and the `neondb-owner-password` OCI
+  Vault secret — no new Cluster/role. Backstage keeps all plugin data in the single
+  `backstage` DB via `pluginDivisionMode: schema`.
+- **Backstage = Red Hat Developer Hub (community)** — a *prebuilt* Backstage
+  distribution, so there is no custom image to build. The chart's OpenShift-isms are
+  overridden for k3s: `route.enabled: false`, bundled Postgres off (shared CNPG),
+  Lightspeed off, community image pinned, exposed via the standalone Ingress. GitHub
+  integration activates when `backstage-github-token` exists in OCI Vault (optional;
+  Backstage boots without it).
+- **SonarQube → DefectDojo (security findings)**: the `sonarqube-defectdojo-sync`
+  CronJob (`kubernetes/apps/security-integrations`, hourly) triggers DefectDojo's
+  native *SonarQube API Import*, so DefectDojo pulls each project's VULNERABILITY +
+  SECURITY_HOTSPOT findings (security — **not** code smells) and dedupes them against
+  the other tools feeding DefectDojo (Chargate/MegaLinter SARIF, Dependency-Track,
+  Trivy …). Cross-tool dedup is enabled by the DefectDojo bootstrap
+  (`enable_deduplication`). SonarQube's code-quality/coverage stays in SonarQube.
+- **vm.max_map_count**: SonarQube's embedded Elasticsearch needs 524288, set by the
+  chart's privileged `initSysctl` container (fine on the amd64 worker).
+
+### OCI Vault prerequisites (add before/at first reconcile; the jobs retry)
+- `sonarqube-monitoring-passcode` — any strong string; SonarQube never reports ready without it.
+- `sonarqube-defectdojo-token` — a SonarQube user token (My Account → Security → Generate Token) DefectDojo uses to read findings.
+- `backstage-github-token` *(optional)* — a GitHub PAT for Backstage's GitHub integration.
+- `neondb-owner-password` — already exists; reused for both DBs.
+
+### Follow-ups (documented, not yet wired)
+- SonarQube Prometheus metrics: enable `prometheusExporter` + `prometheusMonitoring.podMonitor` (the cluster scrapes all monitors via `…SelectorNilUsesHelmValues: false`).
+- Google SSO for both (cluster oauth2-proxy / OIDC pattern); Backstage Kubernetes plugin (in-cluster SA) and GitHub org catalog discovery.

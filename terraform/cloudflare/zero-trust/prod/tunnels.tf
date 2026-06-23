@@ -292,6 +292,23 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # SonarQube — self-hosted code-quality + security (firefly cluster). DNS is
+    # published by external-dns from the k8s Ingress (kubernetes/apps/sonarqube).
+    # Its security findings are imported into DefectDojo (security-integrations).
+    ingress_rule {
+      hostname = "sonarqube.magmamoose.com"
+      service  = "http://sonarqube-sonarqube.security.svc.cluster.local:9000"
+      origin_request {}
+    }
+
+    # Backstage developer portal (firefly cluster) — Red Hat Developer Hub
+    # community build (kubernetes/apps/backstage). Service is <release>-developer-hub.
+    ingress_rule {
+      hostname = "backstage.magmamoose.com"
+      service  = "http://backstage-developer-hub.core.svc.cluster.local:7007"
+      origin_request {}
+    }
+
     # Cloudflared requires the last rule to be a catch-all with no hostname.
     ingress_rule {
       service = "http_status:404"
