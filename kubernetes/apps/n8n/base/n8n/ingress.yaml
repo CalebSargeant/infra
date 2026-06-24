@@ -11,7 +11,25 @@ metadata:
   labels:
     app: n8n
 spec:
+  # LAN-only, intentionally NOT on the cloudflared tunnel. external-dns
+  # publishes grey-cloud A records (→ the Traefik node IPs) for these hosts,
+  # so they resolve publicly but only route on the LAN — same posture as the
+  # old n8n.sargeant.co. n8n's only auth is basic-auth (admin), so it stays off
+  # the public internet; add a tunnel ingress_rule + Cloudflare Access app
+  # (terraform/cloudflare/zero-trust/prod/tunnels.tf) if off-LAN access is ever
+  # needed.
   rules:
+    - host: n8n.magmamoose.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: n8n
+                port:
+                  number: 5678
+    # Legacy alias kept during the hostname move to magmamoose.com.
     - host: n8n.sargeant.co
       http:
         paths:
@@ -33,6 +51,9 @@ spec:
                 port:
                   number: 5678
   tls:
+    - hosts:
+        - n8n.magmamoose.com
+      secretName: n8n-magmamoose-tls
     - hosts:
         - n8n.sargeant.co
       secretName: n8n-tls
