@@ -2,6 +2,29 @@
 
 <!-- version list -->
 
+## v1.63.0 (2026-06-24)
+
+### Bug Fixes
+
+- **nievah**: Suppress KICS read-secrets findings on ghcr-reader Role
+  ([#426](https://github.com/CalebSargeant/infra/pull/426),
+  [`651baa9`](https://github.com/CalebSargeant/infra/commit/651baa9a666669162e6ec0c5a7530b103297794b))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`1e3b961`](https://github.com/CalebSargeant/infra/commit/1e3b961f2c75fa277eceea658ad70b2d78608fbb))
+
+- **media**: Bump image tags
+  ([`8edf912`](https://github.com/CalebSargeant/infra/commit/8edf912aa70dba3ec21407a5ac002f9a70c5f4ea))
+
+### Features
+
+- **nievah**: Register PR-review GitHub App (Flux + tunnel)
+  ([#426](https://github.com/CalebSargeant/infra/pull/426),
+  [`651baa9`](https://github.com/CalebSargeant/infra/commit/651baa9a666669162e6ec0c5a7530b103297794b))
+
+
 ## v1.62.1 (2026-06-23)
 
 ### Bug Fixes
