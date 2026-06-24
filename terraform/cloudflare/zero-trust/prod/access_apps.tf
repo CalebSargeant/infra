@@ -417,3 +417,50 @@ resource "cloudflare_zero_trust_access_policy" "diatreme_dispatch_bypass" {
     everyone = true
   }
 }
+
+# --- self_hosted: n8n -------------------------------------------------------
+# n8n automation platform (firefly cluster, automation ns), now reachable
+# off-LAN through the firefly cloudflared tunnel (ingress in tunnels.tf) + the
+# proxied CNAME external-dns publishes from kubernetes/apps/n8n's magmamoose
+# Ingress. Access is the ZTNA gate: Caleb-only. This covers the editor/UI, the
+# self-service ops-request form (/form/operations-request), and the approval
+# resume webhooks ($execution.resumeUrl) — so the browser-link approval flow
+# works remotely, with Caleb authenticating via Google SSO. No device-posture
+# `require` — Caleb approves from his phone too (the posture rules need a
+# WARP-enrolled device he doesn't have, so requiring it would be a hard
+# lockout). n8n.sargeant.co stays a LAN-only alias (no tunnel, no Access) for
+# direct on-LAN access if the edge is down.
+#
+# To let other @magmamoose.com staff submit the form, swap the policy's group to
+# cloudflare_zero_trust_access_group.magma_moose_domain (or add a bypass app for
+# the /form + /webhook-waiting paths, like the Zoey Slack webhook bypass above).
+resource "cloudflare_zero_trust_access_application" "n8n" {
+  account_id                = var.account_id
+  name                      = "n8n"
+  type                      = "self_hosted"
+  domain                    = "n8n.magmamoose.com"
+  logo_url                  = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/n8n.svg"
+  tags                      = ["Magma Moose"]
+  app_launcher_visible      = true
+  auto_redirect_to_identity = false
+  session_duration          = "24h"
+
+  allowed_idps = [
+    cloudflare_zero_trust_access_identity_provider.google_workspace.id,
+    cloudflare_zero_trust_access_identity_provider.one_time_pin.id,
+    cloudflare_zero_trust_access_identity_provider.google.id,
+  ]
+}
+
+resource "cloudflare_zero_trust_access_policy" "n8n_caleb" {
+  account_id       = var.account_id
+  application_id   = cloudflare_zero_trust_access_application.n8n.id
+  name             = "Caleb"
+  decision         = "allow"
+  precedence       = 1
+  session_duration = "24h"
+
+  include {
+    group = [cloudflare_zero_trust_access_group.caleb.id]
+  }
+}
