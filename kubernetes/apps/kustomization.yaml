@@ -14,6 +14,7 @@ resources:
   # magmamoose products (open-core; external-repo + image automation)
   - ./caldrith
   - ./diatreme-pro
+  - ./nievah
   # backup
   - ./timemachine
   # miscellaneous (dashboard)
