@@ -13,6 +13,7 @@ resources:
   - ./openclaw
   # magmamoose products (open-core; external-repo + image automation)
   - ./caldrith
+  - ./chargate
   - ./diatreme-pro
   - ./nievah
   # backup
