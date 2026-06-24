@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.65.0 (2026-06-24)
+
+### Features
+
+- **n8n**: Expose n8n via Cloudflare ZTNA (tunnel + Access)
+  ([#431](https://github.com/CalebSargeant/infra/pull/431),
+  [`8bc2eb1`](https://github.com/CalebSargeant/infra/commit/8bc2eb1c0eb7e64fa6d6595cf2eb0ac6f190d7ff))
+
+
 ## v1.64.1 (2026-06-24)
 
 ### Bug Fixes
