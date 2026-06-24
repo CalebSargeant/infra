@@ -110,6 +110,19 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # n8n — self-service automation UI plus the ops-request form and the
+    # approval *resume* webhooks. Now reachable off-LAN via this tunnel and
+    # gated by the Caleb-only Cloudflare Access app (access_apps.tf), so the
+    # browser-link approval pattern ($execution.resumeUrl on n8n.magmamoose.com)
+    # works remotely, not just on the LAN. Pairs with the proxied CNAME
+    # external-dns publishes from kubernetes/apps/n8n (the magmamoose Ingress).
+    # n8n.sargeant.co stays a LAN-only alias (no tunnel, no Access).
+    ingress_rule {
+      hostname = "n8n.magmamoose.com"
+      service  = "http://n8n.automation.svc.cluster.local:5678"
+      origin_request {}
+    }
+
     # Public OpenAI-compatible LiteLLM endpoint for Warp custom inference.
     # Keep the normal litellm.sargeant.co host LAN/VPN-only; Warp's backend
     # rejects private RFC1918 resolutions, so this hostname enters through the
