@@ -38,16 +38,16 @@ inputs = {
   # Subnet configuration
   subnets = {
     edge = {
-      cidr = "192.168.223.0/26"    # .1-.62 for edge/routers (public)
+      cidr = "192.168.223.0/26" # .1-.62 for edge/routers (public)
     }
     app = {
-      cidr = "192.168.223.64/26"   # .65-.126 for app/workload (private)
+      cidr = "192.168.223.64/26" # .65-.126 for app/workload (private)
     }
     data = {
-      cidr = "192.168.223.128/26"  # .129-.190 for database (private)
+      cidr = "192.168.223.128/26" # .129-.190 for database (private)
     }
     spare = {
-      cidr = "192.168.223.192/26"  # .193-.254 reserved (private)
+      cidr = "192.168.223.192/26" # .193-.254 reserved (private)
     }
   }
 
@@ -66,11 +66,25 @@ inputs = {
   # repo doesn't broadcast which IP is whitelisted.
   routeros_api_management_cidrs = local.operator_mgmt_cidrs
 
-  # Remote networks accessible via VPN
+  # Remote networks accessible via VPN. The FortiGate sites reach OCI over the
+  # per-FortiGate BGP S2S tunnels (terraform/oci/.../vpn-fortigate); these rules
+  # send VCN return traffic for the on-prem CIDRs to the DRG.
   remote_networks = {
-    sargeant_onprem = {
+    sargeant_home = {
       cidr        = "192.168.19.0/24"
-      description = "Sargeant on-prem network (MikroTik)"
+      description = "Sargeant home internal LAN (behind FG1/CRS)"
+    }
+    fg1_vlans = {
+      cidr        = "192.168.220.0/23"
+      description = "FortiGate FG1 home VLANs (iot/sargeant/area51/guest/mgmt)"
+    }
+    fg2_lan = {
+      cidr        = "192.168.99.0/24"
+      description = "FortiGate FG2 LAN (reached via FG1)"
+    }
+    fg_transit = {
+      cidr        = "10.19.19.0/29"
+      description = "FortiGate FG1 lifeline transit segment"
     }
     franklinhouse_oci = {
       cidr        = "192.168.72.0/24"
