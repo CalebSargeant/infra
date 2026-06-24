@@ -2,6 +2,29 @@
 
 <!-- version list -->
 
+## v1.64.0 (2026-06-24)
+
+### Bug Fixes
+
+- **chargate/rbac**: Document KICS suppressions for the ghcr-reader Role
+  ([#427](https://github.com/CalebSargeant/infra/pull/427),
+  [`89fad2a`](https://github.com/CalebSargeant/infra/commit/89fad2a06e9bef2fd8491feecccd8ccf6d4d6b1c))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`95273f1`](https://github.com/CalebSargeant/infra/commit/95273f17868b7ee493b773b1f63b65a8aceee8cf))
+
+- **media**: Bump image tags
+  ([`203b4e2`](https://github.com/CalebSargeant/infra/commit/203b4e23828baba19eda252172e01676a18640b6))
+
+### Features
+
+- **chargate**: Deploy the Chargate token broker to firefly
+  ([#427](https://github.com/CalebSargeant/infra/pull/427),
+  [`89fad2a`](https://github.com/CalebSargeant/infra/commit/89fad2a06e9bef2fd8491feecccd8ccf6d4d6b1c))
+
+
 ## v1.63.0 (2026-06-24)
 
 ### Bug Fixes
