@@ -223,6 +223,16 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # Nievah GitHub App webhook — MUST be publicly reachable so GitHub's delivery
+    # IPs can POST to the apex (nievah.magmamoose.com). No Access gate (GitHub
+    # can't authenticate through Access); the webhook secret + HMAC signature
+    # authenticate payloads. Auto-reviews PRs on allowlisted MagmaMoose repos.
+    ingress_rule {
+      hostname = "nievah.magmamoose.com"
+      service  = "http://nievah.nievah.svc.cluster.local:8000"
+      origin_request {}
+    }
+
     # DefectDojo UI — fronted by oauth2-proxy (Google SSO, @magmamoose.com).
     # The proxy forwards to defectdojo-django and bypasses auth for /api/v2 +
     # /webhook (token/secret-authenticated, non-browser clients).

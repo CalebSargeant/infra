@@ -1,0 +1,31 @@
+# Cross-namespace RBAC in flux-system that lets the nievah-namespace
+# ServiceAccount `nievah-ghcr-reader` read the SOPS-managed `ghcr-pull-secret`
+# (which provably pulls ghcr.io/magmamoose/* — Flux's ImageRepository scans the
+# nievah image with it). Paired with the SecretStore + ExternalSecret in the
+# nievah repo's k8s/base/ghcr-pull-secret.yaml. Applied (with the rest of
+# base/nievah) by the prod-nievah-source Flux Kustomization. Mirrors
+# caldrith's ghcr-reader-rbac.yaml.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: nievah-ghcr-reader
+  namespace: flux-system
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["ghcr-pull-secret"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: nievah-ghcr-reader
+  namespace: flux-system
+subjects:
+  - kind: ServiceAccount
+    name: nievah-ghcr-reader
+    namespace: nievah
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: nievah-ghcr-reader
