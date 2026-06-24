@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v1.64.1 (2026-06-24)
+
+### Bug Fixes
+
+- **n8n**: Resolve OOM crashloop and move to n8n.magmamoose.com
+  ([#430](https://github.com/CalebSargeant/infra/pull/430),
+  [`7c94b23`](https://github.com/CalebSargeant/infra/commit/7c94b23be96bf598cdc7aac1894f942502472560))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`5b6950f`](https://github.com/CalebSargeant/infra/commit/5b6950f361be6c7c42f23024b8cc29c568542f88))
+
+
 ## v1.64.0 (2026-06-24)
 
 ### Bug Fixes
