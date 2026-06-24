@@ -14,6 +14,11 @@ rules:
   - apiGroups: [""]
     resources: ["secrets"]
     resourceNames: ["ghcr-pull-secret"]
+    # Reading this one secret is the whole point: Flux's ImageRepository needs
+    # the ghcr-pull-secret to scan ghcr.io/magmamoose/* for the nievah image.
+    # Already scoped to a single named secret (resourceNames above), so the
+    # KICS "read secrets" findings are expected and acceptable here.
+    # kics-scan ignore-line
     verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
