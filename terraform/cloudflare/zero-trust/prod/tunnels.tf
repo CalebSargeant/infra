@@ -233,12 +233,15 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
-    # Chargate token broker — MUST be publicly reachable so GitHub Actions runners
-    # can POST their OIDC token to /token (api.chargate.magmamoose.com). No Access
-    # gate (runners can't authenticate through Access); the broker verifies each
-    # caller's OIDC token itself and mints a repo-scoped Chargate[bot] token.
+    # Chargate token broker (firefly cluster) — GitHub Actions runners POST their
+    # OIDC token to chargate.magmamoose.com/token to mint a repo-scoped
+    # Chargate[bot] token. Registered as a self_hosted Access app in access_apps.tf
+    # with a BYPASS policy (runners can't carry an Access cookie); the broker
+    # verifies each caller's OIDC token itself, so unauthenticated edge
+    # reachability is safe — same posture as the Zoey Slack / Diatreme Dispatch
+    # bypasses. DNS is published by external-dns from the chargate k8s Ingress.
     ingress_rule {
-      hostname = "api.chargate.magmamoose.com"
+      hostname = "chargate.magmamoose.com"
       service  = "http://chargate.chargate.svc.cluster.local:8000"
       origin_request {}
     }

@@ -417,3 +417,34 @@ resource "cloudflare_zero_trust_access_policy" "diatreme_dispatch_bypass" {
     everyone = true
   }
 }
+
+# --- self_hosted: Chargate token broker (bypass — OIDC-gated) ---------------
+# chargate.magmamoose.com is the Chargate token broker (firefly cluster — ingress
+# in tunnels.tf): any consumer's GitHub Actions runner POSTs its OIDC token to
+# /token to mint a repo-scoped Chargate[bot] installation token. Registering it as
+# a ZTNA app puts it in the Access dashboard (logging + WAF), but the policy is
+# BYPASS — runners can't carry an Access cookie, and the broker authenticates each
+# caller itself (issuer-pinned OIDC verify + the repository claim), so
+# unauthenticated edge reachability is safe. Same posture as the Zoey Slack webhook
+# and Diatreme Dispatch bypasses.
+resource "cloudflare_zero_trust_access_application" "chargate_broker" {
+  account_id                = var.account_id
+  name                      = "Chargate token broker"
+  type                      = "self_hosted"
+  domain                    = "chargate.magmamoose.com"
+  tags                      = ["Magma Moose"]
+  app_launcher_visible      = false
+  auto_redirect_to_identity = false
+}
+
+resource "cloudflare_zero_trust_access_policy" "chargate_broker_bypass" {
+  account_id     = var.account_id
+  application_id = cloudflare_zero_trust_access_application.chargate_broker.id
+  name           = "Runner bypass (OIDC-gated)"
+  decision       = "bypass"
+  precedence     = 1
+
+  include {
+    everyone = true
+  }
+}
