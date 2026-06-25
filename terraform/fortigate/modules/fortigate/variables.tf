@@ -53,6 +53,11 @@ variable "fortigates" {
       dhcp_start = string
       dhcp_end   = string
       trusted    = optional(bool, false) # may initiate to all other VLANs + interconnect
+
+      # VRRP (optional): both FGs advertise the same vrip per VLAN as a resilient
+      # default gateway; higher vrrp_priority = master. Null vrip skips VRRP.
+      vrip          = optional(string)
+      vrrp_priority = optional(number, 100)
     }))
 
     # Point-to-point /30 to the other FortiGate.

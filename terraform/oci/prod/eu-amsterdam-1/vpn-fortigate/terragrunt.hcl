@@ -30,12 +30,27 @@ locals {
   region_vars      = read_terragrunt_config(find_in_parent_folders("region.hcl"))
   environment_vars = read_terragrunt_config(find_in_parent_folders("environment.hcl"))
 
-  # FortiGate WAN public IPs (placeholders — TEST-NET-1). Override via env until
-  # they live in OCI Vault.
-  fgt1_wan_ip = get_env("FORTIGATE_FGT1_WAN_IP", "192.0.2.10")
-  fgt2_wan_ip = get_env("FORTIGATE_FGT2_WAN_IP", "192.0.2.11")
+  # FG1 (Sargeant House, Venray) WAN public IP is recon-grade — it reveals the
+  # operator's residential ISP/location, so (like ../vpn) it's sourced from OCI
+  # Vault `infra-recon-blockers` (vault-prod) and never inlined in this PUBLIC
+  # repo. Fetched at parse time via the operator's ~/.oci/config.
+  recon_blockers_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aa7mytuezgibzn4g36jxupsgy57zl4372uq47atgfra2ka"
+  recon_blockers = jsondecode(run_cmd(
+    "--terragrunt-quiet",
+    "bash", "-c",
+    "oci secrets secret-bundle get --secret-id ${local.recon_blockers_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
+  ))
+  fgt1_wan_ip = local.recon_blockers.vpn_peers.home_wan_peer_ip
 
-  # PSK per FortiGate — MUST match terraform/fortigate/prod fortigate_oci_vpn_psks.
+  # FG2 is behind Starlink CGNAT — its public IPv4 is DYNAMIC. OCI requires an
+  # IPv4 CPE, so we pin FG2's current egress IP here (sourced from the recon
+  # vault, never inlined). FRAGILE: when Starlink reassigns FG2's public
+  # IP, update `vpn_peers.fg2_starlink_public_ip` in the recon vault and re-apply
+  # (the CPE ip_address is immutable, so the apply recreates the CPE + connection).
+  fgt2_wan_ip = local.recon_blockers.vpn_peers.fg2_starlink_public_ip
+
+  # PSK per FortiGate — null lets OCI auto-generate and store in the module vault;
+  # read back to configure the FortiGate side. (No PSK inlined in this PUBLIC repo.)
   fgt1_psk = get_env("FORTIGATE_FGT1_OCI_PSK", "")
   fgt2_psk = get_env("FORTIGATE_FGT2_OCI_PSK", "")
 }
@@ -67,10 +82,12 @@ inputs = {
   #   FGT1 (AS 65010): 169.254.22.0/24   FGT2 (AS 65020): 169.254.23.0/24
   vpn_connections = {
     fortigate1 = {
-      peer_ip                 = local.fgt1_wan_ip
-      cpe_device_shape_id     = null
-      type                    = "other"
-      static_routes           = [] # BGP-routed
+      peer_ip             = local.fgt1_wan_ip
+      cpe_device_shape_id = null
+      type                = "other"
+      # OCI requires >=1 static route even for BGP tunnels (it's ignored while the
+      # tunnels run routing=BGP). Listed = the on-prem nets reachable behind FG1/FG2.
+      static_routes           = ["192.168.19.0/24", "192.168.99.0/24", "192.168.220.0/23"]
       routing_type            = "BGP"
       ike_version             = "V2"
       bgp_asn                 = 65010
@@ -82,11 +99,13 @@ inputs = {
       shared_secret_tunnel2   = local.fgt1_psk != "" ? local.fgt1_psk : null
     }
 
+    # FG2 (Starlink) — CGNAT IPv4 CPE; FG2 is the sole initiator (OCI can't reach a
+    # CGNAT'd peer, so oracle-initiation is forced RESPONDER_ONLY out-of-band).
     fortigate2 = {
       peer_ip                 = local.fgt2_wan_ip
       cpe_device_shape_id     = null
       type                    = "other"
-      static_routes           = []
+      static_routes           = ["192.168.99.0/24", "192.168.19.0/24", "192.168.220.0/23"]
       routing_type            = "BGP"
       ike_version             = "V2"
       bgp_asn                 = 65020

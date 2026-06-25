@@ -41,10 +41,18 @@ inputs = {
   # Ubuntu 22.04 for ARM
   image_ocid              = "ocid1.image.oc1.eu-amsterdam-1.aaaaaaaahc3kbflujx4g536l4yuzzy7udc6ltwlbt7iqbkt33i6zx62yy7va"
 
-  # Create two servers, one per fault domain
+  # Create two servers, one per fault domain. These are the "native-cloud"
+  # worker tier: arm64 free-tier VMs that join firefly as k3s agents and host
+  # always-online, public-facing workloads + the postgres-oci CNPG cluster.
+  #
+  # node_name registers them as ff-oci1/ff-oci2 (the ff-<type><n> standard)
+  # instead of the OS hostname. node_labels bakes the tier label at join so it
+  # survives node re-registration; the node-role.kubernetes.io/worker label is
+  # applied post-join with kubectl (kubelet can't self-set kubernetes.io labels).
+  # See docs/reference/cluster-topology.md.
   servers = {
-    "fd1" = { fault_domain = 0, private_ip = "192.168.223.71" }  # Fault Domain 1
-    "fd2" = { fault_domain = 1, private_ip = "192.168.223.72" }  # Fault Domain 2
+    "fd1" = { fault_domain = 0, private_ip = "192.168.223.71", node_name = "ff-oci1", node_labels = ["topology.sargeant.co/tier=native-cloud"] }  # Fault Domain 1
+    "fd2" = { fault_domain = 1, private_ip = "192.168.223.72", node_name = "ff-oci2", node_labels = ["topology.sargeant.co/tier=native-cloud"] }  # Fault Domain 2
   }
 
   # Join the existing firefly k3s cluster as agents. The actual node-token
