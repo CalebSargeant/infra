@@ -2,6 +2,49 @@
 
 <!-- version list -->
 
+## v1.67.0 (2026-06-25)
+
+### Bug Fixes
+
+- **n8n-mcp**: Suppress SonarCloud S5332 on in-cluster n8n API URL
+  ([#434](https://github.com/CalebSargeant/infra/pull/434),
+  [`f76be2f`](https://github.com/CalebSargeant/infra/commit/f76be2fccdbbfdc5aa5e9e90b539dce84a8d43ea))
+
+### Chores
+
+- **deps**: Bump actions/setup-python from 6.2.0 to 6.3.0
+  ([#428](https://github.com/CalebSargeant/infra/pull/428),
+  [`c566011`](https://github.com/CalebSargeant/infra/commit/c566011a0a8f58e1dfe31d41964ed31c1372c8c7))
+
+- **deps**: Bump magmamoose/chargate/.github/workflows/gate.yml
+  ([#429](https://github.com/CalebSargeant/infra/pull/429),
+  [`8e3ba9b`](https://github.com/CalebSargeant/infra/commit/8e3ba9bfdf9907e02dc2c9cb2221f39c0a010b9c))
+
+- **media**: Bump image tags
+  ([`607f7b1`](https://github.com/CalebSargeant/infra/commit/607f7b115c694be4cea1ea87ce18fb5f41d0db18))
+
+- **media**: Bump image tags
+  ([`b5d4846`](https://github.com/CalebSargeant/infra/commit/b5d4846d5904ff9ac2c3fa5402e60f82667e7989))
+
+### Features
+
+- **fortigate**: Shared dual-gateway VLANs + VRRP across both 40Fs
+  ([#424](https://github.com/CalebSargeant/infra/pull/424),
+  [`9b94bf5`](https://github.com/CalebSargeant/infra/commit/9b94bf5509c9b933c8e387321d5213bebe5151c5))
+
+- **n8n-mcp**: Serve token-gated remote MCP at n8n.magmamoose.com/mcp
+  ([#434](https://github.com/CalebSargeant/infra/pull/434),
+  [`f76be2f`](https://github.com/CalebSargeant/infra/commit/f76be2fccdbbfdc5aa5e9e90b539dce84a8d43ea))
+
+- **oci**: Native-cloud worker tier (ff-oci1/ff-oci2) + postgres-oci CNPG
+  ([#435](https://github.com/CalebSargeant/infra/pull/435),
+  [`0483ad4`](https://github.com/CalebSargeant/infra/commit/0483ad40bf2efe717a0705b3afee065a660c5cf0))
+
+- **oci**: Per-FortiGate site-to-site VPN to OCI DRG
+  ([#432](https://github.com/CalebSargeant/infra/pull/432),
+  [`1b224ad`](https://github.com/CalebSargeant/infra/commit/1b224add9326787e20c3d3e879c50439fad6fed2))
+
+
 ## v1.66.0 (2026-06-25)
 
 ### Features
