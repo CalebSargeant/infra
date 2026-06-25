@@ -7,6 +7,7 @@
     ansible_network_os: community.routeros.routeros
     ansible_ssh_user: admin
     ansible_ssh_private_key_file: "{{ ansible_ssh_private_key_file }}"
+    # chr_admin_password: supply at runtime (vaulted var / 1Password / -e). Never hardcode — PUBLIC repo.
   tasks:
     - name: Run Expect script dynamically
       local_action:
@@ -18,7 +19,7 @@
             set timeout 20
 
             # Start the SSH session
-            spawn ssh -i {{ ansible_ssh_private_key_file }} {{ ansible_ssh_user }}@{{ ansible_host }} -o StrictHostKeyChecking=no
+            spawn ssh -i {{ ansible_ssh_private_key_file }} {{ ansible_ssh_user }}@{{ ansible_host }} -o "StrictHostKeyChecking no"
 
             # Wait for the license prompt and respond "n"
             expect "Do you want to see the software license?*"
@@ -26,11 +27,11 @@
 
             # Wait for the password prompt and send new password
             expect "new password>"
-            send "123\r"
+            send "{{ chr_admin_password }}\r"
 
             # Confirm the new password
             expect "repeat new password>"
-            send "123\r"
+            send "{{ chr_admin_password }}\r"
 
             # Change system identity
             expect "] >"
