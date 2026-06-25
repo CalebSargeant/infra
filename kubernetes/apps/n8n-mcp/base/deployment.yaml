@@ -45,7 +45,7 @@ spec:
             # Internal n8n — the MCP appends /api/v1 itself. Keeps n8n's REST API
             # in-cluster only; n8n.magmamoose.com/api stays Caleb-SSO-gated.
             - name: N8N_API_URL
-              value: "http://n8n.automation.svc.cluster.local:5678"
+              value: "http://n8n.automation.svc.cluster.local:5678" # NOSONAR S5332 - in-cluster east-west; n8n's REST API is HTTP-only and never leaves the pod network
             # SSRF guard. This gate also applies to N8N_API_URL, and n8n resolves
             # to a private ClusterIP (10.x), so it MUST be `permissive` (allow
             # private IPs) — `strict`/`moderate` both block RFC1918 and would fail
