@@ -1,0 +1,43 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: renovate
+  namespace: automation
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: renovate
+      version: "46.200.2"
+      sourceRef:
+        kind: HelmRepository
+        name: renovate
+        namespace: flux-system
+      interval: 10m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    cronjob:
+      # Self-hosted Renovate runs on a schedule (vs the hosted GitHub App).
+      schedule: "0 */6 * * *"
+    # RENOVATE_TOKEN (GitHub PAT) comes from the renovate ExternalSecret (OCI Vault).
+    existingSecret: renovate
+    renovate:
+      # Autodiscover repos under your orgs. Renovate's flux/kubernetes/terraform/
+      # docker/github-actions managers are on by default — which is exactly the
+      # coverage Dependabot lacks here.
+      config: |
+        {
+          "platform": "github",
+          "autodiscover": true,
+          "autodiscoverFilter": ["CalebSargeant/*", "MagmaMoose/*"],
+          "onboarding": true,
+          "dependencyDashboard": true,
+          "prHourlyLimit": 4
+        }
+    nodeSelector:
+      node-role.kubernetes.io/worker: ""
