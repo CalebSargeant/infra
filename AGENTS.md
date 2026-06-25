@@ -220,6 +220,12 @@ Only spin up an additional `Cluster` when:
 - Creating a separate environment (dev, staging, testing)
 - Running an isolated experiment that must not touch shared production data
 - Explicitly requested by the user for environment separation
+- A distinct **failure domain / hardware tier** needs its own DB — e.g.
+  `postgres-oci` (`kubernetes/infrastructure/services/stack/postgres-oci/`,
+  ns `database-oci`), the always-online cluster pinned to the OCI native-cloud
+  nodes for public-facing apps. Pin a CNPG cluster via the `Cluster`'s own
+  `spec.affinity.nodeSelector` — the node-selectors kustomize **component does
+  not patch the `Cluster` CR**.
 
 ### Adding a Database to the Shared Cluster
 
@@ -245,6 +251,28 @@ spec:
 - Known outstanding migration: Home Assistant (`kubernetes/apps/homeassistant/base/homeassistant/daemonset.yaml`) — marked `# todo: move from sqlite to postgres`
 - When migrating, provision a new database in the shared cluster (see pattern above), update the app's connection env vars to point at `postgres-rw.database.svc.cluster.local`, and remove any SQLite volume mounts
 - If the app doesn't natively support PostgreSQL, check for a supported adapter/plugin before assuming SQLite is the only option
+
+## Native-cloud (OCI) worker tier
+
+`ff-oci1` / `ff-oci2` are OCI free-tier **arm64** VMs that join firefly as k3s
+agents and form the **native-cloud** tier — a more reliable home for
+always-online, public-facing workloads (GitHub-App backends) and the
+`postgres-oci` DB. Full detail: `docs/reference/cluster-topology.md`. Gotchas:
+
+- **Provisioned in Terraform, not Ansible.** `terraform/oci/modules/server` +
+  the `server` leaf define the VMs and their cloud-init k3s agent join. The
+  leaf's `servers` map sets `node_name` (registers as `ff-ociN`) and
+  `node_labels` (the tier label). Editing the **module** means Atlantis won't
+  autoplan — run `atlantis plan -p oci-prod-eu-amsterdam-1-server`. Changing
+  `node_name`/`node_labels` **replaces** the VM (cloud-init hash changes).
+- **Tier label:** `topology.sargeant.co/tier=native-cloud`, set at join. The
+  `node-role.kubernetes.io/worker` label is applied post-join with `kubectl`
+  (the kubelet may **not** self-register `kubernetes.io`-namespaced labels —
+  NodeRestriction), so don't put it in `node_labels`.
+- **Pin apps** with `components: [ ../../../../components/node-selectors/native-cloud ]`
+  (or inline `nodeSelector` for non-app-template HelmReleases). **Verify the
+  image is arm64/multi-arch first** — several custom images are amd64-only.
+- **Label-only, no taint** (no toleration churn across DaemonSets).
 
 ## When Making Changes
 
