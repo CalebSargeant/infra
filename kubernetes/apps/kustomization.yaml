@@ -57,6 +57,8 @@ resources:
   - ./node-tuning
   # progressive delivery
   - ./flagger
+  # identity (SSO)
+  - ./authentik
   # security
   - ./defectdojo
   - ./dependency-track

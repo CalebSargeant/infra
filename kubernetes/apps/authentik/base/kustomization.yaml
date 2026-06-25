@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# The HelmRelease/secret/Ingress run in `authentik`; the CNPG Database CR lives in
+# `database`. Each resource carries its own metadata.namespace.
+resources:
+  - namespace.yaml
+  - database.yaml
+  - externalsecret.yaml
+  - helmrelease.yaml
+  - ingress.yaml
