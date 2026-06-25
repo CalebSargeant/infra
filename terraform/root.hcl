@@ -32,7 +32,12 @@ remote_state {
   backend = "gcs"
   config = {
     bucket   = "${local.company}-${local.environment}-terraform-state"
-    prefix   = "${path_relative_to_include()}"
+    # path_relative_to_include() returns OS-native separators; on Windows that
+    # yields backslashes, which become a DIFFERENT GCS object prefix than the
+    # forward-slash prefix used on Mac/Linux/Atlantis — silently splitting state
+    # into an empty parallel tree (every resource shows as "to create"). Force
+    # forward slashes so state is identical across platforms. No-op on *nix.
+    prefix   = replace(path_relative_to_include(), "\\", "/")
     project  = "magmamoose-terraform"
     location = "europe-west4"
   }
