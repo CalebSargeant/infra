@@ -15,11 +15,11 @@ You will need to install python3 on your server (target machine/device), which i
 ### Modify the vars.yml file
 You will find the vars files in the `vars/` folder of this project, which contains all the variables necessary to modify for you to execute the Ansible Playbook. Please note that you will need to create your own vars files to match the missing (personal/private) variables and point to them in the vars section of your playbooks.
 
-### Modify the hosts.yml file
-You will find the hosts.yml file in the root of this project. Change `x.x.x.x` to the IP Address of the server you would like to deploy to. The hosts.yml file serves as just an example and, just like your vars files, I recommend you create your own hosts file for this repo.
+### Modify the hosts.yaml file
+You will find the `hosts.yaml` file in the `ansible/` folder of this project. Change the host IP addresses to those of the servers you would like to deploy to. The `hosts.yaml` file serves as just an example and, just like your vars files, I recommend you create your own hosts file for this repo.
 
 ## Usage
-I recommend you `cd` into the root of this project, so that you can just execute `ansible-playbook -i hosts.yml playbook.yml`.
+I recommend you `cd` into the `ansible/` folder of this project, so that you can just execute `ansible-playbook -i hosts.yaml playbook.yml`.
 
 ## License
 [MIT License](https://github.com/CalebSargeant/ansible/blob/master/LICENSE)

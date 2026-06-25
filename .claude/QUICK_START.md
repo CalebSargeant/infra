@@ -12,7 +12,7 @@ flux reconcile source git flux-system -n flux-system
 flux reconcile kustomization <name> -n flux-system
 
 # Ansible (always --check first)
-cd ansible && ansible-playbook -i hosts.yml <playbook>.yml [--check]
+cd ansible && ansible-playbook -i hosts.yaml <playbook>.yml [--check]
 
 # Pre-commit (must pass)
 pre-commit run --all-files
