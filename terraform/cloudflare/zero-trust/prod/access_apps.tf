@@ -553,3 +553,44 @@ resource "cloudflare_zero_trust_access_policy" "n8n_webhook_bypass" {
     everyone = true
   }
 }
+
+# --- self_hosted: n8n-mcp (service-token-gated path on the n8n host) ---------
+# The n8n-mcp remote MCP server (kubernetes/apps/n8n-mcp) — lets Claude Code /
+# Claude Desktop build & edit n8n workflows via prompts. It runs in the firefly
+# cluster and talks to n8n over the cluster network
+# (n8n.automation.svc:5678/api/v1), so n8n's own REST API NEVER goes public — it
+# stays behind the Caleb SSO gate on the n8n.magmamoose.com apex. This carves out
+# the /mcp PATH on that same host (most-specific match wins, like the /form +
+# /webhook bypasses above) and gates it with a Cloudflare Access service token
+# (non-human identity). Defence in depth:
+#   edge   — CF Access service token (CF-Access-Client-Id / -Secret)  ← this app
+#   app    — the MCP's own bearer (AUTH_TOKEN, Authorization: Bearer …)
+#   origin — n8n's X-N8N-API-KEY (in-cluster only, never leaves the namespace)
+# No human SSO policy: a browser can't speak the MCP protocol anyway, the only
+# client is the machine token. NOTE: CF Access path-matching is a prefix, so this
+# also gates n8n's own native MCP-trigger production URLs (/mcp/<id>); the
+# /webhook/mcp/<id> trigger form is unaffected (covered by the /webhook bypass).
+# The firefly tunnel routes n8n.magmamoose.com ^/mcp to the MCP (tunnels.tf).
+resource "cloudflare_zero_trust_access_application" "n8n_mcp" {
+  account_id                = var.account_id
+  name                      = "n8n-mcp"
+  type                      = "self_hosted"
+  domain                    = "n8n.magmamoose.com/mcp"
+  logo_url                  = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/n8n.svg"
+  tags                      = ["Magma Moose"]
+  app_launcher_visible      = false
+  auto_redirect_to_identity = false
+  session_duration          = "24h"
+}
+
+resource "cloudflare_zero_trust_access_policy" "n8n_mcp_service_token" {
+  account_id     = var.account_id
+  application_id = cloudflare_zero_trust_access_application.n8n_mcp.id
+  name           = "n8n-mcp service token"
+  decision       = "non_identity"
+  precedence     = 1
+
+  include {
+    service_token = [cloudflare_zero_trust_access_service_token.n8n_mcp.id]
+  }
+}

@@ -110,6 +110,21 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # n8n-mcp — the remote MCP endpoint (kubernetes/apps/n8n-mcp) served at the
+    # /mcp path on this SAME host, so Claude can build/edit n8n workflows without a
+    # separate subdomain. cloudflared evaluates top-to-bottom, so this MUST precede
+    # the n8n catch-all below: ^/mcp(/?$) → the MCP service; everything else (UI,
+    # /api, /form, and n8n's own MCP-trigger /mcp/<id> URLs, which carry a subpath)
+    # falls through to n8n. Gated by the n8n-mcp CF Access service token
+    # (access_apps.tf → n8n_mcp); the MCP reaches n8n in-cluster so n8n's REST API
+    # stays private.
+    ingress_rule {
+      hostname = "n8n.magmamoose.com"
+      path     = "^/mcp/?$"
+      service  = "http://n8n-mcp.automation.svc.cluster.local:3000"
+      origin_request {}
+    }
+
     # n8n — self-service automation UI plus the ops-request form and the
     # approval *resume* webhooks. Now reachable off-LAN via this tunnel and
     # gated by the Caleb-only Cloudflare Access app (access_apps.tf), so the

@@ -10,6 +10,7 @@ resources:
   - ./litellm
   - ./mikrotik-minder
   - ./n8n
+  - ./n8n-mcp
   - ./openclaw
   # magmamoose products (open-core; external-repo + image automation)
   - ./caldrith
