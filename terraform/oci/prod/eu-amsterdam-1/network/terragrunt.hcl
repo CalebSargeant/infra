@@ -15,11 +15,16 @@ locals {
   # IP a hacker should target. Stored as JSON: `["A.B.C.D/32", ...]`.
   operator_mgmt_cidrs_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aaqvgllhc77ptjy7npdstq6jp67j5auvhn4y4keiqcqhwa"
 
-  operator_mgmt_cidrs = jsondecode(run_cmd(
+  # Direct `oci` call + base64decode in HCL (no `bash -c`) so this parses on
+  # Windows/PowerShell, which has no bash. Pattern: cloudflare/zero-trust/prod.
+  operator_mgmt_cidrs = jsondecode(base64decode(trimspace(run_cmd(
     "--terragrunt-quiet",
-    "bash", "-c",
-    "oci secrets secret-bundle get --secret-id ${local.operator_mgmt_cidrs_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
-  ))
+    "oci", "secrets", "secret-bundle", "get",
+    "--secret-id", local.operator_mgmt_cidrs_secret_ocid,
+    "--region", "eu-amsterdam-1",
+    "--query", "data.\"secret-bundle-content\".content",
+    "--raw-output"
+  ))))
 }
 
 inputs = {

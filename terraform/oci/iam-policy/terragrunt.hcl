@@ -9,11 +9,16 @@ terraform {
 locals {
   recon_blockers_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aa7mytuezgibzn4g36jxupsgy57zl4372uq47atgfra2ka"
 
-  recon_blockers = jsondecode(run_cmd(
+  # Direct `oci` call + base64decode in HCL (no `bash -c`) so this parses on
+  # Windows/PowerShell, which has no bash. Pattern: cloudflare/zero-trust/prod.
+  recon_blockers = jsondecode(base64decode(trimspace(run_cmd(
     "--terragrunt-quiet",
-    "bash", "-c",
-    "oci secrets secret-bundle get --secret-id ${local.recon_blockers_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
-  ))
+    "oci", "secrets", "secret-bundle", "get",
+    "--secret-id", local.recon_blockers_secret_ocid,
+    "--region", "eu-amsterdam-1",
+    "--query", "data.\"secret-bundle-content\".content",
+    "--raw-output"
+  ))))
 
   franklinhouse_tenancy_ocid = local.recon_blockers.iam_peers.franklinhouse_tenancy_ocid
 }
