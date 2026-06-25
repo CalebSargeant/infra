@@ -13,8 +13,12 @@ spec:
     name: flux-system
   timeout: 2m
   wait: true
-  # Needs external-secrets + the OCI Vault ClusterSecretStore up first so the
-  # n8n-mcp Secret (auth-token, n8n-api-key) materialises before the pod starts.
+  # n8n-mcp only needs external-secrets + the OCI Vault ClusterSecretStore (both
+  # in the controllers tier) to materialise its Secret (auth-token, n8n-api-key);
+  # it uses NO database, so it depends on infrastructure-CONTROLLERS, not
+  # -services. The services tier goes NotReady whenever an OCI-pinned resource on
+  # the (not-yet-joined) native-cloud nodes can't schedule — e.g. postgres-oci —
+  # which would otherwise gate this app indefinitely.
   dependsOn:
-    - name: infrastructure-services
+    - name: infrastructure-controllers
 # No `decryption` block: the only secrets are an ExternalSecret (OCI Vault).
