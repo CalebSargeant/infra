@@ -2,6 +2,56 @@
 
 <!-- version list -->
 
+## v1.68.0 (2026-06-25)
+
+### Bug Fixes
+
+- **flagger**: Suppress SonarCloud S5332 on in-cluster metrics URL
+  ([#419](https://github.com/CalebSargeant/infra/pull/419),
+  [`6fe82f4`](https://github.com/CalebSargeant/infra/commit/6fe82f4e19281c8cee2d20c84c0e5f9e97c1e289))
+
+- **renovate**: Suppress KICS false-positive on ESO secretKey field name (GHAS #1429)
+  ([#419](https://github.com/CalebSargeant/infra/pull/419),
+  [`6fe82f4`](https://github.com/CalebSargeant/infra/commit/6fe82f4e19281c8cee2d20c84c0e5f9e97c1e289))
+
+### Chores
+
+- **deps**: Bump actions/checkout from 6.0.3 to 7.0.0
+  ([#413](https://github.com/CalebSargeant/infra/pull/413),
+  [`62c721e`](https://github.com/CalebSargeant/infra/commit/62c721eec8dc03698a9efa3c8788785e10b37970))
+
+- **deps**: Bump magmamoose/release-runner from 1.30.0 to 2.0.0
+  ([#416](https://github.com/CalebSargeant/infra/pull/416),
+  [`ca32408`](https://github.com/CalebSargeant/infra/commit/ca324086916748703f44bd02ef8b133484023f7f))
+
+### Features
+
+- Progressive delivery (Flagger), Renovate, and image-signature verification
+  ([#419](https://github.com/CalebSargeant/infra/pull/419),
+  [`6fe82f4`](https://github.com/CalebSargeant/infra/commit/6fe82f4e19281c8cee2d20c84c0e5f9e97c1e289))
+
+- Register flagger/renovate/kyverno-policies + docs
+  ([#419](https://github.com/CalebSargeant/infra/pull/419),
+  [`6fe82f4`](https://github.com/CalebSargeant/infra/commit/6fe82f4e19281c8cee2d20c84c0e5f9e97c1e289))
+
+- **flagger**: Flux-native progressive-delivery controller
+  ([#419](https://github.com/CalebSargeant/infra/pull/419),
+  [`6fe82f4`](https://github.com/CalebSargeant/infra/commit/6fe82f4e19281c8cee2d20c84c0e5f9e97c1e289))
+
+- **kyverno-policies**: Cosign image-verification scaffold (Audit)
+  ([#419](https://github.com/CalebSargeant/infra/pull/419),
+  [`6fe82f4`](https://github.com/CalebSargeant/infra/commit/6fe82f4e19281c8cee2d20c84c0e5f9e97c1e289))
+
+- **renovate**: Self-hosted dependency automation
+  ([#419](https://github.com/CalebSargeant/infra/pull/419),
+  [`6fe82f4`](https://github.com/CalebSargeant/infra/commit/6fe82f4e19281c8cee2d20c84c0e5f9e97c1e289))
+
+### Refactoring
+
+- Update release runner to diatreme action ([#416](https://github.com/CalebSargeant/infra/pull/416),
+  [`ca32408`](https://github.com/CalebSargeant/infra/commit/ca324086916748703f44bd02ef8b133484023f7f))
+
+
 ## v1.67.0 (2026-06-25)
 
 ### Bug Fixes
