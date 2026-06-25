@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.71.3 (2026-06-25)
+
+### Bug Fixes
+
+- **terraform**: Force forward-slash terragrunt state prefix on Windows
+  ([#439](https://github.com/CalebSargeant/infra/pull/439),
+  [`9b6a896`](https://github.com/CalebSargeant/infra/commit/9b6a896d1828a6789fcebaca72c5670cdf071baf))
+
+
 ## v1.71.2 (2026-06-25)
 
 ### Bug Fixes
