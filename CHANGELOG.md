@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v1.71.0 (2026-06-25)
+
+### Features
+
+- Continuous + runtime security (Trivy Operator + Falco)
+  ([#421](https://github.com/CalebSargeant/infra/pull/421),
+  [`0e77cbe`](https://github.com/CalebSargeant/infra/commit/0e77cbe2769995cbf916bc8b413811e72fe155ba))
+
+- Register trivy-operator + falco + docs ([#421](https://github.com/CalebSargeant/infra/pull/421),
+  [`0e77cbe`](https://github.com/CalebSargeant/infra/commit/0e77cbe2769995cbf916bc8b413811e72fe155ba))
+
+- **falco**: EBPF runtime threat detection ([#421](https://github.com/CalebSargeant/infra/pull/421),
+  [`0e77cbe`](https://github.com/CalebSargeant/infra/commit/0e77cbe2769995cbf916bc8b413811e72fe155ba))
+
+- **trivy-operator**: Continuous workload vulnerability scanning
+  ([#421](https://github.com/CalebSargeant/infra/pull/421),
+  [`0e77cbe`](https://github.com/CalebSargeant/infra/commit/0e77cbe2769995cbf916bc8b413811e72fe155ba))
+
+
 ## v1.70.0 (2026-06-25)
 
 ### Bug Fixes
