@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v1.69.0 (2026-06-25)
+
+### Bug Fixes
+
+- **devlake**: Suppress KICS false-positive on ESO secretKey field name (GHAS #1430)
+  ([#420](https://github.com/CalebSargeant/infra/pull/420),
+  [`ff23e0a`](https://github.com/CalebSargeant/infra/commit/ff23e0af2b852a5a6341f14459a7d3e53528b67d))
+
+### Features
+
+- Register devlake + DORA docs ([#420](https://github.com/CalebSargeant/infra/pull/420),
+  [`ff23e0a`](https://github.com/CalebSargeant/infra/commit/ff23e0af2b852a5a6341f14459a7d3e53528b67d))
+
+- **devlake**: DORA metrics platform (Apache DevLake)
+  ([#420](https://github.com/CalebSargeant/infra/pull/420),
+  [`ff23e0a`](https://github.com/CalebSargeant/infra/commit/ff23e0af2b852a5a6341f14459a7d3e53528b67d))
+
+
 ## v1.68.0 (2026-06-25)
 
 ### Bug Fixes
