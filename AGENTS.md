@@ -182,6 +182,7 @@ LiteLLM (`kubernetes/apps/litellm`) intentionally separates Claude Code OAuth pa
 - The self-hosted Ollama provider is represented as `ollama-lan`: a selectorless Service plus an Endpoints object pointing at `192.168.19.69:11434`, with `ollama.sargeant.co` / `.local` ingress. Do not manage a manual EndpointSlice for it; Kubernetes mirrors the Endpoints object into EndpointSlices, and Traefik needs the Endpoints backend to avoid `503 no available server`. Its bearer token must live in OCI Vault as `litellm-ollama-lan-api-key`; never commit the value. The local `qwen2.5-coder:7b-instruct-q4_K_M` route is OpenAI-chat-compatible through LiteLLM, but keep `supports_function_calling: false` until live probes return structured OpenAI `tool_calls`; it has been observed returning tool-call-shaped JSON in message content instead.
 - DefectDojo (`kubernetes/apps/defectdojo`) uses the shared CNPG cluster and the shared authless Valkey service. The upstream chart still unconditionally mounts `defectdojo-valkey-specific:valkey-password` into Django/Celery and `defectdojo:METRICS_HTTP_AUTH_PASSWORD` into nginx, even when bundled Valkey and metrics are disabled. Keep `valkey-password-empty.yaml` as an empty non-credential Secret, and keep `defectdojo-metrics-http-auth-password` in OCI Vault via `externalsecret-app.yaml`; do not enable chart-generated Valkey secrets because an auto-generated password breaks the authless shared broker.
 - AppSec/dev tooling public hostnames are on `magmamoose.com`: `pullrequests.magmamoose.com`, `defectdojo.magmamoose.com`, `dependencytrack.magmamoose.com`, `dependencytrack-api.magmamoose.com`, and `safesettings.magmamoose.com`. Keep app-level URLs and Cloudflare Tunnel ingress rules (`terraform/cloudflare/zero-trust/prod/tunnels.tf`) in sync. Terraform owns tunnel CNAMEs only for hosts without Kubernetes Ingresses (`pullrequests`, `defectdojo`); Ingress-backed hosts (`dependencytrack`, `dependencytrack-api`, `safesettings`) must carry external-dns annotations pointing at the firefly tunnel target so external-dns does not publish private Traefik IPs. Dependency-Track needs both the frontend and API host because the SPA calls the API directly from the browser.
+- SonarQube (`kubernetes/apps/sonarqube`) and Backstage (`kubernetes/apps/backstage`) run on the `worker` node on **magmamoose.com** (`sonarqube.magmamoose.com`, `backstage.magmamoose.com`), backed by the shared CNPG `neondb_owner` database (a `Database` CR; no new Cluster). **Backstage is Red Hat Developer Hub community** (`rhdh/backstage` chart + prebuilt `quay.io/rhdh-community/rhdh` image — no custom image build); the chart's OpenShift defaults are overridden for k3s (`route.enabled: false`, bundled Postgres off → shared CNPG, Lightspeed off, community tag pinned). **SonarQube security findings flow to DefectDojo**: the `sonarqube-defectdojo-sync` CronJob in `kubernetes/apps/security-integrations` runs DefectDojo's native *SonarQube API Import* (VULNERABILITY + SECURITY_HOTSPOT only — not code smells), and the DefectDojo bootstrap (`kubernetes/apps/defectdojo`) sets `enable_deduplication` so those dedupe against Chargate/MegaLinter/Dependency-Track findings. OCI Vault prereqs: `sonarqube-monitoring-passcode` (readiness), `sonarqube-defectdojo-token` (DefectDojo→SonarQube), optional `backstage-github-token`.
 
 ## Integration Points & Dependencies
 
@@ -219,6 +220,12 @@ Only spin up an additional `Cluster` when:
 - Creating a separate environment (dev, staging, testing)
 - Running an isolated experiment that must not touch shared production data
 - Explicitly requested by the user for environment separation
+- A distinct **failure domain / hardware tier** needs its own DB — e.g.
+  `postgres-oci` (`kubernetes/infrastructure/services/stack/postgres-oci/`,
+  ns `database-oci`), the always-online cluster pinned to the OCI native-cloud
+  nodes for public-facing apps. Pin a CNPG cluster via the `Cluster`'s own
+  `spec.affinity.nodeSelector` — the node-selectors kustomize **component does
+  not patch the `Cluster` CR**.
 
 ### Adding a Database to the Shared Cluster
 
@@ -244,6 +251,28 @@ spec:
 - Known outstanding migration: Home Assistant (`kubernetes/apps/homeassistant/base/homeassistant/daemonset.yaml`) — marked `# todo: move from sqlite to postgres`
 - When migrating, provision a new database in the shared cluster (see pattern above), update the app's connection env vars to point at `postgres-rw.database.svc.cluster.local`, and remove any SQLite volume mounts
 - If the app doesn't natively support PostgreSQL, check for a supported adapter/plugin before assuming SQLite is the only option
+
+## Native-cloud (OCI) worker tier
+
+`ff-oci1` / `ff-oci2` are OCI free-tier **arm64** VMs that join firefly as k3s
+agents and form the **native-cloud** tier — a more reliable home for
+always-online, public-facing workloads (GitHub-App backends) and the
+`postgres-oci` DB. Full detail: `docs/reference/cluster-topology.md`. Gotchas:
+
+- **Provisioned in Terraform, not Ansible.** `terraform/oci/modules/server` +
+  the `server` leaf define the VMs and their cloud-init k3s agent join. The
+  leaf's `servers` map sets `node_name` (registers as `ff-ociN`) and
+  `node_labels` (the tier label). Editing the **module** means Atlantis won't
+  autoplan — run `atlantis plan -p oci-prod-eu-amsterdam-1-server`. Changing
+  `node_name`/`node_labels` **replaces** the VM (cloud-init hash changes).
+- **Tier label:** `topology.sargeant.co/tier=native-cloud`, set at join. The
+  `node-role.kubernetes.io/worker` label is applied post-join with `kubectl`
+  (the kubelet may **not** self-register `kubernetes.io`-namespaced labels —
+  NodeRestriction), so don't put it in `node_labels`.
+- **Pin apps** with `components: [ ../../../../components/node-selectors/native-cloud ]`
+  (or inline `nodeSelector` for non-app-template HelmReleases). **Verify the
+  image is arm64/multi-arch first** — several custom images are amd64-only.
+- **Label-only, no taint** (no toleration churn across DaemonSets).
 
 ## When Making Changes
 

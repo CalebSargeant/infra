@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n-mcp
+  namespace: automation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: n8n-mcp
+  template:
+    metadata:
+      labels:
+        app: n8n-mcp
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: n8n-mcp
+          # Remote MCP server (HTTP transport) exposing n8n's node catalogue +
+          # workflow/execution management tools to Claude Code / Claude Desktop.
+          # It reaches n8n over the cluster network (N8N_API_URL below), so n8n's
+          # REST API itself never leaves the cluster — only the /mcp path on
+          # n8n.magmamoose.com is published, behind a CF Access service token
+          # (zero-trust/.../access_apps.tf → n8n_mcp) plus the AUTH_TOKEN bearer.
+          # Pinned; bump via PR (no image automation on this auth boundary).
+          image: ghcr.io/czlonkowski/n8n-mcp:2.60.0
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: MCP_MODE
+              value: "http"
+            - name: PORT
+              value: "3000"
+            - name: HOST
+              value: "0.0.0.0"
+            # Behind the cloudflared tunnel (a reverse proxy) — trust the forwarded
+            # headers so the MCP derives its public URL/host correctly.
+            - name: TRUST_PROXY
+              value: "1"
+            - name: BASE_URL
+              value: "https://n8n.magmamoose.com"
+            # Internal n8n — the MCP appends /api/v1 itself. Keeps n8n's REST API
+            # in-cluster only; n8n.magmamoose.com/api stays Caleb-SSO-gated.
+            - name: N8N_API_URL
+              value: "http://n8n.automation.svc.cluster.local:5678" # NOSONAR S5332 - in-cluster east-west; n8n's REST API is HTTP-only and never leaves the pod network
+            # SSRF guard. This gate also applies to N8N_API_URL, and n8n resolves
+            # to a private ClusterIP (10.x), so it MUST be `permissive` (allow
+            # private IPs) — `strict`/`moderate` both block RFC1918 and would fail
+            # every management call. Cloud-metadata (169.254.169.254) stays blocked.
+            - name: WEBHOOK_SECURITY_MODE
+              value: "permissive"
+            # App-layer bearer every MCP client must send (Authorization: Bearer …),
+            # behind the CF Access service token at the edge. Source: OCI Vault.
+            - name: AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: n8n-mcp
+                  key: auth-token
+            # n8n Public API key (n8n Settings → n8n API). Enables the 16 workflow/
+            # execution management tools. In-cluster use only. Source: OCI Vault.
+            - name: N8N_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: n8n-mcp
+                  key: n8n-api-key
+          resources:
+            # Small Node service with a bundled (read-only) node-docs DB. No CPU
+            # limit (avoids false CFS-throttle alerts); request set to real usage.
+            requests:
+              cpu: 25m
+              memory: 192Mi
+            limits:
+              memory: 512Mi
+          readinessProbe:
+            # /health needs the bearer, so probe the TCP socket instead (cf. browserless).
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL

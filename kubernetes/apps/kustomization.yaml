@@ -10,10 +10,13 @@ resources:
   - ./litellm
   - ./mikrotik-minder
   - ./n8n
+  - ./n8n-mcp
   - ./openclaw
   # magmamoose products (open-core; external-repo + image automation)
   - ./caldrith
+  - ./chargate
   - ./diatreme-pro
+  - ./nievah
   # backup
   - ./timemachine
   # miscellaneous (dashboard)
@@ -57,6 +60,9 @@ resources:
   - ./gatekeeper
   - ./kubescape
   - ./security-integrations
+  - ./sonarqube
+  # developer portal
+  - ./backstage
   # external-repo apps (workload manifests live in their own GitHub repos;
   # each dir holds only the in-cluster Flux plumbing — source, image
   # automation, namespace, and the Flux Kustomization that pulls the workload)

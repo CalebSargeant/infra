@@ -1,0 +1,97 @@
+---
+# postgres-oci — a SECOND CloudNativePG cluster, pinned to the OCI native-cloud
+# worker tier (ff-oci1, ff-oci2). Deliberate, documented exception to the
+# "one shared postgres" rule (COMMON_MISTAKES #3): this is a separate failure
+# domain for always-online, public-facing workloads (e.g. GitHub-App backends),
+# with its own credentials and backup namespace. The shared `postgres` cluster
+# in the `database` ns is unchanged. See the ADR
+# .claude/decisions/2026-06-25-native-cloud-worker-tier.md.
+#
+# Managed by the SAME existing cloudnative-pg operator — no new controller.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres-oci
+  namespace: database-oci
+spec:
+  # Two instances, one per OCI node (see affinity below). A primary + 1 hot
+  # standby with Postgres streaming replication — node-local storage is fine
+  # because CNPG replicates at the database layer.
+  instances: 2
+
+  # Pin to the OCI tier. CRITICAL: a CNPG Cluster is NOT a Deployment/StatefulSet,
+  # so the kustomize node-selectors component does NOT reach it — placement MUST
+  # be set here in spec.affinity. nodeSelector keeps every instance on an OCI
+  # node; required pod anti-affinity on hostname spreads the two instances across
+  # ff-oci1 and ff-oci2 (no two replicas on the same node).
+  affinity:
+    nodeSelector:
+      topology.sargeant.co/tier: native-cloud
+    enablePodAntiAffinity: true
+    podAntiAffinityType: required
+    topologyKey: kubernetes.io/hostname
+
+  # CNPG's default operand image is multi-arch (incl. arm64), so no imageName
+  # pin is needed for the arm64 OCI nodes.
+
+  postgresql:
+    parameters:
+      max_connections: "200"
+      shared_buffers: "256MB"
+      effective_cache_size: "1GB"
+      maintenance_work_mem: "64MB"
+      checkpoint_completion_target: "0.9"
+      wal_buffers: "16MB"
+      default_statistics_target: "100"
+      random_page_cost: "1.1"
+      effective_io_concurrency: "200"
+      work_mem: "1310kB"
+      huge_pages: "off"
+      min_wal_size: "1GB"
+      max_wal_size: "4GB"
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 2Gi
+
+  storage:
+    size: 10Gi
+    storageClass: local-path
+
+  # Empty cluster for now (no apps pinned yet — infra plumbing only). CNPG
+  # auto-generates the `app` owner credentials into the secret `postgres-oci-app`.
+  # When apps are migrated to this tier, add a postgresql.cnpg.io Database CR
+  # (spec.cluster.name: postgres-oci) per app and a dedicated managed role whose
+  # password lives in OCI Vault (clone the externalsecret pattern), rather than
+  # reusing the shared neondb_owner.
+  bootstrap:
+    initdb:
+      database: app
+      owner: app
+
+  monitoring:
+    enablePodMonitor: true
+
+  backup:
+    barmanObjectStore:
+      # Same OCI Object Storage bucket as the shared cluster, but a distinct
+      # serverName so the two clusters' base backups + WAL never collide
+      # (objects land under s3://postgres-backups/postgres-oci/).
+      destinationPath: s3://postgres-backups/
+      serverName: postgres-oci
+      endpointURL: https://axn3gwpaabzc.compat.objectstorage.eu-amsterdam-1.oraclecloud.com
+      s3Credentials:
+        accessKeyId:
+          name: postgres-backup-oci
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: postgres-backup-oci
+          key: ACCESS_SECRET_KEY
+      wal:
+        compression: gzip
+        maxParallel: 2
+    retentionPolicy: "30d"

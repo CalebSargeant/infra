@@ -1,0 +1,11 @@
+---
+# Dedicated namespace for the OCI-pinned "native-cloud" Postgres tier
+# (postgres-oci CNPG cluster). Kept separate from `database` so the two
+# clusters' PodMonitors / alerts / Database CRs don't collide, and so the
+# always-online public tier is a clean failure domain of its own.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: database-oci
+  labels:
+    goldilocks.fairwinds.com/enabled: "true"

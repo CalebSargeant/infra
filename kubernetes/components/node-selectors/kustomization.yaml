@@ -22,6 +22,17 @@ patches:
     target:
       labelSelector: "node-selector=worker"
 
+  # "native-cloud" = the OCI free-tier ARM worker tier (ff-oci1, ff-oci2).
+  # An ADDITIONAL label on top of the worker role, so public-facing always-online
+  # workloads can target OCI specifically. See docs/reference/cluster-topology.md.
+  - patch: |
+      - op: add
+        path: /spec/template/spec/nodeSelector
+        value:
+          topology.sargeant.co/tier: native-cloud
+    target:
+      labelSelector: "node-selector=native-cloud"
+
   # Raspberry Pi nodes (legacy alias for `system`)
   - patch: |
       - op: add
