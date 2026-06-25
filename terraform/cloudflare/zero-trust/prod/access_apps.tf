@@ -417,3 +417,180 @@ resource "cloudflare_zero_trust_access_policy" "diatreme_dispatch_bypass" {
     everyone = true
   }
 }
+
+# --- self_hosted: n8n -------------------------------------------------------
+# n8n automation platform (firefly cluster, automation ns), now reachable
+# off-LAN through the firefly cloudflared tunnel (ingress in tunnels.tf) + the
+# proxied CNAME external-dns publishes from kubernetes/apps/n8n's magmamoose
+# Ingress. Access is the ZTNA gate: Caleb-only. This covers the editor/UI, the
+# self-service ops-request form (/form/operations-request), and the approval
+# resume webhooks ($execution.resumeUrl) — so the browser-link approval flow
+# works remotely, with Caleb authenticating via Google SSO. No device-posture
+# `require` — Caleb approves from his phone too (the posture rules need a
+# WARP-enrolled device he doesn't have, so requiring it would be a hard
+# lockout). n8n.sargeant.co stays a LAN-only alias (no tunnel, no Access) for
+# direct on-LAN access if the edge is down.
+#
+# The /form, /webhook, and /webhook-waiting paths are carved out below by
+# bypass apps so non-Caleb requesters can submit the form and email/Teams/Slack
+# approval-link clicks resume without a Google-SSO interstitial. To let other
+# @magmamoose.com staff submit the form OR access the editor/UI, swap this
+# policy's group to cloudflare_zero_trust_access_group.magma_moose_domain.
+resource "cloudflare_zero_trust_access_application" "n8n" {
+  account_id                = var.account_id
+  name                      = "n8n"
+  type                      = "self_hosted"
+  domain                    = "n8n.magmamoose.com"
+  logo_url                  = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/n8n.svg"
+  tags                      = ["Magma Moose"]
+  app_launcher_visible      = true
+  auto_redirect_to_identity = false
+  session_duration          = "24h"
+
+  allowed_idps = [
+    cloudflare_zero_trust_access_identity_provider.google_workspace.id,
+    cloudflare_zero_trust_access_identity_provider.one_time_pin.id,
+    cloudflare_zero_trust_access_identity_provider.google.id,
+  ]
+}
+
+resource "cloudflare_zero_trust_access_policy" "n8n_caleb" {
+  account_id       = var.account_id
+  application_id   = cloudflare_zero_trust_access_application.n8n.id
+  name             = "Caleb"
+  decision         = "allow"
+  precedence       = 1
+  session_duration = "24h"
+
+  include {
+    group = [cloudflare_zero_trust_access_group.caleb.id]
+  }
+}
+
+# Bypass apps for n8n's public form + webhook paths. Cloudflare Access matches
+# the most-specific path first, so requests under /form/, /webhook/, and
+# /webhook-waiting/ hit these bypass apps instead of the Caleb gate above.
+# Three reasons we need them:
+#   1. /form/<id>         — the self-service ops-request form (and any future
+#                           Form Triggers) is submitted by non-technical users
+#                           who don't have Cloudflare Access. Without bypass,
+#                           the form URL forces Google SSO and they can't pass.
+#   2. /webhook-waiting/  — the Wait-node resume URL ($execution.resumeUrl),
+#                           clicked from email/Teams/Slack approval messages.
+#                           Bypassing makes the click an instant resume instead
+#                           of a Google-SSO interstitial; security relies on the
+#                           per-execution unique resume token (UUID).
+#   3. /webhook/<id>      — for any future Webhook-trigger workflows. n8n's
+#                           webhook authentication options (header/JWT/HMAC) are
+#                           configured per-node and authenticate the caller
+#                           themselves; same model as the Zoey/Diatreme bypasses.
+# The n8n editor/UI/API stay behind the Caleb gate via the apex domain match.
+# Three separate apps (one per path) — provider v4 deprecated multi-domain apps
+# and the existing Zoey/Diatreme bypasses follow this same one-app-per-path
+# pattern.
+resource "cloudflare_zero_trust_access_application" "n8n_form" {
+  account_id                = var.account_id
+  name                      = "n8n — Form trigger"
+  type                      = "self_hosted"
+  domain                    = "n8n.magmamoose.com/form/"
+  tags                      = ["Magma Moose"]
+  app_launcher_visible      = false
+  auto_redirect_to_identity = false
+}
+
+resource "cloudflare_zero_trust_access_policy" "n8n_form_bypass" {
+  account_id     = var.account_id
+  application_id = cloudflare_zero_trust_access_application.n8n_form.id
+  name           = "Form bypass"
+  decision       = "bypass"
+  precedence     = 1
+
+  include {
+    everyone = true
+  }
+}
+
+resource "cloudflare_zero_trust_access_application" "n8n_webhook_waiting" {
+  account_id                = var.account_id
+  name                      = "n8n — Wait resume webhook"
+  type                      = "self_hosted"
+  domain                    = "n8n.magmamoose.com/webhook-waiting/"
+  tags                      = ["Magma Moose"]
+  app_launcher_visible      = false
+  auto_redirect_to_identity = false
+}
+
+resource "cloudflare_zero_trust_access_policy" "n8n_webhook_waiting_bypass" {
+  account_id     = var.account_id
+  application_id = cloudflare_zero_trust_access_application.n8n_webhook_waiting.id
+  name           = "Wait resume bypass"
+  decision       = "bypass"
+  precedence     = 1
+
+  include {
+    everyone = true
+  }
+}
+
+resource "cloudflare_zero_trust_access_application" "n8n_webhook" {
+  account_id                = var.account_id
+  name                      = "n8n — Webhook trigger"
+  type                      = "self_hosted"
+  domain                    = "n8n.magmamoose.com/webhook/"
+  tags                      = ["Magma Moose"]
+  app_launcher_visible      = false
+  auto_redirect_to_identity = false
+}
+
+resource "cloudflare_zero_trust_access_policy" "n8n_webhook_bypass" {
+  account_id     = var.account_id
+  application_id = cloudflare_zero_trust_access_application.n8n_webhook.id
+  name           = "Webhook bypass"
+  decision       = "bypass"
+  precedence     = 1
+
+  include {
+    everyone = true
+  }
+}
+
+# --- self_hosted: n8n-mcp (service-token-gated path on the n8n host) ---------
+# The n8n-mcp remote MCP server (kubernetes/apps/n8n-mcp) — lets Claude Code /
+# Claude Desktop build & edit n8n workflows via prompts. It runs in the firefly
+# cluster and talks to n8n over the cluster network
+# (n8n.automation.svc:5678/api/v1), so n8n's own REST API NEVER goes public — it
+# stays behind the Caleb SSO gate on the n8n.magmamoose.com apex. This carves out
+# the /mcp PATH on that same host (most-specific match wins, like the /form +
+# /webhook bypasses above) and gates it with a Cloudflare Access service token
+# (non-human identity). Defence in depth:
+#   edge   — CF Access service token (CF-Access-Client-Id / -Secret)  ← this app
+#   app    — the MCP's own bearer (AUTH_TOKEN, Authorization: Bearer …)
+#   origin — n8n's X-N8N-API-KEY (in-cluster only, never leaves the namespace)
+# No human SSO policy: a browser can't speak the MCP protocol anyway, the only
+# client is the machine token. NOTE: CF Access path-matching is a prefix, so this
+# also gates n8n's own native MCP-trigger production URLs (/mcp/<id>); the
+# /webhook/mcp/<id> trigger form is unaffected (covered by the /webhook bypass).
+# The firefly tunnel routes n8n.magmamoose.com ^/mcp to the MCP (tunnels.tf).
+resource "cloudflare_zero_trust_access_application" "n8n_mcp" {
+  account_id                = var.account_id
+  name                      = "n8n-mcp"
+  type                      = "self_hosted"
+  domain                    = "n8n.magmamoose.com/mcp"
+  logo_url                  = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/n8n.svg"
+  tags                      = ["Magma Moose"]
+  app_launcher_visible      = false
+  auto_redirect_to_identity = false
+  session_duration          = "24h"
+}
+
+resource "cloudflare_zero_trust_access_policy" "n8n_mcp_service_token" {
+  account_id     = var.account_id
+  application_id = cloudflare_zero_trust_access_application.n8n_mcp.id
+  name           = "n8n-mcp service token"
+  decision       = "non_identity"
+  precedence     = 1
+
+  include {
+    service_token = [cloudflare_zero_trust_access_service_token.n8n_mcp.id]
+  }
+}

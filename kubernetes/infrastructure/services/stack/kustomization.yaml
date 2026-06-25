@@ -6,6 +6,8 @@ resources:
   - external-dns-cloudflare
   - external-dns-mikrotik
   - postgres
+  # Second CNPG cluster pinned to the OCI native-cloud tier (ff-oci1/ff-oci2).
+  - postgres-oci
   - mariadb
   - valkey
   # Shared Privado VPN gateway (pod-gateway). Restored: creds now in a SOPS secret

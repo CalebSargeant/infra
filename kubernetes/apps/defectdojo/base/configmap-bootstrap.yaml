@@ -74,6 +74,9 @@ data:
         # ── GitHub: flip the flag so the UI shows issue links the sync records.
         # No GITHUB_Conf — the sync pushes issues directly (multi-server, OCI Vault).
         settings_obj.enable_github = True
+        # Cross-tool deduplication: collapse the same finding reported by multiple
+        # tools (SonarQube, Chargate/MegaLinter SARIF, Dependency-Track, Trivy, ...).
+        settings_obj.enable_deduplication = True
         settings_obj.save()
 
         # ── Route import/SLA events to Slack (merge, don't clobber 'alert') ───────
