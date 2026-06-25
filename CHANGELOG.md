@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.71.1 (2026-06-25)
+
+### Bug Fixes
+
+- **n8n-mcp**: Depend on infrastructure-controllers, not -services
+  ([#436](https://github.com/CalebSargeant/infra/pull/436),
+  [`53dca84`](https://github.com/CalebSargeant/infra/commit/53dca84cab75b611deabceb4d553084e4a0bebed))
+
+
 ## v1.71.0 (2026-06-25)
 
 ### Features
