@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.66.0 (2026-06-25)
+
+### Features
+
+- **cf-access**: Bypass /form, /webhook, /webhook-waiting on n8n Access app
+  ([#433](https://github.com/CalebSargeant/infra/pull/433),
+  [`f9f1e31`](https://github.com/CalebSargeant/infra/commit/f9f1e317b07d6cf6b49614d64de8395ade634994))
+
+
 ## v1.65.0 (2026-06-24)
 
 ### Features
