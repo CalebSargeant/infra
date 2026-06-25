@@ -51,6 +51,8 @@ resources:
   - ./thanos-compactor
   - ./thanos-query
   - ./thanos-store
+  # delivery metrics (DORA)
+  - ./devlake
   # platform (node-level tuning)
   - ./node-tuning
   # progressive delivery
