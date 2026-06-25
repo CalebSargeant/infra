@@ -176,11 +176,29 @@ spec:
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
+  name: flagger
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://flagger.app
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
   name: falcosecurity
   namespace: flux-system
 spec:
   interval: 1h
   url: https://falcosecurity.github.io/charts
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: renovate
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://docs.renovatebot.com/helm-charts
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
