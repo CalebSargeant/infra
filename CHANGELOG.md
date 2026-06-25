@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.71.2 (2026-06-25)
+
+### Bug Fixes
+
+- **security**: Remove leaked chr.pem key, drop stale inventory, clear secret-scan false positives
+  ([#438](https://github.com/CalebSargeant/infra/pull/438),
+  [`39b3900`](https://github.com/CalebSargeant/infra/commit/39b39009a8150e27085f0f5d9f50009cf0a0ce95))
+
+- **terragrunt**: Call oci CLI directly in run_cmd so OCI Vault fetches work on Windows
+  ([#437](https://github.com/CalebSargeant/infra/pull/437),
+  [`c291aca`](https://github.com/CalebSargeant/infra/commit/c291aca10ba611742d344074c1fa1cd89dde395c))
+
+
 ## v1.71.1 (2026-06-25)
 
 ### Bug Fixes
