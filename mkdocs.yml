@@ -49,6 +49,8 @@ nav:
       - Single-Hook Implementation: guides/single-hook-implementation.md
   - Operations:
       - AppSec and Dev Tooling: operations/appsec-dev-tooling.md
+      - Delivery & Automation: operations/delivery-and-automation.md
+      - DORA Metrics (DevLake): operations/dora-devlake.md
       - Identity (Authentik): operations/identity-authentik.md
       - DefectDojo: operations/defectdojo.md
       - Observability Stack: operations/observability-stack.md

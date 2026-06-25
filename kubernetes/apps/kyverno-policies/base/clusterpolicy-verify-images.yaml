@@ -1,0 +1,48 @@
+---
+# Cosign image-signature verification at admission (SLSA stage-5 close), via the
+# already-installed Kyverno.
+#
+# SCAFFOLD — deliberately non-disruptive until you confirm how images are signed:
+#   - validationFailureAction: Audit  -> reports only, never blocks a Pod.
+#   - required: false                 -> unsigned images PASS; only a present-but-
+#                                        invalid signature is flagged.
+# Scoped to your own images. Flip to `required: true` + `Enforce` once Diatreme
+# cosign-signs release images and you've verified the keyless identity below
+# (issuer/subject) matches the signing workflow.
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-image-signatures
+  annotations:
+    policies.kyverno.io/title: Verify image signatures (cosign keyless)
+    policies.kyverno.io/category: Supply Chain / SLSA
+    policies.kyverno.io/description: >-
+      Keyless cosign verification of ghcr.io/calebsargeant images against the
+      GitHub Actions OIDC identity. Audit + non-required scaffold; tune to your
+      signing method, then enforce.
+spec:
+  validationFailureAction: Audit
+  background: false
+  failurePolicy: Ignore
+  webhookTimeoutSeconds: 30
+  rules:
+    - name: verify-ghcr-calebsargeant
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      verifyImages:
+        - imageReferences:
+            - "ghcr.io/calebsargeant/*"
+          required: false
+          mutateDigest: false
+          verifyDigest: false
+          attestors:
+            - count: 1
+              entries:
+                - keyless:
+                    subject: "https://github.com/CalebSargeant/*"
+                    issuer: "https://token.actions.githubusercontent.com"
+                    rekor:
+                      url: "https://rekor.sigstore.dev"

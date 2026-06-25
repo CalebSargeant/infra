@@ -12,6 +12,7 @@ resources:
   - ./n8n
   - ./n8n-mcp
   - ./openclaw
+  - ./renovate
   # magmamoose products (open-core; external-repo + image automation)
   - ./caldrith
   - ./chargate
@@ -50,8 +51,12 @@ resources:
   - ./thanos-compactor
   - ./thanos-query
   - ./thanos-store
+  # delivery metrics (DORA)
+  - ./devlake
   # platform (node-level tuning)
   - ./node-tuning
+  # progressive delivery
+  - ./flagger
   # identity (SSO)
   - ./authentik
   # security
@@ -59,6 +64,7 @@ resources:
   - ./dependency-track
   - ./gatekeeper
   - ./kubescape
+  - ./kyverno-policies
   - ./security-integrations
   - ./sonarqube
   # developer portal
