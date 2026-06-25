@@ -14,37 +14,34 @@
 #      and stash in OCI Vault. The client_secret is only readable at
 #      create-time; rotating means destroy + recreate the resource.
 #
-# Currently no service tokens defined — leaving this file as the scaffold
-# and pattern reference. Add one when there's a real consumer (e.g.
-# uptime monitoring hitting overseerr.sargeant.co).
+# --- n8n-mcp -----------------------------------------------------------------
+# Non-human identity for the n8n-mcp remote MCP endpoint (the /mcp path on
+# n8n.magmamoose.com, kubernetes/apps/n8n-mcp). Claude Code / Claude Desktop send
+# this token's CF-Access-Client-Id / CF-Access-Client-Secret headers (alongside
+# the MCP's own Authorization: Bearer) so requests pass Cloudflare Access without
+# a human SSO flow. Attached to the non_identity policy on the n8n_mcp Access app
+# (access_apps.tf). The n8n REST API itself is NOT exposed — the MCP reaches it
+# in-cluster — so this token only unlocks the MCP, which still enforces its bearer.
+#
+# After the first apply, pull the credentials and stash them in OCI Vault +
+# the Claude client config (the secret is only readable at create-time; rotating
+# means destroy + recreate this resource):
+#   terragrunt output -raw service_token_n8n_mcp_client_id
+#   terragrunt output -raw service_token_n8n_mcp_client_secret
+resource "cloudflare_zero_trust_access_service_token" "n8n_mcp" {
+  account_id = var.account_id
+  name       = "n8n-mcp"
+  # v4 only accepts these enum values: "8760h" (1y), "17520h" (2y), "43800h"
+  # (5y), "87600h" (10y), or "forever". 1y is a sane default; recreate to rotate.
+  duration = "8760h"
+}
 
-# Example (commented out — un-comment + adapt when you have a real consumer):
-#
-# resource "cloudflare_zero_trust_access_service_token" "uptime_kuma" {
-#   account_id = var.account_id
-#   name       = "uptime-kuma"
-#   # Default duration is "8760h" (1y). For tighter rotation set e.g. "720h" (30d).
-#   duration   = "8760h"
-# }
-#
-# output "service_token_uptime_kuma_client_id" {
-#   value     = cloudflare_zero_trust_access_service_token.uptime_kuma.client_id
-#   sensitive = true
-# }
-#
-# output "service_token_uptime_kuma_client_secret" {
-#   value     = cloudflare_zero_trust_access_service_token.uptime_kuma.client_secret
-#   sensitive = true
-# }
-#
-# Then on the app's policy:
-#   resource "cloudflare_zero_trust_access_policy" "overseerr_uptime" {
-#     account_id     = var.account_id
-#     application_id = cloudflare_zero_trust_access_application.overseerr.id
-#     name           = "Uptime probes"
-#     decision       = "non_identity"
-#     precedence     = 100
-#     include {
-#       service_token = [cloudflare_zero_trust_access_service_token.uptime_kuma.id]
-#     }
-#   }
+output "service_token_n8n_mcp_client_id" {
+  value     = cloudflare_zero_trust_access_service_token.n8n_mcp.client_id
+  sensitive = true
+}
+
+output "service_token_n8n_mcp_client_secret" {
+  value     = cloudflare_zero_trust_access_service_token.n8n_mcp.client_secret
+  sensitive = true
+}
