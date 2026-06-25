@@ -62,11 +62,13 @@ resources:
   # security
   - ./defectdojo
   - ./dependency-track
+  - ./falco
   - ./gatekeeper
   - ./kubescape
   - ./kyverno-policies
   - ./security-integrations
   - ./sonarqube
+  - ./trivy-operator
   # developer portal
   - ./backstage
   # external-repo apps (workload manifests live in their own GitHub repos;

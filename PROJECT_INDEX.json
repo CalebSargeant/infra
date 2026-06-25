@@ -85,6 +85,7 @@
                 "dependency-track",
                 "devlake",
                 "excalidraw",
+                "falco",
                 "flagger",
                 "flaresolverr",
                 "fluent-bit",
@@ -118,6 +119,7 @@
                 "thanos-query",
                 "thanos-store",
                 "timemachine",
+                "trivy-operator",
                 "wordpress"
             ],
             "depends_on": [

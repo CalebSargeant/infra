@@ -1,0 +1,36 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: trivy-operator
+  namespace: trivy-system
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: trivy-operator
+      version: "0.33.2"
+      sourceRef:
+        kind: HelmRepository
+        name: aqua
+        namespace: flux-system
+      interval: 10m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    # Continuously scans running workloads (images/configs/secrets) and writes
+    # VulnerabilityReport/ConfigAuditReport CRDs + Prometheus metrics.
+    # Skip the cluster-plumbing namespaces.
+    excludeNamespaces: "kube-system,kube-public,kube-node-lease,flux-system"
+    # Operator on the amd64 worker; scanner Jobs likewise.
+    nodeSelector:
+      node-role.kubernetes.io/worker: ""
+    operator:
+      scanJobNodeSelector:
+        node-role.kubernetes.io/worker: ""
+    # The cluster's kube-prometheus-stack scrapes all monitors.
+    serviceMonitor:
+      enabled: true

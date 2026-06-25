@@ -167,6 +167,15 @@ spec:
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
+  name: aqua
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://aquasecurity.github.io/helm-charts
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
   name: goauthentik
   namespace: flux-system
 spec:
@@ -190,6 +199,15 @@ metadata:
 spec:
   interval: 1h
   url: https://flagger.app
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: falcosecurity
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://falcosecurity.github.io/charts
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
