@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v1.70.0 (2026-06-25)
+
+### Bug Fixes
+
+- **authentik**: Suppress KICS false-positives on ESO secretKey field names (GHAS #1431-1434)
+  ([#422](https://github.com/CalebSargeant/infra/pull/422),
+  [`8983623`](https://github.com/CalebSargeant/infra/commit/8983623ff0fa91b16cabca3c2721fdee4925a3da))
+
+### Features
+
+- Register authentik + tunnel route + docs ([#422](https://github.com/CalebSargeant/infra/pull/422),
+  [`8983623`](https://github.com/CalebSargeant/infra/commit/8983623ff0fa91b16cabca3c2721fdee4925a3da))
+
+- **authentik**: Central identity provider (SSO foundation)
+  ([#422](https://github.com/CalebSargeant/infra/pull/422),
+  [`8983623`](https://github.com/CalebSargeant/infra/commit/8983623ff0fa91b16cabca3c2721fdee4925a3da))
+
+
 ## v1.69.0 (2026-06-25)
 
 ### Bug Fixes
