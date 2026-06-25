@@ -48,24 +48,25 @@ inputs = {
 
   # VPN connections
   vpn_connections = {
-    # Sargeant on-prem MikroTik
-    sargeant_onprem = {
-      peer_ip             = local.home_wan_peer_ip
-      cpe_device_shape_id = null  # Generic/Other
-      type                = "mikrotik"
-      static_routes       = ["192.168.19.0/24"]
-      routing_type        = "BGP"
-      ike_version         = "V2"
-      # BGP configuration - using OCI-supported ranges (169.254.21.0/24 or 169.254.22.0/24)
-      bgp_asn                  = 65001  # Customer ASN (same as AWS)
-      bgp_customer_ip_tunnel1  = "169.254.21.2/30"   # Customer (MikroTik) side
-      bgp_oracle_ip_tunnel1    = "169.254.21.1/30"   # Oracle side
-      bgp_customer_ip_tunnel2  = "169.254.21.6/30"   # Customer (MikroTik) side
-      bgp_oracle_ip_tunnel2    = "169.254.21.5/30"   # Oracle side
-      # PSKs will be auto-generated and stored in OCI Vault
-      shared_secret_tunnel1 = null
-      shared_secret_tunnel2 = null
-    }
+    # sargeant_onprem (MikroTik CHR @ home) DECOMMISSIONED 2026-06: the home edge
+    # is now the FortiGate, which terminates OCI directly via the per-FortiGate
+    # design in ../vpn-fortigate (fortigate1, same home WAN peer IP). The old
+    # connection only collided on that shared CPE IP, so it was removed.
+    # sargeant_onprem = {
+    #   peer_ip             = local.home_wan_peer_ip
+    #   cpe_device_shape_id = null  # Generic/Other
+    #   type                = "mikrotik"
+    #   static_routes       = ["192.168.19.0/24"]
+    #   routing_type        = "BGP"
+    #   ike_version         = "V2"
+    #   bgp_asn                  = 65001
+    #   bgp_customer_ip_tunnel1  = "169.254.21.2/30"
+    #   bgp_oracle_ip_tunnel1    = "169.254.21.1/30"
+    #   bgp_customer_ip_tunnel2  = "169.254.21.6/30"
+    #   bgp_oracle_ip_tunnel2    = "169.254.21.5/30"
+    #   shared_secret_tunnel1 = null
+    #   shared_secret_tunnel2 = null
+    # }
 
     # AWS af-south-1 - uncomment when AWS VPN Gateway is deployed
     # aws_af_south_1 = {

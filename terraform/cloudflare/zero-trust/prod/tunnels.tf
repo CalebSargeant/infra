@@ -110,6 +110,34 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # n8n-mcp — the remote MCP endpoint (kubernetes/apps/n8n-mcp) served at the
+    # /mcp path on this SAME host, so Claude can build/edit n8n workflows without a
+    # separate subdomain. cloudflared evaluates top-to-bottom, so this MUST precede
+    # the n8n catch-all below: ^/mcp(/?$) → the MCP service; everything else (UI,
+    # /api, /form, and n8n's own MCP-trigger /mcp/<id> URLs, which carry a subpath)
+    # falls through to n8n. Gated by the n8n-mcp CF Access service token
+    # (access_apps.tf → n8n_mcp); the MCP reaches n8n in-cluster so n8n's REST API
+    # stays private.
+    ingress_rule {
+      hostname = "n8n.magmamoose.com"
+      path     = "^/mcp/?$"
+      service  = "http://n8n-mcp.automation.svc.cluster.local:3000"
+      origin_request {}
+    }
+
+    # n8n — self-service automation UI plus the ops-request form and the
+    # approval *resume* webhooks. Now reachable off-LAN via this tunnel and
+    # gated by the Caleb-only Cloudflare Access app (access_apps.tf), so the
+    # browser-link approval pattern ($execution.resumeUrl on n8n.magmamoose.com)
+    # works remotely, not just on the LAN. Pairs with the proxied CNAME
+    # external-dns publishes from kubernetes/apps/n8n (the magmamoose Ingress).
+    # n8n.sargeant.co stays a LAN-only alias (no tunnel, no Access).
+    ingress_rule {
+      hostname = "n8n.magmamoose.com"
+      service  = "http://n8n.automation.svc.cluster.local:5678"
+      origin_request {}
+    }
+
     # Public OpenAI-compatible LiteLLM endpoint for Warp custom inference.
     # Keep the normal litellm.sargeant.co host LAN/VPN-only; Warp's backend
     # rejects private RFC1918 resolutions, so this hostname enters through the
@@ -213,18 +241,33 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
     }
 
     # ── AppSec / dev tooling (firefly cluster) ───────────────────────────────
-    # safe-settings GitHub App webhook — MUST be publicly reachable so GitHub's
-    # delivery IPs can POST to /api/github/webhooks. No Access gate (GitHub can't
-    # authenticate through Access); the webhook secret authenticates payloads.
+    # Caldrith GitHub App webhook — MUST be publicly reachable so GitHub's
+    # delivery IPs can POST to the apex (caldrith.magmamoose.com). No Access
+    # gate (GitHub can't authenticate through Access); the webhook secret + HMAC
+    # signature authenticate payloads. Supersedes the retired safe-settings app.
     ingress_rule {
-      hostname = "safesettings.magmamoose.com"
-      service  = "http://safe-settings.security.svc.cluster.local:3000"
+      hostname = "caldrith.magmamoose.com"
+      service  = "http://caldrith.caldrith.svc.cluster.local:8000"
       origin_request {}
     }
-    # Legacy alias kept during the hostname move to magmamoose.com.
+
+    # Nievah GitHub App webhook — MUST be publicly reachable so GitHub's delivery
+    # IPs can POST to the apex (nievah.magmamoose.com). No Access gate (GitHub
+    # can't authenticate through Access); the webhook secret + HMAC signature
+    # authenticate payloads. Auto-reviews PRs on allowlisted MagmaMoose repos.
     ingress_rule {
-      hostname = "safe-settings.sargeant.co"
-      service  = "http://safe-settings.security.svc.cluster.local:3000"
+      hostname = "nievah.magmamoose.com"
+      service  = "http://nievah.nievah.svc.cluster.local:8000"
+      origin_request {}
+    }
+
+    # Chargate token broker — MUST be publicly reachable so GitHub Actions runners
+    # can POST their OIDC token to /token (api.chargate.magmamoose.com). No Access
+    # gate (runners can't authenticate through Access); the broker verifies each
+    # caller's OIDC token itself and mints a repo-scoped Chargate[bot] token.
+    ingress_rule {
+      hostname = "api.chargate.magmamoose.com"
+      service  = "http://chargate.chargate.svc.cluster.local:8000"
       origin_request {}
     }
 
@@ -294,6 +337,23 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
     ingress_rule {
       hostname = "pr-dashboard.sargeant.co"
       service  = "http://oauth2-proxy.automation.svc.cluster.local:4180"
+      origin_request {}
+    }
+
+    # SonarQube — self-hosted code-quality + security (firefly cluster). DNS is
+    # published by external-dns from the k8s Ingress (kubernetes/apps/sonarqube).
+    # Its security findings are imported into DefectDojo (security-integrations).
+    ingress_rule {
+      hostname = "sonarqube.magmamoose.com"
+      service  = "http://sonarqube-sonarqube.security.svc.cluster.local:9000"
+      origin_request {}
+    }
+
+    # Backstage developer portal (firefly cluster) — Red Hat Developer Hub
+    # community build (kubernetes/apps/backstage). Service is <release>-developer-hub.
+    ingress_rule {
+      hostname = "backstage.magmamoose.com"
+      service  = "http://backstage-developer-hub.core.svc.cluster.local:7007"
       origin_request {}
     }
 

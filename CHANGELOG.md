@@ -2,6 +2,258 @@
 
 <!-- version list -->
 
+## v1.66.0 (2026-06-25)
+
+### Features
+
+- **cf-access**: Bypass /form, /webhook, /webhook-waiting on n8n Access app
+  ([#433](https://github.com/CalebSargeant/infra/pull/433),
+  [`f9f1e31`](https://github.com/CalebSargeant/infra/commit/f9f1e317b07d6cf6b49614d64de8395ade634994))
+
+
+## v1.65.0 (2026-06-24)
+
+### Features
+
+- **n8n**: Expose n8n via Cloudflare ZTNA (tunnel + Access)
+  ([#431](https://github.com/CalebSargeant/infra/pull/431),
+  [`8bc2eb1`](https://github.com/CalebSargeant/infra/commit/8bc2eb1c0eb7e64fa6d6595cf2eb0ac6f190d7ff))
+
+
+## v1.64.1 (2026-06-24)
+
+### Bug Fixes
+
+- **n8n**: Resolve OOM crashloop and move to n8n.magmamoose.com
+  ([#430](https://github.com/CalebSargeant/infra/pull/430),
+  [`7c94b23`](https://github.com/CalebSargeant/infra/commit/7c94b23be96bf598cdc7aac1894f942502472560))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`5b6950f`](https://github.com/CalebSargeant/infra/commit/5b6950f361be6c7c42f23024b8cc29c568542f88))
+
+
+## v1.64.0 (2026-06-24)
+
+### Bug Fixes
+
+- **chargate/rbac**: Document KICS suppressions for the ghcr-reader Role
+  ([#427](https://github.com/CalebSargeant/infra/pull/427),
+  [`89fad2a`](https://github.com/CalebSargeant/infra/commit/89fad2a06e9bef2fd8491feecccd8ccf6d4d6b1c))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`95273f1`](https://github.com/CalebSargeant/infra/commit/95273f17868b7ee493b773b1f63b65a8aceee8cf))
+
+- **media**: Bump image tags
+  ([`203b4e2`](https://github.com/CalebSargeant/infra/commit/203b4e23828baba19eda252172e01676a18640b6))
+
+### Features
+
+- **chargate**: Deploy the Chargate token broker to firefly
+  ([#427](https://github.com/CalebSargeant/infra/pull/427),
+  [`89fad2a`](https://github.com/CalebSargeant/infra/commit/89fad2a06e9bef2fd8491feecccd8ccf6d4d6b1c))
+
+
+## v1.63.0 (2026-06-24)
+
+### Bug Fixes
+
+- **nievah**: Suppress KICS read-secrets findings on ghcr-reader Role
+  ([#426](https://github.com/CalebSargeant/infra/pull/426),
+  [`651baa9`](https://github.com/CalebSargeant/infra/commit/651baa9a666669162e6ec0c5a7530b103297794b))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`1e3b961`](https://github.com/CalebSargeant/infra/commit/1e3b961f2c75fa277eceea658ad70b2d78608fbb))
+
+- **media**: Bump image tags
+  ([`8edf912`](https://github.com/CalebSargeant/infra/commit/8edf912aa70dba3ec21407a5ac002f9a70c5f4ea))
+
+### Features
+
+- **nievah**: Register PR-review GitHub App (Flux + tunnel)
+  ([#426](https://github.com/CalebSargeant/infra/pull/426),
+  [`651baa9`](https://github.com/CalebSargeant/infra/commit/651baa9a666669162e6ec0c5a7530b103297794b))
+
+
+## v1.62.1 (2026-06-23)
+
+### Bug Fixes
+
+- **security-integrations**: Source SONARQUBE_TOKEN from existing defectdojo-api-key vault secret
+  ([#425](https://github.com/CalebSargeant/infra/pull/425),
+  [`473695a`](https://github.com/CalebSargeant/infra/commit/473695a745e539a77bbd1d0d3e4dc7afed77522e))
+
+
+## v1.62.0 (2026-06-23)
+
+### Bug Fixes
+
+- **security-integrations**: Harden sonarqube-sync CronJob to clear the net-new gate
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **security-integrations**: Suppress SonarCloud S5332 on in-cluster http URLs
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`8fae796`](https://github.com/CalebSargeant/infra/commit/8fae796ad5e659d300c09e7f421c4c9a78dd62d2))
+
+- **media**: Bump image tags
+  ([`b19aff5`](https://github.com/CalebSargeant/infra/commit/b19aff5eebf77487e775265f2c456768e538c64d))
+
+### Documentation
+
+- Document sonarqube + backstage on firefly
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- Update sonarqube/backstage for magmamoose.com, RHDH, DefectDojo bridge
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+### Features
+
+- SonarQube + Backstage on firefly (GitOps via Flux)
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **backstage**: Add Backstage portal plumbing (placeholder image)
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **backstage**: GitHub org catalog auto-discovery config
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **backstage**: Switch to Red Hat Developer Hub community + GitHub integration
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **cloudflare**: Tunnel routes for sonarqube + backstage
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **flux**: Register sonarqube + backstage Helm sources and apps
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **security-integrations**: Import SonarQube security findings into DefectDojo
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **sonarqube**: Deploy SonarQube Community Build on firefly
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+- **sonarqube,backstage**: Move public hosts to magmamoose.com
+  ([#418](https://github.com/CalebSargeant/infra/pull/418),
+  [`b38de0d`](https://github.com/CalebSargeant/infra/commit/b38de0d7d6dbd6d668f60b7bce5be52d201b92db))
+
+
+## v1.61.1 (2026-06-20)
+
+### Bug Fixes
+
+- **fortigate**: Iterate ra_fgts not its keyset in remote-access for_each
+  ([#423](https://github.com/CalebSargeant/infra/pull/423),
+  [`e9eab3f`](https://github.com/CalebSargeant/infra/commit/e9eab3f96ff83fab823e75288facac0353d651b4))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`994ccac`](https://github.com/CalebSargeant/infra/commit/994ccac395fbdbb9f333c6f7c366afedbaee8478))
+
+
+## v1.61.0 (2026-06-20)
+
+### Chores
+
+- **media**: Bump image tags
+  ([`a0c982e`](https://github.com/CalebSargeant/infra/commit/a0c982e2a99b9e3c416555481682a1b585251f85))
+
+### Features
+
+- **edge**: Terraform two FortiGate 40Fs + MikroTik CRS edge (VLANs, BGP, OCI VPN, SD-WAN, remote
+  access) ([#417](https://github.com/CalebSargeant/infra/pull/417),
+  [`3499de9`](https://github.com/CalebSargeant/infra/commit/3499de9084322e0a5740b048a26da97363323820))
+
+
+## v1.60.0 (2026-06-19)
+
+### Bug Fixes
+
+- Caldrith webhook host -> caldrith.magmamoose.com (2nd-level)
+  ([#415](https://github.com/CalebSargeant/infra/pull/415),
+  [`9af91b5`](https://github.com/CalebSargeant/infra/commit/9af91b5df5654e9ddb11cb6aa426f66c206bbd69))
+
+- Caldrith webhook host -> caldrith.magmamoose.com (2nd-level, cert coverage)
+  ([#415](https://github.com/CalebSargeant/infra/pull/415),
+  [`9af91b5`](https://github.com/CalebSargeant/infra/commit/9af91b5df5654e9ddb11cb6aa426f66c206bbd69))
+
+### Features
+
+- Add caldrith app, retire safe-settings ([#415](https://github.com/CalebSargeant/infra/pull/415),
+  [`9af91b5`](https://github.com/CalebSargeant/infra/commit/9af91b5df5654e9ddb11cb6aa426f66c206bbd69))
+
+
+## v1.59.0 (2026-06-19)
+
+### Bug Fixes
+
+- **security**: PYTHONPATH=/app + bulletproof bootstrap so it can't wedge the upgrade
+  ([#410](https://github.com/CalebSargeant/infra/pull/410),
+  [`b4e9685`](https://github.com/CalebSargeant/infra/commit/b4e9685eca959a1a6342ba66d7b033da821d87bd))
+
+- **security**: Suppress KICS false positives on GitHub token injection
+  ([#410](https://github.com/CalebSargeant/infra/pull/410),
+  [`b4e9685`](https://github.com/CalebSargeant/infra/commit/b4e9685eca959a1a6342ba66d7b033da821d87bd))
+
+### Features
+
+- **security**: Zero-touch GitHub issue auto-discovery (github.com + GHE)
+  ([#410](https://github.com/CalebSargeant/infra/pull/410),
+  [`b4e9685`](https://github.com/CalebSargeant/infra/commit/b4e9685eca959a1a6342ba66d7b033da821d87bd))
+
+
+## v1.58.1 (2026-06-19)
+
+### Bug Fixes
+
+- **security**: Set PYTHONPATH=/app so DefectDojo bootstrap/sync can import dojo
+  ([#411](https://github.com/CalebSargeant/infra/pull/411),
+  [`82d1ea7`](https://github.com/CalebSargeant/infra/commit/82d1ea79bbf724d3eca0bec3acd87599797dd8e1))
+
+
+## v1.58.0 (2026-06-19)
+
+### Chores
+
+- **media**: Bump image tags
+  ([`701ba6e`](https://github.com/CalebSargeant/infra/commit/701ba6e97a947cb63dc450df0ee0bb9a51114ea6))
+
+- **media**: Bump image tags
+  ([`1c4cda5`](https://github.com/CalebSargeant/infra/commit/1c4cda52233bdf2147dbd51d5090a6326511b06b))
+
+- **media**: Bump image tags
+  ([`89a8408`](https://github.com/CalebSargeant/infra/commit/89a84086f6fdb53e3dc9df0ce0603b330189543b))
+
+- **media**: Bump image tags
+  ([`c53a4ac`](https://github.com/CalebSargeant/infra/commit/c53a4ac09d7db8cf538f14432668ac040e6d6738))
+
+### Features
+
+- Add caldrith app, retire safe-settings ([#414](https://github.com/CalebSargeant/infra/pull/414),
+  [`fbf49ea`](https://github.com/CalebSargeant/infra/commit/fbf49eaa5842b540ba333f872ff456e1eb46d639))
+
+
 ## v1.57.2 (2026-06-17)
 
 ### Bug Fixes

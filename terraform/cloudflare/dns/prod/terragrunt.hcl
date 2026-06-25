@@ -181,15 +181,8 @@ inputs = {
     # terraform/cloudflare/zero-trust/prod/tunnels.tf. Must be proxied so
     # Cloudflare routes via the `firefly` tunnel (a grey-cloud CNAME would hand
     # the cfargotunnel.com target straight back to the client). Without these
-    # the hosts don't resolve and — for safe-settings — GitHub can't deliver
-    # webhooks to /api/github/webhooks (same reason the atlantis record above
-    # must be proxied).
-    {
-      name    = "safe-settings.sargeant.co"
-      type    = "CNAME"
-      value   = "7694eb38-c35e-4905-bd2b-16ab7053080a.cfargotunnel.com"
-      proxied = true
-    },
+    # the hosts don't resolve (same reason the atlantis record above must be
+    # proxied).
     {
       name    = "defectdojo.sargeant.co"
       type    = "CNAME"

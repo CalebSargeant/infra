@@ -1,0 +1,13 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: postgres-oci-backup
+  namespace: database-oci
+spec:
+  # Daily at 03:30 — offset 30m from the shared cluster's 03:00 backup so the
+  # two don't hammer the object store at the same instant.
+  schedule: "0 30 3 * * *"
+  backupOwnerReference: self
+  cluster:
+    name: postgres-oci

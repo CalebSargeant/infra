@@ -66,6 +66,17 @@ variable "servers" {
   type = map(object({
     fault_domain = number
     private_ip   = optional(string)
+    # k3s node name to register as (e.g. "ff-oci1"). Empty => the node
+    # registers under its OS hostname (server-<key>). Drives display_name +
+    # hostname_label too so the OCI console matches the cluster.
+    node_name = optional(string, "")
+    # Extra k3s --node-label flags applied at agent registration, each as
+    # "key=value" (value may be empty). NOTE: kubelet self-registration cannot
+    # set labels in the kubernetes.io / k8s.io namespaces (NodeRestriction), so
+    # only custom-domain labels belong here (e.g. topology.sargeant.co/tier=...).
+    # Role labels like node-role.kubernetes.io/worker must be applied post-join
+    # with kubectl — see docs/reference/cluster-topology.md.
+    node_labels = optional(list(string), [])
   }))
   default = {
     "fd1" = { fault_domain = 0 }

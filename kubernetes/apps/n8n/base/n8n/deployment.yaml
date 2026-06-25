@@ -5,11 +5,11 @@ metadata:
   namespace: automation
 spec:
   replicas: 1
-  # Single replica on a ReadWriteOnce hostPath volume, pinned to the Pi
-  # (nodeSelector type:pi). RollingUpdate would surge a second pod before
-  # killing the old one, but the Pi can't fit two n8n pods (320Mi each) →
-  # new pod stuck Pending, old pod never terminates, image bumps never roll
-  # out. Recreate terminates the old pod first, freeing memory for the new.
+  # Single replica on a ReadWriteOnce volume. RollingUpdate would surge a
+  # second pod before killing the old one, but a single node can't reliably
+  # fit two n8n pods (now ~1Gi each) → new pod stuck Pending, old pod never
+  # terminates, image bumps never roll out. Recreate terminates the old pod
+  # first, freeing memory for the new.
   strategy:
     type: Recreate
   selector:
@@ -30,16 +30,20 @@ spec:
       enableServiceLinks: false
       containers:
         - name: n8n
-          image: n8nio/n8n:2.27.2 # {"$imagepolicy": "flux-system:n8n"}
+          image: n8nio/n8n:2.28.2 # {"$imagepolicy": "flux-system:n8n"}
           resources:
-            # KRR ~277Mi working set. Raw values (no resource-profile component,
-            # which would have overridden these up to c.small's 512Mi). 320Mi
-            # request with 512Mi limit for workflow-execution spikes. No CPU limit.
+            # n8n 2.x outgrew the old 512Mi limit: under that cgroup V8 capped
+            # its old-space heap at ~256Mi and OOM-crashed on startup ("Reached
+            # heap limit" → CrashLoopBackOff, 2026-06). The DB backlog is tiny
+            # (~15MB), so this is baseline growth, not runaway execution data.
+            # Fix = 1Gi limit + NODE_OPTIONS=--max-old-space-size=768 (see env)
+            # so V8 actually uses the headroom. ff-vm1 has ample free RAM. No CPU
+            # limit (avoids false CFS-throttle alerts); request set to real usage.
             requests:
-              memory: "320Mi"
+              memory: "512Mi"
               cpu: "50m"
             limits:
-              memory: "512Mi"
+              memory: "1Gi"
           env:
             - name: DB_TYPE
               value: "postgresdb"
@@ -72,14 +76,18 @@ spec:
             - name: N8N_BASIC_AUTH_USER
               value: "admin"
             - name: WEBHOOK_URL
-              value: "https://n8n.sargeant.co"
+              value: "https://n8n.magmamoose.com"
             - name: N8N_ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef:
                   name: n8n
                   key: encryption-key
-            - name: N8N_RUNNERS_ENABLED
-              value: "true"
+            # Raise V8's heap ceiling to match the 1Gi limit above — without
+            # this n8n OOM-crashes at the container-derived ~256Mi default.
+            # (Old N8N_RUNNERS_ENABLED removed: task runners are GA/default-on
+            # in 2.x and n8n logs the var as no longer needed.)
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=768"
           volumeMounts:
             - name: n8n
               mountPath: /home/node/.n8n
