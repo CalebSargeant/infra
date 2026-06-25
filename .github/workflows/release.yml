@@ -33,7 +33,7 @@ jobs:
       contents: read # Release writes use the public-app installation token.
       id-token: write
     steps:
-      - uses: magmamoose/diatreme@f31adec7d62907cc81b9b880cd776e24fcdcbaf1 # v2.0.0
+      - uses: magmamoose/diatreme@43efe38cb3515e19319f7f1173b14a28ae3b5dd4 # v2.1.0
         with:
           environment: prod
           environments: '["prod"]'
