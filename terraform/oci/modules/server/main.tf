@@ -13,6 +13,22 @@ data "oci_identity_availability_domains" "ads" {
   compartment_id = var.tenancy_ocid
 }
 
+locals {
+  # Per-server INSTALL_K3S_EXEC for agent mode: always "agent", plus an
+  # optional --node-name (so the node registers as e.g. ff-oci1 rather than its
+  # OS hostname) and any --node-label flags from var.servers[*].node_labels.
+  #
+  # node-role.kubernetes.io/* labels are deliberately NOT injectable here: the
+  # kubelet may not self-register labels in the kubernetes.io/k8s.io namespaces
+  # (NodeRestriction admission), so passing one would fail the join. Custom
+  # labels (topology.sargeant.co/tier=native-cloud) are allowed; the worker role
+  # label is applied post-join with kubectl (docs/reference/cluster-topology.md).
+  k3s_agent_exec = {
+    for k, s in var.servers : k =>
+    "agent${s.node_name != "" ? " --node-name ${s.node_name}" : ""}${join("", [for l in s.node_labels : " --node-label ${l}"])}"
+  }
+}
+
 # Hash of the inputs that *meaningfully* change cloud-init outcome —
 # k3s_url, the secret OCID it should fetch (in agent mode), and the base
 # image. Cosmetic script tweaks don't change the hash so don't recreate
@@ -35,6 +51,10 @@ resource "terraform_data" "user_data_replace_trigger" {
       k3s_url               = var.k3s_url
       k3s_token_secret_ocid = var.k3s_url == "" ? "" : var.k3s_token_secret_ocid
       image                 = var.image_ocid
+      # node_name / node_labels change the k3s registration identity, so a
+      # rename (server-fd1 -> ff-oci1) or label change must replace the VM.
+      node_name   = each.value.node_name
+      node_labels = each.value.node_labels
     },
     var.cloud_init_rebuild_token == "" ? {} : { rebuild_token = var.cloud_init_rebuild_token }
   )))
@@ -45,7 +65,7 @@ resource "oci_core_instance" "this" {
 
   availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
   compartment_id      = var.compartment_ocid
-  display_name        = "${var.environment}-server-${each.key}"
+  display_name        = each.value.node_name != "" ? each.value.node_name : "${var.environment}-server-${each.key}"
   shape               = var.shape
   fault_domain        = "FAULT-DOMAIN-${each.value.fault_domain + 1}"
 
@@ -58,7 +78,7 @@ resource "oci_core_instance" "this" {
     subnet_id        = var.subnet_id
     assign_public_ip = false
     nsg_ids          = [var.network_security_group_id]
-    hostname_label   = "server-${each.key}"
+    hostname_label   = each.value.node_name != "" ? each.value.node_name : "server-${each.key}"
     private_ip       = each.value.private_ip
   }
 
@@ -144,7 +164,7 @@ resource "oci_core_instance" "this" {
         echo "token fetched (len=$${#K3S_TOKEN_VALUE})"
 
         curl -sfL https://get.k3s.io | \
-          INSTALL_K3S_EXEC="agent" \
+          INSTALL_K3S_EXEC="${local.k3s_agent_exec[each.key]}" \
           K3S_URL="${var.k3s_url}" \
           K3S_TOKEN="$K3S_TOKEN_VALUE" \
           sh -

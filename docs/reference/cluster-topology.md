@@ -9,7 +9,7 @@ workload should run*.
 | Role | k3s role | Runs | Current node(s) | Planned | Labels |
 |------|----------|------|-----------------|---------|--------|
 | **system** | k3s **server** (control plane) | API server, scheduler, controller-manager, kine **plus** the cluster's system controllers (helm-controller, flux-\*, kyverno, gatekeeper, cert-manager, external-secrets, longhorn-manager, 1Password Connect, …) | **ff-pi1** (Raspberry Pi 5, arm64, 8 GiB) | ff-pi2, ff-pi3 (more Pi5s — control-plane HA / more system capacity) | `node-role.kubernetes.io/system`, legacy `type=pi` / `node-role.kubernetes.io/pi` |
-| **worker** | k3s **agent** | Application workloads | **ff-vm1** (amd64, 16 vCPU / 32 GiB) | ff-vm2, ff-oci1, ff-oci2 (OCI free-tier VMs) | `node-role.kubernetes.io/worker`, legacy `type=mini` / `node-role.kubernetes.io/mini` |
+| **worker** | k3s **agent** | Application workloads | **ff-vm1** (amd64, 16 vCPU / 32 GiB); **ff-oci1** / **ff-oci2** (OCI free-tier, arm64, 2 OCPU / 12 GiB — the **native-cloud** sub-tier, see below) | ff-vm2 | `node-role.kubernetes.io/worker`, legacy `type=mini` / `node-role.kubernetes.io/mini`; native-cloud nodes also carry `topology.sargeant.co/tier=native-cloud` |
 
 ```mermaid
 flowchart TB
@@ -21,8 +21,10 @@ flowchart TB
   subgraph worker["worker role — k3s agents"]
     vm1["ff-vm1 (now)"]
     vm2["ff-vm2 (planned)"]
-    oci1["ff-oci1 (planned)"]
-    oci2["ff-oci2 (planned)"]
+    subgraph nc["native-cloud sub-tier (OCI, arm64)"]
+      oci1["ff-oci1 (now)"]
+      oci2["ff-oci2 (now)"]
+    end
   end
   cp["Control plane + system controllers"] --> system
   apps["Application workloads"] --> worker
@@ -45,23 +47,71 @@ headroom for the API server, scheduler, and node-level DaemonSets
 (node-exporter, fluent-bit, Alloy). The Pi is **memory-request bound** (8 GiB),
 so a single over-provisioned app reservation there is expensive.
 
+## The native-cloud tier (OCI)
+
+`ff-oci1` and `ff-oci2` are OCI free-tier ARM VMs (`VM.Standard.A1.Flex`, 2 OCPU /
+12 GiB each, one per fault domain) that join firefly as k3s **agents** over the
+FortiGate-to-OCI site-to-site VPN. They are the **native-cloud** sub-tier: more
+reliable / always-on than the home-lab nodes, so they host **public-facing,
+always-online** workloads (e.g. GitHub-App backends) and the `postgres-oci`
+database.
+
+They are ordinary `worker` nodes **plus** an extra tier label:
+
+| Label | Where it's set | Why |
+|-------|----------------|-----|
+| `topology.sargeant.co/tier=native-cloud` | k3s `--node-label` at agent registration (cloud-init, `terraform/oci/modules/server`) | Pin workloads to OCI **specifically** (vs `ff-vm1`, which shares the `worker` role). Durable across node re-registration. |
+| `node-role.kubernetes.io/worker` | `kubectl` post-join (see below) | Generic worker role. **Cannot** be set via `--node-label` — the kubelet may not self-register `kubernetes.io`-namespaced labels (NodeRestriction). |
+
+!!! info "Provisioning is in Terraform, not Ansible"
+    The VMs and their k3s agent join are defined entirely in
+    `terraform/oci/modules/server` (+ the `server` leaf). cloud-init fetches the
+    k3s node-token from OCI Vault via instance-principal at boot — no token in
+    state or metadata. `node_name` / `node_labels` in the leaf's `servers` map
+    set the k3s `--node-name` (so they register as `ff-oci1`/`ff-oci2`, not the
+    OS hostname) and the tier label. Changing either replaces the VM (it alters
+    the cloud-init hash). Because this edits a shared **module**, Atlantis
+    autoplan won't fire — run `atlantis plan -p oci-prod-eu-amsterdam-1-server`.
+
+### Pinning to native-cloud
+
+- **Apps**: reference the component
+  `../../../../components/node-selectors/native-cloud` from the app's base
+  `kustomization.yaml` (or set `nodeSelector: { topology.sargeant.co/tier: native-cloud }`
+  inline for non-app-template HelmReleases). Verify the image is **arm64 /
+  multi-arch** first — several custom images (`atlantis-firefly`, etc.) are
+  amd64-only today.
+- **CNPG**: a Cluster CR is **not** a Deployment/StatefulSet, so the
+  node-selectors component does **not** reach it. Pin it via the Cluster's own
+  `spec.affinity.nodeSelector` — see
+  `kubernetes/infrastructure/services/stack/postgres-oci/base/cluster.yaml`
+  (2 instances, one per OCI node via required hostname anti-affinity).
+
 ## How it's codified
 
 ### Node labels
 
 ```bash
 # Applied to the live nodes (cluster-admin / `ember` context):
-kubectl label node ff-pi1 node-role.kubernetes.io/system=""  --overwrite
-kubectl label node ff-vm1 node-role.kubernetes.io/worker=""  --overwrite
+kubectl label node ff-pi1  node-role.kubernetes.io/system=""  --overwrite
+kubectl label node ff-vm1  node-role.kubernetes.io/worker=""  --overwrite
+# native-cloud (OCI) nodes — the worker ROLE label still goes on via kubectl
+# (kubelet can't self-set kubernetes.io labels). Their tier label is already
+# baked at join (cloud-init --node-label), so it does NOT need re-applying.
+kubectl label node ff-oci1 node-role.kubernetes.io/worker=""  --overwrite
+kubectl label node ff-oci2 node-role.kubernetes.io/worker=""  --overwrite
 ```
 
 !!! warning "Labels must persist across node re-registration"
     `kubectl label` is imperative and is lost if a node re-registers. To make the
-    role labels durable, add them to each node's **k3s config** via Ansible
+    role labels durable, add them to each node's **k3s config**
     (`node-label:` in `/etc/rancher/k3s/config.yaml` for servers,
-    `/etc/rancher/k3s/config.yaml.d/` for agents). Until that Ansible change lands,
-    re-apply the commands above after any node rebuild. The legacy `type=` labels
-    are set the same way.
+    `/etc/rancher/k3s/config.yaml.d/` for agents). The OCI native-cloud nodes
+    already do this for their **tier** label via cloud-init
+    (`terraform/oci/modules/server`); their `worker` **role** label still needs
+    the `kubectl` step above after any rebuild, because the kubelet may not
+    self-register `node-role.kubernetes.io/*` (NodeRestriction). The legacy
+    `type=` labels are set the same way.
 
 ### Node-selector components
 
@@ -71,7 +121,8 @@ Kustomize components apply the selector to a workload's pod template
 | Component | Selects | Use for |
 |-----------|---------|---------|
 | `node-selectors/system` | `node-role.kubernetes.io/system` | control-plane / system controllers |
-| `node-selectors/worker` | `node-role.kubernetes.io/worker` | application workloads |
+| `node-selectors/worker` | `node-role.kubernetes.io/worker` | application workloads (any agent: ff-vm1 or ff-oci*) |
+| `node-selectors/native-cloud` | `topology.sargeant.co/tier=native-cloud` | always-online / public-facing apps pinned to the OCI tier (ff-oci1/ff-oci2) |
 | `node-selectors/pi` | `type=pi` | **legacy alias** for `system` |
 | `node-selectors/mini` | `type=mini` | **legacy alias** for `worker` |
 

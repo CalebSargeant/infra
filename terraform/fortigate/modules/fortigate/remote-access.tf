@@ -10,16 +10,18 @@
 # ============================================================================
 
 locals {
+  # key (fgt1/fgt2) => its remote_access object. Iterate THIS map of objects (not
+  # its keyset) so each.value is the remote_access config (pool_start/end/etc.);
+  # each.key is still the FortiGate key for the provider + var.fortigates lookups.
   ra_fgts = {
     for fk, f in var.fortigates : fk => f.remote_access
     if f.remote_access != null && try(f.remote_access.enabled, true)
   }
-  ra_keys = toset(keys(local.ra_fgts))
 }
 
 # --- Google Workspace as a SAML IdP ----------------------------------------
 resource "fortios_user_saml" "google" {
-  for_each = local.ra_keys
+  for_each = local.ra_fgts
   provider = fortios.by_fortigate[each.key]
 
   name                   = "google"
@@ -38,7 +40,7 @@ resource "fortios_user_saml" "google" {
 }
 
 resource "fortios_user_group" "vpn_saml" {
-  for_each = local.ra_keys
+  for_each = local.ra_fgts
   provider = fortios.by_fortigate[each.key]
 
   name = "vpn-saml"
@@ -49,7 +51,7 @@ resource "fortios_user_group" "vpn_saml" {
 
 # --- Address objects: the client pool + the split-tunnel subnet -------------
 resource "fortios_firewall_address" "ra_pool" {
-  for_each = local.ra_keys
+  for_each = local.ra_fgts
   provider = fortios.by_fortigate[each.key]
 
   name     = "ra-pool"
@@ -60,7 +62,7 @@ resource "fortios_firewall_address" "ra_pool" {
 }
 
 resource "fortios_firewall_address" "ra_split" {
-  for_each = local.ra_keys
+  for_each = local.ra_fgts
   provider = fortios.by_fortigate[each.key]
 
   name    = "ra-split"
@@ -71,7 +73,7 @@ resource "fortios_firewall_address" "ra_split" {
 
 # --- IPsec dial-up phase 1 (IKEv2 + mode-config + SAML/EAP) -----------------
 resource "fortios_vpnipsec_phase1interface" "dialup" {
-  for_each = local.ra_keys
+  for_each = local.ra_fgts
   provider = fortios.by_fortigate[each.key]
 
   name        = "ra-dialup"
@@ -109,7 +111,7 @@ resource "fortios_vpnipsec_phase1interface" "dialup" {
 }
 
 resource "fortios_vpnipsec_phase2interface" "dialup" {
-  for_each = local.ra_keys
+  for_each = local.ra_fgts
   provider = fortios.by_fortigate[each.key]
 
   name       = "ra-dialup-p2"
@@ -121,7 +123,7 @@ resource "fortios_vpnipsec_phase2interface" "dialup" {
 
 # --- Policy: remote-access clients -> trusted VLAN (SAML group gated) -------
 resource "fortios_firewall_policy" "ra_to_trusted" {
-  for_each = local.ra_keys
+  for_each = local.ra_fgts
   provider = fortios.by_fortigate[each.key]
 
   policyid = 310

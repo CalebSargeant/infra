@@ -1,5 +1,5 @@
 {
-    "generated": "2026-05-24T00:00:00Z",
+    "generated": "2026-06-25T00:00:00Z",
     "summary": "Monolithic infrastructure-as-code repo for a Raspberry Pi home lab plus multi-cloud (GCP/OCI/Cloudflare). Terragrunt-wrapped Terraform provisions cloud, Ansible bootstraps systems, FluxCD reconciles a single-node k3s cluster ('firefly'). The franklinhouse cluster lives in a separate repo (calebsargeant/infra-v2) \u2014 this repo is firefly-only.",
     "entrypoints": [
         "kubernetes/clusters/firefly/kustomization.yaml \u2014 Flux root (loads apps + infrastructure)",
@@ -34,7 +34,7 @@
             "shared_modules": [
                 "modules/fortigate"
             ],
-            "notes": "Hardware not wired yet — Atlantis autoplan disabled (enabled:false); run 'atlantis plan -p fortigate-prod' once units are reachable + API tokens are in OCI Vault. Placeholder RFC1918 addressing; verify 40F physical port names before apply."
+            "notes": "Hardware not wired yet \u2014 Atlantis autoplan disabled (enabled:false); run 'atlantis plan -p fortigate-prod' once units are reachable + API tokens are in OCI Vault. Placeholder RFC1918 addressing; verify 40F physical port names before apply."
         },
         "terraform-mikrotik": {
             "path": "terraform/mikrotik/",
@@ -45,7 +45,7 @@
             "shared_modules": [
                 "modules/crs"
             ],
-            "notes": "Hardware not wired yet (mt2 not installed) — Atlantis autoplan disabled; run 'atlantis plan -p mikrotik-prod' once reachable + password in OCI Vault. Placeholder addressing consistent with terraform/fortigate; verify CRS port names before apply."
+            "notes": "Hardware not wired yet (mt2 not installed) \u2014 Atlantis autoplan disabled; run 'atlantis plan -p mikrotik-prod' once reachable + password in OCI Vault. Placeholder addressing consistent with terraform/fortigate; verify CRS port names before apply."
         },
         "terraform-gcp": {
             "path": "terraform/gcp/",
@@ -70,13 +70,14 @@
             "depends_on": [
                 "terraform-root"
             ],
-            "notes": "OCI Vault publicly accessible (KMS endpoints are public-internet + OCI-auth, not VPN-gated)"
+            "notes": "OCI Vault publicly accessible (KMS endpoints are public-internet + OCI-auth, not VPN-gated). modules/server provisions the ff-oci1/ff-oci2 arm64 free-tier k3s agents (native-cloud tier): servers map takes node_name + node_labels; cloud-init joins via token from Vault. Editing the module needs manual 'atlantis plan -p oci-prod-eu-amsterdam-1-server'"
         },
         "kubernetes-apps": {
             "path": "kubernetes/apps/",
             "purpose": "Per-app manifests. Each app has base/<app>/ (kustomize manifests) + prod/<app>/ (Flux Kustomization CR)",
             "apps": [
                 "atlantis",
+                "backstage",
                 "bazarr",
                 "blackbox-exporter",
                 "defectdojo",
@@ -106,6 +107,7 @@
                 "radarr",
                 "sabnzbd",
                 "safe-settings",
+                "sonarqube",
                 "sonarr",
                 "syncthing",
                 "thanos-compactor",
@@ -126,7 +128,7 @@
             "tiers": {
                 "configs": "infrastructure-configs \u2014 namespaces only",
                 "controllers": "infrastructure-controllers \u2014 cert-manager, external-secrets, 1password-connect, cloudnative-pg (dependsOn configs)",
-                "services": "infrastructure-services \u2014 cloudflared, minio, external-dns\u00d72, postgres, mariadb (dependsOn controllers)"
+                "services": "infrastructure-services \u2014 cloudflared, minio, external-dns\u00d72, postgres, postgres-oci (CNPG pinned to the OCI native-cloud tier, ns database-oci), mariadb (dependsOn controllers)"
             },
             "depends_on": [
                 "kubernetes-components"
@@ -145,7 +147,7 @@
                 "helm-release-standards",
                 "ingress-standards"
             ],
-            "notes": "resource-profiles map AWS-style names (t.small, c.medium, m.large) to Pi-constrained requests/limits"
+            "notes": "resource-profiles map AWS-style names (t.small, c.medium, m.large) to Pi-constrained requests/limits. node-selectors: system/worker (+ legacy pi/mini) and native-cloud (topology.sargeant.co/tier=native-cloud, the OCI ff-oci tier)"
         },
         "kubernetes-clusters": {
             "path": "kubernetes/clusters/firefly/",

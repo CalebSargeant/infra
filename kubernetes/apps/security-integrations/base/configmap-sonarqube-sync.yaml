@@ -1,0 +1,192 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # Mounted at /scripts in the sonarqube-defectdojo-sync CronJob (defectdojo image).
+  name: sonarqube-defectdojo-sync
+  namespace: security
+data:
+  sync.py: |
+    #!/usr/bin/env python3
+    """SonarQube security findings -> DefectDojo.
+
+    Runs in the DefectDojo django image (Django ORM + requests). For every SonarQube
+    project it ensures DefectDojo has a SonarQube Tool Configuration + a per-product
+    API Scan Configuration, then triggers DefectDojo's native "SonarQube API Import".
+    DefectDojo then pulls that project's VULNERABILITY + SECURITY_HOTSPOT findings
+    (SECURITY, not code smells / bugs), dedupes them against findings from the other
+    tools that already feed DefectDojo (Chargate/MegaLinter SARIF, Dependency-Track,
+    Trivy, ...), and closes ones SonarQube has since resolved.
+
+    Idempotent + safe to re-run hourly. Per-project errors are logged and skipped;
+    the job only fails hard on setup errors (no SonarQube token / SonarQube
+    unreachable). Cross-tool dedup requires DefectDojo's `enable_deduplication`
+    (set by the defectdojo bootstrap).
+    """
+    import logging
+    import os
+    import sys
+
+    logging.basicConfig(level=logging.INFO, format="sonar-sync: %(message)s")
+    log = logging.getLogger("sonar-sync")
+
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
+    import django  # noqa: E402
+
+    django.setup()
+
+    import requests  # noqa: E402
+
+    DD_URL = os.environ.get("DEFECTDOJO_URL", "http://defectdojo-django.security.svc.cluster.local").rstrip("/")
+    SONAR_URL = os.environ.get("SONARQUBE_URL", "http://sonarqube-sonarqube.security.svc.cluster.local:9000").rstrip("/")
+    SONAR_TOKEN = os.environ.get("SONARQUBE_TOKEN", "").strip()
+    PRODUCT_TYPE = os.environ.get("DD_PRODUCT_TYPE", "SonarQube")
+    ENGAGEMENT = os.environ.get("DD_ENGAGEMENT", "SonarQube")
+    TOOL_NAME = os.environ.get("DD_TOOL_NAME", "SonarQube")
+    HTTP_TIMEOUT = int(os.environ.get("HTTP_TIMEOUT", "300"))
+
+    # A SonarQube user token authenticates as the basic-auth username (empty password).
+    SONAR_AUTH = (SONAR_TOKEN, "")
+
+
+    def dd_token():
+        """Mint/fetch an API token for a superuser via the ORM (no password needed)."""
+        from rest_framework.authtoken.models import Token
+
+        from dojo.models import Dojo_User
+        admin = Dojo_User.objects.filter(is_superuser=True, is_active=True).order_by("id").first()
+        if not admin:
+            raise RuntimeError("no active superuser found to mint a DefectDojo token")
+        token, _ = Token.objects.get_or_create(user=admin)
+        return token.key
+
+
+    def sonar_projects():
+        out, page, size = [], 1, 100
+        while True:
+            resp = requests.get(
+                f"{SONAR_URL}/api/projects/search",
+                params={"ps": size, "p": page},
+                auth=SONAR_AUTH, timeout=HTTP_TIMEOUT,
+            )
+            resp.raise_for_status()
+            body = resp.json()
+            comps = body.get("components", [])
+            out.extend(comps)
+            total = body.get("paging", {}).get("total", len(out))
+            if not comps or page * size >= total:
+                break
+            page += 1
+        return out
+
+
+    def dd_get_or_create(session, path, lookup, create):
+        """GET <path>?<lookup>; return first result id, else POST <create> -> id."""
+        r = session.get(f"{DD_URL}/api/v2/{path}/", params=lookup, timeout=HTTP_TIMEOUT)
+        r.raise_for_status()
+        results = r.json().get("results", [])
+        if results:
+            return results[0]["id"]
+        r = session.post(f"{DD_URL}/api/v2/{path}/", json=create, timeout=HTTP_TIMEOUT)
+        r.raise_for_status()
+        return r.json()["id"]
+
+
+    def ensure_tool_config(session):
+        r = session.get(f"{DD_URL}/api/v2/tool_configurations/", params={"name": TOOL_NAME}, timeout=HTTP_TIMEOUT)
+        r.raise_for_status()
+        res = r.json().get("results", [])
+        if res:
+            return res[0]["id"]
+        tool_type_id = dd_get_or_create(
+            session, "tool_types", {"name": TOOL_NAME},
+            {"name": TOOL_NAME, "description": "SonarQube (managed by security-integrations)"},
+        )
+        payload = {
+            "name": TOOL_NAME,
+            "tool_type": tool_type_id,
+            "url": SONAR_URL,
+            "authentication_type": "API",
+            "api_key": SONAR_TOKEN,
+        }
+        r = session.post(f"{DD_URL}/api/v2/tool_configurations/", json=payload, timeout=HTTP_TIMEOUT)
+        r.raise_for_status()
+        return r.json()["id"]
+
+
+    def ensure_scan_config(session, product_id, tool_config_id, project_key):
+        r = session.get(
+            f"{DD_URL}/api/v2/product_api_scan_configurations/",
+            params={"product": product_id}, timeout=HTTP_TIMEOUT,
+        )
+        r.raise_for_status()
+        for cfg in r.json().get("results", []):
+            if cfg.get("service_key_1") == project_key:
+                return cfg["id"]
+        payload = {"product": product_id, "tool_configuration": tool_config_id, "service_key_1": project_key}
+        r = session.post(f"{DD_URL}/api/v2/product_api_scan_configurations/", json=payload, timeout=HTTP_TIMEOUT)
+        r.raise_for_status()
+        return r.json()["id"]
+
+
+    def dd_reimport(session, product_name, scan_config_id):
+        data = {
+            "scan_type": "SonarQube API Import",
+            "product_type_name": PRODUCT_TYPE,
+            "product_name": product_name,
+            "engagement_name": ENGAGEMENT,
+            "api_scan_configuration": scan_config_id,
+            "auto_create_context": "true",
+            "active": "true",
+            "close_old_findings": "true",
+            "minimum_severity": "Info",
+        }
+        r = session.post(f"{DD_URL}/api/v2/reimport-scan/", data=data, timeout=HTTP_TIMEOUT)
+        r.raise_for_status()
+        return r.json()
+
+
+    def main():
+        if not SONAR_TOKEN:
+            log.error("SONARQUBE_TOKEN is empty; aborting")
+            return 1
+        try:
+            projects = sonar_projects()
+        except requests.RequestException:
+            log.exception("failed to list SonarQube projects; aborting")
+            return 1
+        log.info("found %d SonarQube project(s)", len(projects))
+
+        session = requests.Session()
+        session.headers["Authorization"] = f"Token {dd_token()}"
+
+        tool_config_id = ensure_tool_config(session)
+        prod_type_id = dd_get_or_create(
+            session, "product_types", {"name": PRODUCT_TYPE},
+            {"name": PRODUCT_TYPE, "description": "SonarQube (managed by security-integrations)"},
+        )
+
+        ok = skipped = 0
+        for proj in projects:
+            key = proj.get("key")
+            name = proj.get("name") or key
+            if not key:
+                continue
+            try:
+                product_id = dd_get_or_create(
+                    session, "products", {"name": name},
+                    {"name": name, "description": f"SonarQube project {key}", "prod_type": prod_type_id},
+                )
+                scan_config_id = ensure_scan_config(session, product_id, tool_config_id, key)
+                dd_reimport(session, name, scan_config_id)
+                log.info("[%s] security findings imported into DefectDojo", key)
+                ok += 1
+            except Exception:  # noqa: BLE001
+                log.exception("[%s] sync failed; skipping", key)
+                skipped += 1
+
+        log.info("done: %d synced, %d skipped", ok, skipped)
+        return 0
+
+
+    if __name__ == "__main__":
+        sys.exit(main())

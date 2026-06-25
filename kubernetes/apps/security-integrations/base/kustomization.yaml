@@ -4,6 +4,8 @@ kind: Kustomization
 # resource carries its own metadata.namespace.
 resources:
   - configmap-sync-script.yaml
+  - configmap-sonarqube-sync.yaml
   - cronjob-dt-sync.yaml
+  - cronjob-sonarqube-sync.yaml
   - externalsecret-github-targets.yaml
   - externalsecret-sync.yaml

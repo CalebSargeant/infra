@@ -96,81 +96,60 @@ inputs = {
   # Automation-stitch webhook (chat/incident endpoint). Empty disables stitches.
   automation_webhook_url = get_env("FORTIGATE_AUTOMATION_WEBHOOK", "")
 
-  # --- Topology (PLACEHOLDER addressing — edit to your real scheme) ----------
-  # Interconnect /30s + cross-link /30s share 10.255.255.0/24:
-  #   FGT1<->FGT2 : 10.255.255.0/30  (FGT1 .1, FGT2 .2)
-  #   FGT2<->MT1  : 10.255.255.4/30  (FGT2 .5)   [cross-link]
-  #   FGT1<->MT2  : 10.255.255.8/30  (FGT1 .9)   [cross-link]
-  # Client space per site: 10.<site>.<vlanid>.0/24, summarised as a /16 for
-  # east-west routing. Site1 = 10.10.0.0/16, Site2 = 10.20.0.0/16.
-  # VLANs: 10 trusted, 20 iot, 30 guest, 99 mgmt.
+  # --- Shared dual-gateway topology -------------------------------------------
+  # Both FortiGates serve the SAME VLAN subnets (FG1 = .1, FG2 = .2); each has its
+  # own ISP/WAN. Managed over their WAN IPs (192.168.1.60 / .52) so a LAN reconfig
+  # can't lock us out. VLANs are tagged subinterfaces on the `lan` hard-switch and
+  # are inert until the MikroTik switches trunk them together. DHCP ranges are
+  # split (FG1 low / FG2 high) so the two coexist once the LANs are bridged.
+  # interconnect / crosslink / bgp are placeholders REQUIRED by the module but NOT
+  # applied (no FG<->FG cable, no OCI yet) — the apply targets only VLAN + DHCP.
+  # VLAN sizes: iot + sargeant (/25) > area51 + guest (/26) > mgmt (/27).
   fortigates = {
     fgt1 = {
-      hostname = get_env("FORTIGATE_FGT1_HOST", "192.168.1.99") # 40F default mgmt IP
+      hostname = get_env("FORTIGATE_FGT1_HOST", "192.168.1.60") # WAN (Starlink) mgmt
+      ports = {
+        wan          = "wan"
+        lan_mikrotik = "lan" # VLANs ride the lan hard-switch as tagged subinterfaces
+        interconnect = "lan2"
+        crosslink    = "lan3"
+      }
       vlans = {
-        trusted = { id = 10, ip = "10.10.10.1", dhcp_start = "10.10.10.100", dhcp_end = "10.10.10.200", trusted = true }
-        iot     = { id = 20, ip = "10.10.20.1", dhcp_start = "10.10.20.100", dhcp_end = "10.10.20.200" }
-        guest   = { id = 30, ip = "10.10.30.1", dhcp_start = "10.10.30.100", dhcp_end = "10.10.30.200" }
-        mgmt    = { id = 99, ip = "10.10.99.1", dhcp_start = "10.10.99.100", dhcp_end = "10.10.99.200" }
+        iot      = { id = 20, ip = "192.168.220.1", netmask = "255.255.255.128", dhcp_start = "192.168.220.10", dhcp_end = "192.168.220.60", vrip = "192.168.220.1", vrrp_priority = 200 }
+        sargeant = { id = 30, ip = "192.168.220.129", netmask = "255.255.255.128", dhcp_start = "192.168.220.140", dhcp_end = "192.168.220.190", vrip = "192.168.220.129", vrrp_priority = 200 }
+        area51   = { id = 10, ip = "192.168.221.1", netmask = "255.255.255.192", dhcp_start = "192.168.221.10", dhcp_end = "192.168.221.30", trusted = true, vrip = "192.168.221.1", vrrp_priority = 200 }
+        guest    = { id = 40, ip = "192.168.221.65", netmask = "255.255.255.192", dhcp_start = "192.168.221.70", dhcp_end = "192.168.221.90", vrip = "192.168.221.65", vrrp_priority = 200 }
+        mgmt     = { id = 99, ip = "192.168.221.129", netmask = "255.255.255.224", dhcp_start = "192.168.221.135", dhcp_end = "192.168.221.145", vrip = "192.168.221.129", vrrp_priority = 200 }
       }
-      interconnect = {
-        ip      = "10.255.255.1"
-        peer_ip = "10.255.255.2"
-      }
-      crosslink       = { ip = "10.255.255.9" } # to MikroTik2
-      peer_lan_subnet = "10.20.0.0/16"          # Site2 supernet
-
-      bgp_asn      = 65010
-      peer_bgp_asn = 65020 # FGT2
-
-      # OCI tunnel public IPs come from the oci/vpn-fortigate `tunnel_ips` output
-      # (fortigate1); BGP inside IPs match that leaf. Placeholders until live.
-      oci_vpn = {
-        tunnels = [
-          { name = "oci-t1", remote_gw = get_env("FORTIGATE_FGT1_OCI_T1", "192.0.2.1"), bgp_customer_ip = "169.254.22.2/30", bgp_oracle_ip = "169.254.22.1" },
-          { name = "oci-t2", remote_gw = get_env("FORTIGATE_FGT1_OCI_T2", "192.0.2.2"), bgp_customer_ip = "169.254.22.6/30", bgp_oracle_ip = "169.254.22.5" },
-        ]
-      }
-
-      remote_access = {
-        pool_start    = "10.10.250.1"
-        pool_end      = "10.10.250.50"
-        client_dns    = "10.10.10.1" # trusted VLAN gateway
-        split_include = "10.10.0.0/16"
-      }
+      # Deferred (required by the module, NOT applied yet):
+      interconnect    = { ip = "10.255.255.1", peer_ip = "10.255.255.2" }
+      crosslink       = { ip = "10.255.255.9" }
+      peer_lan_subnet = "192.168.220.0/22"
+      bgp_asn         = 65010
+      peer_bgp_asn    = 65020
     }
 
     fgt2 = {
-      hostname = get_env("FORTIGATE_FGT2_HOST", "192.168.1.98")
+      hostname = get_env("FORTIGATE_FGT2_HOST", "192.168.1.52") # WAN (Starlink) mgmt
+      ports = {
+        wan          = "wan"
+        lan_mikrotik = "lan"
+        interconnect = "lan2"
+        crosslink    = "lan3"
+      }
       vlans = {
-        trusted = { id = 10, ip = "10.20.10.1", dhcp_start = "10.20.10.100", dhcp_end = "10.20.10.200", trusted = true }
-        iot     = { id = 20, ip = "10.20.20.1", dhcp_start = "10.20.20.100", dhcp_end = "10.20.20.200" }
-        guest   = { id = 30, ip = "10.20.30.1", dhcp_start = "10.20.30.100", dhcp_end = "10.20.30.200" }
-        mgmt    = { id = 99, ip = "10.20.99.1", dhcp_start = "10.20.99.100", dhcp_end = "10.20.99.200" }
+        iot      = { id = 20, ip = "192.168.220.2", netmask = "255.255.255.128", dhcp_start = "192.168.220.70", dhcp_end = "192.168.220.120", vrip = "192.168.220.1", vrrp_priority = 100 }
+        sargeant = { id = 30, ip = "192.168.220.130", netmask = "255.255.255.128", dhcp_start = "192.168.220.200", dhcp_end = "192.168.220.250", vrip = "192.168.220.129", vrrp_priority = 100 }
+        area51   = { id = 10, ip = "192.168.221.2", netmask = "255.255.255.192", dhcp_start = "192.168.221.35", dhcp_end = "192.168.221.55", trusted = true, vrip = "192.168.221.1", vrrp_priority = 100 }
+        guest    = { id = 40, ip = "192.168.221.66", netmask = "255.255.255.192", dhcp_start = "192.168.221.95", dhcp_end = "192.168.221.115", vrip = "192.168.221.65", vrrp_priority = 100 }
+        mgmt     = { id = 99, ip = "192.168.221.130", netmask = "255.255.255.224", dhcp_start = "192.168.221.148", dhcp_end = "192.168.221.156", vrip = "192.168.221.129", vrrp_priority = 100 }
       }
-      interconnect = {
-        ip      = "10.255.255.2"
-        peer_ip = "10.255.255.1"
-      }
-      crosslink       = { ip = "10.255.255.5" } # to MikroTik1
-      peer_lan_subnet = "10.10.0.0/16"          # Site1 supernet
-
-      bgp_asn      = 65020
-      peer_bgp_asn = 65010 # FGT1
-
-      oci_vpn = {
-        tunnels = [
-          { name = "oci-t1", remote_gw = get_env("FORTIGATE_FGT2_OCI_T1", "192.0.2.3"), bgp_customer_ip = "169.254.23.2/30", bgp_oracle_ip = "169.254.23.1" },
-          { name = "oci-t2", remote_gw = get_env("FORTIGATE_FGT2_OCI_T2", "192.0.2.4"), bgp_customer_ip = "169.254.23.6/30", bgp_oracle_ip = "169.254.23.5" },
-        ]
-      }
-
-      remote_access = {
-        pool_start    = "10.20.250.1"
-        pool_end      = "10.20.250.50"
-        client_dns    = "10.20.10.1" # trusted VLAN gateway
-        split_include = "10.20.0.0/16"
-      }
+      # Deferred (required by the module, NOT applied yet):
+      interconnect    = { ip = "10.255.255.2", peer_ip = "10.255.255.1" }
+      crosslink       = { ip = "10.255.255.5" }
+      peer_lan_subnet = "192.168.220.0/22"
+      bgp_asn         = 65020
+      peer_bgp_asn    = 65010
     }
   }
 }

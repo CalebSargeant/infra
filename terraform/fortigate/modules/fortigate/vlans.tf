@@ -16,16 +16,18 @@ locals {
   vlan_entries = flatten([
     for fk, f in var.fortigates : [
       for vname, v in f.vlans : {
-        fgt        = fk
-        vlan       = vname
-        key        = "${fk}/${vname}"
-        id         = v.id
-        ip         = v.ip
-        netmask    = v.netmask
-        prefix_len = one([for p in range(0, 33) : p if cidrnetmask("0.0.0.0/${p}") == v.netmask])
-        dhcp_start = v.dhcp_start
-        dhcp_end   = v.dhcp_end
-        trusted    = v.trusted
+        fgt           = fk
+        vlan          = vname
+        key           = "${fk}/${vname}"
+        id            = v.id
+        ip            = v.ip
+        netmask       = v.netmask
+        prefix_len    = one([for p in range(0, 33) : p if cidrnetmask("0.0.0.0/${p}") == v.netmask])
+        dhcp_start    = v.dhcp_start
+        dhcp_end      = v.dhcp_end
+        trusted       = v.trusted
+        vrip          = v.vrip
+        vrrp_priority = v.vrrp_priority
       }
     ]
   ])
@@ -63,6 +65,22 @@ resource "fortios_system_interface" "vlan" {
   role        = "lan"
   allowaccess = var.lan_allowaccess
   description = "${local.marker} — VLAN ${each.value.id} (${each.value.vlan})"
+
+  # VRRP gateway redundancy (optional). Both FortiGates advertise the same virtual
+  # IP per VLAN; the higher-priority unit is master, the other backs it up — so
+  # clients keep one resilient default gateway across an FG failure. Skipped when
+  # vrip is null.
+  dynamic "vrrp" {
+    for_each = each.value.vrip != null ? [1] : []
+    content {
+      vrid     = each.value.id
+      version  = "2"
+      vrip     = each.value.vrip
+      priority = each.value.vrrp_priority
+      preempt  = "enable"
+      status   = "enable"
+    }
+  }
 }
 
 # --- Per-VLAN DHCP server --------------------------------------------------

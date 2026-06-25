@@ -16,4 +16,4 @@ permissions:
 
 jobs:
   chargate:
-    uses: magmamoose/chargate/.github/workflows/gate.yml@9e64603f83ca3cf5e03d4566903e4ae3f91613e9 # v2.0.2
+    uses: magmamoose/chargate/.github/workflows/gate.yml@2b4730444162a52b4cb89c1b7db743967616f427 # v2.5.1
