@@ -42,15 +42,12 @@ spec:
     # Prometheus configuration
     prometheus:
       prometheusSpec:
-        # Affinity to run on mini nodes only
-        affinity:
-          nodeAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              nodeSelectorTerms:
-              - matchExpressions:
-                - key: node-role.kubernetes.io/mini
-                  operator: Exists
-        
+        # Pin to the on-prem worker (ff-vm1) — holds the Longhorn-backed storage,
+        # must not drift onto the cloud nodes.
+        nodeSelector:
+          node-role.kubernetes.io/worker: ""
+          topology.sargeant.co/tier: on-prem
+
         # External labels for Thanos
         externalLabels:
           cluster: firefly
@@ -124,16 +121,17 @@ spec:
         userKey: admin-user
         passwordKey: admin-password
       
-      # Run Grafana on the worker, alongside the rest of observability
-      # (prometheus/loki/thanos/alertmanager). Migrated off ff-pi1's local-path
-      # PV to Longhorn (below), so it's no longer pinned to the system node.
+      # Run Grafana on the OCI cloud tier (native-cloud). Stateless aside from
+      # its Longhorn PVC, so it no longer needs to sit beside the on-prem worker.
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: node-role.kubernetes.io/worker
-                operator: Exists
+              - key: topology.sargeant.co/tier
+                operator: In
+                values:
+                - native-cloud
       # Recreate so the old pod releases the RWO PVC before the new one starts.
       deploymentStrategy:
         type: Recreate
@@ -273,15 +271,17 @@ spec:
         # /etc/alertmanager/secrets/slack-bot-token/token
         secrets:
           - slack-bot-token
-        # Affinity to run on mini nodes only
+        # Run Alertmanager on the OCI cloud tier (native-cloud).
         affinity:
           nodeAffinity:
             requiredDuringSchedulingIgnoredDuringExecution:
               nodeSelectorTerms:
               - matchExpressions:
-                - key: node-role.kubernetes.io/mini
-                  operator: Exists
-        
+                - key: topology.sargeant.co/tier
+                  operator: In
+                  values:
+                  - native-cloud
+
         storage:
           volumeClaimTemplate:
             spec:
@@ -302,10 +302,11 @@ spec:
     
     # Prometheus Operator
     prometheusOperator:
-      # Stateless observability controller — schedule on a worker, not the Pi
+      # Stateless observability controller — schedule on the on-prem worker, not the Pi
       # (the node-selectors/mini kustomize component can't reach Helm-rendered pods).
       nodeSelector:
         node-role.kubernetes.io/worker: ""
+        topology.sargeant.co/tier: on-prem
       resources:
         requests:
           cpu: 10m
@@ -339,9 +340,10 @@ spec:
     
     # Kube State Metrics resources
     kube-state-metrics:
-      # Stateless observability component — schedule on a worker, not the Pi.
+      # Stateless observability component — schedule on the on-prem worker, not the Pi.
       nodeSelector:
         node-role.kubernetes.io/worker: ""
+        topology.sargeant.co/tier: on-prem
       resources:
         requests:
           cpu: 10m

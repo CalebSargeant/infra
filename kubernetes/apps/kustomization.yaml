@@ -43,6 +43,7 @@ resources:
   # observability
   - ./alloy
   - ./blackbox-exporter
+  - ./blackbox-exporter-oci
   - ./fluent-bit
   - ./krr
   - ./kube-prometheus-stack

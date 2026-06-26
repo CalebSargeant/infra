@@ -27,6 +27,14 @@ spec:
     remediation:
       retries: 3
   values:
+    # Pin every controller pod (the VPN gateway AND the admission webhook) to the
+    # on-prem worker (ff-vm1). The gateway must stay on-prem and must NEVER drift
+    # onto the OCI native-cloud nodes. defaultPodOptions applies to all
+    # controllers; the webhook also carries an explicit override below.
+    defaultPodOptions:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+        topology.sargeant.co/tier: on-prem
     # Pods in `media` labeled `setGateway: "true"` get their default route
     # injected through this gateway (one shared Privado tunnel for all of them).
     routed_namespaces:
@@ -54,7 +62,8 @@ spec:
       webhook:
         pod:
           nodeSelector:
-            kubernetes.io/arch: amd64
+            node-role.kubernetes.io/worker: ""
+            topology.sargeant.co/tier: on-prem
       main:
         containers:
           gluetun:

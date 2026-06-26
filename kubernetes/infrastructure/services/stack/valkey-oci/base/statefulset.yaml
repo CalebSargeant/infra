@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: valkey-oci
+  namespace: database
+spec:
+  serviceName: valkey-oci
+  replicas: 1
+  selector:
+    matchLabels:
+      app: valkey-oci
+  template:
+    metadata:
+      labels:
+        app: valkey-oci
+    spec:
+      # The valkey image runs as the non-root `valkey` user (uid/gid 999) from
+      # the start (it can't chown a fresh Longhorn PV itself), so fsGroup makes
+      # /data group-writable — without it valkey CrashLoops on EACCES.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: valkey
+          # Redis-compatible cache pinned to the OCI native-cloud tier
+          # (ff-oci1/ff-oci2), for OCI-resident workloads that need a
+          # low-latency cache co-located with their nodes — the mirror of
+          # postgres-oci for the Redis side. Internal ClusterIP only (headless
+          # svc, database ns) — no auth, matching the shared valkey/CNPG tiers.
+          image: valkey/valkey:8.1-alpine
+          args:
+            # AOF persistence so queued Celery tasks survive a restart; never
+            # evict (a broker dropping keys = lost tasks).
+            - "--appendonly"
+            - "yes"
+            - "--maxmemory"
+            - "200mb"
+            - "--maxmemory-policy"
+            - "noeviction"
+          ports:
+            - name: valkey
+              containerPort: 6379
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          readinessProbe:
+            exec:
+              command: ["valkey-cli", "ping"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["valkey-cli", "ping"]
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: valkey-data
+              mountPath: /data
+      volumes:
+        - name: valkey-data
+          persistentVolumeClaim:
+            claimName: valkey-oci
