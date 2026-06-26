@@ -17,7 +17,7 @@ resources:
   - oauth2-proxy-emails.enc.yaml
   - auth-redirect.yaml
 #components:
-#  - ../../../../components/node-selectors/pi
+#  - ../../../../components/node-selectors/native-cloud
 #  - ../../../../components/ingress-standards/sargeant.co
 #  - ../../../../components/helm-release-standards/configmap-values
 

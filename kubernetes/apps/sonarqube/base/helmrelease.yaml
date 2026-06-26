@@ -25,11 +25,12 @@ spec:
     community:
       enabled: true
 
-    # Pin to the amd64 worker (ff-vm1). The chart isn't app-template, so the
-    # node-selectors/worker component's defaultPodOptions patch wouldn't apply —
-    # set nodeSelector directly.
+    # Pin to the on-prem worker (ff-vm1). The chart isn't app-template, so the
+    # node-selectors/worker-on-prem component's defaultPodOptions patch wouldn't
+    # apply — set nodeSelector directly.
     nodeSelector:
       node-role.kubernetes.io/worker: ""
+      topology.sargeant.co/tier: on-prem
 
     # Embedded Elasticsearch needs vm.max_map_count=524288; the chart's
     # privileged init container sets it (default-on, restated for clarity).

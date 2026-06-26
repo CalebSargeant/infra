@@ -35,4 +35,4 @@ components:
   # rather than via a resource-profile t-shirt component — see the rationale
   # comment there: ~55Mi idle, request trimmed to 256Mi, 2Gi limit kept for
   # terragrunt plan spikes, no CPU limit.
-  - ../../../../components/node-selectors/worker
+  - ../../../../components/node-selectors/native-cloud

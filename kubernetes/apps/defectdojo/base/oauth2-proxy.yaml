@@ -13,9 +13,10 @@ spec:
       labels:
         app: oauth2-proxy
     spec:
-      # Stateless — pin to the worker node like everything else here.
+      # Stateless — pin to the on-prem worker node like everything else here.
       nodeSelector:
         node-role.kubernetes.io/worker: ""
+        topology.sargeant.co/tier: on-prem
       containers:
         - name: oauth2-proxy
           image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0

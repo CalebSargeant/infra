@@ -55,3 +55,19 @@ spec:
   dependsOn:
     - name: prod-chargate-source
     - name: infrastructure-services
+  # Pin the externally-sourced workload to the cloud-worker tier (ff-oci*).
+  patches:
+    - target:
+        kind: Deployment
+      patch: |
+        - op: add
+          path: /spec/template/spec/nodeSelector
+          value:
+            topology.sargeant.co/tier: native-cloud
+    - target:
+        kind: CronJob
+      patch: |
+        - op: add
+          path: /spec/jobTemplate/spec/template/spec/nodeSelector
+          value:
+            topology.sargeant.co/tier: native-cloud
