@@ -17,7 +17,7 @@ spec:
           restartPolicy: Never
           automountServiceAccountToken: false
           nodeSelector:
-            type: mini
+            topology.sargeant.co/tier: native-cloud
           containers:
             - name: recyclarr
               # Pinned to v7: v8 removed TRaSH `include: template:` support.

@@ -29,6 +29,12 @@ spec:
       valuesKey: sshKey
       targetPath: git.sshKey
   values:
+    # Pin to the native-cloud tier (OCI free-tier ARM workers ff-oci1/ff-oci2).
+    # This chart reads .Values.nodeSelector directly (templates/deployment.yaml),
+    # NOT app-template's defaultPodOptions, so the node-selectors kustomize
+    # Component can't target it — set the tier label inline here instead.
+    nodeSelector:
+      topology.sargeant.co/tier: native-cloud
     image:
       # Chart's appVersion is the agent's __version__, but the release pipeline
       # re-tags the image with 1.X.Y per release. This tag is auto-bumped within
