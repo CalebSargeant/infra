@@ -14,4 +14,4 @@ components:
   # pinned to the worker node. (DaemonSet + worker selector => runs only on ff-vm1.)
   # hostNetwork stays — the worker (.13) is on the same /24 as the Pi (.10) so
   # mDNS still works; HomeKit/device pairings persist in the migrated /config/.storage.
-  - ../../../../components/node-selectors/worker
+  - ../../../../components/node-selectors/worker-on-prem
