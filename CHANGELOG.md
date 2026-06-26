@@ -2,6 +2,31 @@
 
 <!-- version list -->
 
+## v1.72.0 (2026-06-26)
+
+### Chores
+
+- **media**: Bump image tags
+  ([`d1d8d6f`](https://github.com/CalebSargeant/infra/commit/d1d8d6ff94a5ddee1fd6a7b25217b9053a79dfa3))
+
+- **media**: Bump image tags
+  ([`df34fa7`](https://github.com/CalebSargeant/infra/commit/df34fa7627e047293284d4c487dec39d96bf3d76))
+
+### Features
+
+- **k8s**: Pin external-repo apps to the cloud-worker tier
+  ([#442](https://github.com/CalebSargeant/infra/pull/442),
+  [`65e3735`](https://github.com/CalebSargeant/infra/commit/65e373539625b1cd6c83886f668075ebbfb75fcd))
+
+- **k8s**: Tier more apps; remove retired apps
+  ([#442](https://github.com/CalebSargeant/infra/pull/442),
+  [`65e3735`](https://github.com/CalebSargeant/infra/commit/65e373539625b1cd6c83886f668075ebbfb75fcd))
+
+- **k8s**: Tier workload placement across on-prem and cloud workers
+  ([#442](https://github.com/CalebSargeant/infra/pull/442),
+  [`65e3735`](https://github.com/CalebSargeant/infra/commit/65e373539625b1cd6c83886f668075ebbfb75fcd))
+
+
 ## v1.71.3 (2026-06-25)
 
 ### Bug Fixes
