@@ -7,10 +7,12 @@ resources:
 components:
   - ../../../../components/node-selectors/mini
 patches:
-  # Loki resources — right-sized: observed ~224Mi steady-state, so request 512Mi
-  # (frees scheduling headroom) with a generous 1Gi limit to absorb WAL-replay /
-  # catch-up spikes without OOM. No CPU limit (avoids CFS throttling on the 16-core
-  # node). Ingester back-pressure + ingestion rate limits in the Loki config
+  # Loki resources. Steady-state is ~224Mi, but the 1Gi limit was too tight: WAL
+  # replay / compaction spikes blew past it and OOMKilled the pod (exit 137, 239
+  # restarts), and each OOM made the next WAL replay larger — a vicious cycle.
+  # Raised the limit to 3Gi (ff-vm1 has ample headroom) to absorb those spikes and
+  # break the loop; request stays modest for scheduling. No CPU limit (avoids CFS
+  # throttling). Ingester back-pressure + ingestion rate limits in the Loki config
   # (configmap.enc.yaml) bound steady-state memory.
   - patch: |
       - op: replace
@@ -18,9 +20,9 @@ patches:
         value:
           requests:
             cpu: 350m
-            memory: 512Mi
+            memory: 768Mi
           limits:
-            memory: 1Gi
+            memory: 3Gi
     target:
       kind: StatefulSet
       labelSelector: "app.kubernetes.io/name=loki"
