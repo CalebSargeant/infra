@@ -55,6 +55,16 @@ data:
         transport: streamable-http
         headers:
           Authorization: "Bearer ${HA_MCP_TOKEN}"
+      # In-cluster n8n MCP (czlonkowski/n8n-mcp, MCP_MODE=http) — full workflow
+      # CRUD over n8n via its Public API. Reached east-west on the ClusterIP (the
+      # public edge route n8n.magmamoose.com/mcp is gated by Cloudflare Access and
+      # not used from in-cluster). Bearer = the app-layer AUTH_TOKEN (OCI Vault
+      # n8n-mcp-auth-token), substituted from the N8N_MCP_AUTH_TOKEN env at load.
+      n8n:
+        url: http://n8n-mcp.automation.svc.cluster.local:3000/mcp
+        transport: streamable-http
+        headers:
+          Authorization: "Bearer ${N8N_MCP_AUTH_TOKEN}"
 
     dashboard:
       host: 0.0.0.0
