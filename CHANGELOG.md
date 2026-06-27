@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.74.1 (2026-06-27)
+
+### Bug Fixes
+
+- **hermes**: Pin to on-prem amd64 worker (image is amd64-only)
+  ([#449](https://github.com/CalebSargeant/infra/pull/449),
+  [`d06b8fa`](https://github.com/CalebSargeant/infra/commit/d06b8fa4acdefcfbb079ec8689184187e22f33cd))
+
+- **loki**: Raise memory limit 1Gi->3Gi to stop OOM crashloop
+  ([#448](https://github.com/CalebSargeant/infra/pull/448),
+  [`f0ea4dc`](https://github.com/CalebSargeant/infra/commit/f0ea4dc2f2085e844acafde316f25f7f13f79969))
+
+
 ## v1.74.0 (2026-06-27)
 
 ### Features
