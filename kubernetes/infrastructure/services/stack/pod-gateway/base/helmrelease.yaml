@@ -65,6 +65,13 @@ spec:
             node-role.kubernetes.io/worker: ""
             topology.sargeant.co/tier: on-prem
       main:
+        # The chart does NOT apply defaultPodOptions to the main controller (only the
+        # webhook picked it up via its explicit override), so the gateway kept landing
+        # on the control-plane node ff-pi1. Pin it explicitly, like the webhook.
+        pod:
+          nodeSelector:
+            node-role.kubernetes.io/worker: ""
+            topology.sargeant.co/tier: on-prem
         containers:
           gluetun:
             enabled: true
