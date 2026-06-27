@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.74.0 (2026-06-27)
+
+### Features
+
+- **hermes**: Replace OpenClaw assistant with Nous Research Hermes Agent
+  ([#447](https://github.com/CalebSargeant/infra/pull/447),
+  [`c109408`](https://github.com/CalebSargeant/infra/commit/c1094089ac660e64cd080641484e8fe80fa99007))
+
+
 ## v1.73.2 (2026-06-27)
 
 ### Bug Fixes
