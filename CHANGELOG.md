@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.73.0 (2026-06-27)
+
+### Bug Fixes
+
+- **oci**: Admit k3s data-plane traffic to the OCI cloud-worker nodes
+  ([#443](https://github.com/CalebSargeant/infra/pull/443),
+  [`95d5a00`](https://github.com/CalebSargeant/infra/commit/95d5a00bb9e245b9b3f253e6d024b43534b9d7d2))
+
+### Features
+
+- **oci**: Split monitoring to cloud tier; add valkey-oci + blackbox-oci; pin pod-gateway on-prem
+  ([#444](https://github.com/CalebSargeant/infra/pull/444),
+  [`02c8094`](https://github.com/CalebSargeant/infra/commit/02c8094ef5206738b349307233e2c163a9395e13))
+
+
 ## v1.72.0 (2026-06-26)
 
 ### Chores
