@@ -4,6 +4,7 @@ resources:
   # automation
   - ./atlantis
   - ./browserless
+  - ./hermes
   - ./homeassistant
   - ./homebridge
   - ./git-pull-request-dashboard
@@ -11,7 +12,6 @@ resources:
   - ./mikrotik-minder
   - ./n8n
   - ./n8n-mcp
-  - ./openclaw
   - ./renovate
   # magmamoose products (open-core; external-repo + image automation)
   - ./caldrith

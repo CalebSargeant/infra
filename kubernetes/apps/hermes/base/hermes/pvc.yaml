@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hermes
+  namespace: automation
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  # Longhorn (replicated, node-independent) so Hermes runs on the worker instead
+  # of being pinned to ff-pi1's local storage. /opt/data holds config + sessions +
+  # memories + skills + logs.
+  storageClassName: longhorn

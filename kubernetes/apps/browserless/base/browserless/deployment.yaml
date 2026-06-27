@@ -16,7 +16,7 @@ spec:
       containers:
         - name: browserless
           # Shared headless-Chromium service (CDP/WebSocket) for any in-cluster or
-          # LAN Playwright/Puppeteer client (OpenClaw, n8n, ...). Multi-arch image;
+          # LAN Playwright/Puppeteer client (Hermes, n8n, ...). Multi-arch image;
           # pinned to ff-vm1 (type=mini, amd64) via the node-selector component.
           image: ghcr.io/browserless/chromium:v2.52.1
           ports:
