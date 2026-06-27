@@ -7,13 +7,14 @@ resources:
 components:
   - ../../../../components/node-selectors/mini
 patches:
-  # Loki resources. Steady-state is ~224Mi, but the 1Gi limit was too tight: WAL
-  # replay / compaction spikes blew past it and OOMKilled the pod (exit 137, 239
-  # restarts), and each OOM made the next WAL replay larger — a vicious cycle.
-  # Raised the limit to 3Gi (ff-vm1 has ample headroom) to absorb those spikes and
-  # break the loop; request stays modest for scheduling. No CPU limit (avoids CFS
-  # throttling). Ingester back-pressure + ingestion rate limits in the Loki config
-  # (configmap.enc.yaml) bound steady-state memory.
+  # Loki resources. Steady-state is ~224Mi, but a too-tight limit OOMKilled the pod
+  # (exit 137) during WAL replay, and each OOM grew the next replay — a vicious
+  # cycle that hit 298 restarts. 1Gi→3Gi wasn't enough to replay the accumulated
+  # WAL backlog (still OOMed at 3Gi); 8Gi gives the one-time replay enough headroom
+  # to flush through and break the loop (ff-vm1 has ~30GiB; the limit only caps,
+  # steady-state stays ~600Mi). Request stays modest for scheduling. No CPU limit
+  # (avoids CFS throttling). Proper long-term fix: set the Loki ingester
+  # `wal.replay_memory_ceiling` in configmap.enc.yaml so replay self-bounds.
   - patch: |
       - op: replace
         path: /spec/template/spec/containers/0/resources
@@ -22,7 +23,7 @@ patches:
             cpu: 350m
             memory: 768Mi
           limits:
-            memory: 3Gi
+            memory: 8Gi
     target:
       kind: StatefulSet
       labelSelector: "app.kubernetes.io/name=loki"
