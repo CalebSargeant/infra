@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.73.1 (2026-06-27)
+
+### Bug Fixes
+
+- **oci**: Disable flannel.1 tx-checksum offload on cloud nodes
+  ([#445](https://github.com/CalebSargeant/infra/pull/445),
+  [`b05f254`](https://github.com/CalebSargeant/infra/commit/b05f254f26c6f471e4262df6859977e18c61b94e))
+
+
 ## v1.73.0 (2026-06-27)
 
 ### Bug Fixes
