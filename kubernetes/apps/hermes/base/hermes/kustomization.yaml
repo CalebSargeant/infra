@@ -8,6 +8,8 @@ resources:
   - service.yaml
   - ingress.yaml
 components:
-  # Runs on the worker node (k3s agent) instead of the Pi (system node); state is
-  # on Longhorn so the pod is not pinned to ff-pi1.
-  - ../../../../components/node-selectors/native-cloud
+  # Pin to the ON-PREM worker (ff-vm1, amd64), not native-cloud: the upstream
+  # nousresearch/hermes-agent image is amd64-only, so on the arm64 OCI nodes it
+  # CrashLoops with an OCI-runtime exec error. State is on Longhorn, so it's not
+  # pinned to ff-pi1 either.
+  - ../../../../components/node-selectors/worker-on-prem
