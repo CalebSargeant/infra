@@ -127,7 +127,7 @@ data:
       master_key: os.environ/LITELLM_MASTER_KEY
       # Dedicated header for the proxy master key. The nginx auth-proxy maps
       # OpenAI-style `Authorization: Bearer` onto this header for OpenAI-protocol
-      # clients (Warp, Codex, OpenClaw, the OpenAI SDK).
+      # clients (Warp, Codex, Hermes, the OpenAI SDK).
       litellm_key_header_name: x-litellm-api-key
     litellm_settings:
       drop_params: true

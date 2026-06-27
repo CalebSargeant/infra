@@ -1,0 +1,166 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hermes
+  namespace: automation
+spec:
+  replicas: 1
+  # Single stateful instance on an RWO Longhorn volume — never run two at once.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: hermes
+  template:
+    metadata:
+      annotations:
+        # Rolls the pod (→ re-seed) whenever the git-managed config.yaml changes.
+        # sha256 of kubernetes/apps/hermes/base/hermes/configmap.yaml.
+        checksum/config: 42bb285a138a49481728618585d1ac021c63d509569f51393d558c0bce7fc50e
+      labels:
+        app: hermes
+    spec:
+      initContainers:
+        # OVERWRITE config.yaml from the ConfigMap on every boot — this file is
+        # git-managed (Hermes keeps non-secret behaviour in config.yaml; sessions/
+        # memories/skills/logs live in sibling dirs under /opt/data). Same image as
+        # the app so it runs as the same user and the seeded file is owned correctly.
+        - name: seed-config
+          image: nousresearch/hermes-agent:v2026.6.19
+          command:
+            - sh
+            - -c
+            - 'cp -f /seed/config.yaml "$HERMES_HOME/config.yaml"'
+          env:
+            - name: HERMES_HOME
+              value: /opt/data
+          volumeMounts:
+            - name: seed
+              mountPath: /seed
+              readOnly: true
+            - name: state
+              mountPath: /opt/data
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+      containers:
+        - name: hermes
+          image: nousresearch/hermes-agent:v2026.6.19
+          # `gateway run` is the container's main process: it connects the enabled
+          # channels (Telegram/Slack) and serves the OpenAI-compatible API + health
+          # endpoint on :8642. The dashboard (Control UI) runs on :9119 because
+          # HERMES_DASHBOARD=1.
+          command:
+            - gateway
+            - run
+          ports:
+            - name: api
+              containerPort: 8642
+            - name: dashboard
+              containerPort: 9119
+          env:
+            # All persistent state (config.yaml, .env, sessions, memories, skills,
+            # logs) lives under HERMES_HOME on the Longhorn PVC.
+            - name: HERMES_HOME
+              value: /opt/data
+            - name: TZ
+              value: Europe/Amsterdam
+            # --- Model: in-cluster LiteLLM gateway (OpenAI-compatible). Mirrors the
+            # config.yaml model block; OPENAI_API_KEY is the LiteLLM master key. ---
+            - name: HERMES_INFERENCE_MODEL
+              value: claude-sonnet-4-6
+            - name: OPENAI_BASE_URL
+              value: http://litellm.automation.svc.cluster.local:8080/v1
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes
+                  key: litellm-api-key
+            # --- Web dashboard (LAN Control UI). Basic auth on a trusted LAN; the
+            # password + HMAC session secret reuse the gateway-token vault entry. ---
+            - name: HERMES_DASHBOARD
+              value: "1"
+            - name: HERMES_DASHBOARD_BASIC_AUTH_USERNAME
+              value: caleb
+            - name: HERMES_DASHBOARD_BASIC_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hermes
+                  key: gateway-token
+            - name: HERMES_DASHBOARD_BASIC_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: hermes
+                  key: gateway-token
+            # --- OpenAI-compatible API server + health endpoint (:8642). ---
+            - name: API_SERVER_ENABLED
+              value: "true"
+            - name: API_SERVER_HOST
+              value: 0.0.0.0
+            - name: API_SERVER_PORT
+              value: "8642"
+            - name: API_SERVER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes
+                  key: gateway-token
+            # --- Telegram (@NievahBot), allowlisted to the owner's TG id. ---
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hermes
+                  key: telegram-bot-token
+            - name: TELEGRAM_ALLOWED_USERS
+              value: "8489671466"
+            # --- Slack Socket Mode (bot xoxb + app-level xapp tokens). Channel
+            # access + DM policy are managed by the Slack app config / Hermes
+            # runtime (no SLACK_ALLOWED_* env exists); OpenClaw's dmPolicy=pairing
+            # is not reproduced here — revisit if Slack DMs need tighter gating. ---
+            - name: SLACK_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hermes
+                  key: slack-bot-token
+            - name: SLACK_APP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hermes
+                  key: slack-app-token
+            # --- Home Assistant MCP bearer (substituted into ${HA_MCP_TOKEN}). ---
+            - name: HA_MCP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hermes
+                  key: ha-mcp-token
+          resources:
+            # Python agent — heavier than the old Node assistant. Inline sizing, no
+            # CPU limit (CFS-throttle false alarms); revisit from KRR once it has run.
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              memory: 2Gi
+          readinessProbe:
+            tcpSocket:
+              port: 8642
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8642
+            initialDelaySeconds: 45
+            periodSeconds: 30
+          volumeMounts:
+            # State + config + sessions + memories + skills + logs (writable).
+            - name: state
+              mountPath: /opt/data
+      volumes:
+        - name: seed
+          configMap:
+            name: hermes-config
+        - name: state
+          persistentVolumeClaim:
+            claimName: hermes

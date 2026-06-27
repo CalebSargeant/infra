@@ -2,11 +2,11 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: prod-openclaw
+  name: prod-hermes
   namespace: flux-system
 spec:
   interval: 10m
-  path: ./kubernetes/apps/openclaw/base/openclaw
+  path: ./kubernetes/apps/hermes/base/hermes
   prune: true
   sourceRef:
     kind: GitRepository

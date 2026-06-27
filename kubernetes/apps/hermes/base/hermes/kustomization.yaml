@@ -8,6 +8,6 @@ resources:
   - service.yaml
   - ingress.yaml
 components:
-  # Migrated off ff-pi1: static hostPath pv.yaml dropped, pvc.yaml now Longhorn,
-  # pinned to the worker node (k3s agent) instead of the Pi (system node).
+  # Runs on the worker node (k3s agent) instead of the Pi (system node); state is
+  # on Longhorn so the pod is not pinned to ff-pi1.
   - ../../../../components/node-selectors/native-cloud
