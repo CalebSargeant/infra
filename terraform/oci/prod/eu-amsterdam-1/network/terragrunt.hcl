@@ -91,6 +91,19 @@ inputs = {
       cidr        = "10.19.19.0/29"
       description = "FortiGate FG1 lifeline transit segment"
     }
+    # k3s cluster CIDRs — the OCI nodes are members of the on-prem k3s cluster
+    # over the tunnel, so the VCN must admit (and return-route) pod/service
+    # traffic. Without these, pod-sourced traffic from on-prem to the OCI nodes
+    # is dropped at the cloud edge. (The OCI VMs' own host firewall must also
+    # admit it — see the oci-node-firewall DaemonSet.)
+    cluster_pods = {
+      cidr        = "10.42.0.0/16"
+      description = "k3s pod CIDR (flannel)"
+    }
+    cluster_services = {
+      cidr        = "10.43.0.0/16"
+      description = "k3s service CIDR"
+    }
     franklinhouse_oci = {
       cidr        = "192.168.72.0/24"
       description = "FranklinHouse OCI Johannesburg (DRG peering)"

@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: oci-node-firewall
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: oci-node-firewall
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: oci-node-firewall
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: oci-node-firewall
+    spec:
+      # OCI's Ubuntu cloud image ships a default host iptables ruleset that only
+      # admits SSH/ICMP/established and DROPs everything else inbound — which
+      # silently blocks the k3s data plane (kubelet :10250, flannel VXLAN
+      # :8472/udp, and pod/service-CIDR traffic). The OCI cloud security
+      # list/NSG already permit it; the VM's own firewall is the blocker. Left
+      # unfixed, metrics-server can't scrape the OCI kubelets and NO pod
+      # traffic crosses the tunnel to/from these nodes.
+      #
+      # The init container nsenters the host namespaces (pods share the host's
+      # initial user ns, so a privileged write is node-wide) and inserts ACCEPT
+      # rules for the cluster + node CIDRs, then persists them. The pause
+      # container holds the pod Running so kubelet re-runs the init on every
+      # (re)start — making the fix durable across reboots and node rebuilds.
+      # Only targets the native-cloud (OCI) tier.
+      automountServiceAccountToken: false
+      priorityClassName: system-node-critical
+      hostPID: true
+      hostNetwork: true
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.sargeant.co/tier
+                    operator: In
+                    values:
+                      - native-cloud
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
+      initContainers:
+        - name: firewall
+          image: busybox:1.37.0
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          command:
+            - nsenter
+            - "-t"
+            - "1"
+            - "-m"
+            - "-u"
+            - "-i"
+            - "-n"
+            - "--"
+            - sh
+            - -c
+            - |
+              set -eu
+              for c in 10.42.0.0/16 10.43.0.0/16 192.168.19.0/24 192.168.223.0/24; do
+                iptables -C INPUT -s "$c" -j ACCEPT 2>/dev/null || iptables -I INPUT 1 -s "$c" -j ACCEPT
+              done
+              netfilter-persistent save 2>/dev/null || { mkdir -p /etc/iptables; iptables-save > /etc/iptables/rules.v4; }
+              echo "oci-node-firewall applied on $(hostname)"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 32Mi
+      containers:
+        - name: pause
+          image: registry.k8s.io/pause:3.10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 32Mi
