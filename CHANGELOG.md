@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.74.3 (2026-06-27)
+
+### Bug Fixes
+
+- **loki**: Raise memory limit 3Gi->8Gi for WAL-replay backlog
+  ([#451](https://github.com/CalebSargeant/infra/pull/451),
+  [`7d3378b`](https://github.com/CalebSargeant/infra/commit/7d3378bb1dd3f7f5ff57164d79ab7752ddad46a3))
+
+
 ## v1.74.2 (2026-06-27)
 
 ### Bug Fixes
