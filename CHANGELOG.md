@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v1.73.2 (2026-06-27)
+
+### Bug Fixes
+
+- **cluster**: Keep ff-pi1 a pure system node — pin trivy/postgres/pod-gateway to the on-prem worker
+  ([#446](https://github.com/CalebSargeant/infra/pull/446),
+  [`5bbe119`](https://github.com/CalebSargeant/infra/commit/5bbe119f4d39cc5ec2d58afe6ca87792fa55d2bb))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`786e0e7`](https://github.com/CalebSargeant/infra/commit/786e0e7969b48683726c43e7818926cd47840a29))
+
+
 ## v1.73.1 (2026-06-27)
 
 ### Bug Fixes
