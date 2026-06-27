@@ -7,6 +7,18 @@ metadata:
 spec:
   instances: 3
 
+  # Pin all instances to the on-prem worker (ff-vm1) and OFF the control-plane node
+  # ff-pi1. CNPG's default required pod-anti-affinity was spreading instances across
+  # nodes, sending postgres-3 to ff-pi1 where it sat Pending (the Pi is a pure
+  # system node). Storage is node-local (local-path), so instances must stay on the
+  # on-prem worker; disabling anti-affinity lets all three co-locate there. HA/DR is
+  # covered by the CNPG OCI S3 backups below, not by node spread.
+  affinity:
+    nodeSelector:
+      node-role.kubernetes.io/worker: ""
+      topology.sargeant.co/tier: on-prem
+    enablePodAntiAffinity: false
+
   postgresql:
     parameters:
       max_connections: "200"

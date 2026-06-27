@@ -29,8 +29,18 @@ spec:
     nodeSelector:
       node-role.kubernetes.io/worker: ""
     operator:
+      # Cap concurrent scan Jobs (chart default is 10). Unbounded, trivy spawned
+      # 6+ scans at once and pegged a node's CPU.
+      scanJobsConcurrentLimit: 3
+    trivyOperator:
+      # Scan-job POD placement lives under `trivyOperator`, NOT `operator`, in this
+      # chart (v0.33.2). The previous `operator.scanJobNodeSelector` was silently
+      # ignored, so scan Jobs got NO nodeSelector and piled onto the control-plane
+      # node ff-pi1 (which has no worker label), pegging its CPU to ~86% and causing
+      # NodeNotReady flaps. Pin scan Jobs to the on-prem worker (ff-vm1).
       scanJobNodeSelector:
         node-role.kubernetes.io/worker: ""
+        topology.sargeant.co/tier: on-prem
     # The cluster's kube-prometheus-stack scrapes all monitors.
     serviceMonitor:
       enabled: true
