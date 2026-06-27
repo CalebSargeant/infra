@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: oci-flannel-csum-offload
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: oci-flannel-csum-offload
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: oci-flannel-csum-offload
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: oci-flannel-csum-offload
+    spec:
+      # The OCI nodes reach CoreDNS (single replica, on-prem ff-pi1) over the
+      # flannel VXLAN tunnel. On these nodes' virtio NIC, the flannel.1 VXLAN
+      # device has tx-checksum-ip-generic offload ON, which computes a BAD
+      # checksum for VXLAN-encapsulated UDP — so the receiver silently drops
+      # the packet. TCP is unaffected (different offload/csum path), which is
+      # why on these nodes pod->CoreDNS:53/TCP works but UDP cluster DNS fails
+      # 5/5 (getaddrinfo EAI_AGAIN for *.svc.cluster.local). This is the classic
+      # flannel-VXLAN-over-virtio "DNS broken, TCP fine" bug; the on-prem nodes
+      # don't hit it, so it's strictly the cloud (native-cloud) tier.
+      #
+      # Fix: disable tx-checksum offload on flannel.1 so the kernel computes the
+      # checksum in software (correctly). The loop re-applies every 60s because
+      # flannel.1 is destroyed/recreated whenever flannel (k3s-agent) restarts —
+      # which would NOT restart this pod, so an init-once pattern would silently
+      # regress. Cheap and idempotent. Only targets the native-cloud (OCI) tier.
+      automountServiceAccountToken: false
+      priorityClassName: system-node-critical
+      hostPID: true
+      hostNetwork: true
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.sargeant.co/tier
+                    operator: In
+                    values:
+                      - native-cloud
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
+      containers:
+        - name: flannel-csum
+          image: busybox:1.37.0
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          command:
+            - nsenter
+            - "-t"
+            - "1"
+            - "-m"
+            - "-u"
+            - "-i"
+            - "-n"
+            - "--"
+            - sh
+            - -c
+            - |
+              last=""
+              while true; do
+                if [ -d /sys/class/net/flannel.1 ]; then
+                  ethtool -K flannel.1 tx-checksum-ip-generic off 2>/dev/null || true
+                  ethtool -K flannel.1 tx-udp_tnl-csum-segmentation off 2>/dev/null || true
+                  ethtool -K flannel.1 tx-udp_tnl-segmentation off 2>/dev/null || true
+                  now=$(ethtool -k flannel.1 2>/dev/null | grep tx-checksum-ip-generic)
+                  if [ "$now" != "$last" ]; then
+                    echo "flannel.1 offload on $(hostname): $now"
+                    last="$now"
+                  fi
+                fi
+                sleep 60
+              done
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 32Mi
