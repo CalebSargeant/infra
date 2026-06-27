@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.74.2 (2026-06-27)
+
+### Bug Fixes
+
+- **hermes**: Use args not command for gateway run; wire in-cluster n8n MCP
+  ([#450](https://github.com/CalebSargeant/infra/pull/450),
+  [`e7e7d8f`](https://github.com/CalebSargeant/infra/commit/e7e7d8f3ef4f1f7556d4e1be4256488f25ed9c02))
+
+
 ## v1.74.1 (2026-06-27)
 
 ### Bug Fixes
