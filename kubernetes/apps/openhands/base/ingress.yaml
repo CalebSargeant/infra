@@ -1,0 +1,43 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openhands
+  namespace: openhands
+  labels:
+    app: openhands
+  annotations:
+    # LAN-only (openhands.sargeant.co -> Traefik LB on a private 192.168.x IP), DNS-01
+    # issuer. NOT on the public Cloudflare tunnel: this agent autonomously edits code and
+    # acts as you on GitHub — it stays on the LAN. Same pattern as litellm/hermes.
+    cert-manager.io/cluster-issuer: letsencrypt-dns
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/service.serversscheme: http
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: openhands.sargeant.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: openhands
+                port:
+                  number: 3000
+    - host: openhands.sargeant.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: openhands
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+        - openhands.sargeant.co
+      secretName: openhands-tls
