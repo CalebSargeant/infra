@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v1.75.0 (2026-06-28)
+
+### Chores
+
+- **media**: Bump image tags
+  ([`a0871c1`](https://github.com/CalebSargeant/infra/commit/a0871c1738cdffbe2115430b6a78c909685f3fb9))
+
+### Features
+
+- **holmesgpt**: Deploy HolmesGPT ops/incident-investigation agent
+  ([#454](https://github.com/CalebSargeant/infra/pull/454),
+  [`40d9973`](https://github.com/CalebSargeant/infra/commit/40d9973da5aa66c26b92921767b8bce477b1821b))
+
+- **openhands**: Add dormant OpenHands dev-engine scaffold (not deployed)
+  ([#455](https://github.com/CalebSargeant/infra/pull/455),
+  [`d00b65f`](https://github.com/CalebSargeant/infra/commit/d00b65fd524cc731e033a62d1feb70ec65540a40))
+
+
 ## v1.74.5 (2026-06-28)
 
 ### Bug Fixes
