@@ -45,6 +45,7 @@ resources:
   - ./blackbox-exporter
   - ./blackbox-exporter-oci
   - ./fluent-bit
+  - ./holmesgpt
   - ./krr
   - ./kube-prometheus-stack
   - ./loki
