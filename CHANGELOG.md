@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.74.4 (2026-06-28)
+
+### Bug Fixes
+
+- **authentik**: Wire DB host via global.env + pin on-prem
+  ([#452](https://github.com/CalebSargeant/infra/pull/452),
+  [`2618f3d`](https://github.com/CalebSargeant/infra/commit/2618f3d50e35584620d2413af2735d2ac9e07ac1))
+
+
 ## v1.74.3 (2026-06-27)
 
 ### Bug Fixes
