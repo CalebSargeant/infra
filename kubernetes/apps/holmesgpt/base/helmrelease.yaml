@@ -1,0 +1,81 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: holmesgpt
+  namespace: holmesgpt
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: holmes
+      version: "0.33.0"
+      sourceRef:
+        kind: HelmRepository
+        name: robusta
+        namespace: flux-system
+      interval: 10m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    # HolmesGPT — the OPS / incident-investigation engine. It reads k8s state, logs, and
+    # Prometheus to root-cause problems; it is read-only and does NOT touch GitHub/PRs
+    # (that's Nievah/OpenHands). Multiarch image, so no node pinning needed.
+
+    # All inference goes through the in-cluster LiteLLM gateway (single entry point for
+    # billing/keys). modelList is a litellm model registry: `openai/<name>` + the :8080
+    # OpenAI-compat proxy + the master key (Bearer -> x-litellm-api-key inside the proxy).
+    modelList:
+      claude-sonnet-4-6:
+        model: openai/claude-sonnet-4-6
+        api_base: http://litellm.automation.svc.cluster.local:8080/v1
+        api_key: "{{ env.LITELLM_MASTER_KEY }}"
+      claude-opus-4-8:
+        model: openai/claude-opus-4-8
+        api_base: http://litellm.automation.svc.cluster.local:8080/v1
+        api_key: "{{ env.LITELLM_MASTER_KEY }}"
+
+    # PROMETHEUS_URL points the prometheus/metrics toolset at the kube-prometheus-stack
+    # Prometheus (observability ns). LITELLM_MASTER_KEY is injected from the ExternalSecret.
+    additionalEnvVars:
+      - name: PROMETHEUS_URL
+        value: http://kube-prometheus-stack-prometheus.observability.svc.cluster.local:9090
+    additional_env_froms:
+      - secretRef:
+          name: holmesgpt-litellm
+
+    # Investigation toolsets. robusta (the Robusta SaaS platform) is disabled — we run the
+    # standalone agent. kubernetes + prometheus + bash give it what it needs to diagnose.
+    toolsets:
+      kubernetes/core:
+        enabled: true
+      kubernetes/logs:
+        enabled: true
+      prometheus/metrics:
+        enabled: true
+      bash:
+        enabled: true
+        config:
+          builtin_allowlist: "extended"
+      robusta:
+        enabled: false
+
+    # Read access to the cluster for the kubernetes toolset (chart creates the SA + RBAC).
+    createServiceAccount: true
+
+    # Operator (HealthCheck/ScheduledHealthCheck CRDs for 24/7 detection) OFF for now —
+    # this deploys Holmes as an on-demand investigation API (reachable in-cluster, e.g. by
+    # Hermes). Enable later for scheduled health checks.
+    operator:
+      enabled: false
+
+    # CPU request, no CPU limit (CFS-throttle false alarms); memory bounded.
+    resources:
+      requests:
+        cpu: 100m
+        memory: 1Gi
+      limits:
+        memory: 2Gi

@@ -236,3 +236,13 @@ metadata:
 spec:
   interval: 1h
   url: https://redhat-developer.github.io/rhdh-chart
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  # Robusta HolmesGPT — AI incident-investigation agent (CNCF Sandbox).
+  name: robusta
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://robusta-charts.storage.googleapis.com
