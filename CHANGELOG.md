@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.74.5 (2026-06-28)
+
+### Bug Fixes
+
+- **oci**: Codify cross-tenancy DRG peering acceptor IAM policy
+  ([#453](https://github.com/CalebSargeant/infra/pull/453),
+  [`4af0cda`](https://github.com/CalebSargeant/infra/commit/4af0cda820f8e3d4dc481f897ed4ffea70ae3a9e))
+
+
 ## v1.74.4 (2026-06-28)
 
 ### Bug Fixes
