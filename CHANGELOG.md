@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.75.1 (2026-06-29)
+
+### Bug Fixes
+
+- **oci**: Codify cross-tenancy DRG peering acceptor IAM policy
+  ([#456](https://github.com/CalebSargeant/infra/pull/456),
+  [`2c494af`](https://github.com/CalebSargeant/infra/commit/2c494af2f0c63ab01633250908fe0bf2886af022))
+
+### Chores
+
+- **claude**: Add settings.json secret-read guardrails
+  ([#456](https://github.com/CalebSargeant/infra/pull/456),
+  [`2c494af`](https://github.com/CalebSargeant/infra/commit/2c494af2f0c63ab01633250908fe0bf2886af022))
+
+
 ## v1.75.0 (2026-06-28)
 
 ### Chores
