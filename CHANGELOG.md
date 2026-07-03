@@ -2,6 +2,44 @@
 
 <!-- version list -->
 
+## v1.76.0 (2026-07-03)
+
+### Chores
+
+- **media**: Bump image tags
+  ([`3c9daf6`](https://github.com/CalebSargeant/infra/commit/3c9daf6d24d5cb9ac8fe4cdcb8c2c71b6bb15079))
+
+- **media**: Bump image tags
+  ([`047784d`](https://github.com/CalebSargeant/infra/commit/047784d6c94d08905af625511465440a455ad249))
+
+- **media**: Bump image tags
+  ([`ed6bfdd`](https://github.com/CalebSargeant/infra/commit/ed6bfdd37f20e6a584bce74428b850bb8339e8a5))
+
+- **media**: Bump image tags
+  ([`b578278`](https://github.com/CalebSargeant/infra/commit/b5782789af14443606034c376cea74102d78af04))
+
+- **media**: Bump image tags
+  ([`7321ab0`](https://github.com/CalebSargeant/infra/commit/7321ab094979cf4f9b11b717d31afc3d2d8b3a50))
+
+- **media**: Bump image tags
+  ([`0c765ec`](https://github.com/CalebSargeant/infra/commit/0c765ecd382a7b12337cc019a2d62d81e75e5837))
+
+- **media**: Bump image tags
+  ([`1b7a989`](https://github.com/CalebSargeant/infra/commit/1b7a98902108b001ec74558719f29afea61f9200))
+
+- **media**: Bump image tags
+  ([`007336e`](https://github.com/CalebSargeant/infra/commit/007336eec18461e8b142685a53d92b25d961da89))
+
+- **media**: Bump image tags
+  ([`ea92432`](https://github.com/CalebSargeant/infra/commit/ea92432a187fe6a5f10041a44b0eb2a7259e1d88))
+
+### Features
+
+- **observability**: Move Grafana to magmamoose.com and improve Loki log viewing
+  ([#461](https://github.com/CalebSargeant/infra/pull/461),
+  [`018aef9`](https://github.com/CalebSargeant/infra/commit/018aef9a42c2fb10f49cc1ede101ebafc7de15c4))
+
+
 ## v1.75.1 (2026-06-29)
 
 ### Bug Fixes
