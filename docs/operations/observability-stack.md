@@ -14,7 +14,7 @@ It's the firefly translation of an originally AWS-targeted design:
 | AWS design | Firefly equivalent | Notes |
 |------------|--------------------|-------|
 | S3 | **MinIO** (`minio.core.svc.cluster.local:9000`) | In-cluster object storage in the `core` namespace; buckets `thanos-metrics`, `loki-chunks`, `loki-ruler` |
-| AMG (Amazon Managed Grafana) | **In-cluster Grafana** | Deployed by the kube-prometheus-stack Helm chart; exposed at `grafana.sargeant.co` via Traefik |
+| AMG (Amazon Managed Grafana) | **In-cluster Grafana** | Deployed by the kube-prometheus-stack Helm chart; exposed at `grafana.magmamoose.com` via Traefik |
 | ALB | **FortiGate LB + Traefik** | FortiGate handles north-south; in-cluster apps (incl. Grafana) are fronted by Traefik |
 | EBS | **local-path PVCs** (ff-vm1) | Per-workload volumes; durability comes from the MinIO→OCI backup, not volume replication |
 | Slack | **Slack** | `#engineering-alerts`, via the Slack Web API with a bot token |
@@ -24,7 +24,7 @@ It's the firefly translation of an originally AWS-targeted design:
 ```mermaid
 flowchart TD
     %% ===== Access / UI =====
-    Traefik["Traefik Ingress<br/>grafana.sargeant.co"]
+    Traefik["Traefik Ingress<br/>grafana.magmamoose.com"]
     Slack(["Slack<br/>#engineering-alerts"])
     Grafana["Grafana<br/>in-cluster UI"]
 
@@ -154,8 +154,9 @@ after the source compacts them). The OCI `minio-backups` bucket is provisioned b
 
 ### Access
 
-Grafana is exposed at **`grafana.sargeant.co`** through Traefik (cert-manager `letsencrypt-dns`,
-`websecure`), the same pattern as the other in-cluster apps. Prometheus, Alertmanager and the
+Grafana is exposed at **`grafana.magmamoose.com`** through Traefik (cert-manager `letsencrypt-dns`,
+`websecure`), the same pattern as the other in-cluster apps. It's a LAN-only host: the record is
+DNS-only (grey cloud) and resolves to a private `192.168.x` IP, so it only works on the LAN/VPN. Prometheus, Alertmanager and the
 Thanos components remain ClusterIP-only — reach them with `kubectl port-forward`.
 
 ### Logs — two shippers

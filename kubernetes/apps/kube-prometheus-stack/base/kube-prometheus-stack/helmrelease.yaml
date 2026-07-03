@@ -115,6 +115,23 @@ spec:
     # Grafana configuration
     grafana:
       enabled: true
+
+      # Pin the Grafana image to 11.6.16 (chart 68.2.2 ships 11.4.0). Required by
+      # the Logs Drilldown app below, which needs Grafana >= 11.6.0. Grafana
+      # migrates grafana.db forward on upgrade — rolling back the tag is not clean.
+      image:
+        tag: "11.6.16"
+
+      # Grafana Logs Drilldown (grafana-lokiexplore-app) — queryless Loki log
+      # exploration: pick a namespace/app, auto log-level detection, error
+      # highlighting, volume history. Installed from the grafana.com catalog on
+      # pod start (needs egress). Pairs with the version-controlled
+      # "App Logs — Loki" dashboard (dashboard-app-logs.yaml). Loki 3.3.2 already
+      # satisfies its backend needs; the Patterns tab additionally wants
+      # `pattern_ingester.enabled: true` in the Loki config (optional).
+      plugins:
+        - grafana-lokiexplore-app
+
       # Admin credentials from OCI Vault via ExternalSecret grafana-admin-credentials.
       admin:
         existingSecret: grafana-admin-credentials
@@ -184,8 +201,12 @@ spec:
               options:
                 path: /var/lib/grafana/dashboards/default
       
-      # Ingress for Grafana — LAN exposure via Traefik, same pattern as
-      # radarr.sargeant.co (cert-manager letsencrypt-dns, websecure).
+      # Ingress for Grafana — LAN exposure via Traefik (cert-manager
+      # letsencrypt-dns, websecure). Primary host is grafana.magmamoose.com;
+      # external-dns-cloudflare manages that zone too, so it republishes the
+      # grey-cloud A record (LAN IP) under the new name and drops the old
+      # grafana.sargeant.co on reconcile. grafana.sargeant.local stays a
+      # LAN-only alias.
       ingress:
         enabled: true
         ingressClassName: traefik
@@ -194,11 +215,11 @@ spec:
           traefik.ingress.kubernetes.io/service.serversscheme: http
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
         hosts:
-          - grafana.sargeant.co
+          - grafana.magmamoose.com
           - grafana.sargeant.local
         tls:
           - hosts:
-              - grafana.sargeant.co
+              - grafana.magmamoose.com
             secretName: grafana-tls
 
       # Sidecar for loading dashboards
