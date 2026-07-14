@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.76.2 (2026-07-14)
+
+### Bug Fixes
+
+- **grafana**: Serve grafana.magmamoose.com via Cloudflare tunnel + Access
+  ([#463](https://github.com/CalebSargeant/infra/pull/463),
+  [`28bf7b9`](https://github.com/CalebSargeant/infra/commit/28bf7b977ec04ddaec4a9f33009d34a8945cc1b9))
+
+### Chores
+
+- **atlantis**: Drop `approved` apply requirement (solo maintainer)
+  ([#463](https://github.com/CalebSargeant/infra/pull/463),
+  [`28bf7b9`](https://github.com/CalebSargeant/infra/commit/28bf7b977ec04ddaec4a9f33009d34a8945cc1b9))
+
+
 ## v1.76.1 (2026-07-14)
 
 ### Bug Fixes
