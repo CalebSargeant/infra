@@ -23,7 +23,14 @@ spec:
   values:
     # HolmesGPT — the OPS / incident-investigation engine. It reads k8s state, logs, and
     # Prometheus to root-cause problems; it is read-only and does NOT touch GitHub/PRs
-    # (that's Nievah/OpenHands). Multiarch image, so no node pinning needed.
+    # (that's Nievah/OpenHands).
+
+    # Pin to worker nodes: HolmesGPT is an app workload, not a system controller, so keep
+    # it off the memory-constrained control-plane Pi. The robusta `holmes` chart honors a
+    # top-level nodeSelector — it has NO defaultPodOptions, so the repo's
+    # components/node-selectors/worker patch would be a silent no-op here.
+    nodeSelector:
+      node-role.kubernetes.io/worker: ""
 
     # All inference goes through the in-cluster LiteLLM gateway (single entry point for
     # billing/keys). modelList is a litellm model registry: `openai/<name>` + the :8080
