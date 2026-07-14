@@ -366,6 +366,16 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # Grafana — kube-prometheus-stack observability dashboards (firefly cluster).
+    # DNS is the proxied CNAME external-dns publishes from the k8s Ingress
+    # (kubernetes/apps/kube-prometheus-stack); Access-gated (Caleb) in access_apps.tf.
+    # grafana.sargeant.local stays a LAN-only alias (no tunnel).
+    ingress_rule {
+      hostname = "grafana.magmamoose.com"
+      service  = "http://kube-prometheus-stack-grafana.observability.svc.cluster.local:80"
+      origin_request {}
+    }
+
     # Cloudflared requires the last rule to be a catch-all with no hostname.
     ingress_rule {
       service = "http_status:404"
