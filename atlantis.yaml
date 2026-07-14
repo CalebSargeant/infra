@@ -36,7 +36,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
   - name: cloudflare-dns-magmamoose-prod
     dir: terraform/cloudflare/dns-magmamoose/prod
@@ -46,7 +46,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
   - name: cloudflare-zero-trust-prod
     dir: terraform/cloudflare/zero-trust/prod
@@ -56,7 +56,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
   # ─── FortiGate (home-lab edge — physical 40Fs) ───────────────────────────
   # autoplan disabled: a plan connects to the live FortiGate API, and the units
@@ -70,7 +70,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: false
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
   # ─── MikroTik CRS (home-lab edge switches — physical) ────────────────────
   # autoplan disabled: a plan connects to the live RouterOS API, and the
@@ -85,7 +85,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: false
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
   # ─── GCP ─────────────────────────────────────────────────────────────────
   - name: gcp-prod-project
@@ -96,7 +96,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
   # ─── OCI: tenancy-level IAM policy ───────────────────────────────────────
   - name: oci-iam-policy
@@ -107,7 +107,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
   # ─── OCI prod / eu-amsterdam-1 (8 leaves) ────────────────────────────────
   - name: oci-prod-eu-amsterdam-1-network
@@ -118,7 +118,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
   - name: oci-prod-eu-amsterdam-1-edge
     dir: terraform/oci/prod/eu-amsterdam-1/edge
@@ -128,7 +128,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
   - name: oci-prod-eu-amsterdam-1-server
     dir: terraform/oci/prod/eu-amsterdam-1/server
@@ -138,7 +138,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
   - name: oci-prod-eu-amsterdam-1-mikrotik
     dir: terraform/oci/prod/eu-amsterdam-1/mikrotik
@@ -148,7 +148,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
   - name: oci-prod-eu-amsterdam-1-vpn
     dir: terraform/oci/prod/eu-amsterdam-1/vpn
@@ -158,7 +158,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
   # FortiGate site-to-site VPN (OCI side). autoplan disabled: peer_ip is each
   # FortiGate's WAN public IP, unknown until the units are online. Apply
@@ -171,7 +171,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: false
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
   - name: oci-prod-eu-amsterdam-1-database
     dir: terraform/oci/prod/eu-amsterdam-1/database
@@ -181,7 +181,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
   - name: oci-prod-eu-amsterdam-1-backups
     dir: terraform/oci/prod/eu-amsterdam-1/backups
@@ -191,7 +191,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
   - name: oci-prod-eu-amsterdam-1-drg-peering
     dir: terraform/oci/prod/eu-amsterdam-1/drg-peering
@@ -201,7 +201,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
   - name: oci-prod-eu-amsterdam-1-policy
     dir: terraform/oci/prod/eu-amsterdam-1/policy
@@ -211,7 +211,7 @@ projects:
     autoplan:
       when_modified: ["**/*.tf", "**/*.tfvars", "**/*.hcl"]
       enabled: true
-    apply_requirements: [approved, mergeable]
+    apply_requirements: [mergeable]
 
 workflows:
   terragrunt:
