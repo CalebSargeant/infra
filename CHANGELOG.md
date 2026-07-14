@@ -2,6 +2,68 @@
 
 <!-- version list -->
 
+## v1.76.1 (2026-07-14)
+
+### Bug Fixes
+
+- **placement**: Pin floating workloads off the control-plane Pi + bound falcosidekick/renovate
+  ([#462](https://github.com/CalebSargeant/infra/pull/462),
+  [`d72c930`](https://github.com/CalebSargeant/infra/commit/d72c930c204a3632a33bb42a83f170dac0163bee))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`4b0b096`](https://github.com/CalebSargeant/infra/commit/4b0b09660f92c07fb6ceaf97d052ecf5e0072e57))
+
+- **media**: Bump image tags
+  ([`727c1a1`](https://github.com/CalebSargeant/infra/commit/727c1a14d349af8c0bcab383bd08a91597fe1b66))
+
+- **media**: Bump image tags
+  ([`418a4eb`](https://github.com/CalebSargeant/infra/commit/418a4eba284c8e161b491532d82a74487c1f0857))
+
+- **media**: Bump image tags
+  ([`cc1c283`](https://github.com/CalebSargeant/infra/commit/cc1c283907363fdccd4875cf64bed69749ffb62e))
+
+- **media**: Bump image tags
+  ([`fe2773e`](https://github.com/CalebSargeant/infra/commit/fe2773e5337a4de72cd7bc55542c9bd1ee630d78))
+
+- **media**: Bump image tags
+  ([`bddd4fa`](https://github.com/CalebSargeant/infra/commit/bddd4faae0c70280ed953cbe10e26a3020317bd3))
+
+- **media**: Bump image tags
+  ([`13defae`](https://github.com/CalebSargeant/infra/commit/13defaeb4d948a138d4c65bec752c31bf9701460))
+
+- **media**: Bump image tags
+  ([`e3f2bae`](https://github.com/CalebSargeant/infra/commit/e3f2baebcd46a9bdfbfd8409afc15d0ee396cf39))
+
+- **media**: Bump image tags
+  ([`50423df`](https://github.com/CalebSargeant/infra/commit/50423df0bf26c2587a3227cd9a7446faff2103dc))
+
+- **media**: Bump image tags
+  ([`463ae8e`](https://github.com/CalebSargeant/infra/commit/463ae8e9691dd7d6bdf5bef699cd663654cf230f))
+
+- **media**: Bump image tags
+  ([`b0c0986`](https://github.com/CalebSargeant/infra/commit/b0c09861f68a5739a96dd9c0356e85dce97057e6))
+
+- **media**: Bump image tags
+  ([`6cadfef`](https://github.com/CalebSargeant/infra/commit/6cadfef7e5eb59bc6ef6ee94dbe2c45243ebfeef))
+
+- **media**: Bump image tags
+  ([`8a249c7`](https://github.com/CalebSargeant/infra/commit/8a249c796dd75dda5446a6cd774c545c7e1cdebc))
+
+- **media**: Bump image tags
+  ([`ad7503f`](https://github.com/CalebSargeant/infra/commit/ad7503f2b9ac2aee46597c091b16120df464ec74))
+
+- **media**: Bump image tags
+  ([`6806597`](https://github.com/CalebSargeant/infra/commit/6806597ba31c4302cc22fd568a62d261339e3a3b))
+
+- **media**: Bump image tags
+  ([`80e19c6`](https://github.com/CalebSargeant/infra/commit/80e19c6fadb90feefb5838ab25eb1affa52ee62c))
+
+- **media**: Bump image tags
+  ([`e8e3ad4`](https://github.com/CalebSargeant/infra/commit/e8e3ad4e981ee3681fe8cdcd788eaa7473739247))
+
+
 ## v1.76.0 (2026-07-03)
 
 ### Chores
