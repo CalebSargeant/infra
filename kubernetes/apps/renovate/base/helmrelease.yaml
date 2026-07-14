@@ -24,6 +24,14 @@ spec:
     cronjob:
       # Self-hosted Renovate runs on a schedule (vs the hosted GitHub App).
       schedule: "0 */6 * * *"
+      # PREREQUISITE: the OCI Vault key `renovate-github-token` must exist — it supplies
+      # RENOVATE_TOKEN via the renovate ExternalSecret. While it is missing, every run
+      # fails CreateContainerConfigError ("secret renovate not found"). Forbid + tight
+      # history limits stop stuck runs from stacking (they previously piled to 62 active
+      # jobs and bloated the control-plane datastore).
+      concurrencyPolicy: Forbid
+      successfulJobsHistoryLimit: 1
+      failedJobsHistoryLimit: 1
     # RENOVATE_TOKEN (GitHub PAT) comes from the renovate ExternalSecret (OCI Vault).
     existingSecret: renovate
     renovate:
