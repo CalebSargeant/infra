@@ -16,7 +16,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet # Required when host networking is used
       containers:
         - name: plex
-          image: lscr.io/linuxserver/plex:1.43.2 # {"$imagepolicy": "flux-system:plex"}
+          image: lscr.io/linuxserver/plex:1.43.3 # {"$imagepolicy": "flux-system:plex"}
           resources:
             requests:
               # Right-sized from observed ~266Mi usage; 448Mi gives scheduling headroom.
@@ -27,14 +27,14 @@ spec:
               memory: "1Gi"
           ports:
             - containerPort: 32400 # Plex web interface
-#            - containerPort: 1900  # Plex DLNA server
-#            - containerPort: 5353  # Bonjour/Avahi
-#            - containerPort: 8324  # Plex Roku Companion
+              #            - containerPort: 1900  # Plex DLNA server
+              #            - containerPort: 5353  # Bonjour/Avahi
+              #            - containerPort: 8324  # Plex Roku Companion
             - containerPort: 32410 # GDM network discovery
             - containerPort: 32412 # GDM network discovery
             - containerPort: 32413 # GDM network discovery
             - containerPort: 32414 # GDM network discovery
-#            - containerPort: 32469 # DLNA server
+              #            - containerPort: 32469 # DLNA server
           env:
             - name: PUID
               value: "1000"
