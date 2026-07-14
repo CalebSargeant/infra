@@ -43,6 +43,10 @@ spec:
       nodeSelector:
         node-role.kubernetes.io/worker: ""
     grafana:
+      # Pin to worker (mysql/lake/ui above are already pinned) — the grafana
+      # subcomponent had no nodeSelector, so it floated onto the control-plane Pi.
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
       persistence:
         enabled: true
         size: 4Gi

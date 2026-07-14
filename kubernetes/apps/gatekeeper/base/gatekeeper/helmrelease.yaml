@@ -24,6 +24,10 @@ spec:
     # Enable audit and mutation features
     audit:
       replicas: 1
+      # Policy engine (an app workload) — keep it off the memory-constrained
+      # control-plane Pi. Applied to all three gatekeeper components.
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
       resources:
         # KRR ~146Mi working set. No CPU limit (avoid CFS throttling).
         requests:
@@ -34,6 +38,8 @@ spec:
 
     controllerManager:
       replicas: 1
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
       resources:
         # KRR ~198Mi working set; trimmed from 256Mi. 256Mi limit kept as
         # admission burst headroom. No CPU limit (avoid CFS throttling).
@@ -59,6 +65,8 @@ spec:
     # Webhook settings
     webhook:
       replicas: 1
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
       resources:
         # Admission path; 200Mi request with 256Mi burst headroom.
         # No CPU limit (avoid CFS throttling).
