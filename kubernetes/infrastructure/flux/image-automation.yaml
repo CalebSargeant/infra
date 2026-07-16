@@ -357,7 +357,7 @@ spec:
     commit:
       author:
         email: actions@users.noreply.github.com
-        name: Flux Bot
+        name: fluxcdbot
       messageTemplate: |-
         chore(media): bump image tags
         {{range .Changed.Changes}}{{print .OldValue}} -> {{println .NewValue}}{{end}}
