@@ -35,17 +35,26 @@ locals {
   cf_token_secret_ocid         = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aajtdkg5uwvfie4raijqushv4s3bep4feep6goh5hsnbpa"
   cf_access_groups_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aalypl7o6qeuuf3lk57oicmyt43uu5rknpurzczmrsv4mq"
 
-  cloudflare_api_token = run_cmd(
+  # Call the oci CLI directly (no shell) so this works on Windows/PowerShell as
+  # well as Linux (Atlantis). base64 decoding happens in HCL instead of piping
+  # to `base64 -d`, so there's no dependency on bash / WSL.
+  cloudflare_api_token = base64decode(trimspace(run_cmd(
     "--terragrunt-quiet",
-    "bash", "-c",
-    "oci secrets secret-bundle get --secret-id ${local.cf_token_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
-  )
+    "oci", "secrets", "secret-bundle", "get",
+    "--secret-id", local.cf_token_secret_ocid,
+    "--region", "eu-amsterdam-1",
+    "--query", "data.\"secret-bundle-content\".content",
+    "--raw-output"
+  )))
 
-  cf_access_groups_membership = jsondecode(run_cmd(
+  cf_access_groups_membership = jsondecode(base64decode(trimspace(run_cmd(
     "--terragrunt-quiet",
-    "bash", "-c",
-    "oci secrets secret-bundle get --secret-id ${local.cf_access_groups_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
-  ))
+    "oci", "secrets", "secret-bundle", "get",
+    "--secret-id", local.cf_access_groups_secret_ocid,
+    "--region", "eu-amsterdam-1",
+    "--query", "data.\"secret-bundle-content\".content",
+    "--raw-output"
+  ))))
 }
 
 terraform {
