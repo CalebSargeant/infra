@@ -39,8 +39,11 @@ terraform {
 #
 #   locals {
 #     crs_pw_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.<...>"
-#     routeros_password = run_cmd("--terragrunt-quiet", "bash", "-c",
-#       "oci secrets secret-bundle get --secret-id ${local.crs_pw_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d | jq -r .password")
+#     # Call `oci` directly + decode in HCL (no `bash -c`/jq) so it parses on Windows too.
+#     routeros_password = jsondecode(base64decode(trimspace(run_cmd("--terragrunt-quiet",
+#       "oci", "secrets", "secret-bundle", "get", "--secret-id", local.crs_pw_secret_ocid,
+#       "--region", "eu-amsterdam-1", "--query", "data.\"secret-bundle-content\".content",
+#       "--raw-output"))))["password"]
 #   }
 #
 # PUBLIC repo — never inline a real password. OCI Vault first; rotate if leaked.

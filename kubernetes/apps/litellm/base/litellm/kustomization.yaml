@@ -12,3 +12,4 @@ resources:
   - ollama-lan-ingress.yaml
 components:
   - ../../../../components/resource-profiles/m.nano
+  - ../../../../components/node-selectors/native-cloud

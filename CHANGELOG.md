@@ -2,6 +2,297 @@
 
 <!-- version list -->
 
+## v1.76.2 (2026-07-14)
+
+### Bug Fixes
+
+- **grafana**: Serve grafana.magmamoose.com via Cloudflare tunnel + Access
+  ([#463](https://github.com/CalebSargeant/infra/pull/463),
+  [`28bf7b9`](https://github.com/CalebSargeant/infra/commit/28bf7b977ec04ddaec4a9f33009d34a8945cc1b9))
+
+### Chores
+
+- **atlantis**: Drop `approved` apply requirement (solo maintainer)
+  ([#463](https://github.com/CalebSargeant/infra/pull/463),
+  [`28bf7b9`](https://github.com/CalebSargeant/infra/commit/28bf7b977ec04ddaec4a9f33009d34a8945cc1b9))
+
+
+## v1.76.1 (2026-07-14)
+
+### Bug Fixes
+
+- **placement**: Pin floating workloads off the control-plane Pi + bound falcosidekick/renovate
+  ([#462](https://github.com/CalebSargeant/infra/pull/462),
+  [`d72c930`](https://github.com/CalebSargeant/infra/commit/d72c930c204a3632a33bb42a83f170dac0163bee))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`4b0b096`](https://github.com/CalebSargeant/infra/commit/4b0b09660f92c07fb6ceaf97d052ecf5e0072e57))
+
+- **media**: Bump image tags
+  ([`727c1a1`](https://github.com/CalebSargeant/infra/commit/727c1a14d349af8c0bcab383bd08a91597fe1b66))
+
+- **media**: Bump image tags
+  ([`418a4eb`](https://github.com/CalebSargeant/infra/commit/418a4eba284c8e161b491532d82a74487c1f0857))
+
+- **media**: Bump image tags
+  ([`cc1c283`](https://github.com/CalebSargeant/infra/commit/cc1c283907363fdccd4875cf64bed69749ffb62e))
+
+- **media**: Bump image tags
+  ([`fe2773e`](https://github.com/CalebSargeant/infra/commit/fe2773e5337a4de72cd7bc55542c9bd1ee630d78))
+
+- **media**: Bump image tags
+  ([`bddd4fa`](https://github.com/CalebSargeant/infra/commit/bddd4faae0c70280ed953cbe10e26a3020317bd3))
+
+- **media**: Bump image tags
+  ([`13defae`](https://github.com/CalebSargeant/infra/commit/13defaeb4d948a138d4c65bec752c31bf9701460))
+
+- **media**: Bump image tags
+  ([`e3f2bae`](https://github.com/CalebSargeant/infra/commit/e3f2baebcd46a9bdfbfd8409afc15d0ee396cf39))
+
+- **media**: Bump image tags
+  ([`50423df`](https://github.com/CalebSargeant/infra/commit/50423df0bf26c2587a3227cd9a7446faff2103dc))
+
+- **media**: Bump image tags
+  ([`463ae8e`](https://github.com/CalebSargeant/infra/commit/463ae8e9691dd7d6bdf5bef699cd663654cf230f))
+
+- **media**: Bump image tags
+  ([`b0c0986`](https://github.com/CalebSargeant/infra/commit/b0c09861f68a5739a96dd9c0356e85dce97057e6))
+
+- **media**: Bump image tags
+  ([`6cadfef`](https://github.com/CalebSargeant/infra/commit/6cadfef7e5eb59bc6ef6ee94dbe2c45243ebfeef))
+
+- **media**: Bump image tags
+  ([`8a249c7`](https://github.com/CalebSargeant/infra/commit/8a249c796dd75dda5446a6cd774c545c7e1cdebc))
+
+- **media**: Bump image tags
+  ([`ad7503f`](https://github.com/CalebSargeant/infra/commit/ad7503f2b9ac2aee46597c091b16120df464ec74))
+
+- **media**: Bump image tags
+  ([`6806597`](https://github.com/CalebSargeant/infra/commit/6806597ba31c4302cc22fd568a62d261339e3a3b))
+
+- **media**: Bump image tags
+  ([`80e19c6`](https://github.com/CalebSargeant/infra/commit/80e19c6fadb90feefb5838ab25eb1affa52ee62c))
+
+- **media**: Bump image tags
+  ([`e8e3ad4`](https://github.com/CalebSargeant/infra/commit/e8e3ad4e981ee3681fe8cdcd788eaa7473739247))
+
+
+## v1.76.0 (2026-07-03)
+
+### Chores
+
+- **media**: Bump image tags
+  ([`3c9daf6`](https://github.com/CalebSargeant/infra/commit/3c9daf6d24d5cb9ac8fe4cdcb8c2c71b6bb15079))
+
+- **media**: Bump image tags
+  ([`047784d`](https://github.com/CalebSargeant/infra/commit/047784d6c94d08905af625511465440a455ad249))
+
+- **media**: Bump image tags
+  ([`ed6bfdd`](https://github.com/CalebSargeant/infra/commit/ed6bfdd37f20e6a584bce74428b850bb8339e8a5))
+
+- **media**: Bump image tags
+  ([`b578278`](https://github.com/CalebSargeant/infra/commit/b5782789af14443606034c376cea74102d78af04))
+
+- **media**: Bump image tags
+  ([`7321ab0`](https://github.com/CalebSargeant/infra/commit/7321ab094979cf4f9b11b717d31afc3d2d8b3a50))
+
+- **media**: Bump image tags
+  ([`0c765ec`](https://github.com/CalebSargeant/infra/commit/0c765ecd382a7b12337cc019a2d62d81e75e5837))
+
+- **media**: Bump image tags
+  ([`1b7a989`](https://github.com/CalebSargeant/infra/commit/1b7a98902108b001ec74558719f29afea61f9200))
+
+- **media**: Bump image tags
+  ([`007336e`](https://github.com/CalebSargeant/infra/commit/007336eec18461e8b142685a53d92b25d961da89))
+
+- **media**: Bump image tags
+  ([`ea92432`](https://github.com/CalebSargeant/infra/commit/ea92432a187fe6a5f10041a44b0eb2a7259e1d88))
+
+### Features
+
+- **observability**: Move Grafana to magmamoose.com and improve Loki log viewing
+  ([#461](https://github.com/CalebSargeant/infra/pull/461),
+  [`018aef9`](https://github.com/CalebSargeant/infra/commit/018aef9a42c2fb10f49cc1ede101ebafc7de15c4))
+
+
+## v1.75.1 (2026-06-29)
+
+### Bug Fixes
+
+- **oci**: Codify cross-tenancy DRG peering acceptor IAM policy
+  ([#456](https://github.com/CalebSargeant/infra/pull/456),
+  [`2c494af`](https://github.com/CalebSargeant/infra/commit/2c494af2f0c63ab01633250908fe0bf2886af022))
+
+### Chores
+
+- **claude**: Add settings.json secret-read guardrails
+  ([#456](https://github.com/CalebSargeant/infra/pull/456),
+  [`2c494af`](https://github.com/CalebSargeant/infra/commit/2c494af2f0c63ab01633250908fe0bf2886af022))
+
+
+## v1.75.0 (2026-06-28)
+
+### Chores
+
+- **media**: Bump image tags
+  ([`a0871c1`](https://github.com/CalebSargeant/infra/commit/a0871c1738cdffbe2115430b6a78c909685f3fb9))
+
+### Features
+
+- **holmesgpt**: Deploy HolmesGPT ops/incident-investigation agent
+  ([#454](https://github.com/CalebSargeant/infra/pull/454),
+  [`40d9973`](https://github.com/CalebSargeant/infra/commit/40d9973da5aa66c26b92921767b8bce477b1821b))
+
+- **openhands**: Add dormant OpenHands dev-engine scaffold (not deployed)
+  ([#455](https://github.com/CalebSargeant/infra/pull/455),
+  [`d00b65f`](https://github.com/CalebSargeant/infra/commit/d00b65fd524cc731e033a62d1feb70ec65540a40))
+
+
+## v1.74.5 (2026-06-28)
+
+### Bug Fixes
+
+- **oci**: Codify cross-tenancy DRG peering acceptor IAM policy
+  ([#453](https://github.com/CalebSargeant/infra/pull/453),
+  [`4af0cda`](https://github.com/CalebSargeant/infra/commit/4af0cda820f8e3d4dc481f897ed4ffea70ae3a9e))
+
+
+## v1.74.4 (2026-06-28)
+
+### Bug Fixes
+
+- **authentik**: Wire DB host via global.env + pin on-prem
+  ([#452](https://github.com/CalebSargeant/infra/pull/452),
+  [`2618f3d`](https://github.com/CalebSargeant/infra/commit/2618f3d50e35584620d2413af2735d2ac9e07ac1))
+
+
+## v1.74.3 (2026-06-27)
+
+### Bug Fixes
+
+- **loki**: Raise memory limit 3Gi->8Gi for WAL-replay backlog
+  ([#451](https://github.com/CalebSargeant/infra/pull/451),
+  [`7d3378b`](https://github.com/CalebSargeant/infra/commit/7d3378bb1dd3f7f5ff57164d79ab7752ddad46a3))
+
+
+## v1.74.2 (2026-06-27)
+
+### Bug Fixes
+
+- **hermes**: Use args not command for gateway run; wire in-cluster n8n MCP
+  ([#450](https://github.com/CalebSargeant/infra/pull/450),
+  [`e7e7d8f`](https://github.com/CalebSargeant/infra/commit/e7e7d8f3ef4f1f7556d4e1be4256488f25ed9c02))
+
+
+## v1.74.1 (2026-06-27)
+
+### Bug Fixes
+
+- **hermes**: Pin to on-prem amd64 worker (image is amd64-only)
+  ([#449](https://github.com/CalebSargeant/infra/pull/449),
+  [`d06b8fa`](https://github.com/CalebSargeant/infra/commit/d06b8fa4acdefcfbb079ec8689184187e22f33cd))
+
+- **loki**: Raise memory limit 1Gi->3Gi to stop OOM crashloop
+  ([#448](https://github.com/CalebSargeant/infra/pull/448),
+  [`f0ea4dc`](https://github.com/CalebSargeant/infra/commit/f0ea4dc2f2085e844acafde316f25f7f13f79969))
+
+
+## v1.74.0 (2026-06-27)
+
+### Features
+
+- **hermes**: Replace OpenClaw assistant with Nous Research Hermes Agent
+  ([#447](https://github.com/CalebSargeant/infra/pull/447),
+  [`c109408`](https://github.com/CalebSargeant/infra/commit/c1094089ac660e64cd080641484e8fe80fa99007))
+
+
+## v1.73.2 (2026-06-27)
+
+### Bug Fixes
+
+- **cluster**: Keep ff-pi1 a pure system node — pin trivy/postgres/pod-gateway to the on-prem worker
+  ([#446](https://github.com/CalebSargeant/infra/pull/446),
+  [`5bbe119`](https://github.com/CalebSargeant/infra/commit/5bbe119f4d39cc5ec2d58afe6ca87792fa55d2bb))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`786e0e7`](https://github.com/CalebSargeant/infra/commit/786e0e7969b48683726c43e7818926cd47840a29))
+
+
+## v1.73.1 (2026-06-27)
+
+### Bug Fixes
+
+- **oci**: Disable flannel.1 tx-checksum offload on cloud nodes
+  ([#445](https://github.com/CalebSargeant/infra/pull/445),
+  [`b05f254`](https://github.com/CalebSargeant/infra/commit/b05f254f26c6f471e4262df6859977e18c61b94e))
+
+
+## v1.73.0 (2026-06-27)
+
+### Bug Fixes
+
+- **oci**: Admit k3s data-plane traffic to the OCI cloud-worker nodes
+  ([#443](https://github.com/CalebSargeant/infra/pull/443),
+  [`95d5a00`](https://github.com/CalebSargeant/infra/commit/95d5a00bb9e245b9b3f253e6d024b43534b9d7d2))
+
+### Features
+
+- **oci**: Split monitoring to cloud tier; add valkey-oci + blackbox-oci; pin pod-gateway on-prem
+  ([#444](https://github.com/CalebSargeant/infra/pull/444),
+  [`02c8094`](https://github.com/CalebSargeant/infra/commit/02c8094ef5206738b349307233e2c163a9395e13))
+
+
+## v1.72.0 (2026-06-26)
+
+### Chores
+
+- **media**: Bump image tags
+  ([`d1d8d6f`](https://github.com/CalebSargeant/infra/commit/d1d8d6ff94a5ddee1fd6a7b25217b9053a79dfa3))
+
+- **media**: Bump image tags
+  ([`df34fa7`](https://github.com/CalebSargeant/infra/commit/df34fa7627e047293284d4c487dec39d96bf3d76))
+
+### Features
+
+- **k8s**: Pin external-repo apps to the cloud-worker tier
+  ([#442](https://github.com/CalebSargeant/infra/pull/442),
+  [`65e3735`](https://github.com/CalebSargeant/infra/commit/65e373539625b1cd6c83886f668075ebbfb75fcd))
+
+- **k8s**: Tier more apps; remove retired apps
+  ([#442](https://github.com/CalebSargeant/infra/pull/442),
+  [`65e3735`](https://github.com/CalebSargeant/infra/commit/65e373539625b1cd6c83886f668075ebbfb75fcd))
+
+- **k8s**: Tier workload placement across on-prem and cloud workers
+  ([#442](https://github.com/CalebSargeant/infra/pull/442),
+  [`65e3735`](https://github.com/CalebSargeant/infra/commit/65e373539625b1cd6c83886f668075ebbfb75fcd))
+
+
+## v1.71.3 (2026-06-25)
+
+### Bug Fixes
+
+- **terraform**: Force forward-slash terragrunt state prefix on Windows
+  ([#439](https://github.com/CalebSargeant/infra/pull/439),
+  [`9b6a896`](https://github.com/CalebSargeant/infra/commit/9b6a896d1828a6789fcebaca72c5670cdf071baf))
+
+
+## v1.71.2 (2026-06-25)
+
+### Bug Fixes
+
+- **security**: Remove leaked chr.pem key, drop stale inventory, clear secret-scan false positives
+  ([#438](https://github.com/CalebSargeant/infra/pull/438),
+  [`39b3900`](https://github.com/CalebSargeant/infra/commit/39b39009a8150e27085f0f5d9f50009cf0a0ce95))
+
+- **terragrunt**: Call oci CLI directly in run_cmd so OCI Vault fetches work on Windows
+  ([#437](https://github.com/CalebSargeant/infra/pull/437),
+  [`c291aca`](https://github.com/CalebSargeant/infra/commit/c291aca10ba611742d344074c1fa1cd89dde395c))
+
+
 ## v1.71.1 (2026-06-25)
 
 ### Bug Fixes

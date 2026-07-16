@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hermes-config
+  namespace: automation
+data:
+  # GIT-MANAGED config for the Hermes Agent gateway (source of truth). An
+  # initContainer OVERWRITES $HERMES_HOME/config.yaml from this ConfigMap on every
+  # pod start, and the Deployment's checksum/config annotation rolls the pod
+  # whenever this file changes — so edits here apply on the next Flux reconcile.
+  # Hermes keeps non-secret behaviour here (config.yaml) and secrets in env /
+  # ~/.hermes/.env; we inject all secrets as Deployment env, so no .env is seeded.
+  # Sessions/memories/skills/logs persist in sibling dirs under /opt/data, so
+  # re-seeding config.yaml is safe. Do NOT hand-edit the live file — change it here.
+  #
+  #   - model: route ALL chat through the in-cluster LiteLLM gateway. provider=
+  #     custom + base_url points at the nginx auth-proxy (:8080 maps OpenAI-style
+  #     `Authorization: Bearer` -> x-litellm-api-key). The credential is the
+  #     LiteLLM master key, supplied via the OPENAI_API_KEY env. `default` must
+  #     match a LiteLLM model_name (per-token API billing inside LiteLLM); switch
+  #     models at runtime with `hermes model`.
+  #   - mcp_servers.home-assistant: HA's MCP server (read + control Assist-exposed
+  #     entities); bearer substituted from the HA_MCP_TOKEN env at load.
+  #   - memory: markdown-file memory (MEMORY.md / USER.md under /opt/data) — no
+  #     external embedding service required. cron: scheduled routines
+  #     (`hermes cron ...`), times use the container TZ.
+  #   - dashboard: the LAN Control UI at hermes.sargeant.co (enabled via
+  #     HERMES_DASHBOARD=1, basic-auth creds via env). api: OpenAI-compatible API
+  #     server + health endpoint on :8642 (bearer via API_SERVER_KEY env).
+  #   - Channels (Telegram @NievahBot, Slack Socket Mode) are configured entirely
+  #     via env (TELEGRAM_*/SLACK_* — see the Deployment).
+  #   - NOT carried over from OpenClaw (no clean Hermes-native equivalent wired
+  #     yet): browser automation (Browserless CDP), keyless web search (DuckDuckGo),
+  #     and voice TTS/STT. Hermes ships its own equivalents — Firecrawl/SearXNG for
+  #     web, Mistral for audio — but they need API keys/a SearXNG URL, so they are
+  #     intentionally left out of this swap and can be added later. The HA MCP
+  #     server, Telegram/Slack channels, memory, and cron all carry over.
+  config.yaml: |
+    model:
+      provider: custom
+      default: claude-sonnet-4-6
+      base_url: http://litellm.automation.svc.cluster.local:8080/v1
+      api_mode: chat_completions
+
+    memory:
+      memory_enabled: true
+      user_profile_enabled: true
+
+    cron:
+      enabled: true
+
+    mcp_servers:
+      home-assistant:
+        url: http://homeassistant.automation.svc.cluster.local:8123/api/mcp
+        transport: streamable-http
+        headers:
+          Authorization: "Bearer ${HA_MCP_TOKEN}"
+      # In-cluster n8n MCP (czlonkowski/n8n-mcp, MCP_MODE=http) — full workflow
+      # CRUD over n8n via its Public API. Reached east-west on the ClusterIP (the
+      # public edge route n8n.magmamoose.com/mcp is gated by Cloudflare Access and
+      # not used from in-cluster). Bearer = the app-layer AUTH_TOKEN (OCI Vault
+      # n8n-mcp-auth-token), substituted from the N8N_MCP_AUTH_TOKEN env at load.
+      n8n:
+        url: http://n8n-mcp.automation.svc.cluster.local:3000/mcp
+        transport: streamable-http
+        headers:
+          Authorization: "Bearer ${N8N_MCP_AUTH_TOKEN}"
+
+    dashboard:
+      host: 0.0.0.0
+      port: 9119
+
+    api:
+      enabled: true
+      host: 0.0.0.0
+      port: 8642

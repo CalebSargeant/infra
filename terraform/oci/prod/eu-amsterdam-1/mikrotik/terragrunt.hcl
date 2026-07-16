@@ -64,27 +64,40 @@ locals {
   cloudflared_tunnel_token_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aa2awevyczjklffua7eugrlxbsz4xziug5x5jgpewsbwfa" # vault-prod / cloudflared-tunnel-token-firefly  (TODO: swap to cloudflared-tunnel-token-firefly-oci)
   recon_blockers_secret_ocid        = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aa7mytuezgibzn4g36jxupsgy57zl4372uq47atgfra2ka" # vault-prod / infra-recon-blockers
 
-  routeros_password = run_cmd(
+  # Direct `oci` calls + base64decode/jsondecode in HCL (no `bash -c`, no jq) so
+  # these parse on Windows/PowerShell, which has no bash. Pattern:
+  # cloudflare/zero-trust/prod. The mikrotik-credentials secret is JSON
+  # {baseurl,username,password}; we pull .password in HCL.
+  routeros_password = jsondecode(base64decode(trimspace(run_cmd(
     "--terragrunt-quiet",
-    "bash", "-c",
-    "oci secrets secret-bundle get --secret-id ${local.routeros_password_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d | jq -r .password"
-  )
+    "oci", "secrets", "secret-bundle", "get",
+    "--secret-id", local.routeros_password_secret_ocid,
+    "--region", "eu-amsterdam-1",
+    "--query", "data.\"secret-bundle-content\".content",
+    "--raw-output"
+  ))))["password"]
 
-  cloudflared_tunnel_token = run_cmd(
+  cloudflared_tunnel_token = base64decode(trimspace(run_cmd(
     "--terragrunt-quiet",
-    "bash", "-c",
-    "oci secrets secret-bundle get --secret-id ${local.cloudflared_tunnel_token_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
-  )
+    "oci", "secrets", "secret-bundle", "get",
+    "--secret-id", local.cloudflared_tunnel_token_secret_ocid,
+    "--region", "eu-amsterdam-1",
+    "--query", "data.\"secret-bundle-content\".content",
+    "--raw-output"
+  )))
 
   # The trusted-address list labels reveal the operator's employer and the
   # two family residences by name + IP/hostname — moved into OCI Vault so
   # only the operator's authenticated principals (or atlantis) see them.
   # JSON sub-key: `mikrotik_trusted_addresses` → map(label -> ip-or-host).
-  recon_blockers = jsondecode(run_cmd(
+  recon_blockers = jsondecode(base64decode(trimspace(run_cmd(
     "--terragrunt-quiet",
-    "bash", "-c",
-    "oci secrets secret-bundle get --secret-id ${local.recon_blockers_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
-  ))
+    "oci", "secrets", "secret-bundle", "get",
+    "--secret-id", local.recon_blockers_secret_ocid,
+    "--region", "eu-amsterdam-1",
+    "--query", "data.\"secret-bundle-content\".content",
+    "--raw-output"
+  ))))
 }
 
 inputs = {

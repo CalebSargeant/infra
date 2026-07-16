@@ -2,20 +2,28 @@ terraform {
   source = "${get_repo_root()}/terraform/oci/modules/iam-policy"
 }
 
-# The peer tenancy OCID is recon-grade (enumerates cross-tenant trust) and
-# lives in OCI Vault as `infra-recon-blockers` (vault-prod). Fetched at parse
-# time using the operator's ~/.oci/config and decoded as JSON; only the
-# franklinhouse_tenancy_ocid sub-key is consumed here.
+# Cross-tenancy DRG remote-peering trust. Sargeant is the ACCEPTOR; FranklinHouse
+# (the requestor) initiates the RPC `connect`, so its admin group is admitted to
+# `remote-peering-to` here. The peer tenancy + admin-group OCIDs are recon-grade
+# (they enumerate cross-tenant trust) and live in OCI Vault as `infra-recon-blockers`
+# (vault-prod); fetched at parse time via the operator's ~/.oci/config and decoded
+# as JSON. Only the iam_peers.* sub-keys are consumed here.
 locals {
   recon_blockers_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aa7mytuezgibzn4g36jxupsgy57zl4372uq47atgfra2ka"
 
-  recon_blockers = jsondecode(run_cmd(
+  # Direct `oci` call + base64decode in HCL (no `bash -c`) so this parses on
+  # Windows/PowerShell, which has no bash. Pattern: cloudflare/zero-trust/prod.
+  recon_blockers = jsondecode(base64decode(trimspace(run_cmd(
     "--terragrunt-quiet",
-    "bash", "-c",
-    "oci secrets secret-bundle get --secret-id ${local.recon_blockers_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
-  ))
+    "oci", "secrets", "secret-bundle", "get",
+    "--secret-id", local.recon_blockers_secret_ocid,
+    "--region", "eu-amsterdam-1",
+    "--query", "data.\"secret-bundle-content\".content",
+    "--raw-output"
+  ))))
 
-  franklinhouse_tenancy_ocid = local.recon_blockers.iam_peers.franklinhouse_tenancy_ocid
+  franklinhouse_tenancy_ocid      = local.recon_blockers.iam_peers.franklinhouse_tenancy_ocid
+  franklinhouse_admins_group_ocid = local.recon_blockers.iam_peers.franklinhouse_admins_group_ocid
 }
 
 inputs = {
@@ -24,12 +32,24 @@ inputs = {
   region           = "eu-amsterdam-1"
   environment      = "prod"
 
-  policy_name = "drg-cross-tenancy-peering-franklinhouse"
-  description = "Allow FranklinHouse tenancy to peer DRGs with Sargeant"
+  policy_name = "drg-cross-tenancy-peering-acceptor"
+  description = "Allow Sargeant (acceptor) to peer with FranklinHouse"
 
+  # Sargeant is the ACCEPTOR. `Define group` binds the peer admin group name to
+  # its OCID so `Admit` can reference it; `Admit ... remote-peering-to` lets the
+  # FranklinHouse requestor establish the RPC against Sargeant's DRG; the final
+  # `Allow` lets Sargeant's own admins manage the RPC resource. Mirrors the
+  # requestor-side `Endorse ... remote-peering-to in tenancy sargeant` in the
+  # FranklinHouse tenancy (MagmaMoose/franklinhouse repo).
+  #
+  # NOTE: this policy already exists live (created by hand to bring the peering
+  # up). Import it into state before the first apply, or the create 409s on the
+  # duplicate name — see the PR description for the exact import command.
   statements = [
     "Define tenancy franklinhouse as ${local.franklinhouse_tenancy_ocid}",
-    "Endorse group Administrators to manage remote-peering-to in tenancy franklinhouse"
+    "Define group FranklinHouseAdmins as ${local.franklinhouse_admins_group_ocid}",
+    "Admit group FranklinHouseAdmins of tenancy franklinhouse to manage remote-peering-to in tenancy",
+    "Allow group Administrators to manage remote-peering-connections in tenancy",
   ]
 }
 

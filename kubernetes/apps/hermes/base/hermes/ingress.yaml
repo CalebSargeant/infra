@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hermes
+  namespace: automation
+  labels:
+    app: hermes
+  annotations:
+    # LAN-only host (hermes.sargeant.co -> firefly.sargeant.co -> Traefik LB on a
+    # private 192.168.x IP), so the cert must use the DNS-01 issuer — HTTP-01 can't
+    # reach a private IP. NOT published to the public Cloudflare tunnel: this agent
+    # can act on your behalf, so it stays on the LAN. Same pattern as litellm.
+    cert-manager.io/cluster-issuer: letsencrypt-dns
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/service.serversscheme: http
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: hermes.sargeant.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hermes
+                port:
+                  number: 9119
+    - host: hermes.sargeant.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hermes
+                port:
+                  number: 9119
+  tls:
+    - hosts:
+        - hermes.sargeant.co
+      secretName: hermes-tls

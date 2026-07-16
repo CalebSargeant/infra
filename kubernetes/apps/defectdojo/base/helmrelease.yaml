@@ -59,6 +59,7 @@ spec:
       replicas: 1
       nodeSelector:
         node-role.kubernetes.io/worker: ""
+        topology.sargeant.co/tier: on-prem
       # We manage ingress ourselves (ingress.yaml: both .co + .local hosts).
       ingress:
         enabled: false
@@ -184,6 +185,7 @@ spec:
         replicas: 1
         nodeSelector:
           node-role.kubernetes.io/worker: ""
+          topology.sargeant.co/tier: on-prem
         autoscaling:
           enabled: false
         resources:
@@ -198,6 +200,7 @@ spec:
         replicas: 1
         nodeSelector:
           node-role.kubernetes.io/worker: ""
+          topology.sargeant.co/tier: on-prem
         resources:
           requests:
             cpu: 50m
@@ -209,6 +212,7 @@ spec:
     initializer:
       nodeSelector:
         node-role.kubernetes.io/worker: ""
+        topology.sargeant.co/tier: on-prem
       resources:
         requests:
           cpu: 100m

@@ -1,1 +1,11 @@
 .DS_Store
+
+# Never commit private key material (PUBLIC repo). Public keys (*.pub) are allowed.
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+keys/*
+!keys/*.pub

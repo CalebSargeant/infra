@@ -1,0 +1,27 @@
+---
+# grafana.sargeant.local — LAN-only alias (no Cloudflare tunnel, no Access).
+# Deliberately SEPARATE from the chart's grafana.magmamoose.com Ingress so the
+# cloudflared tunnel `target` annotation on that one never lands on this .local
+# record. Traefik host-routes straight to the Grafana Service. Mirrors the n8n
+# n8n-ingress-lan pattern (kubernetes/apps/n8n/base/n8n/ingress.yaml).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kube-prometheus-stack-grafana-lan
+  namespace: observability
+  annotations:
+    traefik.ingress.kubernetes.io/service.serversscheme: http
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: grafana.sargeant.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kube-prometheus-stack-grafana
+                port:
+                  number: 80

@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openhands
+  namespace: openhands
+spec:
+  replicas: 1
+  # Single stateful instance on an RWO Longhorn volume — never run two at once.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: openhands
+  template:
+    metadata:
+      labels:
+        app: openhands
+    spec:
+      containers:
+        - name: openhands
+          # PIN + VERIFY before enabling. OpenHands is mid-V1 transition: the V0 server
+          # line is `docker.all-hands.dev/all-hands-ai/openhands:<ver>` (port 3000); V1 is
+          # `ghcr.io/openhands/agent-canvas` (port 8000, currently a release candidate).
+          # This scaffold pins the stable V0 server; confirm the tag/arch in-cluster first.
+          image: docker.all-hands.dev/all-hands-ai/openhands:0.50
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            # RUNTIME=local runs the action server IN THIS container — no Docker-in-Docker,
+            # no privileged sandbox, no separate (amd64-only) runtime image. The pod itself
+            # is the sandbox boundary (ephemeral, scrubbed). Stronger isolation (Kubernetes
+            # runtime / DinD) is a deliberate follow-up if you need it.
+            - name: RUNTIME
+              value: local
+            # All inference through the in-cluster LiteLLM gateway. The litellm_proxy/ prefix
+            # is REQUIRED for OpenHands' custom-endpoint path (headless bugs #11608/#11632 hit
+            # plain custom URLs); the model must match a LiteLLM model_name.
+            - name: LLM_BASE_URL
+              value: http://litellm.automation.svc.cluster.local:4000
+            - name: LLM_MODEL
+              value: litellm_proxy/claude-opus-4-8
+            - name: LLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openhands
+                  key: llm-api-key
+            # Acts AS YOU on GitHub (clone/push/PR). Same trust posture as Nievah's write path.
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: openhands
+                  key: github-token
+            # Persistent state (sessions, settings) on the PVC.
+            - name: OH_PERSISTENCE_DIR
+              value: /.openhands-state
+            - name: TZ
+              value: Europe/Amsterdam
+          resources:
+            requests:
+              cpu: 200m
+              memory: 1Gi
+            limits:
+              memory: 2Gi
+          volumeMounts:
+            - name: state
+              mountPath: /.openhands-state
+      volumes:
+        - name: state
+          persistentVolumeClaim:
+            claimName: openhands

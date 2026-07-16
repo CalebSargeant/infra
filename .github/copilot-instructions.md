@@ -34,7 +34,7 @@ This is a monolithic infrastructure-as-code repository managing a home lab envir
 - Organize playbooks by function (docker-, pi-, server-, etc.)
 - Store variables in the `vars/` directory
 - Use roles in the `roles/` directory for complex tasks
-- Host inventory should be in `hosts.yaml` or `hosts.yml`
+- Host inventory should be in `hosts.yaml`
 
 ### Kubernetes
 - Use Kustomize for manifest management

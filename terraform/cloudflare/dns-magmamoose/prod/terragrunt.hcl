@@ -33,11 +33,16 @@ EOF
 locals {
   cf_token_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.amaaaaaa4ebs56aawodbynrquyvlohrzze2uipxvxawsaqqe3sykv5owulfa"
 
-  cloudflare_api_token = run_cmd(
+  # Direct `oci` call + base64decode in HCL (no `bash -c`) so this parses on
+  # Windows/PowerShell, which has no bash. Pattern: cloudflare/zero-trust/prod.
+  cloudflare_api_token = base64decode(trimspace(run_cmd(
     "--terragrunt-quiet",
-    "bash", "-c",
-    "oci secrets secret-bundle get --secret-id ${local.cf_token_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d"
-  )
+    "oci", "secrets", "secret-bundle", "get",
+    "--secret-id", local.cf_token_secret_ocid,
+    "--region", "eu-amsterdam-1",
+    "--query", "data.\"secret-bundle-content\".content",
+    "--raw-output"
+  )))
 }
 
 terraform {

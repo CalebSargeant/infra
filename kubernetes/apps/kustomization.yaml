@@ -4,6 +4,7 @@ resources:
   # automation
   - ./atlantis
   - ./browserless
+  - ./hermes
   - ./homeassistant
   - ./homebridge
   - ./git-pull-request-dashboard
@@ -11,13 +12,15 @@ resources:
   - ./mikrotik-minder
   - ./n8n
   - ./n8n-mcp
-  - ./openclaw
   - ./renovate
   # magmamoose products (open-core; external-repo + image automation)
   - ./caldrith
   - ./chargate
-  - ./diatreme-pro
   - ./nievah
+  # DORMANT — autonomous-coding engine (acts as you on GitHub). Reviewed scaffold parked
+  # in ./openhands; uncomment to deploy ONLY after validating image/runtime in-cluster.
+  # See kubernetes/apps/openhands/README.md.
+  # - ./openhands
   # backup
   - ./timemachine
   # miscellaneous (dashboard)
@@ -44,7 +47,9 @@ resources:
   # observability
   - ./alloy
   - ./blackbox-exporter
+  - ./blackbox-exporter-oci
   - ./fluent-bit
+  - ./holmesgpt
   - ./krr
   - ./kube-prometheus-stack
   - ./loki
@@ -77,5 +82,3 @@ resources:
   - ./buxfer-sync
   - ./deskbird-booking
   - ./fortivpn-gateway
-  - ./openviking
-  - ./zoey

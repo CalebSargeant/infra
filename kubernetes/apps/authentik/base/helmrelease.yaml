@@ -29,6 +29,16 @@ spec:
           value: valkey.database.svc.cluster.local
         - name: AUTHENTIK_REDIS__DB
           value: "4"
+        # DB coordinates MUST live here in global.env, NOT under authentik.postgresql
+        # below: when `existingSecret` is set, the chart injects only that secret's
+        # keys and ignores authentik.postgresql.*, so the pod never received
+        # AUTHENTIK_POSTGRESQL__HOST and defaulted to 127.0.0.1 → connection refused.
+        - name: AUTHENTIK_POSTGRESQL__HOST
+          value: postgres-rw.database.svc.cluster.local
+        - name: AUTHENTIK_POSTGRESQL__NAME
+          value: authentik
+        - name: AUTHENTIK_POSTGRESQL__USER
+          value: neondb_owner
     authentik:
       # Single secret carries AUTHENTIK_SECRET_KEY + POSTGRESQL__PASSWORD +
       # BOOTSTRAP_* (env-injected into server + worker).
@@ -46,8 +56,10 @@ spec:
     server:
       nodeSelector:
         node-role.kubernetes.io/worker: ""
+        topology.sargeant.co/tier: on-prem
       ingress:
         enabled: false
     worker:
       nodeSelector:
         node-role.kubernetes.io/worker: ""
+        topology.sargeant.co/tier: on-prem

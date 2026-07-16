@@ -33,6 +33,20 @@ spec:
     # dashboard. VERIFY the Loki push endpoint/namespace for your install.
     falcosidekick:
       enabled: true
+      # The Falco DaemonSet is worker-pinned above, but the falcosidekick Deployment had
+      # no nodeSelector and no resource request, so the scheduler placed it on the full
+      # control-plane Pi, where a high Falco event rate ballooned it toward ~2Gi and the
+      # node OOM-killed it repeatedly (23 restarts). Pin to worker, bound its memory, and
+      # run a single replica (one alert forwarder is plenty for this cluster).
+      replicaCount: 1
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      resources:
+        requests:
+          cpu: 10m
+          memory: 128Mi
+        limits:
+          memory: 1Gi
       config:
         loki:
           hostport: "http://loki-gateway.observability.svc.cluster.local" # NOSONAR S5332 - in-cluster Loki push endpoint (east-west), not internet-facing

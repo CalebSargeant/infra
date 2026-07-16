@@ -4,4 +4,4 @@ resources:
   - cronjob.yaml
   - externalsecret.yaml
 components:
-  - ../../../../components/node-selectors/mini
+  - ../../../../components/node-selectors/native-cloud

@@ -43,8 +43,11 @@ terraform {
 #
 #   locals {
 #     fgt1_token_secret_ocid = "ocid1.vaultsecret.oc1.eu-amsterdam-1.<...>"
-#     fgt1_token = run_cmd("--terragrunt-quiet", "bash", "-c",
-#       "oci secrets secret-bundle get --secret-id ${local.fgt1_token_secret_ocid} --region eu-amsterdam-1 --query 'data.\"secret-bundle-content\".content' --raw-output | base64 -d")
+#     # Call `oci` directly + decode in HCL (no `bash -c`) so it parses on Windows too.
+#     fgt1_token = base64decode(trimspace(run_cmd("--terragrunt-quiet",
+#       "oci", "secrets", "secret-bundle", "get", "--secret-id", local.fgt1_token_secret_ocid,
+#       "--region", "eu-amsterdam-1", "--query", "data.\"secret-bundle-content\".content",
+#       "--raw-output")))
 #   }
 #
 # NOTE: API tokens are plaintext-equivalent secrets — never inline a real one

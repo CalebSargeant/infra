@@ -594,3 +594,42 @@ resource "cloudflare_zero_trust_access_policy" "n8n_mcp_service_token" {
     service_token = [cloudflare_zero_trust_access_service_token.n8n_mcp.id]
   }
 }
+
+# ---------------------------------------------------------------------------
+# Grafana — kube-prometheus-stack observability dashboards (firefly cluster).
+# Reachable off-LAN via the firefly cloudflared tunnel (tunnels.tf) and gated by
+# this Caleb-only Access app. The tunnel route + the proxied CNAME external-dns
+# publishes from kubernetes/apps/kube-prometheus-stack replace the old private
+# LAN A record that hung from off-LAN. grafana.sargeant.local stays LAN-only
+# (no tunnel, no Access). Grafana keeps its own login behind Access.
+# ---------------------------------------------------------------------------
+resource "cloudflare_zero_trust_access_application" "grafana" {
+  account_id                = var.account_id
+  name                      = "Grafana"
+  type                      = "self_hosted"
+  domain                    = "grafana.magmamoose.com"
+  logo_url                  = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/grafana.svg"
+  tags                      = ["Magma Moose"]
+  app_launcher_visible      = true
+  auto_redirect_to_identity = false
+  session_duration          = "24h"
+
+  allowed_idps = [
+    cloudflare_zero_trust_access_identity_provider.google_workspace.id,
+    cloudflare_zero_trust_access_identity_provider.one_time_pin.id,
+    cloudflare_zero_trust_access_identity_provider.google.id,
+  ]
+}
+
+resource "cloudflare_zero_trust_access_policy" "grafana_caleb" {
+  account_id       = var.account_id
+  application_id   = cloudflare_zero_trust_access_application.grafana.id
+  name             = "Caleb"
+  decision         = "allow"
+  precedence       = 1
+  session_duration = "24h"
+
+  include {
+    group = [cloudflare_zero_trust_access_group.caleb.id]
+  }
+}

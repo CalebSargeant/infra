@@ -5,5 +5,7 @@ resources:
   - externalsecret.yaml
   - externalsecret-thanos-objstore.yaml
   - externalsecret-grafana-admin.yaml
+  - dashboard-app-logs.yaml
+  - ingress-grafana-lan.yaml
 components:
   - ../../../../components/node-selectors/mini

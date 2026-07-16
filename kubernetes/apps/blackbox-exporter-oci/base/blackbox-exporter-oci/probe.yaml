@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: blackbox-http-oci
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: blackbox-exporter-oci
+spec:
+  interval: 60s
+  module: http_2xx
+  prober:
+    # prober.url must be host:port with NO scheme — the operator builds
+    # <scheme>://<url><path>; a leading http:// makes it reject the URL.
+    url: blackbox-exporter-oci.observability.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      # External-connectivity / uptime probes, run from the OCI vantage point.
+      # Mirrors the on-prem blackbox-exporter targets so results can be
+      # compared across vantage points (probe label distinguishes them).
+      static:
+        - https://sargeant.co
+        - https://www.google.com
+        - https://1.1.1.1
+      labels:
+        probe: external-oci

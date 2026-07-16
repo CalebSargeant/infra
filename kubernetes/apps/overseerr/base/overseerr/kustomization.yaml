@@ -10,4 +10,4 @@ resources:
 components:
   # resources set explicitly inline in deployment.yaml (right-sized from live usage);
   # c.nano resource-profile removed — it op:add-overrode the inline block.
-  - ../../../../components/node-selectors/mini
+  - ../../../../components/node-selectors/native-cloud
