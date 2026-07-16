@@ -2,6 +2,28 @@
 
 <!-- version list -->
 
+## v1.76.3 (2026-07-16)
+
+### Bug Fixes
+
+- Fluxcdbot name ([#465](https://github.com/CalebSargeant/infra/pull/465),
+  [`0b25765`](https://github.com/CalebSargeant/infra/commit/0b25765af267359ab3f5e2a908af37ad25fe064e))
+
+### Chores
+
+- **media**: Bump image tags
+  ([`de67cc2`](https://github.com/CalebSargeant/infra/commit/de67cc2fe73a6356b73103af4ddd4be7ec2f5bb6))
+
+- **media**: Bump image tags
+  ([`996531f`](https://github.com/CalebSargeant/infra/commit/996531f617d4884a5c998df970b1639d8351234f))
+
+- **media**: Bump image tags
+  ([`4579f42`](https://github.com/CalebSargeant/infra/commit/4579f42ae3414b96cf6f06696abcfd4f4b148725))
+
+- **media**: Bump image tags
+  ([`2b8cf2f`](https://github.com/CalebSargeant/infra/commit/2b8cf2f6d5ef1a5a15cc319854081b12067826de))
+
+
 ## v1.76.2 (2026-07-14)
 
 ### Bug Fixes
