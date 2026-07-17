@@ -6,4 +6,5 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - gitrepository.yaml
+  - image-automation.yaml
   - ghcr-reader-rbac.yaml

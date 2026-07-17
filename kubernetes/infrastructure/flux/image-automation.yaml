@@ -336,10 +336,13 @@ spec:
     semver:
       range: '>=2.0.0 <3.0.0'
 ---
-# Single image-update automation for the whole media stack. Scans ./kubernetes/apps
-# for `$imagepolicy` markers (only the 11 media workloads carry them — the
-# self-managed apps' markers live in their own repos) and pushes tag bumps to
-# infra's main via the App-authenticated source above.
+# Single image-update automation for every infra-hosted tag marker. Scans
+# ./kubernetes/apps for `$imagepolicy` markers — the media workloads above, plus
+# github-usage-dashboard (its chart is remote but its deploy tag lives here, with
+# its ImagePolicy in apps/github-usage-dashboard/base/) — and pushes tag bumps to
+# infra's main via the App-authenticated source above. Fully self-managed apps
+# (nievah, git-pull-request-dashboard) keep their markers, and their own
+# ImageUpdateAutomation, in their own repos, so they're out of scope here.
 apiVersion: image.toolkit.fluxcd.io/v1beta2
 kind: ImageUpdateAutomation
 metadata:

@@ -28,11 +28,12 @@ spec:
   values:
     image:
       repository: ghcr.io/magmamoose/github-usage
-      # Pinned to a Diatreme release. Bump on new releases (Flux image automation
-      # can be added later, as nievah/diatreme-pro do). Multi-arch since v0.0.4;
-      # v0.0.6 adds the live-usage render fix (MagmaMoose/github-usage#10) that
-      # stopped the dashboard blanking on real billing data.
-      tag: v0.0.6
+      # Auto-bumped by Flux image automation — do NOT hand-edit the tag; the
+      # `$imagepolicy` marker below is the setter. The ImageRepository + ImagePolicy
+      # live in base/github-usage-dashboard/image-automation.yaml; the shared `media`
+      # ImageUpdateAutomation scans ./kubernetes/apps and pushes the bump to main.
+      # Multi-arch since v0.0.4; v0.0.6 added the live-usage render fix (github-usage#10).
+      tag: v0.0.6 # {"$imagepolicy": "flux-system:github-usage-dashboard:tag"}
       pullPolicy: IfNotPresent
       pullSecrets:
         - name: ghcr-pull-secret
