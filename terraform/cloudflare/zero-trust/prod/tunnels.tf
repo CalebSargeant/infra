@@ -181,6 +181,16 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # GitHub usage dashboard (firefly cluster) — githubusage.magmamoose.com.
+    # Gated by the self_hosted Cloudflare Access app in access_apps.tf (Caleb
+    # only — it surfaces org billing, no in-app auth). external-dns publishes the
+    # proxied CNAME from the k8s Ingress annotations.
+    ingress_rule {
+      hostname = "githubusage.magmamoose.com"
+      service  = "http://github-usage-dashboard.github-usage-dashboard.svc.cluster.local:8000"
+      origin_request {}
+    }
+
     # Diatreme Pro dashboard (firefly cluster) — the apex diatreme.magmamoose.com.
     # Supersedes comment-commander-pro as comment-commander folds into Diatreme;
     # leave the cc-pro rule above until diatreme-pro is verified live, then prune.

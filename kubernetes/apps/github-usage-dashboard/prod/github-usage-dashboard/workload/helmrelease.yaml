@@ -1,0 +1,65 @@
+---
+# Deploys the github-usage-dashboard Helm chart from MagmaMoose/github-usage
+# (charts/github-usage-dashboard) via the GitRepository source in base/. All
+# firefly-specific deploy config lives here in values; the chart stays generic.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: github-usage-dashboard
+  namespace: github-usage-dashboard
+spec:
+  interval: 30m
+  releaseName: github-usage-dashboard
+  chart:
+    spec:
+      chart: charts/github-usage-dashboard
+      reconcileStrategy: Revision   # re-render when main advances
+      sourceRef:
+        kind: GitRepository
+        name: github-usage-dashboard
+        namespace: flux-system
+      interval: 10m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    image:
+      repository: ghcr.io/magmamoose/github-usage
+      # Pinned to the first Diatreme release. Bump on new releases (Flux image
+      # automation can be added later, as nievah/diatreme-pro do).
+      tag: v0.0.1
+      pullPolicy: IfNotPresent
+      pullSecrets:
+        - name: ghcr-pull-secret
+
+    # Live mode: org billing for magmamoose via the GitHub App (id 4050687).
+    # APP_MODE is auto-detected as `live` because a target + App auth are present.
+    # App id / installation id are non-secret (ConfigMap); the private key comes
+    # from the `github-usage-env` secret below (externalsecret.yaml).
+    github:
+      org: magmamoose
+      appId: "4050687"
+      installationId: "145262351"
+
+    config:
+      publicUrl: "https://githubusage.magmamoose.com"
+
+    # First-class Postgres: the DSN is in the github-usage-env secret (built from
+    # the shared CNPG neondb_owner password). No SQLite PVC needed.
+    persistence:
+      enabled: false
+
+    # Secrets (DATABASE_URL + GITHUB_APP_PRIVATE_KEY) come from the ExternalSecret
+    # we manage in workload/externalsecret.yaml, referenced by name here.
+    secrets:
+      existingSecretName: github-usage-env
+    externalSecret:
+      enabled: false
+
+    # Ingress is DNS-only and hand-written (workload/ingress.yaml) to match the
+    # firefly cloudflared-tunnel pattern; the chart's own Ingress stays off.
+    ingress:
+      enabled: false
