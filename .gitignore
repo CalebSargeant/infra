@@ -43,6 +43,9 @@ k3s.yaml
 # contain no secret material themselves, so they are safe to commit.
 !externalsecret.yaml
 !github-app-magmamoose-secret.yaml
+# ghcr-pull-secret.yaml here is the ExternalSecret/SecretStore mirror (SA + refs
+# to the flux-system pull secret) — no secret material, safe to commit.
+!ghcr-pull-secret.yaml
 
 ansible/vars
 
