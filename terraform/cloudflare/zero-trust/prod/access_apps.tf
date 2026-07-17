@@ -387,6 +387,40 @@ resource "cloudflare_zero_trust_access_policy" "diatreme_pro_caleb" {
   }
 }
 
+# --- self_hosted: GitHub Usage Dashboard (firefly) -------------------------
+# githubusage.magmamoose.com surfaces org billing usage and has no in-app auth,
+# so it's Caleb-only — same posture as the Diatreme Pro dashboard above. The
+# tunnel ingress rule is in tunnels.tf; external-dns publishes the CNAME.
+resource "cloudflare_zero_trust_access_application" "github_usage_dashboard" {
+  account_id                = var.account_id
+  name                      = "GitHub Usage Dashboard"
+  type                      = "self_hosted"
+  domain                    = "githubusage.magmamoose.com"
+  tags                      = ["Magma Moose"]
+  app_launcher_visible      = true
+  auto_redirect_to_identity = false
+  session_duration          = "24h"
+
+  allowed_idps = [
+    cloudflare_zero_trust_access_identity_provider.google_workspace.id,
+    cloudflare_zero_trust_access_identity_provider.one_time_pin.id,
+    cloudflare_zero_trust_access_identity_provider.google.id,
+  ]
+}
+
+resource "cloudflare_zero_trust_access_policy" "github_usage_dashboard_caleb" {
+  account_id       = var.account_id
+  application_id   = cloudflare_zero_trust_access_application.github_usage_dashboard.id
+  name             = "Caleb"
+  decision         = "allow"
+  precedence       = 1
+  session_duration = "24h"
+
+  include {
+    group = [cloudflare_zero_trust_access_group.caleb.id]
+  }
+}
+
 # --- self_hosted: Diatreme Dispatch API (bypass — bearer-gated) -------------
 # diatreme.magmamoose.com/api/dispatch is POSTed to by the Diatreme worker
 # (api.diatreme.magmamoose.com) when triage decides a Copilot comment is a
