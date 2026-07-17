@@ -29,9 +29,10 @@ spec:
     image:
       repository: ghcr.io/magmamoose/github-usage
       # Pinned to a Diatreme release. Bump on new releases (Flux image automation
-      # can be added later, as nievah/diatreme-pro do). v0.0.4 is the first
-      # multi-arch (linux/amd64 + linux/arm64) release.
-      tag: v0.0.4
+      # can be added later, as nievah/diatreme-pro do). Multi-arch since v0.0.4;
+      # v0.0.6 adds the live-usage render fix (MagmaMoose/github-usage#10) that
+      # stopped the dashboard blanking on real billing data.
+      tag: v0.0.6
       pullPolicy: IfNotPresent
       pullSecrets:
         - name: ghcr-pull-secret
