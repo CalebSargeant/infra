@@ -28,9 +28,10 @@ spec:
   values:
     image:
       repository: ghcr.io/magmamoose/github-usage
-      # Pinned to the first Diatreme release. Bump on new releases (Flux image
-      # automation can be added later, as nievah/diatreme-pro do).
-      tag: v0.0.1
+      # Pinned to a Diatreme release. Bump on new releases (Flux image automation
+      # can be added later, as nievah/diatreme-pro do). v0.0.4 is the first
+      # multi-arch (linux/amd64 + linux/arm64) release.
+      tag: v0.0.4
       pullPolicy: IfNotPresent
       pullSecrets:
         - name: ghcr-pull-secret
@@ -71,8 +72,9 @@ spec:
     ingress:
       enabled: false
 
-    # The v0.0.1 image is amd64-only (Diatreme didn't build arm64), but 3 of 4
-    # firefly nodes are arm64 — pin to the amd64 node so the image can run.
-    # TODO: remove once the image is published multi-arch (linux/arm64 too).
+    # v0.0.4+ is published multi-arch (linux/amd64 + linux/arm64), so pin this
+    # always-online, public-facing dashboard to the OCI free-tier ARM workers
+    # (ff-oci1/ff-oci2) instead of the single amd64 node. Nodes are untainted, so
+    # nodeSelector alone is enough. See kubernetes/components/node-selectors/native-cloud.
     nodeSelector:
-      kubernetes.io/arch: amd64
+      topology.sargeant.co/tier: native-cloud
