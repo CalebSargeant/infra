@@ -48,9 +48,16 @@ spec:
       publicUrl: "https://githubusage.magmamoose.com"
 
     # First-class Postgres: the DSN is in the github-usage-env secret (built from
-    # the shared CNPG neondb_owner password). No SQLite PVC needed.
+    # the shared CNPG neondb_owner password). Datastore is Postgres, not SQLite.
+    #
+    # persistence stays ENABLED only to work around a chart bug: with it disabled,
+    # templates/pvc.yaml renders to just its leading `# kics-scan` comment (a
+    # comment-only doc) and `helm install` fails with "apiVersion not set". The
+    # PVC is mounted but unused (the app uses DATABASE_URL). TODO: fix the chart
+    # to render pvc.yaml empty when disabled, then set this false.
     persistence:
-      enabled: false
+      enabled: true
+      size: 1Gi
 
     # Secrets (DATABASE_URL + GITHUB_APP_PRIVATE_KEY) come from the ExternalSecret
     # we manage in workload/externalsecret.yaml, referenced by name here.
