@@ -70,3 +70,9 @@ spec:
     # firefly cloudflared-tunnel pattern; the chart's own Ingress stays off.
     ingress:
       enabled: false
+
+    # The v0.0.1 image is amd64-only (Diatreme didn't build arm64), but 3 of 4
+    # firefly nodes are arm64 — pin to the amd64 node so the image can run.
+    # TODO: remove once the image is published multi-arch (linux/arm64 too).
+    nodeSelector:
+      kubernetes.io/arch: amd64
