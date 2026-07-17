@@ -51,14 +51,15 @@ spec:
     # First-class Postgres: the DSN is in the github-usage-env secret (built from
     # the shared CNPG neondb_owner password). Datastore is Postgres, not SQLite.
     #
-    # persistence stays ENABLED only to work around a chart bug: with it disabled,
-    # templates/pvc.yaml renders to just its leading `# kics-scan` comment (a
-    # comment-only doc) and `helm install` fails with "apiVersion not set". The
-    # PVC is mounted but unused (the app uses DATABASE_URL). TODO: fix the chart
-    # to render pvc.yaml empty when disabled, then set this false.
+    # Persistence is OFF: the app persists to Postgres via DATABASE_URL, so the
+    # mounted dir is just an unused SQLite fallback. With it off the chart uses an
+    # emptyDir (node-portable) instead of an RWO local-path PVC — which is what lets
+    # the pod schedule on the OCI arm64 workers. A local-path PVC binds to a single
+    # node (ff-vm1) and the pod can't follow the native-cloud nodeSelector to
+    # ff-oci1/ff-oci2. The chart bug that broke `enabled: false` (comment-only
+    # pvc.yaml doc) is fixed in MagmaMoose/github-usage#9.
     persistence:
-      enabled: true
-      size: 1Gi
+      enabled: false
 
     # Secrets (DATABASE_URL + GITHUB_APP_PRIVATE_KEY) come from the ExternalSecret
     # we manage in workload/externalsecret.yaml, referenced by name here.
