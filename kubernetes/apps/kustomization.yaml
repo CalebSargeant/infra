@@ -4,6 +4,7 @@ resources:
   # automation
   - ./atlantis
   - ./browserless
+  - ./github-runner
   - ./hermes
   - ./homeassistant
   - ./homebridge
