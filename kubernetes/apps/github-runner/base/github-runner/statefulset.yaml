@@ -23,13 +23,13 @@ metadata:
     app: github-runner
 spec:
   serviceName: github-runner
-  # Two runners so a ~15-min chargate/MegaLinter PR scan does not head-of-line
-  # block a quick release/deploy job. Stable StatefulSet names (firefly-infra-0,
-  # firefly-infra-1) + `config.sh --replace` mean a restart re-registers the
-  # SAME runner rather than accumulating offline duplicates in the GitHub UI.
-  # Scale up only if job queueing becomes a problem — ff-vm1 has 32 GiB but is
-  # the shared on-prem worker.
-  replicas: 2
+  # One runner. ff-vm1 is the ONLY amd64 node and it already hosts most of the
+  # cluster, so a second replica can't schedule ("Insufficient cpu" — the pod pins
+  # to ff-vm1 via worker-on-prem). Jobs queue serially, which is fine at this
+  # volume. A stable StatefulSet name (firefly-infra-0) + `config.sh --replace`
+  # means a restart re-registers the SAME runner rather than accumulating offline
+  # duplicates in the GitHub UI. Scale up only after adding amd64 capacity.
+  replicas: 1
   selector:
     matchLabels:
       app: github-runner
@@ -65,7 +65,7 @@ spec:
               echo "=== Installing required packages ==="
               apk add --no-cache curl openssl
 
-              echo "=== Fetching fresh GitHub runner registration token (repo-level) ==="
+              echo "=== Fetching fresh GitHub runner registration token (org-level) ==="
 
               # GitHub App configuration
               APP_ID="${GITHUB_APP_ID}"
