@@ -1,0 +1,76 @@
+# Deploys the github-usage-dashboard Helm chart from MagmaMoose/github-usage
+# (charts/github-usage-dashboard) via the GitRepository source in base/. All
+# firefly-specific deploy config lives here in values; the chart stays generic.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: github-usage-dashboard
+  namespace: github-usage-dashboard
+spec:
+  interval: 30m
+  releaseName: github-usage-dashboard
+  chart:
+    spec:
+      chart: charts/github-usage-dashboard
+      reconcileStrategy: Revision # re-render when main advances
+      sourceRef:
+        kind: GitRepository
+        name: github-usage-dashboard
+        namespace: flux-system
+      interval: 10m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    image:
+      repository: ghcr.io/magmamoose/github-usage
+      # Auto-bumped by Flux image automation — do NOT hand-edit the tag; the
+      # `$imagepolicy` marker below is the setter. The ImageRepository + ImagePolicy
+      # live in base/github-usage-dashboard/image-automation.yaml; the shared `media`
+      # ImageUpdateAutomation scans ./kubernetes/apps and pushes the bump to main.
+      # Multi-arch since v0.0.4; v0.0.6 added the live-usage render fix (github-usage#10).
+      tag: v0.0.8 # {"$imagepolicy": "flux-system:github-usage-dashboard:tag"}
+      pullPolicy: IfNotPresent
+      pullSecrets:
+        - name: ghcr-pull-secret
+    # Live mode: org billing for magmamoose via the GitHub App (id 4050687).
+    # APP_MODE is auto-detected as `live` because a target + App auth are present.
+    # App id / installation id are non-secret (ConfigMap); the private key comes
+    # from the `github-usage-env` secret below (externalsecret.yaml).
+    github:
+      org: magmamoose
+      appId: "4050687"
+      installationId: "145262351"
+    config:
+      publicUrl: "https://githubusage.magmamoose.com"
+    # First-class Postgres: the DSN is in the github-usage-env secret (built from
+    # the shared CNPG neondb_owner password). Datastore is Postgres, not SQLite.
+    #
+    # Persistence is OFF: the app persists to Postgres via DATABASE_URL, so the
+    # mounted dir is just an unused SQLite fallback. With it off the chart uses an
+    # emptyDir (node-portable) instead of an RWO local-path PVC — which is what lets
+    # the pod schedule on the OCI arm64 workers. A local-path PVC binds to a single
+    # node (ff-vm1) and the pod can't follow the native-cloud nodeSelector to
+    # ff-oci1/ff-oci2. The chart bug that broke `enabled: false` (comment-only
+    # pvc.yaml doc) is fixed in MagmaMoose/github-usage#9.
+    persistence:
+      enabled: false
+    # Secrets (DATABASE_URL + GITHUB_APP_PRIVATE_KEY) come from the ExternalSecret
+    # we manage in workload/externalsecret.yaml, referenced by name here.
+    secrets:
+      existingSecretName: github-usage-env
+    externalSecret:
+      enabled: false
+    # Ingress is DNS-only and hand-written (workload/ingress.yaml) to match the
+    # firefly cloudflared-tunnel pattern; the chart's own Ingress stays off.
+    ingress:
+      enabled: false
+    # v0.0.4+ is published multi-arch (linux/amd64 + linux/arm64), so pin this
+    # always-online, public-facing dashboard to the OCI free-tier ARM workers
+    # (ff-oci1/ff-oci2) instead of the single amd64 node. Nodes are untainted, so
+    # nodeSelector alone is enough. See kubernetes/components/node-selectors/native-cloud.
+    nodeSelector:
+      topology.sargeant.co/tier: native-cloud

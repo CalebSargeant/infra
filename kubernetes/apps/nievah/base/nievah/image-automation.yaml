@@ -45,7 +45,7 @@ spec:
         branch: main
     commit:
       author:
-        email: actions@users.noreply.github.com
+        email: fluxcdbot@users.noreply.github.com
         name: fluxcdbot
       messageTemplate: |-
         chore: update nievah image

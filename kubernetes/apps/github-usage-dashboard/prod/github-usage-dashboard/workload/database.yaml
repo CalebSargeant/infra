@@ -1,0 +1,17 @@
+---
+# Empty database on the SHARED CNPG cluster (do NOT create a new Cluster). The
+# github-usage backend creates its own tables on first boot (store.py), so it
+# only needs an empty database it owns. Owned by the shared `neondb_owner` role
+# (password enforced by CNPG from OCI Vault `neondb-owner-password`, surfaced to
+# the app as DATABASE_URL via externalsecret.yaml).
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: githubusage
+  namespace: database
+spec:
+  cluster:
+    name: postgres
+  name: githubusage
+  owner: neondb_owner
+  databaseReclaimPolicy: retain

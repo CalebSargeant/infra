@@ -376,6 +376,17 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "firefly" {
       origin_request {}
     }
 
+    # GitHub usage dashboard (firefly cluster) — githubusage.magmamoose.com.
+    # Gated by the self_hosted Cloudflare Access app in access_apps.tf (Caleb
+    # only — it surfaces org billing, no in-app auth). external-dns publishes the
+    # proxied CNAME from the k8s Ingress annotations. Placed last (before the
+    # catch-all) so the plan is a clean append, not a mid-list reorder.
+    ingress_rule {
+      hostname = "githubusage.magmamoose.com"
+      service  = "http://github-usage-dashboard.github-usage-dashboard.svc.cluster.local:8000"
+      origin_request {}
+    }
+
     # Cloudflared requires the last rule to be a catch-all with no hostname.
     ingress_rule {
       service = "http_status:404"
