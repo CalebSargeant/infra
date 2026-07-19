@@ -26,7 +26,11 @@ concurrency:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    # Per-repo runner toggle: set the repo variable SELFHOSTED_GITHUB_RUNNER to
+    # `firefly` to run Diatreme releases on the in-cluster runner (free minutes;
+    # the runner ships `gh`, which Diatreme shells out to for `gh release create`).
+    # Unset/blank stays on GitHub-hosted — the instant fail-back if the runner is down.
+    runs-on: ${{ vars.SELFHOSTED_GITHUB_RUNNER || 'ubuntu-latest' }}
     permissions:
       # Release Runner public-app mode uses OIDC to request an installation token
       # for release writes; the workflow token itself only needs read access.

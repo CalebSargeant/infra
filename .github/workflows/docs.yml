@@ -16,7 +16,10 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Per-repo runner toggle: SELFHOSTED_GITHUB_RUNNER=firefly runs the mkdocs build
+    # on the in-cluster runner. Unset/blank stays on GitHub-hosted. (The `deploy` job
+    # below stays on ubuntu-latest — GitHub Pages deployment, low value to self-host.)
+    runs-on: ${{ vars.SELFHOSTED_GITHUB_RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
@@ -36,4 +39,4 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - id: deploy
-        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v3.0.2-node.24
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0

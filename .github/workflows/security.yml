@@ -1,19 +1,47 @@
+# Chargate security gate (https://github.com/MagmaMoose/chargate), consumed as the
+# MARKETPLACE ACTION rather than the reusable `gate.yml`. A job that calls a
+# reusable workflow (`uses:` at job level) may NOT set its own `runs-on` — the
+# runner is fixed inside the reusable workflow. Switching to the marketplace action
+# gives this job a job-level `runs-on`, which is what lets it route to the firefly
+# self-hosted runner (mirrors platform1-infra's security.yml).
+#
+# Runner toggle: set the repo variable SELFHOSTED_GITHUB_RUNNER to `firefly` to run
+# the (~15-min, docker-backed) MegaLinter scan on the in-cluster runner — free
+# minutes. Leave it unset/blank to stay on GitHub-hosted; blanking it is the instant
+# escape hatch if the runner is down.
+#
+# PR-only: the previous `push: [main]` trigger was dropped (matching platform1). It
+# made every Diatreme release commit to main kick off a fresh whole-repo scan — the
+# single biggest minute sink here. PR-time net-new gating (and its SARIF upload, which
+# satisfies the `code_scanning` ruleset rule) is retained; only the default-branch
+# baseline SARIF refresh is lost. DefectDojo / Dependency-Track stay intentionally
+# unwired.
 name: Security
 
-# Chargate security gate (https://github.com/MagmaMoose/chargate).
-# On PRs: whole-repo MegaLinter -> gate on net-new findings -> SARIF to the
-# GitHub Security tab. On push to main: non-gating baseline scan.
-# DefectDojo import is intentionally not wired (no defectdojo_* inputs / token).
 on:
   pull_request:
-  push:
-    branches: [main]
 
 permissions:
   contents: read
-  pull-requests: read
+  pull-requests: write
   security-events: write
+  actions: read
+  # Chargate uses OIDC to request a short-lived Chargate App token for PR comments;
+  # without the App installed it falls back to the workflow GITHUB_TOKEN.
+  id-token: write
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   chargate:
-    uses: magmamoose/chargate/.github/workflows/gate.yml@57283fe8c62cf837e27196f1b419b13fdd16322c # v2.5.2
+    # Dependabot PRs only bump SHA-pinned actions — a full MegaLinter run is wasted
+    # minutes, and a skipped required check still satisfies the ruleset.
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    # Per-repo runner toggle (see header). SELFHOSTED_GITHUB_RUNNER=firefly routes to
+    # the cluster pool; unset/blank stays on GitHub-hosted.
+    runs-on: ${{ vars.SELFHOSTED_GITHUB_RUNNER || 'ubuntu-latest' }}
+    steps:
+      # The root action self-checkouts with fetch-depth 0 (needed for net-new gating).
+      - uses: magmamoose/chargate@eaac494291b73dd9586875ba8aaed658ca24eb6c # v2.8.0
