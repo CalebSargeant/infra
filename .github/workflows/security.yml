@@ -1,9 +1,8 @@
+# Org Chargate security gate (MegaLinter-backed, net-new PR-diff gating), consumed
+# as the Chargate MARKETPLACE ACTION. On PRs it gates on net-new findings; on push
+# to the default branch it runs a non-gating baseline scan and ships the full SARIF.
 name: Security
 
-# Chargate security gate (https://github.com/MagmaMoose/chargate).
-# On PRs: whole-repo MegaLinter -> gate on net-new findings -> SARIF to the
-# GitHub Security tab. On push to main: non-gating baseline scan.
-# DefectDojo import is intentionally not wired (no defectdojo_* inputs / token).
 on:
   pull_request:
   push:
@@ -11,9 +10,26 @@ on:
 
 permissions:
   contents: read
-  pull-requests: read
+  pull-requests: write
   security-events: write
+  # codeql-action/upload-sarif (and Chargate's status telemetry) read this run's
+  # metadata via GET /actions/runs/{id}; without actions:read that 403s with
+  # "Resource not accessible by integration" and the SARIF upload errors.
+  actions: read
 
 jobs:
   chargate:
-    uses: magmamoose/chargate/.github/workflows/gate.yml@57283fe8c62cf837e27196f1b419b13fdd16322c # v2.5.2
+    # Per-repo runner toggle, shared with the release (Diatreme) workflow.
+    # Set the SELFHOSTED_GITHUB_RUNNER variable to a self-hosted runner label
+    # to route this repo's managed workflows to a cluster pool — free minutes
+    # and a warm MegaLinter image. Leave it unset/blank to stay on
+    # GitHub-hosted; blanking it is also the instant escape hatch if the
+    # self-hosted runners bomb out.
+    runs-on: ${{ vars.SELFHOSTED_GITHUB_RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: magmamoose/chargate@eaac494291b73dd9586875ba8aaed658ca24eb6c # v2.8.0
+        with:
+          defectdojo_url: ${{ vars.MM_DEFECTDOJO_URL }}
+          defectdojo_token: ${{ secrets.MM_DEFECTDOJO_API_KEY }}
+          dependency_track_url: ${{ vars.MM_DEPENDENCY_TRACK_URL }}
+          dependency_track_token: ${{ secrets.MM_DEPENDENCY_TRACK_API_KEY }}
