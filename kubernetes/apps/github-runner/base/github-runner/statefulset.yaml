@@ -199,6 +199,14 @@ spec:
         - name: docker-dind
           image: docker:24-dind
           imagePullPolicy: Always
+          # Match the pod-network MTU (firefly's flannel VXLAN veth = 1450). dockerd's
+          # docker0 bridge defaults to 1500, so nested MegaLinter/build containers put
+          # 1500-byte frames onto a 1450 path — large packets (TLS handshakes, package
+          # + registry downloads) get blackholed and connections HANG until timeout.
+          # That is what stalled the chargate/MegaLinter scans at ~0% CPU and timed out
+          # the image builds' apt/npm fetches (deb.nodesource.com). The docker:dind
+          # entrypoint forwards these args to dockerd.
+          args: ["--mtu=1450"]
           securityContext:
             privileged: true
           resources:
