@@ -1,21 +1,6 @@
-# Chargate security gate (https://github.com/MagmaMoose/chargate), consumed as the
-# MARKETPLACE ACTION rather than the reusable `gate.yml`. A job that calls a
-# reusable workflow (`uses:` at job level) may NOT set its own `runs-on` — the
-# runner is fixed inside the reusable workflow. Switching to the marketplace action
-# gives this job a job-level `runs-on`, which is what lets it route to the firefly
-# self-hosted runner (mirrors platform1-infra's security.yml).
-#
-# Runner toggle: set the repo variable SELFHOSTED_GITHUB_RUNNER to `firefly` to run
-# the (~15-min, docker-backed) MegaLinter scan on the in-cluster runner — free
-# minutes. Leave it unset/blank to stay on GitHub-hosted; blanking it is the instant
-# escape hatch if the runner is down.
-#
-# PR-only: the previous `push: [main]` trigger was dropped (matching platform1). It
-# made every Diatreme release commit to main kick off a fresh whole-repo scan — the
-# single biggest minute sink here. PR-time net-new gating (and its SARIF upload, which
-# satisfies the `code_scanning` ruleset rule) is retained; only the default-branch
-# baseline SARIF refresh is lost. DefectDojo / Dependency-Track stay intentionally
-# unwired.
+# Org Chargate security gate (MegaLinter-backed, net-new PR-diff gating), consumed
+# as the Chargate MARKETPLACE ACTION. On PRs it gates on net-new findings; on push
+# to the default branch it runs a non-gating baseline scan and ships the full SARIF.
 name: Security
 
 on:
@@ -25,23 +10,24 @@ permissions:
   contents: read
   pull-requests: write
   security-events: write
+  # codeql-action/upload-sarif (and Chargate's status telemetry) read this run's
+  # metadata via GET /actions/runs/{id}; without actions:read that 403s with
+  # "Resource not accessible by integration" and the SARIF upload errors.
   actions: read
-  # Chargate uses OIDC to request a short-lived Chargate App token for PR comments;
-  # without the App installed it falls back to the workflow GITHUB_TOKEN.
-  id-token: write
-
-concurrency:
-  group: security-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   chargate:
-    # Dependabot PRs only bump SHA-pinned actions — a full MegaLinter run is wasted
-    # minutes, and a skipped required check still satisfies the ruleset.
-    if: ${{ github.actor != 'dependabot[bot]' }}
-    # Per-repo runner toggle (see header). SELFHOSTED_GITHUB_RUNNER=firefly routes to
-    # the cluster pool; unset/blank stays on GitHub-hosted.
+    # Per-repo runner toggle, shared with the release (Diatreme) workflow.
+    # Set the SELFHOSTED_GITHUB_RUNNER variable to a self-hosted runner label
+    # to route this repo's managed workflows to a cluster pool — free minutes
+    # and a warm MegaLinter image. Leave it unset/blank to stay on
+    # GitHub-hosted; blanking it is also the instant escape hatch if the
+    # self-hosted runners bomb out.
     runs-on: ${{ vars.SELFHOSTED_GITHUB_RUNNER || 'ubuntu-latest' }}
     steps:
-      # The root action self-checkouts with fetch-depth 0 (needed for net-new gating).
       - uses: magmamoose/chargate@eaac494291b73dd9586875ba8aaed658ca24eb6c # v2.8.0
+        with:
+          defectdojo_url: ${{ vars.MM_DEFECTDOJO_URL }}
+          defectdojo_token: ${{ secrets.MM_DEFECTDOJO_API_KEY }}
+          dependency_track_url: ${{ vars.MM_DEPENDENCY_TRACK_URL }}
+          dependency_track_token: ${{ secrets.MM_DEPENDENCY_TRACK_API_KEY }}
