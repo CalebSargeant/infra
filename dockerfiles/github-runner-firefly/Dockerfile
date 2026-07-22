@@ -11,7 +11,18 @@
 # BASE_IMAGE must match the runner the cluster actually runs (env-var contract:
 # myoung34/github-runner). Pin it to the tag in use if it differs from the
 # default below.
-ARG BASE_IMAGE=myoung34/github-runner:latest
+#
+# Accepted Chargate/KICS findings:
+#   965a08d7  package version pinning (rm, gettext-base) – `rm` is a coreutil,
+#             not an installable package; `gettext-base` version varies per
+#             distro release, and pinning a Debian version breaks the Alpine
+#             fallback branch — cross-distro detection is the intent.
+#   d3499f6d  RUN instruction not in package-pinning form – same reasoning.
+#   b03a748a  no HEALTHCHECK – runner agents have no HTTP health endpoint;
+#             liveness is runner registration with GitHub (matches statefulset
+#             accepted-risk doc).
+# kics-scan disable=965a08d7-ef86-4f14-8792-4a3b2098937e,d3499f6d-1651-41bb-a9a7-de925fea487b,b03a748a-542d-44f4-bb86-9199ab4fd2d5
+ARG BASE_IMAGE=myoung34/github-runner:2.334.0
 FROM ${BASE_IMAGE}
 
 USER root
