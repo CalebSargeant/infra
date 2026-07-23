@@ -17,6 +17,7 @@ resources:
   # magmamoose products (open-core; external-repo + image automation)
   - ./caldrith
   - ./chargate
+  - ./github-contributions
   - ./github-usage-dashboard
   - ./nievah
   # DORMANT — autonomous-coding engine (acts as you on GitHub). Reviewed scaffold parked
