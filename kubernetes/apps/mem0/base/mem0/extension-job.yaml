@@ -1,0 +1,58 @@
+---
+# One-shot bootstrap: create the pgvector `vector` extension in the agent_memory DB.
+#
+# Why a Job (not Database.spec.extensions): this cluster's CNPG Database CRD (v1) has
+# no `spec.extensions` field, and the DB owner `neondb_owner` is NOT a superuser, so it
+# cannot `CREATE EXTENSION vector` (pgvector is not a trusted extension). This cluster
+# has no dedicated postgres-superuser secret, so the Job connects as the existing
+# `admin` superuser role (managed in the CNPG Cluster spec; password in the
+# `nextcloud-db-admin` secret in this namespace). Reviewed trade-off — see the app
+# README. Idempotent (`IF NOT EXISTS`); waits for the Database CR to provision first.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mem0-pgvector-extension
+  namespace: database
+spec:
+  backoffLimit: 20
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app: mem0-bootstrap
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: create-extension
+          image: postgres:16-alpine
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              echo "waiting for agent_memory database on postgres-rw..."
+              until psql "host=postgres-rw.database.svc.cluster.local port=5432 user=$PGUSER dbname=agent_memory sslmode=require" -c 'SELECT 1' >/dev/null 2>&1; do
+                echo "  not ready yet; sleeping"; sleep 3;
+              done
+              echo "creating pgvector extension + granting schema to neondb_owner"
+              psql "host=postgres-rw.database.svc.cluster.local port=5432 user=$PGUSER dbname=agent_memory sslmode=require" \
+                -c 'CREATE EXTENSION IF NOT EXISTS vector;' \
+                -c 'GRANT ALL ON SCHEMA public TO neondb_owner;'
+              echo "done"
+          env:
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: nextcloud-db-admin
+                  key: username
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nextcloud-db-admin
+                  key: password
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi

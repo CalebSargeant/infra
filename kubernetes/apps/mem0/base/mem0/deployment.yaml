@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mem0
+  namespace: automation
+  labels:
+    app: mem0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mem0
+  template:
+    metadata:
+      labels:
+        app: mem0
+    spec:
+      # Wait for the agent_memory DB + pgvector extension before mem0 starts, so its
+      # first-boot table creation doesn't race the bootstrap Job.
+      initContainers:
+        - name: wait-for-pgvector
+          image: postgres:16-alpine
+          command:
+            - sh
+            - -c
+            - |
+              until psql "host=postgres-rw.database.svc.cluster.local port=5432 user=neondb_owner dbname=agent_memory sslmode=require" -tAc "SELECT 1 FROM pg_extension WHERE extname='vector'" | grep -q 1; do
+                echo "waiting for agent_memory + vector extension..."; sleep 3;
+              done
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mem0
+                  key: POSTGRES_PASSWORD
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+      containers:
+        - name: mem0
+          # PREREQUISITE: build + push this image (see ./Dockerfile). The upstream
+          # mem0/mem0-api-server image lacks the pgvector client deps. Pin a real tag.
+          image: ghcr.io/magmamoose/mem0-server:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            # --- Vector store: pgvector on the shared CNPG cluster ---
+            - name: POSTGRES_HOST
+              value: postgres-rw.database.svc.cluster.local
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: agent_memory
+            - name: POSTGRES_USER
+              value: neondb_owner
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mem0
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_COLLECTION_NAME
+              value: memories
+            # --- LLM + embeddings: routed through the in-cluster LiteLLM gateway
+            # (OpenAI-compatible :8080 auth-proxy). mem0's default models
+            # (gpt-4o-mini + text-embedding-3-small) are registered in the LiteLLM
+            # config in this change so they resolve. OPENAI_API_KEY is the LiteLLM key. ---
+            - name: OPENAI_BASE_URL
+              value: http://litellm.automation.svc.cluster.local:8080/v1
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mem0
+                  key: OPENAI_API_KEY
+            - name: MEM0_TELEMETRY
+              value: "false"
+            # LAN-only ingress + in-cluster callers for v1. Add an admin key before
+            # exposing wider (see README).
+            - name: AUTH_DISABLED
+              value: "true"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            initialDelaySeconds: 40
+            periodSeconds: 20
