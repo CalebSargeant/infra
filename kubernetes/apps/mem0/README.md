@@ -42,6 +42,30 @@ See ADR `.claude/decisions/2026-07-23-fleet-shared-memory-mem0.md`.
 4. **AUTH_DISABLED=true** for v1 (LAN-only ingress + in-cluster callers). Add an admin
    key before exposing beyond the LAN.
 
+## Hardening follow-ups (before un-parking)
+
+Surfaced by the security review of this PR; none block the (parked) merge, all are worth
+doing before the app actually reconciles:
+
+1. **Verify AppArmor node support before enabling a profile.** The modern
+   `securityContext.appArmorProfile` (GA in k8s 1.30, cluster is 1.33) is deliberately NOT
+   set: there is no AppArmor configuration in `ansible/`/`terraform/`, and a pod requesting a
+   non-`Unconfined` profile **fails to start** if the kubelet finds AppArmor unavailable.
+   mem0 has no `nodeSelector`, so it could land on the Pi. Check
+   `cat /sys/module/apparmor/parameters/enabled` on each node, then add the profile.
+2. **Dedicated postgres-superuser secret.** `extension-job.yaml` borrows
+   `nextcloud-db-admin` (the CNPG `admin` superuser). That makes one credential serve two
+   unrelated consumers — rotating for one breaks the other, and the blast radius spans both.
+   A dedicated `postgres-superuser` vault entry is the real fix.
+3. **In-cluster reachability.** The repo has no `NetworkPolicy`, so a `ClusterIP` service in
+   `automation` is reachable unauthenticated by *any* pod — "LAN-only ingress" constrains
+   north-south only. Since this store aggregates memory across Claude Code, Hermes, OpenHands
+   and HolmesGPT, set the admin key (item 4 above) before first real use, not just before
+   exposing it wider.
+4. **Liveness probe signal.** `/docs` (FastAPI Swagger) renders fine while Postgres or LiteLLM
+   is down, so a wedged backend never restarts the pod. Swap for a real health endpoint if the
+   image grows one.
+
 ## MCP exposure (the fleet interface — fast follow)
 
 mem0's storage layer is here; the shared **MCP-over-SSE** endpoint every agent points at

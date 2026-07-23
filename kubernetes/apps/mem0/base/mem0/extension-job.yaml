@@ -1,3 +1,22 @@
+# Chargate/KICS suppressions (accepted risks, reviewed — same rationale as the mem0
+# Deployment; this Job already runs non-root, RO-root, no-privilege-escalation, caps dropped):
+#   caa3479d IfNotPresent w/ tag      – house convention for stock utility images
+#   7c81d34c no image digest            (postgres:16-alpine), same as cronjob-sonarqube-sync.
+#                                       NOTE: this container holds the CNPG SUPERUSER
+#                                       credential, so it is the highest-value image here. The
+#                                       real fix for that is a DEDICATED postgres-superuser
+#                                       vault entry (tracked follow-up in the app README), not
+#                                       a digest pin — reusing nextcloud-db-admin is the
+#                                       documented trade-off.
+#   8b36775e no AppArmor annotation   – KICS wants the DEPRECATED beta annotation; the modern
+#                                       securityContext.appArmorProfile is not set until node
+#                                       AppArmor support is verified (would fail pod startup).
+#   4a20ebac no LimitRange            – namespace-scoped policy for the SHARED `database` ns,
+#   48a5beba no ResourceQuota           owned elsewhere; an app PR must not impose it.
+#   3d658f8b secretKeyRef is defined  – ExternalSecret/Secret -> secretKeyRef env is the
+#                                       repo-wide sanctioned pattern; psql reads PGUSER/
+#                                       PGPASSWORD from env only.
+# kics-scan disable=caa3479d-885d-4882-9aac-95e5e78ef5c2,7c81d34c-8e5a-402b-9798-9f442630e678,8b36775e-183d-4d46-b0f7-96a6f34a723f,4a20ebac-1060-4c81-95d1-1f7f620e983b,48a5beba-e4c0-4584-a2aa-e6894e4cf424,3d658f8b-d988-41a0-a841-40043121de1e
 ---
 # One-shot bootstrap: create the pgvector `vector` extension in the agent_memory DB.
 #

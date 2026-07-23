@@ -1,3 +1,27 @@
+# Chargate/KICS suppressions (accepted risks, reviewed — genuinely actionable findings were
+# FIXED in code instead: the base image is digest-pinned in ./Dockerfile and the mem0 container
+# now runs with a READ-ONLY root filesystem + emptyDir scratch, matching every other workload):
+#   4ac0e2b7 no CPU limits            – repo convention (CPU limits cause false CFS-throttle
+#                                       alerts); see hermes deployment.yaml. The short-lived
+#                                       utility containers below DO set one — that's deliberate.
+#   caa3479d IfNotPresent w/ tag      – house convention for stock utility images
+#   7c81d34c no image digest            (postgres:16-alpine); same as cronjob-sonarqube-sync.
+#                                       NOTE: the sibling extension-job runs with the CNPG
+#                                       SUPERUSER credential — digest-pin that one first if we
+#                                       ever tighten this.
+#   8b36775e no AppArmor annotation   – KICS wants the DEPRECATED beta annotation. The modern
+#                                       securityContext.appArmorProfile is deliberately NOT set
+#                                       yet: no AppArmor config exists in ansible/terraform, and
+#                                       a profile request on a node without AppArmor FAILS pod
+#                                       startup. Verify node support before enabling (README).
+#   4a20ebac no LimitRange            – namespace-scoped policy for the SHARED `automation` ns,
+#   48a5beba no ResourceQuota           owned elsewhere; an app PR must not impose it (house
+#                                       convention, same as cronjob-sonarqube-sync).
+#   3d658f8b secretKeyRef is defined  – the query prefers file-mounted secrets over env (CIS
+#                                       5.4.1). ExternalSecret -> secretKeyRef env is the
+#                                       repo-wide sanctioned pattern (41 apps) and mem0 reads
+#                                       config only from env.
+# kics-scan disable=4ac0e2b7-d2d2-4af7-8799-e8de6721ccda,caa3479d-885d-4882-9aac-95e5e78ef5c2,7c81d34c-8e5a-402b-9798-9f442630e678,8b36775e-183d-4d46-b0f7-96a6f34a723f,4a20ebac-1060-4c81-95d1-1f7f620e983b,48a5beba-e4c0-4584-a2aa-e6894e4cf424,3d658f8b-d988-41a0-a841-40043121de1e
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -96,6 +120,16 @@ spec:
               value: "true"
             - name: PYTHONUNBUFFERED
               value: "1"
+            # --- Read-only root filesystem support (see securityContext below) ---
+            # The image installs deps as root then drops to UID 65534 without creating a
+            # home, so the process could never write to / or $HOME anyway; these point the
+            # few things that DO write at the emptyDir scratch mounts.
+            - name: PYTHONDONTWRITEBYTECODE  # don't try to write .pyc onto a RO root
+              value: "1"
+            - name: HOME
+              value: /home/mem0
+            - name: TMPDIR
+              value: /tmp
           resources:
             requests:
               cpu: 50m
@@ -106,7 +140,12 @@ spec:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
             runAsUser: 65534
-            readOnlyRootFilesystem: false
+            # RO root + emptyDir scratch (mirrors cronjob-sonarqube-sync, and the sibling
+            # initContainer/Job below). The container mounts no persistent volume — all runtime
+            # writes were already ephemeral on the container overlay — so this costs no
+            # durability. If first boot fails on an unwritable path, add another emptyDir for
+            # that path; do NOT flip this back to false.
+            readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
             seccompProfile:
@@ -124,3 +163,15 @@ spec:
               port: 8000
             initialDelaySeconds: 40
             periodSeconds: 20
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: home
+              mountPath: /home/mem0
+      volumes:
+        # Ephemeral by design: mem0's durable state is the agent_memory DB on the shared
+        # CNPG cluster, not the pod filesystem.
+        - name: tmp
+          emptyDir: {}
+        - name: home
+          emptyDir: {}
