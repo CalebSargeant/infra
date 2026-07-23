@@ -63,16 +63,23 @@ spec:
       publicUrl: "https://githubcontributions.magmamoose.com"
       currency: "USD"
 
-    # SQLite datastore on a Longhorn PVC. Longhorn is replicated and node-independent,
-    # so the pod can reschedule across ff-oci1/ff-oci2 without stranding the volume
-    # (local-path would bind the PVC to whichever node won the first schedule, making
-    # the pod permanently node-bound across the 2-node native-cloud tier).
+    # First-class Postgres: the DSN is in the github-contributions-env secret
+    # (built from the shared CNPG neondb_owner password + the githubcontributions
+    # DB — see workload/database.yaml + externalsecret.yaml). store.build_store
+    # selects PostgresStore whenever DATABASE_URL is set, so the datastore is
+    # Postgres, not SQLite.
+    #
+    # Persistence is OFF: the app persists to Postgres via DATABASE_URL, so there's
+    # no SQLite fallback file to keep. With it off the chart uses an emptyDir
+    # (node-portable) instead of an RWO PVC — which is what lets the pod schedule
+    # freely on the OCI arm64 workers under the native-cloud nodeSelector below,
+    # rather than binding to a single node's local storage (the earlier Longhorn PVC
+    # pin is moot now there's no PVC).
     persistence:
-      enabled: true
-      storageClass: longhorn
+      enabled: false
 
-    # Secrets (LITELLM_API_KEY + GH_TOKEN + GHES_TOKEN) come from the ExternalSecret
-    # we manage in workload/externalsecret.yaml, referenced by name here.
+    # Secrets (DATABASE_URL + LITELLM_API_KEY + GH_TOKEN + GHES_TOKEN) come from the
+    # ExternalSecret we manage in workload/externalsecret.yaml, referenced by name here.
     secrets:
       existingSecretName: github-contributions-env
     externalSecret:
