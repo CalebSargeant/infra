@@ -11,3 +11,4 @@
 9. **Parallel agents** — k8s + tf share one checkout; use a worktree for tf to avoid git-op collisions.
 10. **Ansible without `--check`** — dry-run real-host playbooks first.
 11. **Pre-commit** — `calebsargeant/pre-commit-hooks` must pass before commit.
+12. **Restarting `hermes` (amd64-only, RWO Longhorn) can strand it** — it's pinned to the single on-prem amd64 worker `ff-vm1`, which is CPU-*request*-saturated (~63% real use but requests fully reserved). With `strategy: Recreate` a restart deletes the pod first, and queued pods grab its freed CPU, so the new pod stays `Pending` (FailedScheduling: Insufficient cpu). Right-size the CPU *request* (it has no CPU limit, so it still bursts). Same trap for any amd64-pinned app on ff-vm1. When patching a Flux-managed value live, `flux suspend kustomization <name>` first or Flux reverts it in ≤10m.
