@@ -57,6 +57,15 @@ spec:
         - name: install-dotnet
           image: mcr.microsoft.com/dotnet/sdk:8.0
           command: ["sh", "-c", "cp -a /usr/share/dotnet/. /opt/dotnet/"]
+          # Run as root like the token-fetcher init container: the copy must write
+          # the SDK into the shared emptyDir, and a non-root uid can hit an
+          # unwritable volume dir and crash-loop the whole pod. Escalation is off —
+          # a file copy never needs it. (runAsNonRoot/readOnlyRootFilesystem/caps/
+          # seccomp are accepted for this privileged CI runner — see the file's
+          # kics-scan disable header.)
+          securityContext:
+            runAsUser: 0
+            allowPrivilegeEscalation: false
           resources:
             requests:
               cpu: 50m
