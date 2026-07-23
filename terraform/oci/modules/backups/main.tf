@@ -35,6 +35,9 @@ resource "oci_objectstorage_bucket" "this" {
 # --- Lifecycle: keep Object Storage bounded (Always Free tier is 10 GiB total) ---
 # Only touches non-current versions and orphaned multipart uploads — live/current
 # backups are owned by Barman's own retention policy and are never deleted here.
+# No object_name_filter: the rules apply to ALL prefixes in each bucket, including
+# internal-postgres/ (the out-of-repo cluster). That's intentional — non-current
+# version purge only reclaims already-deleted objects, so no active data is at risk.
 resource "oci_objectstorage_object_lifecycle_policy" "this" {
   for_each = oci_objectstorage_bucket.this
 
