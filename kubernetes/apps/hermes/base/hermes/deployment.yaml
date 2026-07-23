@@ -152,9 +152,7 @@ spec:
             # CPU-REQUEST-saturated (~63% real use but requests fully reserved), and
             # a Recreate roll couldn't reschedule at 200m. 50m fits and, with no CPU
             # limit, the agent still bursts freely. Revisit from KRR / relieve ff-vm1
-            # request pressure. NOTE: prod-hermes Flux kustomization was `flux suspend`ed
-            # during the live fix — `flux resume kustomization prod-hermes -n flux-system`
-            # after this merges to main.
+            # request pressure.
             requests:
               cpu: 50m
               memory: 512Mi

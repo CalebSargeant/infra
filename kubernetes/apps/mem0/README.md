@@ -24,11 +24,17 @@ See ADR `.claude/decisions/2026-07-23-fleet-shared-memory-mem0.md`.
    `ghcr.io/magmamoose/mem0-server` (ideally from its own repo + CI, matching the
    github-contributions/nievah convention) before this reconciles, or the Deployment
    ImagePullBackOffs. Pin a real tag over `:latest`.
-2. **mem0 config env surface.** The Deployment configures mem0 via env (POSTGRES_*,
-   OPENAI_BASE_URL→LiteLLM), mirroring the proven `zoey/k8s-mem0` pattern. Confirm the
-   built image reads these and that its default models resolve to LiteLLM model names
-   (`text-embedding-3-small`, `gpt-4o-mini` — both added to the LiteLLM config in this
-   change). Adjust to `claude-*`/`deepseek-*` if you want non-OpenAI extraction.
+2. **LiteLLM rollout required.** The LiteLLM ConfigMap in this change adds
+   `text-embedding-3-small` and `gpt-4o-mini`. LiteLLM reads its YAML config at startup
+   only — after this PR merges and Flux reconciles the ConfigMap, trigger a rollout so
+   the new model entries load:
+   ```
+   kubectl rollout restart deployment/litellm -n automation
+   ```
+   Without this step, mem0's first embedding/completion calls will fail with "model not
+   found". Confirm the env vars (`OPENAI_BASE_URL`, `OPENAI_API_KEY`) match the
+   provisioned ExternalSecret. Adjust models to `claude-*`/`deepseek-*` if you prefer
+   non-OpenAI extraction.
 3. **pgvector extension.** This CNPG version's `Database` CR has no `spec.extensions`,
    and `neondb_owner` is not a superuser, so `extension-job.yaml` creates the extension
    using the existing `admin` superuser (secret `nextcloud-db-admin` in ns `database`).
