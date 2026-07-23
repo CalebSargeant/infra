@@ -12,6 +12,10 @@ rules:
   - apiGroups: [""]
     resources: ["secrets"]
     resourceNames: ["ghcr-pull-secret"]
+    # Already scoped to a single named secret (resourceNames above); ExternalSecrets
+    # needs get to resolve the ghcr-pull-secret into the workload namespace.
+    # The KICS "read secrets" findings below are expected and acceptable here.
+    # kics-scan ignore-line
     verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
