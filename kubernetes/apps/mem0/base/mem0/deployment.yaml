@@ -166,8 +166,10 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
+              readOnly: false
             - name: home
               mountPath: /home/mem0
+              readOnly: false
       volumes:
         # Ephemeral by design: mem0's durable state is the agent_memory DB on the shared
         # CNPG cluster, not the pod filesystem.
