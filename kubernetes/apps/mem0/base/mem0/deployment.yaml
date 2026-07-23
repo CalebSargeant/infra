@@ -21,6 +21,7 @@ spec:
       initContainers:
         - name: wait-for-pgvector
           image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
           command:
             - sh
             - -c
