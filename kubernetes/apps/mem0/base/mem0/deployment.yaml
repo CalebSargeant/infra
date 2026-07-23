@@ -126,8 +126,13 @@ spec:
             # few things that DO write at the emptyDir scratch mounts.
             - name: PYTHONDONTWRITEBYTECODE  # don't try to write .pyc onto a RO root
               value: "1"
+            # HOME points at the /tmp scratch rather than a /home/... mount on purpose: a
+            # writable volumeMount over an OS directory (/home, /etc, /var, ...) trips KICS
+            # b7652612 (high) whatever readOnly says — the rule is about mounting over an OS
+            # dir, not about the flag. One emptyDir serves both; mem0's only durable state is
+            # the agent_memory DB, so an ephemeral home (~/.mem0) is correct anyway.
             - name: HOME
-              value: /home/mem0
+              value: /tmp
             - name: TMPDIR
               value: /tmp
           resources:
@@ -164,16 +169,14 @@ spec:
             initialDelaySeconds: 40
             periodSeconds: 20
           volumeMounts:
+            # The ONLY writable path. readOnly is stated explicitly (not left to default) —
+            # the scanner flags an undefined readOnly on a mount.
             - name: tmp
               mountPath: /tmp
               readOnly: false
-            - name: home
-              mountPath: /home/mem0
-              readOnly: false
       volumes:
         # Ephemeral by design: mem0's durable state is the agent_memory DB on the shared
-        # CNPG cluster, not the pod filesystem.
+        # CNPG cluster, not the pod filesystem. ONE scratch mount — HOME and TMPDIR both
+        # point at it (see env above).
         - name: tmp
-          emptyDir: {}
-        - name: home
           emptyDir: {}
