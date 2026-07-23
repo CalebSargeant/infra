@@ -1,0 +1,89 @@
+# Chargate/KICS suppressions (accepted risks, reviewed — same rationale as the mem0
+# Deployment; this Job already runs non-root, RO-root, no-privilege-escalation, caps dropped):
+#   caa3479d IfNotPresent w/ tag      – house convention for stock utility images
+#   7c81d34c no image digest            (postgres:16-alpine), same as cronjob-sonarqube-sync.
+#                                       NOTE: this container holds the CNPG SUPERUSER
+#                                       credential, so it is the highest-value image here. The
+#                                       real fix for that is a DEDICATED postgres-superuser
+#                                       vault entry (tracked follow-up in the app README), not
+#                                       a digest pin — reusing nextcloud-db-admin is the
+#                                       documented trade-off.
+#   8b36775e no AppArmor annotation   – KICS wants the DEPRECATED beta annotation; the modern
+#                                       securityContext.appArmorProfile is not set until node
+#                                       AppArmor support is verified (would fail pod startup).
+#   4a20ebac no LimitRange            – namespace-scoped policy for the SHARED `database` ns,
+#   48a5beba no ResourceQuota           owned elsewhere; an app PR must not impose it.
+#   3d658f8b secretKeyRef is defined  – ExternalSecret/Secret -> secretKeyRef env is the
+#                                       repo-wide sanctioned pattern; psql reads PGUSER/
+#                                       PGPASSWORD from env only.
+# kics-scan disable=caa3479d-885d-4882-9aac-95e5e78ef5c2,7c81d34c-8e5a-402b-9798-9f442630e678,8b36775e-183d-4d46-b0f7-96a6f34a723f,4a20ebac-1060-4c81-95d1-1f7f620e983b,48a5beba-e4c0-4584-a2aa-e6894e4cf424,3d658f8b-d988-41a0-a841-40043121de1e
+---
+# One-shot bootstrap: create the pgvector `vector` extension in the agent_memory DB.
+#
+# Why a Job (not Database.spec.extensions): this cluster's CNPG Database CRD (v1) has
+# no `spec.extensions` field, and the DB owner `neondb_owner` is NOT a superuser, so it
+# cannot `CREATE EXTENSION vector` (pgvector is not a trusted extension). This cluster
+# has no dedicated postgres-superuser secret, so the Job connects as the existing
+# `admin` superuser role (managed in the CNPG Cluster spec; password in the
+# `nextcloud-db-admin` secret in this namespace). Reviewed trade-off — see the app
+# README. Idempotent (`IF NOT EXISTS`); waits for the Database CR to provision first.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mem0-pgvector-extension
+  namespace: database
+spec:
+  backoffLimit: 20
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app: mem0-bootstrap
+    spec:
+      restartPolicy: OnFailure
+      automountServiceAccountToken: false
+      containers:
+        - name: create-extension
+          image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              echo "waiting for agent_memory database on postgres-rw..."
+              until psql "host=postgres-rw.database.svc.cluster.local port=5432 user=$PGUSER dbname=agent_memory sslmode=require" -c 'SELECT 1' >/dev/null 2>&1; do
+                echo "  not ready yet; sleeping"; sleep 3;
+              done
+              echo "creating pgvector extension + granting schema to neondb_owner"
+              psql "host=postgres-rw.database.svc.cluster.local port=5432 user=$PGUSER dbname=agent_memory sslmode=require" \
+                -c 'CREATE EXTENSION IF NOT EXISTS vector;' \
+                -c 'GRANT ALL ON SCHEMA public TO neondb_owner;'
+              echo "done"
+          env:
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: nextcloud-db-admin
+                  key: username
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nextcloud-db-admin
+                  key: password
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65534
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault

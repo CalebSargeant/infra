@@ -138,6 +138,27 @@ data:
           base_model: openai/gpt-5.4-mini
           billing_mode: openai-api
           credential_source: oci-vault:openai-api-key
+      # --- Embeddings + small utility model for the mem0 fleet-memory service ---
+      # mem0's default OpenAI models; registered so mem0 (which talks OpenAI-protocol to
+      # this gateway) resolves them. Additive — existing clients are unaffected.
+      - model_name: text-embedding-3-small
+        litellm_params:
+          model: openai/text-embedding-3-small
+          api_key: os.environ/OPENAI_API_KEY
+        model_info:
+          mode: embedding
+          base_model: openai/text-embedding-3-small
+          billing_mode: openai-api
+          credential_source: oci-vault:openai-api-key
+      - model_name: gpt-4o-mini
+        litellm_params:
+          model: openai/gpt-4o-mini
+          api_key: os.environ/OPENAI_API_KEY
+        model_info:
+          mode: chat
+          base_model: openai/gpt-4o-mini
+          billing_mode: openai-api
+          credential_source: oci-vault:openai-api-key
       # --- DeepSeek (per-token API billing via DEEPSEEK_API_KEY) ---
       - model_name: deepseek-v4-pro
         litellm_params:

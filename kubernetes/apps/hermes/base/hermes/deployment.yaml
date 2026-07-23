@@ -146,10 +146,15 @@ spec:
                   name: hermes
                   key: n8n-mcp-auth-token
           resources:
-            # Python agent — heavier than the old Node assistant. Inline sizing, no
-            # CPU limit (CFS-throttle false alarms); revisit from KRR once it has run.
+            # Python agent — heavier than the old Node assistant. No CPU limit
+            # (CFS-throttle false alarms). CPU REQUEST dropped 200m -> 50m: ff-vm1
+            # (the only amd64 on-prem worker this amd64-only image can run on) is
+            # CPU-REQUEST-saturated (~63% real use but requests fully reserved), and
+            # a Recreate roll couldn't reschedule at 200m. 50m fits and, with no CPU
+            # limit, the agent still bursts freely. Revisit from KRR / relieve ff-vm1
+            # request pressure.
             requests:
-              cpu: 200m
+              cpu: 50m
               memory: 512Mi
             limits:
               memory: 2Gi
