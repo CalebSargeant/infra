@@ -13,3 +13,4 @@
 FROM mem0/mem0-api-server:latest
 # hadolint ignore=DL3013
 RUN pip install --no-cache-dir "psycopg[binary,pool]" "pgvector" "rank-bm25"
+USER 65534

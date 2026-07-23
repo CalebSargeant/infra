@@ -22,9 +22,11 @@ spec:
         app: mem0-bootstrap
     spec:
       restartPolicy: OnFailure
+      automountServiceAccountToken: false
       containers:
         - name: create-extension
           image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
           command:
             - sh
             - -c
@@ -55,4 +57,14 @@ spec:
               cpu: 10m
               memory: 32Mi
             limits:
+              cpu: 100m
               memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 999
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault

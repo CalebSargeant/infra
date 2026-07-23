@@ -15,6 +15,7 @@ spec:
       labels:
         app: mem0
     spec:
+      automountServiceAccountToken: false
       # Wait for the agent_memory DB + pgvector extension before mem0 starts, so its
       # first-boot table creation doesn't race the bootstrap Job.
       initContainers:
@@ -38,7 +39,17 @@ spec:
               cpu: 10m
               memory: 32Mi
             limits:
+              cpu: 50m
               memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 999
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
       containers:
         - name: mem0
           # PREREQUISITE: build + push this image (see ./Dockerfile). The upstream
@@ -90,6 +101,15 @@ spec:
               memory: 256Mi
             limits:
               memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65534
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
           readinessProbe:
             httpGet:
               path: /docs
