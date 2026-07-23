@@ -1,0 +1,22 @@
+---
+# Chart source: the github-contributions Helm chart lives in the external
+# MagmaMoose/github-contributions repo under ./charts/github-contributions. Unlike
+# diatreme-pro/nievah (raw manifests pulled by a Flux Kustomization), this app
+# ships a Helm chart, so the prod workload is a Flux HelmRelease that references
+# this source. The deploy VALUES (sources, identity, secret refs) are
+# firefly-specific and live in this infra repo's HelmRelease, not the chart.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: github-contributions
+  namespace: flux-system
+spec:
+  interval: 10m
+  provider: github
+  ref:
+    branch: main
+  secretRef:
+    # magmamoose-org repo; uses the MagmaMoose-org App installation, same as
+    # nievah, caldrith, diatreme-pro and zoey.
+    name: github-app-magmamoose
+  url: https://github.com/magmamoose/github-contributions
