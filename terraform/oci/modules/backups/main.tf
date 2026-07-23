@@ -10,6 +10,11 @@ locals {
 }
 
 # --- Backup buckets (versioned, private) ---
+# Versioning stays Enabled for accidental-delete protection, but the lifecycle
+# policy below purges non-current versions after 1 day. Barman (CNPG) manages
+# retention by deleting objects; without that purge every "deleted" backup would
+# linger as a non-current version forever — unbounded Object Storage cost that
+# silently blew past OCI's 10 GiB Always Free tier.
 resource "oci_objectstorage_bucket" "this" {
   for_each = toset(var.bucket_names)
 
@@ -24,6 +29,34 @@ resource "oci_objectstorage_bucket" "this" {
     purpose     = "backups"
     environment = var.environment
     managed-by  = "terraform"
+  }
+}
+
+# --- Lifecycle: keep Object Storage bounded (Always Free tier is 10 GiB total) ---
+# Only touches non-current versions and orphaned multipart uploads — live/current
+# backups are owned by Barman's own retention policy and are never deleted here.
+resource "oci_objectstorage_object_lifecycle_policy" "this" {
+  for_each = oci_objectstorage_bucket.this
+
+  namespace = each.value.namespace
+  bucket    = each.value.name
+
+  rules {
+    name        = "purge-noncurrent-versions"
+    target      = "previous-object-versions"
+    action      = "DELETE"
+    time_amount = 1
+    time_unit   = "DAYS"
+    is_enabled  = true
+  }
+
+  rules {
+    name        = "abort-incomplete-multipart-uploads"
+    target      = "multipart-uploads"
+    action      = "ABORT"
+    time_amount = 3
+    time_unit   = "DAYS"
+    is_enabled  = true
   }
 }
 
