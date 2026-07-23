@@ -94,4 +94,7 @@ spec:
       wal:
         compression: gzip
         maxParallel: 2
-    retentionPolicy: "30d"
+    # 2-day recovery window. WAL archives ~1.2 GiB/day, so retention is the
+    # dominant driver of Object Storage size; kept short to stay inside OCI's
+    # 10 GiB Always Free tier. PITR within the window; primary data is on-cluster.
+    retentionPolicy: "2d"
