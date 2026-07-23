@@ -63,14 +63,13 @@ spec:
       publicUrl: "https://githubcontributions.magmamoose.com"
       currency: "USD"
 
-    # SQLite datastore on a PVC (this app has NO Postgres). The chart pins the
-    # workload to a single replica with a Recreate strategy so the RWO PVC isn't
-    # held during a rollout. NOTE: with the native-cloud nodeSelector below, the
-    # PVC binds on whichever OCI ARM worker the pod schedules onto — confirm the
-    # cluster default StorageClass provisions there (github-usage-dashboard avoided
-    # a PVC on these nodes by using Postgres + persistence:false instead).
+    # SQLite datastore on a Longhorn PVC. Longhorn is replicated and node-independent,
+    # so the pod can reschedule across ff-oci1/ff-oci2 without stranding the volume
+    # (local-path would bind the PVC to whichever node won the first schedule, making
+    # the pod permanently node-bound across the 2-node native-cloud tier).
     persistence:
       enabled: true
+      storageClass: longhorn
 
     # Secrets (LITELLM_API_KEY + GH_TOKEN + GHES_TOKEN) come from the ExternalSecret
     # we manage in workload/externalsecret.yaml, referenced by name here.
