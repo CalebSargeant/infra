@@ -45,6 +45,29 @@ spec:
       automountServiceAccountToken: false
       hostNetwork: false
       initContainers:
+        # The actions-runner image ships no `dotnet`. GitVersion — pulled in by
+        # gittools/actions/gitversion/setup during Diatreme releases (e.g. the
+        # github-contributions release job) — is a .NET global tool and dies with
+        # "Unable to locate executable file: dotnet". Stage the .NET SDK out of
+        # Microsoft's official multi-arch (amd64+arm64) image into a shared volume
+        # at pod startup; the runner finds it via DOTNET_ROOT + PATH below. The SDK
+        # is glibc-based, matching the Ubuntu-based runner image. NOTE: this is the
+        # ACTIVE org runner — the equivalent fix in ansible/roles/k3s-github-runner
+        # is on an orphaned repo-level Deployment that no playbook deploys.
+        - name: install-dotnet
+          image: mcr.microsoft.com/dotnet/sdk:8.0
+          command: ["sh", "-c", "cp -a /usr/share/dotnet/. /opt/dotnet/"]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              # No CPU limit (repo convention). Memory ceiling only; `cp` streams,
+              # so RSS stays low even for the ~1GB SDK.
+              memory: 256Mi
+          volumeMounts:
+            - name: dotnet
+              mountPath: /opt/dotnet
         - name: token-fetcher
           image: alpine:3.18
           imagePullPolicy: Always
@@ -341,8 +364,22 @@ spec:
               value: "1"
             - name: DOCKER_CERT_PATH
               value: "/certs/client"
+            # .NET SDK staged by the install-dotnet initContainer. GitVersion (a
+            # .NET global tool) needs `dotnet` on PATH and DOTNET_ROOT to resolve
+            # the runtime. Opt out of first-run telemetry/logo so the CLI doesn't
+            # try to write a first-run sentinel on every job.
+            - name: DOTNET_ROOT
+              value: /opt/dotnet
+            - name: DOTNET_CLI_TELEMETRY_OPTOUT
+              value: "1"
+            - name: DOTNET_NOLOGO
+              value: "1"
+            # k8s REPLACES the image PATH rather than appending, so this must list
+            # the standard runner dirs plus /opt/dotnet (dotnet) and
+            # /opt/dotnet/tools (global tools). ~/.local/bin stays first for the
+            # user-space gh install.
             - name: PATH
-              value: "/home/runner/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+              value: "/home/runner/.local/bin:/opt/dotnet:/opt/dotnet/tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
           volumeMounts:
             - name: runner-workdir
               mountPath: /opt/runner-work
@@ -351,6 +388,8 @@ spec:
               readOnly: true
             - name: shared-token
               mountPath: /shared
+            - name: dotnet
+              mountPath: /opt/dotnet
           securityContext:
             runAsUser: 1001
             runAsGroup: 1001
@@ -365,6 +404,10 @@ spec:
         - name: docker-certs
           emptyDir: {}
         - name: shared-token
+          emptyDir: {}
+        - name: dotnet
+          # Holds the ~1GB .NET SDK copied in by the install-dotnet initContainer.
+          # Disk-backed (NOT medium: Memory) so it doesn't count against pod memory.
           emptyDir: {}
         - name: private-key
           secret:
